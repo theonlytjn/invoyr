@@ -1,7 +1,33 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+const APP_DOMAIN = "app.invoyr.io";
+const MARKETING_DOMAINS = new Set(["invoyr.io", "www.invoyr.io"]);
+
 export async function middleware(request: NextRequest) {
+  const hostname = request.headers.get("host") ?? "";
+  const pathname = request.nextUrl.pathname;
+
+  // ── Subdomain routing (production only) ──────────────────────────
+  if (MARKETING_DOMAINS.has(hostname)) {
+    // Only / and /pricing belong on the marketing domain
+    const isMarketingPath = pathname === "/" || pathname.startsWith("/pricing");
+    if (!isMarketingPath) {
+      return NextResponse.redirect(
+        `https://${APP_DOMAIN}${pathname}${request.nextUrl.search}`
+      );
+    }
+    return NextResponse.next();
+  }
+
+  if (hostname === APP_DOMAIN) {
+    // Marketing paths don't belong on the app domain
+    if (pathname === "/" || pathname.startsWith("/pricing")) {
+      return NextResponse.redirect(`https://invoyr.io${pathname}`);
+    }
+  }
+
+  // ── Auth guards (app.invoyr.io and localhost) ─────────────────────
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -28,14 +54,15 @@ export async function middleware(request: NextRequest) {
   // Refresh session — IMPORTANT: do not remove
   const { data: { user } } = await supabase.auth.getUser();
 
-  const pathname = request.nextUrl.pathname;
-  const isAppRoute = pathname.startsWith("/dashboard") ||
+  const isAppRoute =
+    pathname.startsWith("/dashboard") ||
     pathname.startsWith("/invoices") ||
     pathname.startsWith("/clients") ||
     pathname.startsWith("/payments") ||
     pathname.startsWith("/reports") ||
     pathname.startsWith("/settings");
-  const isAuthRoute = pathname.startsWith("/login") ||
+  const isAuthRoute =
+    pathname.startsWith("/login") ||
     pathname.startsWith("/signup") ||
     pathname.startsWith("/forgot-password");
   const isOnboarding = pathname.startsWith("/onboarding");
