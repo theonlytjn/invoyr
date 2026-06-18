@@ -1,6 +1,6 @@
 "use client";
 
-import { Trash2, Plus } from "lucide-react";
+import { TrashIcon, PlusIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatCurrency } from "@/lib/utils";
@@ -91,14 +91,14 @@ export default function LineItemsEditor({ items, currency = "GBP", onChange }: P
               className="text-gray-400 hover:text-red-500 transition-colors"
               disabled={items.length === 1}
             >
-              <Trash2 className="w-4 h-4" />
+              <TrashIcon size={16} />
             </button>
           </div>
         );
       })}
 
       <Button type="button" variant="outline" size="sm" onClick={add} className="mt-2">
-        <Plus className="w-3.5 h-3.5 mr-1" />
+        <PlusIcon size={14} className="mr-1" />
         Add line
       </Button>
     </div>

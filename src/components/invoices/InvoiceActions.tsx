@@ -3,13 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  MoreHorizontal,
-  Download,
-  Send,
-  CreditCard,
-  XCircle,
-  Pencil,
-} from "lucide-react";
+  MoreHorizontalIcon,
+  DownloadIcon,
+  SendIcon,
+  CreditCardIcon,
+  XCircleIcon,
+  PencilIcon,
+} from "@/components/icons";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -61,30 +61,30 @@ export default function InvoiceActions({ invoice }: Props) {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="icon">
-            <MoreHorizontal className="w-4 h-4" />
+            <MoreHorizontalIcon size={16} />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
           <DropdownMenuItem onClick={handleDownloadPdf}>
-            <Download className="w-4 h-4 mr-2" />
+            <DownloadIcon size={16} className="mr-2" />
             Download PDF
           </DropdownMenuItem>
           {canSend && (
             <DropdownMenuItem onClick={handleSend} disabled={sending}>
-              <Send className="w-4 h-4 mr-2" />
+              <SendIcon size={16} className="mr-2" />
               {sending ? "Sending…" : "Send to client"}
             </DropdownMenuItem>
           )}
           {canPay && (
             <DropdownMenuItem onClick={() => setPaymentOpen(true)}>
-              <CreditCard className="w-4 h-4 mr-2" />
+              <CreditCardIcon size={16} className="mr-2" />
               Record payment
             </DropdownMenuItem>
           )}
           <DropdownMenuItem
             onClick={() => router.push(`/invoices/${invoice.id}/edit`)}
           >
-            <Pencil className="w-4 h-4 mr-2" />
+            <PencilIcon size={16} className="mr-2" />
             Edit invoice
           </DropdownMenuItem>
           {canVoid && (
@@ -94,7 +94,7 @@ export default function InvoiceActions({ invoice }: Props) {
                 onClick={handleVoid}
                 className="text-red-600 focus:text-red-600"
               >
-                <XCircle className="w-4 h-4 mr-2" />
+                <XCircleIcon size={16} className="mr-2" />
                 Void invoice
               </DropdownMenuItem>
             </>

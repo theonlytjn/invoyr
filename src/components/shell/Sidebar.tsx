@@ -3,27 +3,28 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard,
-  FileText,
-  Users,
-  CreditCard,
-  BarChart2,
-  Settings,
-  LogOut,
-  Plus,
-} from "lucide-react";
+  DashboardIcon,
+  InvoiceIcon,
+  UsersIcon,
+  CreditCardIcon,
+  AnalyticsIcon,
+  SettingsIcon,
+  LogOutIcon,
+  PlusIcon,
+} from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import type { Organisation } from "@/lib/supabase/types";
+import Image from "next/image";
 
 const NAV_ITEMS = [
-  { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
-  { href: "/invoices", label: "Invoices", icon: FileText },
-  { href: "/clients", label: "Clients", icon: Users },
-  { href: "/payments", label: "Payments", icon: CreditCard },
-  { href: "/reports", label: "Reports", icon: BarChart2 },
-  { href: "/settings", label: "Settings", icon: Settings },
+  { href: "/dashboard", label: "Overview", icon: DashboardIcon },
+  { href: "/invoices", label: "Invoices", icon: InvoiceIcon },
+  { href: "/clients", label: "Clients", icon: UsersIcon },
+  { href: "/payments", label: "Payments", icon: CreditCardIcon },
+  { href: "/reports", label: "Reports", icon: AnalyticsIcon },
+  { href: "/settings", label: "Settings", icon: SettingsIcon },
 ];
 
 interface Props {
@@ -45,9 +46,7 @@ export default function Sidebar({ org, userEmail }: Props) {
     <aside className="hidden lg:flex flex-col w-64 bg-white border-r border-gray-200 h-screen sticky top-0">
       {/* Brand */}
       <div className="flex items-center gap-2.5 px-5 py-5 border-b border-gray-100">
-        <div className="w-7 h-7 bg-gray-900 rounded-md flex items-center justify-center flex-shrink-0">
-          <span className="text-white text-[10px] font-bold">IV</span>
-        </div>
+        <Image src="/main-logo.svg" alt="Invoyr" width={28} height={28} className="flex-shrink-0" />
         <div className="min-w-0">
           <p className="text-sm font-semibold text-gray-900 truncate">
             {org?.name ?? "invoyr"}
@@ -62,7 +61,7 @@ export default function Sidebar({ org, userEmail }: Props) {
           href="/invoices/new"
           className="flex items-center justify-center gap-1.5 w-full py-2 px-3 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors"
         >
-          <Plus className="w-3.5 h-3.5" />
+          <PlusIcon size={14} />
           New invoice
         </Link>
       </div>
@@ -103,7 +102,7 @@ export default function Sidebar({ org, userEmail }: Props) {
             className="text-gray-400 hover:text-gray-900 transition-colors"
             title="Sign out"
           >
-            <LogOut className="w-3.5 h-3.5" />
+            <LogOutIcon size={14} />
           </button>
         </div>
       </div>

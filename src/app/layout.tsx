@@ -19,6 +19,7 @@ export const metadata: Metadata = {
   },
   description:
     "Professional invoicing platform for freelancers, agencies, and service businesses. Create, send, and get paid faster.",
+  icons: { icon: "/favicon.png" },
 };
 
 export default function RootLayout({
