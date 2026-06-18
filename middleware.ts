@@ -21,8 +21,12 @@ export async function middleware(request: NextRequest) {
   }
 
   if (hostname === APP_DOMAIN) {
-    // Marketing paths don't belong on the app domain
-    if (pathname === "/" || pathname.startsWith("/pricing")) {
+    // Root → dashboard (auth guard below will redirect to /login if not signed in)
+    if (pathname === "/") {
+      return NextResponse.redirect(`https://${APP_DOMAIN}/dashboard`);
+    }
+    // /pricing belongs on marketing site
+    if (pathname.startsWith("/pricing")) {
       return NextResponse.redirect(`https://invoyr.io${pathname}`);
     }
   }
