@@ -56,10 +56,16 @@ export default function OnboardingWizard({ userId, userName }: Props) {
     setSaving(true);
     const supabase = createClient();
 
-    // Create org
-    const { data: org, error: orgError } = await supabase
+    // Generate org ID client-side to avoid RLS chicken-and-egg:
+    // INSERT ... RETURNING checks the SELECT policy (is_org_member),
+    // but we're not a member yet. By pre-generating the ID we can
+    // insert without RETURNING and add the member row straight after.
+    const orgId = crypto.randomUUID();
+
+    const { error: orgError } = await supabase
       .from("organisations")
       .insert({
+        id: orgId,
         name: data.orgName,
         slug: data.orgSlug || slugify(data.orgName),
         email: data.email || null,
@@ -71,24 +77,26 @@ export default function OnboardingWizard({ userId, userName }: Props) {
         vat_number: data.vatNumber || null,
         logo_url: data.logoUrl || null,
         accent_color: data.accentColor,
-      })
-      .select()
-      .single();
+      });
 
-    if (orgError || !org) {
-      console.error(orgError);
+    if (orgError) {
+      console.error("org insert failed", orgError);
       setSaving(false);
       return;
     }
 
-    // Add user as owner
-    await supabase.from("org_members").insert({
-      org_id: org.id,
+    const { error: memberError } = await supabase.from("org_members").insert({
+      org_id: orgId,
       user_id: userId,
       role: "owner",
     });
 
-    // Mark onboarding complete — upsert handles missing profile rows
+    if (memberError) {
+      console.error("member insert failed", memberError);
+      setSaving(false);
+      return;
+    }
+
     const { error: profileError } = await supabase
       .from("profiles")
       .upsert({ id: userId, onboarding_completed: true }, { onConflict: "id" });
@@ -99,7 +107,6 @@ export default function OnboardingWizard({ userId, userName }: Props) {
       return;
     }
 
-    // Hard redirect so middleware reads fresh profile from Supabase
     window.location.href = "/dashboard";
   }
 
