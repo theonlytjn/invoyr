@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { slugify } from "@/lib/utils";
 import StepOrgSetup from "./StepOrgSetup";
@@ -32,7 +31,6 @@ export type OnboardingData = {
 const TOTAL_STEPS = 4;
 
 export default function OnboardingWizard({ userId, userName }: Props) {
-  const router = useRouter();
   const [step, setStep] = useState(1);
   const [saving, setSaving] = useState(false);
   const [data, setData] = useState<OnboardingData>({
@@ -90,13 +88,19 @@ export default function OnboardingWizard({ userId, userName }: Props) {
       role: "owner",
     });
 
-    // Mark onboarding complete
-    await supabase
+    // Mark onboarding complete — upsert handles missing profile rows
+    const { error: profileError } = await supabase
       .from("profiles")
-      .update({ onboarding_completed: true })
-      .eq("id", userId);
+      .upsert({ id: userId, onboarding_completed: true }, { onConflict: "id" });
 
-    router.push("/dashboard");
+    if (profileError) {
+      console.error("profile upsert failed", profileError);
+      setSaving(false);
+      return;
+    }
+
+    // Hard redirect so middleware reads fresh profile from Supabase
+    window.location.href = "/dashboard";
   }
 
   return (
