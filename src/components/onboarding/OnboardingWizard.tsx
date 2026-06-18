@@ -67,7 +67,7 @@ export default function OnboardingWizard({ userId, userName }: Props) {
       .insert({
         id: orgId,
         name: data.orgName,
-        slug: data.orgSlug || slugify(data.orgName),
+        slug: (data.orgSlug || slugify(data.orgName)) + "-" + orgId.slice(0, 6),
         email: data.email || null,
         phone: data.phone || null,
         address_line1: data.address || null,
@@ -99,7 +99,8 @@ export default function OnboardingWizard({ userId, userName }: Props) {
 
     const { error: profileError } = await supabase
       .from("profiles")
-      .upsert({ id: userId, onboarding_completed: true }, { onConflict: "id" });
+      .update({ onboarding_completed: true })
+      .eq("id", userId);
 
     if (profileError) {
       console.error("profile upsert failed", profileError);
