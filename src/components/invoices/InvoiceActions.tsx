@@ -9,6 +9,7 @@ import {
   CreditCardIcon,
   XCircleIcon,
   PencilIcon,
+  CheckIcon,
 } from "@/components/icons";
 import {
   DropdownMenu,
@@ -29,9 +30,22 @@ export default function InvoiceActions({ invoice }: Props) {
   const router = useRouter();
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [sending, setSending] = useState(false);
+  const [issuing, setIssuing] = useState(false);
 
   async function handleDownloadPdf() {
     window.open(`/api/invoices/${invoice.id}/pdf`, "_blank");
+  }
+
+  async function handleIssue() {
+    setIssuing(true);
+    const res = await fetch(`/api/invoices/${invoice.id}/issue`, { method: "POST" });
+    setIssuing(false);
+    if (res.ok) {
+      router.refresh();
+    } else {
+      const { error } = await res.json();
+      alert(error ?? "Failed to issue invoice");
+    }
   }
 
   async function handleSend() {
@@ -52,6 +66,7 @@ export default function InvoiceActions({ invoice }: Props) {
     if (res.ok) router.refresh();
   }
 
+  const canIssue = invoice.status === "draft";
   const canSend = ["draft", "issued"].includes(invoice.status);
   const canPay = ["sent", "issued", "overdue"].includes(invoice.status);
   const canVoid = !["paid", "void"].includes(invoice.status);
@@ -69,6 +84,12 @@ export default function InvoiceActions({ invoice }: Props) {
             <DownloadIcon size={16} className="mr-2" />
             Download PDF
           </DropdownMenuItem>
+          {canIssue && (
+            <DropdownMenuItem onClick={handleIssue} disabled={issuing}>
+              <CheckIcon size={16} className="mr-2" />
+              {issuing ? "Issuing…" : "Mark as issued"}
+            </DropdownMenuItem>
+          )}
           {canSend && (
             <DropdownMenuItem onClick={handleSend} disabled={sending}>
               <SendIcon size={16} className="mr-2" />
