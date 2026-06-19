@@ -1,14 +1,18 @@
 import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { computeTotals } from "@/lib/invoice-totals";
 import PayButton from "./PayButton";
 
-interface Props { params: Promise<{ token: string }> }
+interface Props {
+  params: Promise<{ token: string }>;
+  searchParams: Promise<{ paid?: string }>;
+}
 
-export default async function PayPage({ params }: Props) {
+export default async function PayPage({ params, searchParams }: Props) {
   const { token } = await params;
-  const supabase = await createClient();
+  const { paid } = await searchParams;
+  const supabase = await createServiceClient();
 
   const { data: invoice } = await supabase
     .from("invoices")
@@ -36,29 +40,40 @@ export default async function PayPage({ params }: Props) {
   );
 
   const amountDue = invoice.total - invoice.amount_paid;
+  const accentColor = orgRow?.accent_color ?? "#111827";
+  const isPaid = invoice.status === "paid" || paid === "1";
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 py-12">
       <div className="w-full max-w-lg bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         {/* Header */}
-        <div
-          className="p-6 text-white"
-          style={{ backgroundColor: orgRow?.accent_color ?? "#111827" }}
-        >
-          <p className="text-sm opacity-75 mb-1">Invoice from</p>
+        <div className="p-6 text-white" style={{ backgroundColor: accentColor }}>
+          {orgRow?.logo_url ? (
+            <img
+              src={orgRow.logo_url}
+              alt={orgRow.name}
+              className="h-10 w-auto max-w-[140px] object-contain mb-3 brightness-0 invert"
+            />
+          ) : (
+            <p className="text-sm opacity-75 mb-1">Invoice from</p>
+          )}
           <p className="text-xl font-bold">{orgRow?.name ?? "Invoice"}</p>
           <p className="text-sm opacity-75 mt-1">#{invoice.invoice_number}</p>
         </div>
 
         {/* Body */}
         <div className="p-6 space-y-4">
-          {invoice.status === "paid" ? (
+          {isPaid ? (
             <div className="text-center py-6">
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <span className="text-green-600 text-xl">✓</span>
+              <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-green-600">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
               </div>
-              <p className="font-semibold text-gray-900">Invoice paid</p>
-              <p className="text-sm text-gray-500 mt-1">Thank you for your payment.</p>
+              <p className="text-lg font-semibold text-gray-900">Payment received</p>
+              <p className="text-sm text-gray-500 mt-1">
+                Thank you! Invoice {invoice.invoice_number} has been paid.
+              </p>
             </div>
           ) : (
             <>
@@ -96,20 +111,22 @@ export default async function PayPage({ params }: Props) {
 
               <div className="border-t border-gray-200 pt-3 space-y-1.5">
                 <div className="flex justify-between text-sm text-gray-500">
-                  <span>Subtotal</span><span>{formatCurrency(totals.subtotal, invoice.currency)}</span>
+                  <span>Subtotal</span>
+                  <span>{formatCurrency(totals.subtotal, invoice.currency)}</span>
                 </div>
                 <div className="flex justify-between text-sm text-gray-500">
-                  <span>VAT</span><span>{formatCurrency(totals.vat_amount, invoice.currency)}</span>
+                  <span>VAT</span>
+                  <span>{formatCurrency(totals.vat_amount, invoice.currency)}</span>
                 </div>
                 <div className="flex justify-between font-bold text-lg border-t border-gray-200 pt-3">
                   <span>Amount due</span>
-                  <span style={{ color: orgRow?.accent_color ?? "#111827" }}>
+                  <span style={{ color: accentColor }}>
                     {formatCurrency(amountDue, invoice.currency)}
                   </span>
                 </div>
               </div>
 
-              <PayButton invoiceId={invoice.id} accentColor={orgRow?.accent_color ?? "#111827"} />
+              <PayButton token={token} accentColor={accentColor} />
             </>
           )}
         </div>

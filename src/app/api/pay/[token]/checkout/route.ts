@@ -1,0 +1,60 @@
+import { NextRequest, NextResponse } from "next/server";
+import { createServiceClient } from "@/lib/supabase/server";
+import { getStripe } from "@/lib/stripe/client";
+
+export async function POST(
+  _req: NextRequest,
+  { params }: { params: Promise<{ token: string }> }
+) {
+  const { token } = await params;
+  const supabase = await createServiceClient();
+
+  const { data: invoice } = await supabase
+    .from("invoices")
+    .select("id, org_id, invoice_number, total, amount_paid, currency, status, clients(email)")
+    .eq("public_token", token)
+    .single();
+
+  if (!invoice) return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
+  if (invoice.status === "paid") return NextResponse.json({ error: "Invoice already paid" }, { status: 400 });
+  if (invoice.status === "void") return NextResponse.json({ error: "Invoice is void" }, { status: 400 });
+
+  const amountDue = Math.round((invoice.total - invoice.amount_paid) * 100);
+  if (amountDue <= 0) return NextResponse.json({ error: "Nothing due" }, { status: 400 });
+
+  const { data: org } = await supabase
+    .from("organisations")
+    .select("name")
+    .eq("id", invoice.org_id)
+    .single();
+
+  const client = Array.isArray(invoice.clients) ? invoice.clients[0] : invoice.clients;
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.invoyr.io";
+
+  const session = await getStripe().checkout.sessions.create({
+    mode: "payment",
+    payment_method_types: ["card"],
+    line_items: [
+      {
+        price_data: {
+          currency: invoice.currency.toLowerCase(),
+          unit_amount: amountDue,
+          product_data: {
+            name: `Invoice ${invoice.invoice_number}`,
+            description: org?.name ? `From ${org.name}` : undefined,
+          },
+        },
+        quantity: 1,
+      },
+    ],
+    customer_email: client?.email ?? undefined,
+    metadata: {
+      invoice_id: invoice.id,
+      org_id: invoice.org_id,
+    },
+    success_url: `${appUrl}/pay/${token}?paid=1`,
+    cancel_url: `${appUrl}/pay/${token}`,
+  });
+
+  return NextResponse.json({ url: session.url });
+}
