@@ -7,7 +7,7 @@ import MetricCard from "@/components/dashboard/MetricCard";
 import LatestInvoicesTable from "@/components/dashboard/LatestInvoicesTable";
 import ActivityFeed from "@/components/dashboard/ActivityFeed";
 import type { Metadata } from "next";
-import type { InvoiceWithClient, Payment, AuditLog } from "@/lib/supabase/types";
+import type { InvoiceWithClient, AuditLog } from "@/lib/supabase/types";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -18,36 +18,53 @@ export default async function DashboardPage() {
 
   if (!org) return null;
 
-  const [invoicesRes, paymentsRes, logsRes] = await Promise.all([
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+
+  const [invoicesRes, latestRes, revenueAllRes, revenueMonthRes, logsRes] = await Promise.all([
+    // All invoices for accurate metric aggregation (status + total only)
+    supabase
+      .from("invoices")
+      .select("id, status, total, amount_paid, due_date")
+      .eq("org_id", org.id),
+    // Latest 10 for the table
     supabase
       .from("invoices")
       .select("*, clients(name)")
       .eq("org_id", org.id)
       .order("created_at", { ascending: false })
-      .limit(6),
+      .limit(10),
+    // All-time revenue
     supabase
       .from("payments")
       .select("amount")
       .eq("org_id", org.id),
+    // This month's revenue
+    supabase
+      .from("payments")
+      .select("amount")
+      .eq("org_id", org.id)
+      .gte("paid_at", monthStart),
+    // Activity feed
     supabase
       .from("audit_logs")
       .select("*")
       .eq("org_id", org.id)
       .order("created_at", { ascending: false })
-      .limit(10),
+      .limit(12),
   ]);
 
-  const invoices = (invoicesRes.data ?? []) as InvoiceWithClient[];
-  const payments = (paymentsRes.data ?? []) as Pick<Payment, "amount">[];
+  const allInvoices = invoicesRes.data ?? [];
+  const latestInvoices = (latestRes.data ?? []) as InvoiceWithClient[];
   const logs = (logsRes.data ?? []) as AuditLog[];
 
-  const totalRevenue = payments.reduce((sum, p) => sum + (p.amount ?? 0), 0);
-  const paidCount = invoices.filter((i) => i.status === "paid").length;
-  const overdueInvoices = invoices.filter((i) => i.status === "overdue");
-  const outstandingInvoices = invoices.filter((i) => ["sent", "issued"].includes(i.status));
+  const totalRevenue = (revenueAllRes.data ?? []).reduce((s, p) => s + (p.amount ?? 0), 0);
+  const monthRevenue = (revenueMonthRes.data ?? []).reduce((s, p) => s + (p.amount ?? 0), 0);
 
-  const overdueTotal = overdueInvoices.reduce((sum, i) => sum + i.total, 0);
-  const outstandingTotal = outstandingInvoices.reduce((sum, i) => sum + i.total, 0);
+  const overdueInvoices = allInvoices.filter((i) => i.status === "overdue");
+  const outstandingInvoices = allInvoices.filter((i) => ["sent", "issued"].includes(i.status));
+  const overdueTotal = overdueInvoices.reduce((s, i) => s + i.total, 0);
+  const outstandingTotal = outstandingInvoices.reduce((s, i) => s + (i.total - i.amount_paid), 0);
 
   return (
     <div>
@@ -65,8 +82,16 @@ export default async function DashboardPage() {
 
       <div className="p-6 space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-          <MetricCard title="Total revenue" value={formatCurrency(totalRevenue)} subtitle="All time" />
-          <MetricCard title="Invoices paid" value={String(paidCount)} subtitle="This account" />
+          <MetricCard
+            title="Revenue this month"
+            value={formatCurrency(monthRevenue)}
+            subtitle={`${formatCurrency(totalRevenue)} all time`}
+          />
+          <MetricCard
+            title="Outstanding"
+            value={formatCurrency(outstandingTotal)}
+            subtitle={`${outstandingInvoices.length} invoice${outstandingInvoices.length !== 1 ? "s" : ""} awaiting payment`}
+          />
           <MetricCard
             title="Overdue"
             value={formatCurrency(overdueTotal)}
@@ -74,9 +99,9 @@ export default async function DashboardPage() {
             accentClass={overdueTotal > 0 ? "text-red-600" : undefined}
           />
           <MetricCard
-            title="Outstanding"
-            value={formatCurrency(outstandingTotal)}
-            subtitle={`${outstandingInvoices.length} awaiting payment`}
+            title="Total invoices"
+            value={String(allInvoices.length)}
+            subtitle={`${allInvoices.filter((i) => i.status === "paid").length} paid`}
           />
         </div>
 
@@ -86,7 +111,7 @@ export default async function DashboardPage() {
               <h2 className="font-semibold text-gray-900">Latest invoices</h2>
               <Link href="/invoices" className="text-sm text-gray-500 hover:text-gray-900">View all →</Link>
             </div>
-            <LatestInvoicesTable invoices={invoices} />
+            <LatestInvoicesTable invoices={latestInvoices} />
           </div>
 
           <div className="bg-white rounded-xl border border-gray-200">
