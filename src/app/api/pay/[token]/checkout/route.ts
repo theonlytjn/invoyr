@@ -24,9 +24,16 @@ export async function POST(
 
   const { data: org } = await supabase
     .from("organisations")
-    .select("name")
+    .select("name, stripe_account_id")
     .eq("id", invoice.org_id)
     .single();
+
+  if (!org?.stripe_account_id) {
+    return NextResponse.json(
+      { error: "This organisation has not connected a Stripe account yet." },
+      { status: 400 }
+    );
+  }
 
   const client = Array.isArray(invoice.clients) ? invoice.clients[0] : invoice.clients;
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.invoyr.io";
@@ -41,13 +48,18 @@ export async function POST(
           unit_amount: amountDue,
           product_data: {
             name: `Invoice ${invoice.invoice_number}`,
-            description: org?.name ? `From ${org.name}` : undefined,
+            description: org.name ? `From ${org.name}` : undefined,
           },
         },
         quantity: 1,
       },
     ],
     customer_email: client?.email ?? undefined,
+    payment_intent_data: {
+      transfer_data: {
+        destination: org.stripe_account_id,
+      },
+    },
     metadata: {
       invoice_id: invoice.id,
       org_id: invoice.org_id,
