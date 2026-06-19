@@ -9,11 +9,8 @@ export default function AuthLayout({
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4 py-12">
       <div className="mb-8">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center">
-            <span className="text-white text-xs font-bold">IV</span>
-          </div>
-          <span className="text-xl font-semibold text-gray-900">invoyr</span>
+        <Link href="/">
+          <Image src="/main-logo.svg" alt="Invoyr" width={120} height={36} priority />
         </Link>
       </div>
       <div className="w-full max-w-md">{children}</div>

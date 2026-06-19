@@ -45,14 +45,23 @@ export default function Sidebar({ org, userEmail }: Props) {
   return (
     <aside className="hidden lg:flex flex-col w-64 bg-white border-r border-gray-200 h-screen sticky top-0">
       {/* Brand */}
-      <div className="flex items-center gap-2.5 px-5 py-5 border-b border-gray-100">
-        <Image src="/main-logo.svg" alt="Invoyr" width={28} height={28} className="flex-shrink-0" />
-        <div className="min-w-0">
-          <p className="text-sm font-semibold text-gray-900 truncate">
-            {org?.name ?? "invoyr"}
-          </p>
-          <p className="text-xs text-gray-400 truncate">Starter plan</p>
-        </div>
+      <div className="px-5 pt-5 pb-4 border-b border-gray-100">
+        <Image src="/main-logo.svg" alt="Invoyr" width={96} height={28} priority />
+        {org && (
+          <div className="mt-3 flex items-center gap-2">
+            {org.logo_url ? (
+              <img src={org.logo_url} alt={org.name} className="w-6 h-6 rounded object-contain flex-shrink-0 border border-gray-100" />
+            ) : (
+              <div className="w-6 h-6 rounded bg-gray-200 flex items-center justify-center flex-shrink-0">
+                <span className="text-[9px] font-bold text-gray-600">{org.name?.[0]?.toUpperCase()}</span>
+              </div>
+            )}
+            <div className="min-w-0">
+              <p className="text-xs font-medium text-gray-700 truncate">{org.name}</p>
+              <p className="text-[10px] text-gray-400">Starter plan</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Quick action */}

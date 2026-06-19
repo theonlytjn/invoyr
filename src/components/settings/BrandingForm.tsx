@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import type { Organisation } from "@/lib/supabase/types";
 
 interface Props { org: Organisation }
@@ -22,6 +21,39 @@ export default function BrandingForm({ org }: Props) {
   const [postcode, setPostcode] = useState(org.postcode ?? "");
   const [vatNumber, setVatNumber] = useState(org.vat_number ?? "");
   const [accentColor, setAccentColor] = useState(org.accent_color);
+  const [logoUrl, setLogoUrl] = useState(org.logo_url ?? "");
+  const [logoUploading, setLogoUploading] = useState(false);
+  const [logoError, setLogoError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  async function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setLogoUploading(true);
+    setLogoError(null);
+    const supabase = createClient();
+    const ext = file.name.split(".").pop();
+    const path = `${org.id}/logo.${ext}`;
+    const { error: uploadError } = await supabase.storage
+      .from("logos")
+      .upload(path, file, { upsert: true, contentType: file.type });
+    if (uploadError) {
+      setLogoError(uploadError.message);
+      setLogoUploading(false);
+      return;
+    }
+    const { data } = supabase.storage.from("logos").getPublicUrl(path);
+    const url = `${data.publicUrl}?t=${Date.now()}`;
+    await supabase.from("organisations").update({ logo_url: url }).eq("id", org.id);
+    setLogoUrl(url);
+    setLogoUploading(false);
+  }
+
+  async function handleRemoveLogo() {
+    const supabase = createClient();
+    await supabase.from("organisations").update({ logo_url: null }).eq("id", org.id);
+    setLogoUrl("");
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -51,6 +83,53 @@ export default function BrandingForm({ org }: Props) {
       <div>
         <h2 className="text-lg font-semibold text-gray-900 mb-1">Business details</h2>
         <p className="text-sm text-gray-500">This information appears on your invoices.</p>
+      </div>
+
+      {/* Company logo */}
+      <div className="space-y-2">
+        <Label>Company logo</Label>
+        <p className="text-xs text-gray-500">Shown on PDFs and the payment link. PNG, JPG or WebP, max 2 MB.</p>
+        <div className="flex items-center gap-4">
+          {logoUrl ? (
+            <img
+              src={logoUrl}
+              alt="Company logo"
+              className="h-14 w-auto max-w-[140px] object-contain rounded border border-gray-200 p-1 bg-white"
+            />
+          ) : (
+            <div className="h-14 w-28 rounded border border-dashed border-gray-300 flex items-center justify-center bg-gray-50">
+              <span className="text-xs text-gray-400">No logo</span>
+            </div>
+          )}
+          <div className="flex flex-col gap-1.5">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={logoUploading}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {logoUploading ? "Uploading…" : logoUrl ? "Replace logo" : "Upload logo"}
+            </Button>
+            {logoUrl && (
+              <button
+                type="button"
+                onClick={handleRemoveLogo}
+                className="text-xs text-red-500 hover:text-red-700 text-left"
+              >
+                Remove
+              </button>
+            )}
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            className="hidden"
+            onChange={handleLogoChange}
+          />
+        </div>
+        {logoError && <p className="text-xs text-red-600">{logoError}</p>}
       </div>
 
       <div className="space-y-1.5">
