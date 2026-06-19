@@ -49,12 +49,21 @@ export default async function InvoicesPage({
       <Topbar
         title="Invoices"
         actions={
-          <Link
-            href="/invoices/new"
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors"
-          >
-            + New invoice
-          </Link>
+          <>
+            <a
+              href="/api/invoices/export"
+              download
+              className="flex items-center gap-1.5 px-3.5 py-2 border border-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Export CSV
+            </a>
+            <Link
+              href="/invoices/new"
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors"
+            >
+              + New invoice
+            </Link>
+          </>
         }
       />
 

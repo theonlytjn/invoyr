@@ -25,8 +25,18 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       : (rawMember.organisations ?? null)
     : null;
 
+  let plan: string | null = null;
+  if (rawOrg?.id) {
+    const { data: sub } = await supabase
+      .from("subscriptions")
+      .select("plan, status")
+      .eq("org_id", rawOrg.id)
+      .single();
+    plan = sub?.plan ?? (sub?.status === "trialing" ? "trial" : null);
+  }
+
   return (
-    <AppShell org={rawOrg} userEmail={user.email ?? ""}>
+    <AppShell org={rawOrg} userEmail={user.email ?? ""} plan={plan}>
       {children}
     </AppShell>
   );

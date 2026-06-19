@@ -30,9 +30,10 @@ const NAV_ITEMS = [
 interface Props {
   org: Organisation | null;
   userEmail: string;
+  plan?: string | null;
 }
 
-export default function Sidebar({ org, userEmail }: Props) {
+export default function Sidebar({ org, userEmail, plan }: Props) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -58,7 +59,9 @@ export default function Sidebar({ org, userEmail }: Props) {
             )}
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-gray-900 truncate">{org.name}</p>
-              <p className="text-xs text-gray-400">Starter plan</p>
+              <p className="text-xs text-gray-400 capitalize">
+                {plan ? `${plan} plan` : "Free trial"}
+              </p>
             </div>
           </div>
         )}
@@ -109,7 +112,7 @@ export default function Sidebar({ org, userEmail }: Props) {
           <button
             onClick={handleSignOut}
             className="text-gray-400 hover:text-gray-900 transition-colors"
-            title="Sign out"
+            aria-label="Sign out"
           >
             <LogOutIcon size={14} />
           </button>
