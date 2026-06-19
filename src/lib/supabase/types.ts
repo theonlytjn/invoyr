@@ -150,14 +150,38 @@ export interface AuditLog {
 
 export interface EmailLog {
   id: number;
-  org_id: string;
+  org_id: string | null;
+  user_id: string | null;
   invoice_id: string | null;
   resend_id: string | null;
   to_email: string;
   subject: string;
   template_name: string;
   status: "sent" | "delivered" | "bounced" | "failed";
+  opened_at: string | null;
   created_at: string;
+}
+
+export interface EmailPreferences {
+  id: string;
+  user_id: string;
+  marketing_consent: boolean;
+  unsubscribe_token: string;
+  unsubscribed_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MarketingContact {
+  id: string;
+  user_id: string | null;
+  email: string;
+  first_name: string | null;
+  last_name: string | null;
+  resend_contact_id: string | null;
+  subscribed: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface InvoiceWithClient extends Invoice {
@@ -197,6 +221,8 @@ export type Database = {
       subscriptions: TableDef<Subscription>;
       audit_logs: TableDef<AuditLog>;
       email_logs: TableDef<EmailLog>;
+      email_preferences: TableDef<EmailPreferences>;
+      marketing_contacts: TableDef<MarketingContact>;
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

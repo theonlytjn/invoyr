@@ -247,14 +247,45 @@ end $$;
 
 create table if not exists public.email_logs (
   id              bigint generated always as identity primary key,
-  org_id          uuid not null references public.organisations(id) on delete cascade,
+  org_id          uuid references public.organisations(id) on delete cascade,
+  user_id         uuid references auth.users(id) on delete set null,
   invoice_id      uuid references public.invoices(id) on delete set null,
   resend_id       text,
   to_email        text not null,
   subject         text not null,
   template_name   text not null,
   status          public.email_log_status not null default 'sent',
+  opened_at       timestamptz,
   created_at      timestamptz not null default now()
+);
+
+-- ----------------------------------------------------------------
+-- 10. EMAIL_PREFERENCES
+-- ----------------------------------------------------------------
+create table if not exists public.email_preferences (
+  id                  uuid primary key default gen_random_uuid(),
+  user_id             uuid not null references auth.users(id) on delete cascade,
+  marketing_consent   boolean not null default false,
+  unsubscribe_token   text not null unique default encode(gen_random_bytes(32), 'hex'),
+  unsubscribed_at     timestamptz,
+  created_at          timestamptz not null default now(),
+  updated_at          timestamptz not null default now(),
+  constraint email_preferences_user_unique unique (user_id)
+);
+
+-- ----------------------------------------------------------------
+-- 11. MARKETING_CONTACTS
+-- ----------------------------------------------------------------
+create table if not exists public.marketing_contacts (
+  id                  uuid primary key default gen_random_uuid(),
+  user_id             uuid references auth.users(id) on delete set null,
+  email               text not null unique,
+  first_name          text,
+  last_name           text,
+  resend_contact_id   text,
+  subscribed          boolean not null default true,
+  created_at          timestamptz not null default now(),
+  updated_at          timestamptz not null default now()
 );
 
 -- ----------------------------------------------------------------
@@ -295,8 +326,10 @@ alter table public.invoices       enable row level security;
 alter table public.invoice_items  enable row level security;
 alter table public.payments       enable row level security;
 alter table public.subscriptions  enable row level security;
-alter table public.audit_logs     enable row level security;
-alter table public.email_logs     enable row level security;
+alter table public.audit_logs          enable row level security;
+alter table public.email_logs          enable row level security;
+alter table public.email_preferences   enable row level security;
+alter table public.marketing_contacts  enable row level security;
 
 -- PROFILES
 drop policy if exists profiles_select on public.profiles;
@@ -377,4 +410,20 @@ create policy audit_select on public.audit_logs for select to authenticated usin
 
 -- EMAIL_LOGS
 drop policy if exists email_select on public.email_logs;
-create policy email_select on public.email_logs for select to authenticated using (is_org_member(org_id));
+create policy email_select on public.email_logs for select to authenticated
+  using (
+    (org_id is not null and is_org_member(org_id))
+    or (user_id = auth.uid())
+  );
+
+-- EMAIL_PREFERENCES
+drop policy if exists email_prefs_select on public.email_preferences;
+create policy email_prefs_select on public.email_preferences for select to authenticated using (user_id = auth.uid());
+drop policy if exists email_prefs_insert on public.email_preferences;
+create policy email_prefs_insert on public.email_preferences for insert to authenticated with check (user_id = auth.uid());
+drop policy if exists email_prefs_update on public.email_preferences;
+create policy email_prefs_update on public.email_preferences for update to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+-- MARKETING_CONTACTS (service-role only — no authenticated user policies needed)
+drop policy if exists marketing_contacts_none on public.marketing_contacts;
+create policy marketing_contacts_none on public.marketing_contacts for all to authenticated using (false);

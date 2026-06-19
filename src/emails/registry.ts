@@ -12,6 +12,11 @@ export type TransactionalTemplateName =
   | "payment-failed"
   | "team-invite";
 
+export type MarketingTemplateName =
+  | "newsletter"
+  | "product-update"
+  | "win-back";
+
 export interface EmailRegistryEntry {
   templateName: TransactionalTemplateName;
   defaultSubject: string;
