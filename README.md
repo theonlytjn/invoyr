@@ -1,36 +1,25 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Invoyr OS v1.0 — Foundation Pack
 
-## Getting Started
+This pack is designed to be copied into the root of the Invoyr repository and used as the operating manual for Claude Code.
 
-First, run the development server:
+## What this contains
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- `docs/INV-000-product-constitution.md` — the product, design, engineering and communication principles for Invoyr.
+- `docs/INV-001-current-state-audit.md` — an audit of the current sitemap, repository, database and implementation gaps.
+- `docs/INV-002-target-architecture.md` — the recommended repository, app, database, API, email and automation architecture.
+- `docs/INV-003-communication-resend-system.md` — the complete communication platform and Resend/React Email plan.
+- `docs/INV-004-implementation-roadmap.md` — phased build plan from current state to MVP.
+- `prompts/CLAUDE-CODE-MASTER-PROMPT.md` — paste this into Claude Code to create the docs folder, audit the existing build, and implement the email/Resend system.
+- `CLAUDE.md` — suggested replacement for the current Claude instruction file.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## How to use
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Copy the whole `docs/` folder into the Invoyr repository root.
+2. Replace the current `CLAUDE.md` with the `CLAUDE.md` in this pack.
+3. Open Claude Code in the Invoyr repository.
+4. Paste `prompts/CLAUDE-CODE-MASTER-PROMPT.md`.
+5. Ask Claude Code to first run in audit mode, then implementation mode.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Rule
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Claude Code must not blindly rewrite the current app. It must first audit what exists, preserve working code, and then implement the target architecture incrementally.

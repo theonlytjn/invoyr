@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createElement } from "react";
 import { createClient } from "@/lib/supabase/server";
-import { getResend } from "@/lib/resend/client";
+import { sendTransactionalEmail } from "@/lib/resend/send-transactional-email";
+import { InvoiceSentEmail } from "@/emails/transactional/InvoiceSentEmail";
 import { computeTotals } from "@/lib/invoice-totals";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
@@ -11,19 +13,26 @@ export async function POST(
   const { id } = await params;
   const supabase = await createClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { data: invoice } = await supabase
     .from("invoices")
-    .select("*, clients(*), invoice_items(*), organisations(name, accent_color, bank_account_name, bank_name, bank_account_number, bank_sort_code, bank_iban, bank_bic)")
+    .select(
+      "*, clients(*), invoice_items(*), organisations(name, accent_color, logo_url, bank_account_name, bank_name, bank_account_number, bank_sort_code, bank_iban, bank_bic)"
+    )
     .eq("id", id)
     .single();
 
   if (!invoice) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const client = Array.isArray(invoice.clients) ? invoice.clients[0] : invoice.clients;
-  const org = Array.isArray(invoice.organisations) ? invoice.organisations[0] : invoice.organisations;
+  const org = Array.isArray(invoice.organisations)
+    ? invoice.organisations[0]
+    : invoice.organisations;
+
   if (!client?.email) {
     return NextResponse.json({ error: "Client has no email address" }, { status: 400 });
   }
@@ -40,43 +49,42 @@ export async function POST(
 
   const payUrl = invoice.public_token
     ? `${process.env.NEXT_PUBLIC_APP_URL}/pay/${invoice.public_token}`
-    : null;
+    : `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`;
 
-  const { data: emailData, error: emailErr } = await getResend().emails.send({
-    from: process.env.RESEND_FROM_EMAIL ?? "invoices@invoyr.io",
+  const hasBankDetails = org?.bank_account_name || org?.bank_account_number;
+  const logoUrl = org?.logo_url ? org.logo_url.split("?")[0] : null;
+
+  const result = await sendTransactionalEmail({
+    orgId: invoice.org_id,
+    invoiceId: id,
     to: client.email,
     subject: `Invoice ${invoice.invoice_number}${org?.name ? ` from ${org.name}` : ""}`,
-    html: `
-      <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:40px 20px;">
-        ${org?.name ? `<p style="color:#6b7280;font-size:14px;margin:0 0 4px;">Invoice from</p><p style="font-size:18px;font-weight:700;color:#111827;margin:0 0 24px;">${org.name}</p>` : ""}
-        <h2 style="font-size:24px;font-weight:700;color:#111827;margin:0 0 8px;">Invoice ${invoice.invoice_number}</h2>
-        <p style="color:#6b7280;margin:0 0 24px;">Please find your invoice details below.</p>
-        <table style="width:100%;border-collapse:collapse;font-size:14px;">
-          <tr><td style="padding:8px 0;color:#6b7280;">Issue date</td><td style="text-align:right;">${formatDate(invoice.issue_date)}</td></tr>
-          ${invoice.due_date ? `<tr><td style="padding:8px 0;color:#6b7280;">Due date</td><td style="text-align:right;">${formatDate(invoice.due_date)}</td></tr>` : ""}
-          <tr style="border-top:1px solid #e5e7eb;"><td style="padding:12px 0;font-weight:700;font-size:16px;">Total due</td><td style="text-align:right;font-weight:700;font-size:16px;">${formatCurrency(totals.total, invoice.currency)}</td></tr>
-        </table>
-        ${payUrl ? `<a href="${payUrl}" style="display:inline-block;margin-top:24px;padding:12px 24px;background:${org?.accent_color ?? "#111827"};color:#fff;text-decoration:none;border-radius:8px;font-weight:600;">Pay now</a>` : ""}
-        ${(org?.bank_account_name || org?.bank_account_number) ? `
-        <div style="margin-top:28px;padding-top:20px;border-top:1px solid #e5e7eb;">
-          <p style="font-size:11px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:0.05em;margin:0 0 10px;">Or pay by bank transfer</p>
-          <table style="font-size:13px;border-collapse:collapse;">
-            ${org.bank_account_name ? `<tr><td style="color:#6b7280;padding:2px 16px 2px 0;">Account name</td><td style="font-weight:600;color:#111827;">${org.bank_account_name}</td></tr>` : ""}
-            ${org.bank_name ? `<tr><td style="color:#6b7280;padding:2px 16px 2px 0;">Bank</td><td style="font-weight:600;color:#111827;">${org.bank_name}</td></tr>` : ""}
-            ${org.bank_account_number ? `<tr><td style="color:#6b7280;padding:2px 16px 2px 0;">Account number</td><td style="font-weight:600;color:#111827;">${org.bank_account_number}</td></tr>` : ""}
-            ${org.bank_sort_code ? `<tr><td style="color:#6b7280;padding:2px 16px 2px 0;">Sort code</td><td style="font-weight:600;color:#111827;">${org.bank_sort_code}</td></tr>` : ""}
-            ${org.bank_iban ? `<tr><td style="color:#6b7280;padding:2px 16px 2px 0;">IBAN</td><td style="font-weight:600;color:#111827;">${org.bank_iban}</td></tr>` : ""}
-            ${org.bank_bic ? `<tr><td style="color:#6b7280;padding:2px 16px 2px 0;">BIC / SWIFT</td><td style="font-weight:600;color:#111827;">${org.bank_bic}</td></tr>` : ""}
-          </table>
-          <p style="font-size:12px;color:#9ca3af;margin-top:8px;">Reference: <strong style="color:#6b7280;">${invoice.invoice_number}</strong></p>
-        </div>` : ""}
-        <p style="margin-top:32px;color:#9ca3af;font-size:12px;">Powered by invoyr</p>
-      </div>
-    `,
+    templateName: "invoice-sent",
+    react: createElement(InvoiceSentEmail, {
+      clientName: client.name ?? "there",
+      orgName: org?.name ?? "",
+      logoUrl,
+      accentColor: org?.accent_color ?? "#111827",
+      invoiceNumber: invoice.invoice_number,
+      invoiceTotal: formatCurrency(totals.total, invoice.currency),
+      issueDate: invoice.issue_date ? formatDate(invoice.issue_date) : undefined,
+      dueDate: invoice.due_date ? formatDate(invoice.due_date) : undefined,
+      payUrl,
+      bankDetails: hasBankDetails
+        ? {
+            accountName: org?.bank_account_name,
+            bankName: org?.bank_name,
+            accountNumber: org?.bank_account_number,
+            sortCode: org?.bank_sort_code,
+            iban: org?.bank_iban,
+            bic: org?.bank_bic,
+          }
+        : null,
+    }),
   });
 
-  if (emailErr) {
-    return NextResponse.json({ error: emailErr.message }, { status: 500 });
+  if (!result.ok) {
+    return NextResponse.json({ error: result.error ?? "Send failed" }, { status: 500 });
   }
 
   await supabase
@@ -84,22 +92,12 @@ export async function POST(
     .update({ status: "sent", sent_at: new Date().toISOString() })
     .eq("id", id);
 
-  await supabase.from("email_logs").insert({
-    org_id: invoice.org_id,
-    invoice_id: id,
-    resend_id: emailData?.id ?? null,
-    to_email: client.email,
-    subject: `Invoice ${invoice.invoice_number}`,
-    template_name: "invoice-sent",
-    status: "sent",
-  });
-
   await supabase.from("audit_logs").insert({
     org_id: invoice.org_id,
     action: "invoice.sent",
     entity_type: "invoice",
     entity_id: id,
-    meta: { to: client.email },
+    meta: { to: client.email, invoice_number: invoice.invoice_number },
   });
 
   return NextResponse.json({ ok: true });
