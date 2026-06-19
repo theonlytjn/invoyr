@@ -31,6 +31,11 @@ export interface Organisation {
   next_invoice_number: number;
   default_terms: string | null;
   default_notes: string | null;
+  company_registration_number: string | null;
+  vat_registered: boolean;
+  default_vat_rate: number;
+  currency: string;
+  default_template: string;
   bank_name: string | null;
   bank_account_name: string | null;
   bank_account_number: string | null;
