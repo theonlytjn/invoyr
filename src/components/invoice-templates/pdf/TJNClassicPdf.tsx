@@ -1,10 +1,11 @@
-import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
+import { Document, Page, Text, View, Image, StyleSheet } from "@react-pdf/renderer";
 import type { InvoiceTemplateProps } from "../types";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 const styles = StyleSheet.create({
   page: { fontFamily: "Helvetica", fontSize: 10, padding: 48, color: "#111827", backgroundColor: "#ffffff" },
   header: { flexDirection: "row", justifyContent: "space-between", marginBottom: 32 },
+  logo: { height: 40, marginBottom: 8, objectFit: "contain" },
   orgName: { fontSize: 16, fontFamily: "Helvetica-Bold", marginBottom: 4 },
   orgDetail: { color: "#6b7280", fontSize: 9, marginBottom: 2 },
   invoiceLabel: { fontSize: 20, fontFamily: "Helvetica-Bold", textAlign: "right" },
@@ -15,7 +16,7 @@ const styles = StyleSheet.create({
   sectionLabel: { fontSize: 8, color: "#9ca3af", textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 },
   clientName: { fontFamily: "Helvetica-Bold", marginBottom: 2 },
   clientDetail: { color: "#6b7280", fontSize: 9, marginBottom: 2 },
-  tableHeader: { flexDirection: "row", borderBottomWidth: 1.5, borderBottomColor: "#111827", paddingBottom: 6, marginBottom: 4 },
+  tableHeader: { flexDirection: "row", paddingBottom: 6, marginBottom: 4 },
   tableHeaderCell: { fontFamily: "Helvetica-Bold", fontSize: 9, color: "#374151" },
   tableRow: { flexDirection: "row", borderBottomWidth: 0.5, borderBottomColor: "#f3f4f6", paddingVertical: 7 },
   tableCell: { fontSize: 9 },
@@ -25,7 +26,7 @@ const styles = StyleSheet.create({
   totalsBox: { width: 200 },
   totalsRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 4 },
   totalsLabel: { color: "#6b7280" },
-  totalRow: { flexDirection: "row", justifyContent: "space-between", borderTopWidth: 2, borderTopColor: "#111827", paddingTop: 6, marginTop: 4 },
+  totalRow: { flexDirection: "row", justifyContent: "space-between", paddingTop: 6, marginTop: 4 },
   totalLabel: { fontFamily: "Helvetica-Bold", fontSize: 12 },
   totalValue: { fontFamily: "Helvetica-Bold", fontSize: 12 },
   notes: { borderTopWidth: 0.5, borderTopColor: "#e5e7eb", marginTop: 32, paddingTop: 16 },
@@ -35,20 +36,26 @@ const styles = StyleSheet.create({
 });
 
 export default function TJNClassicPdf({ invoice, items, client, org, totals }: InvoiceTemplateProps) {
+  const accent = org.accent_color ?? "#111827";
+
   return (
     <Document>
       <Page size="A4" style={styles.page}>
         {/* Header */}
         <View style={styles.header}>
           <View>
+            {org.logo_url ? (
+              <Image src={org.logo_url} style={styles.logo} />
+            ) : null}
             <Text style={styles.orgName}>{org.name}</Text>
             {org.address_line1 ? <Text style={styles.orgDetail}>{org.address_line1}</Text> : null}
             {org.city ? <Text style={styles.orgDetail}>{org.city}{org.postcode ? `, ${org.postcode}` : ""}</Text> : null}
+            {org.email ? <Text style={styles.orgDetail}>{org.email}</Text> : null}
             {org.vat_number ? <Text style={styles.orgDetail}>VAT: {org.vat_number}</Text> : null}
           </View>
           <View>
             <Text style={styles.invoiceLabel}>INVOICE</Text>
-            <Text style={[styles.invoiceNumber, { color: org.accent_color }]}>#{invoice.invoice_number}</Text>
+            <Text style={[styles.invoiceNumber, { color: accent }]}>#{invoice.invoice_number}</Text>
             <View style={styles.metaRow}>
               <Text style={styles.metaLabel}>Issue date:</Text>
               <Text>{formatDate(invoice.issue_date)}</Text>
@@ -75,7 +82,7 @@ export default function TJNClassicPdf({ invoice, items, client, org, totals }: I
         ) : null}
 
         {/* Table header */}
-        <View style={styles.tableHeader}>
+        <View style={[styles.tableHeader, { borderBottomWidth: 1.5, borderBottomColor: accent }]}>
           <Text style={[styles.tableHeaderCell, styles.col1]}>Description</Text>
           <Text style={[styles.tableHeaderCell, styles.col2]}>Qty</Text>
           <Text style={[styles.tableHeaderCell, styles.col2]}>Unit price</Text>
@@ -105,16 +112,16 @@ export default function TJNClassicPdf({ invoice, items, client, org, totals }: I
               <Text style={styles.totalsLabel}>VAT</Text>
               <Text>{formatCurrency(totals.vatAmount, invoice.currency)}</Text>
             </View>
-            <View style={styles.totalRow}>
+            <View style={[styles.totalRow, { borderTopWidth: 2, borderTopColor: accent }]}>
               <Text style={styles.totalLabel}>Total</Text>
-              <Text style={[styles.totalValue, { color: org.accent_color }]}>
+              <Text style={[styles.totalValue, { color: accent }]}>
                 {formatCurrency(totals.total, invoice.currency)}
               </Text>
             </View>
           </View>
         </View>
 
-        {/* Notes */}
+        {/* Notes / Terms */}
         {(invoice.notes || invoice.terms || org.default_terms) ? (
           <View style={styles.notes}>
             {invoice.notes ? (

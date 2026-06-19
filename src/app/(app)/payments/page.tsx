@@ -1,7 +1,9 @@
+import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import Topbar from "@/components/shell/Topbar";
+import PaymentsFilter from "@/components/payments/PaymentsFilter";
 import type { Metadata } from "next";
 import type { PaymentWithInvoice } from "@/lib/supabase/types";
 
@@ -15,31 +17,85 @@ const METHOD_LABELS: Record<string, string> = {
   other: "Other",
 };
 
-export default async function PaymentsPage() {
+function getDateRange(period: string | undefined): { from?: string; to?: string } {
+  const now = new Date();
+  switch (period) {
+    case "this_month": {
+      const from = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      return { from };
+    }
+    case "last_month": {
+      const from = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
+      const to = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      return { from, to };
+    }
+    case "last_3_months": {
+      const from = new Date(now.getFullYear(), now.getMonth() - 3, 1).toISOString();
+      return { from };
+    }
+    case "this_year": {
+      const from = new Date(now.getFullYear(), 0, 1).toISOString();
+      return { from };
+    }
+    default:
+      return {};
+  }
+}
+
+const PERIOD_LABELS: Record<string, string> = {
+  this_month: "This month",
+  last_month: "Last month",
+  last_3_months: "Last 3 months",
+  this_year: "This year",
+};
+
+interface Props {
+  searchParams: Promise<{ period?: string }>;
+}
+
+export default async function PaymentsPage({ searchParams }: Props) {
+  const { period } = await searchParams;
   const org = await requireOrg();
   const supabase = await createClient();
 
-  const { data } = await supabase
+  const { from, to } = getDateRange(period);
+
+  let query = supabase
     .from("payments")
     .select("*, invoices(invoice_number, clients(name))")
     .eq("org_id", org.id)
     .order("paid_at", { ascending: false });
 
+  if (from) query = query.gte("paid_at", from);
+  if (to) query = query.lt("paid_at", to);
+
+  const { data } = await query;
   const payments = (data ?? []) as unknown as PaymentWithInvoice[];
   const total = payments.reduce((sum, p) => sum + p.amount, 0);
+  const periodLabel = period ? (PERIOD_LABELS[period] ?? "Filtered") : "All time";
 
   return (
     <div>
       <Topbar title="Payments" />
-      <div className="p-6 space-y-4">
-        <div className="bg-white rounded-xl border border-gray-200 p-5 w-fit">
+      <div className="p-6 space-y-5">
+        {/* Filter bar */}
+        <Suspense>
+          <PaymentsFilter />
+        </Suspense>
+
+        {/* Summary card */}
+        <div className="bg-white rounded-xl border border-gray-200 p-5 inline-flex flex-col min-w-[180px]">
           <p className="text-sm text-gray-500">Total collected</p>
           <p className="text-2xl font-bold text-gray-900 mt-1">{formatCurrency(total)}</p>
+          <p className="text-xs text-gray-400 mt-1">{periodLabel}</p>
         </div>
 
+        {/* Table */}
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           {!payments.length ? (
-            <p className="text-center py-12 text-sm text-gray-500">No payments yet.</p>
+            <p className="text-center py-12 text-sm text-gray-500">
+              {period ? "No payments in this period." : "No payments yet."}
+            </p>
           ) : (
             <table className="w-full text-sm">
               <thead className="border-b border-gray-100">

@@ -34,11 +34,16 @@ export async function GET(
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const orgData = orgRaw as any;
-  const org: Organisation | null = Array.isArray(orgData?.organisations)
+  const orgRawObj: Organisation | null = Array.isArray(orgData?.organisations)
     ? (orgData.organisations[0] ?? null)
     : (orgData?.organisations ?? null);
 
-  if (!org) return NextResponse.json({ error: "Org not found" }, { status: 404 });
+  if (!orgRawObj) return NextResponse.json({ error: "Org not found" }, { status: 404 });
+
+  // Strip cache-busting query string from logo_url so react-pdf can fetch it cleanly
+  const org: Organisation = orgRawObj.logo_url
+    ? { ...orgRawObj, logo_url: orgRawObj.logo_url.split("?")[0] }
+    : orgRawObj;
 
   const items: InvoiceItem[] = Array.isArray(invoice.invoice_items) ? invoice.invoice_items : [];
   const client: Client | null = Array.isArray(invoice.clients)
