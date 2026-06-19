@@ -211,6 +211,7 @@ create table if not exists public.subscriptions (
   org_id                  uuid not null unique references public.organisations(id) on delete cascade,
   stripe_subscription_id  text unique,
   stripe_price_id         text,
+  plan                    text,
   status                  public.subscription_status not null default 'trialing',
   trial_ends_at           timestamptz,
   current_period_start    timestamptz,

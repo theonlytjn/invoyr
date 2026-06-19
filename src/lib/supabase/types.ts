@@ -128,6 +128,7 @@ export interface Subscription {
   org_id: string;
   stripe_subscription_id: string | null;
   stripe_price_id: string | null;
+  plan: string | null;
   status: SubscriptionStatus;
   trial_ends_at: string | null;
   current_period_start: string | null;

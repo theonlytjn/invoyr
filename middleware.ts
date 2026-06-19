@@ -93,6 +93,31 @@ export async function middleware(request: NextRequest) {
     if (!profile?.onboarding_completed && !isOnboarding) {
       return NextResponse.redirect(new URL("/onboarding", request.url));
     }
+
+    const isBillingPage = pathname.startsWith("/settings/billing");
+
+    if (profile?.onboarding_completed && !isBillingPage) {
+      const { data: member } = await supabase
+        .from("org_members")
+        .select("org_id")
+        .eq("user_id", user.id)
+        .limit(1)
+        .single();
+
+      if (member?.org_id) {
+        const { data: sub } = await supabase
+          .from("subscriptions")
+          .select("status")
+          .eq("org_id", member.org_id)
+          .single();
+
+        if (sub?.status === "canceled") {
+          return NextResponse.redirect(
+            new URL("/settings/billing?reason=subscription_required", request.url)
+          );
+        }
+      }
+    }
   }
 
   return supabaseResponse;

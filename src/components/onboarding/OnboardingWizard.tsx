@@ -111,7 +111,7 @@ export default function OnboardingWizard({ userId, userName }: Props) {
     await fetch("/api/onboarding/welcome", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ orgId }),
+      body: JSON.stringify({ orgId, plan: data.plan }),
     }).catch(() => {});
 
     window.location.href = "/dashboard";
