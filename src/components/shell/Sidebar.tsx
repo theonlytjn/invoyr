@@ -46,19 +46,19 @@ export default function Sidebar({ org, userEmail }: Props) {
     <aside className="hidden lg:flex flex-col w-64 bg-white border-r border-gray-200 h-screen sticky top-0">
       {/* Brand */}
       <div className="px-5 pt-5 pb-4 border-b border-gray-100">
-        <Image src="/main-logo.svg" alt="Invoyr" width={96} height={28} priority />
+        <Image src="/main-logo.svg" alt="Invoyr" width={135} height={40} priority />
         {org && (
-          <div className="mt-3 flex items-center gap-2">
+          <div className="mt-4 flex items-center gap-3">
             {org.logo_url ? (
-              <img src={org.logo_url} alt={org.name} className="w-6 h-6 rounded object-contain flex-shrink-0 border border-gray-100" />
+              <img src={org.logo_url} alt={org.name} className="w-9 h-9 rounded-md object-contain flex-shrink-0 border border-gray-100 bg-white p-0.5" />
             ) : (
-              <div className="w-6 h-6 rounded bg-gray-200 flex items-center justify-center flex-shrink-0">
-                <span className="text-[9px] font-bold text-gray-600">{org.name?.[0]?.toUpperCase()}</span>
+              <div className="w-9 h-9 rounded-md bg-gray-900 flex items-center justify-center flex-shrink-0">
+                <span className="text-sm font-bold text-white">{org.name?.[0]?.toUpperCase()}</span>
               </div>
             )}
-            <div className="min-w-0">
-              <p className="text-xs font-medium text-gray-700 truncate">{org.name}</p>
-              <p className="text-[10px] text-gray-400">Starter plan</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-gray-900 truncate">{org.name}</p>
+              <p className="text-xs text-gray-400">Starter plan</p>
             </div>
           </div>
         )}
