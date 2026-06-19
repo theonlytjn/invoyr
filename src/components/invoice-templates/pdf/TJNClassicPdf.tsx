@@ -31,7 +31,12 @@ const styles = StyleSheet.create({
   totalValue: { fontFamily: "Helvetica-Bold", fontSize: 12 },
   notes: { borderTopWidth: 0.5, borderTopColor: "#e5e7eb", marginTop: 32, paddingTop: 16 },
   notesLabel: { fontSize: 8, color: "#9ca3af", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 },
-  footer: { flexDirection: "row", justifyContent: "space-between", marginTop: 40, paddingTop: 12, borderTopWidth: 0.5, borderTopColor: "#f3f4f6" },
+  bankSection: { borderTopWidth: 0.5, borderTopColor: "#e5e7eb", marginTop: 24, paddingTop: 14 },
+  bankGrid: { flexDirection: "row", flexWrap: "wrap", gap: 16 },
+  bankField: { minWidth: 120, marginBottom: 6 },
+  bankLabel: { fontSize: 7, color: "#9ca3af", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 2 },
+  bankValue: { fontSize: 9, color: "#111827", fontFamily: "Helvetica-Bold" },
+  footer: { flexDirection: "row", justifyContent: "space-between", marginTop: 32, paddingTop: 12, borderTopWidth: 0.5, borderTopColor: "#f3f4f6" },
   footerText: { fontSize: 8, color: "#9ca3af" },
 });
 
@@ -136,6 +141,54 @@ export default function TJNClassicPdf({ invoice, items, client, org, totals }: I
                 <Text style={{ color: "#6b7280", fontSize: 9 }}>{invoice.terms ?? org.default_terms}</Text>
               </>
             ) : null}
+          </View>
+        ) : null}
+
+        {/* Bank details */}
+        {(org.bank_account_name || org.bank_account_number) ? (
+          <View style={styles.bankSection}>
+            <Text style={[styles.notesLabel, { marginBottom: 8 }]}>Payment by bank transfer</Text>
+            <View style={styles.bankGrid}>
+              {org.bank_account_name ? (
+                <View style={styles.bankField}>
+                  <Text style={styles.bankLabel}>Account name</Text>
+                  <Text style={styles.bankValue}>{org.bank_account_name}</Text>
+                </View>
+              ) : null}
+              {org.bank_name ? (
+                <View style={styles.bankField}>
+                  <Text style={styles.bankLabel}>Bank</Text>
+                  <Text style={styles.bankValue}>{org.bank_name}</Text>
+                </View>
+              ) : null}
+              {org.bank_account_number ? (
+                <View style={styles.bankField}>
+                  <Text style={styles.bankLabel}>Account number</Text>
+                  <Text style={styles.bankValue}>{org.bank_account_number}</Text>
+                </View>
+              ) : null}
+              {org.bank_sort_code ? (
+                <View style={styles.bankField}>
+                  <Text style={styles.bankLabel}>Sort code</Text>
+                  <Text style={styles.bankValue}>{org.bank_sort_code}</Text>
+                </View>
+              ) : null}
+              {org.bank_iban ? (
+                <View style={styles.bankField}>
+                  <Text style={styles.bankLabel}>IBAN</Text>
+                  <Text style={styles.bankValue}>{org.bank_iban}</Text>
+                </View>
+              ) : null}
+              {org.bank_bic ? (
+                <View style={styles.bankField}>
+                  <Text style={styles.bankLabel}>BIC / SWIFT</Text>
+                  <Text style={styles.bankValue}>{org.bank_bic}</Text>
+                </View>
+              ) : null}
+            </View>
+            <Text style={{ fontSize: 8, color: "#9ca3af", marginTop: 6 }}>
+              Please use invoice #{invoice.invoice_number} as your payment reference.
+            </Text>
           </View>
         ) : null}
 

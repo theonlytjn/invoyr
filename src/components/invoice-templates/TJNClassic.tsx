@@ -114,6 +114,54 @@ export default function TJNClassic({ invoice, items, client, org, totals }: Invo
         </div>
       )}
 
+      {/* Bank details */}
+      {(org.bank_account_name || org.bank_account_number) && (
+        <div className="border-t border-gray-200 pt-6 mt-6">
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Payment by bank transfer</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-2">
+            {org.bank_account_name && (
+              <div>
+                <p className="text-xs text-gray-400">Account name</p>
+                <p className="text-sm font-medium text-gray-900">{org.bank_account_name}</p>
+              </div>
+            )}
+            {org.bank_name && (
+              <div>
+                <p className="text-xs text-gray-400">Bank</p>
+                <p className="text-sm font-medium text-gray-900">{org.bank_name}</p>
+              </div>
+            )}
+            {org.bank_account_number && (
+              <div>
+                <p className="text-xs text-gray-400">Account number</p>
+                <p className="text-sm font-medium text-gray-900">{org.bank_account_number}</p>
+              </div>
+            )}
+            {org.bank_sort_code && (
+              <div>
+                <p className="text-xs text-gray-400">Sort code</p>
+                <p className="text-sm font-medium text-gray-900">{org.bank_sort_code}</p>
+              </div>
+            )}
+            {org.bank_iban && (
+              <div>
+                <p className="text-xs text-gray-400">IBAN</p>
+                <p className="text-sm font-medium text-gray-900">{org.bank_iban}</p>
+              </div>
+            )}
+            {org.bank_bic && (
+              <div>
+                <p className="text-xs text-gray-400">BIC / SWIFT</p>
+                <p className="text-sm font-medium text-gray-900">{org.bank_bic}</p>
+              </div>
+            )}
+          </div>
+          <p className="text-xs text-gray-400 mt-3">
+            Please use <span className="font-medium text-gray-600">#{invoice.invoice_number}</span> as your payment reference.
+          </p>
+        </div>
+      )}
+
       {/* Footer */}
       <div className="mt-10 pt-4 border-t border-gray-100 flex justify-between items-center">
         <p className="text-xs text-gray-400">{org.name}</p>

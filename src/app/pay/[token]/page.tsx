@@ -24,7 +24,7 @@ export default async function PayPage({ params, searchParams }: Props) {
 
   const { data: orgRow } = await supabase
     .from("organisations")
-    .select("name, logo_url, accent_color, email")
+    .select("name, logo_url, accent_color, email, bank_account_name, bank_name, bank_account_number, bank_sort_code, bank_iban, bank_bic")
     .eq("id", invoice.org_id)
     .single();
 
@@ -127,6 +127,55 @@ export default async function PayPage({ params, searchParams }: Props) {
               </div>
 
               <PayButton token={token} accentColor={accentColor} />
+
+              {(orgRow?.bank_account_name || orgRow?.bank_account_number) && (
+                <div className="border-t border-gray-100 pt-4 space-y-3">
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                    Or pay by bank transfer
+                  </p>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                    {orgRow.bank_account_name && (
+                      <div>
+                        <p className="text-xs text-gray-400">Account name</p>
+                        <p className="text-sm font-medium text-gray-900">{orgRow.bank_account_name}</p>
+                      </div>
+                    )}
+                    {orgRow.bank_name && (
+                      <div>
+                        <p className="text-xs text-gray-400">Bank</p>
+                        <p className="text-sm font-medium text-gray-900">{orgRow.bank_name}</p>
+                      </div>
+                    )}
+                    {orgRow.bank_account_number && (
+                      <div>
+                        <p className="text-xs text-gray-400">Account number</p>
+                        <p className="text-sm font-medium text-gray-900">{orgRow.bank_account_number}</p>
+                      </div>
+                    )}
+                    {orgRow.bank_sort_code && (
+                      <div>
+                        <p className="text-xs text-gray-400">Sort code</p>
+                        <p className="text-sm font-medium text-gray-900">{orgRow.bank_sort_code}</p>
+                      </div>
+                    )}
+                    {orgRow.bank_iban && (
+                      <div className="col-span-2">
+                        <p className="text-xs text-gray-400">IBAN</p>
+                        <p className="text-sm font-medium text-gray-900">{orgRow.bank_iban}</p>
+                      </div>
+                    )}
+                    {orgRow.bank_bic && (
+                      <div>
+                        <p className="text-xs text-gray-400">BIC / SWIFT</p>
+                        <p className="text-sm font-medium text-gray-900">{orgRow.bank_bic}</p>
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-400">
+                    Reference: <span className="font-medium text-gray-600">{invoice.invoice_number}</span>
+                  </p>
+                </div>
+              )}
             </>
           )}
         </div>

@@ -16,7 +16,7 @@ export async function POST(
 
   const { data: invoice } = await supabase
     .from("invoices")
-    .select("*, clients(*), invoice_items(*), organisations(name, accent_color)")
+    .select("*, clients(*), invoice_items(*), organisations(name, accent_color, bank_account_name, bank_name, bank_account_number, bank_sort_code, bank_iban, bank_bic)")
     .eq("id", id)
     .single();
 
@@ -57,6 +57,19 @@ export async function POST(
           <tr style="border-top:1px solid #e5e7eb;"><td style="padding:12px 0;font-weight:700;font-size:16px;">Total due</td><td style="text-align:right;font-weight:700;font-size:16px;">${formatCurrency(totals.total, invoice.currency)}</td></tr>
         </table>
         ${payUrl ? `<a href="${payUrl}" style="display:inline-block;margin-top:24px;padding:12px 24px;background:${org?.accent_color ?? "#111827"};color:#fff;text-decoration:none;border-radius:8px;font-weight:600;">Pay now</a>` : ""}
+        ${(org?.bank_account_name || org?.bank_account_number) ? `
+        <div style="margin-top:28px;padding-top:20px;border-top:1px solid #e5e7eb;">
+          <p style="font-size:11px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:0.05em;margin:0 0 10px;">Or pay by bank transfer</p>
+          <table style="font-size:13px;border-collapse:collapse;">
+            ${org.bank_account_name ? `<tr><td style="color:#6b7280;padding:2px 16px 2px 0;">Account name</td><td style="font-weight:600;color:#111827;">${org.bank_account_name}</td></tr>` : ""}
+            ${org.bank_name ? `<tr><td style="color:#6b7280;padding:2px 16px 2px 0;">Bank</td><td style="font-weight:600;color:#111827;">${org.bank_name}</td></tr>` : ""}
+            ${org.bank_account_number ? `<tr><td style="color:#6b7280;padding:2px 16px 2px 0;">Account number</td><td style="font-weight:600;color:#111827;">${org.bank_account_number}</td></tr>` : ""}
+            ${org.bank_sort_code ? `<tr><td style="color:#6b7280;padding:2px 16px 2px 0;">Sort code</td><td style="font-weight:600;color:#111827;">${org.bank_sort_code}</td></tr>` : ""}
+            ${org.bank_iban ? `<tr><td style="color:#6b7280;padding:2px 16px 2px 0;">IBAN</td><td style="font-weight:600;color:#111827;">${org.bank_iban}</td></tr>` : ""}
+            ${org.bank_bic ? `<tr><td style="color:#6b7280;padding:2px 16px 2px 0;">BIC / SWIFT</td><td style="font-weight:600;color:#111827;">${org.bank_bic}</td></tr>` : ""}
+          </table>
+          <p style="font-size:12px;color:#9ca3af;margin-top:8px;">Reference: <strong style="color:#6b7280;">${invoice.invoice_number}</strong></p>
+        </div>` : ""}
         <p style="margin-top:32px;color:#9ca3af;font-size:12px;">Powered by invoyr</p>
       </div>
     `,

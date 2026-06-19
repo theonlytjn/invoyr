@@ -22,6 +22,12 @@ export default function BrandingForm({ org }: Props) {
   const [vatNumber, setVatNumber] = useState(org.vat_number ?? "");
   const [accentColor, setAccentColor] = useState(org.accent_color);
   const [logoUrl, setLogoUrl] = useState(org.logo_url ?? "");
+  const [bankName, setBankName] = useState(org.bank_name ?? "");
+  const [bankAccountName, setBankAccountName] = useState(org.bank_account_name ?? "");
+  const [bankAccountNumber, setBankAccountNumber] = useState(org.bank_account_number ?? "");
+  const [bankSortCode, setBankSortCode] = useState(org.bank_sort_code ?? "");
+  const [bankIban, setBankIban] = useState(org.bank_iban ?? "");
+  const [bankBic, setBankBic] = useState(org.bank_bic ?? "");
   const [logoUploading, setLogoUploading] = useState(false);
   const [logoError, setLogoError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -71,6 +77,12 @@ export default function BrandingForm({ org }: Props) {
         postcode: postcode || null,
         vat_number: vatNumber || null,
         accent_color: accentColor,
+      bank_name: bankName || null,
+      bank_account_name: bankAccountName || null,
+      bank_account_number: bankAccountNumber || null,
+      bank_sort_code: bankSortCode || null,
+      bank_iban: bankIban || null,
+      bank_bic: bankBic || null,
       })
       .eq("id", org.id);
     setSaving(false);
@@ -172,6 +184,47 @@ export default function BrandingForm({ org }: Props) {
       <div className="space-y-1.5">
         <Label htmlFor="vatNumber">VAT number</Label>
         <Input id="vatNumber" value={vatNumber} onChange={(e) => setVatNumber(e.target.value)} placeholder="GB123456789" />
+      </div>
+
+      {/* Bank details */}
+      <div className="pt-2 border-t border-gray-100">
+        <h3 className="text-base font-semibold text-gray-900 mb-1">Bank details</h3>
+        <p className="text-sm text-gray-500 mb-4">Shown on invoices and the payment page so clients can pay by bank transfer.</p>
+
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="bankAccountName">Account name</Label>
+              <Input id="bankAccountName" value={bankAccountName} onChange={(e) => setBankAccountName(e.target.value)} placeholder="Acme Ltd" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="bankName">Bank name</Label>
+              <Input id="bankName" value={bankName} onChange={(e) => setBankName(e.target.value)} placeholder="Barclays" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="bankAccountNumber">Account number</Label>
+              <Input id="bankAccountNumber" value={bankAccountNumber} onChange={(e) => setBankAccountNumber(e.target.value)} placeholder="12345678" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="bankSortCode">Sort code</Label>
+              <Input id="bankSortCode" value={bankSortCode} onChange={(e) => setBankSortCode(e.target.value)} placeholder="20-00-00" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="bankIban">IBAN</Label>
+              <Input id="bankIban" value={bankIban} onChange={(e) => setBankIban(e.target.value)} placeholder="GB29 NWBK 6016 1331 9268 19" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="bankBic">BIC / SWIFT</Label>
+              <Input id="bankBic" value={bankBic} onChange={(e) => setBankBic(e.target.value)} placeholder="BARCGB22" />
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="space-y-1.5">

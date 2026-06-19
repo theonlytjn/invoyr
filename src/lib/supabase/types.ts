@@ -31,6 +31,12 @@ export interface Organisation {
   next_invoice_number: number;
   default_terms: string | null;
   default_notes: string | null;
+  bank_name: string | null;
+  bank_account_name: string | null;
+  bank_account_number: string | null;
+  bank_sort_code: string | null;
+  bank_iban: string | null;
+  bank_bic: string | null;
   stripe_account_id: string | null;
   stripe_customer_id: string | null;
   created_at: string;
