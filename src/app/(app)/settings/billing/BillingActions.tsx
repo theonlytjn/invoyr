@@ -41,84 +41,91 @@ export function BillingActions({ currentPlan, status, hasActiveSubscription }: P
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
+      {PLANS.map((plan) => {
+        const isCurrent = currentPlan === plan.id;
+        const isPopular = plan.popular;
+
+        return (
+          <div
+            key={plan.id}
+            className={cn(
+              "rounded-xl border p-5",
+              isCurrent
+                ? "border-gray-900 bg-gray-50"
+                : isPopular
+                ? "border-gray-300"
+                : "border-gray-200 bg-white"
+            )}
+          >
+            <div className="flex items-start justify-between gap-6">
+              {/* Left: name + features */}
+              <div className="flex-1 min-w-0 space-y-3">
+                <div className="flex items-center gap-2">
+                  <p className="font-semibold text-gray-900">{plan.name}</p>
+                  {isPopular && !isCurrent && (
+                    <span className="px-2 py-0.5 bg-gray-900 text-white text-[10px] font-medium rounded-full leading-none">
+                      Popular
+                    </span>
+                  )}
+                  {isCurrent && (
+                    <span className="px-2 py-0.5 bg-green-700 text-white text-[10px] font-medium rounded-full leading-none">
+                      Current plan
+                    </span>
+                  )}
+                  <span className="text-xs text-gray-400">{plan.users}</span>
+                </div>
+                <ul className="flex flex-wrap gap-x-4 gap-y-1">
+                  {plan.features.map((f) => (
+                    <li key={f} className="text-xs text-gray-500 flex items-center gap-1">
+                      <span className="text-green-600">✓</span>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Right: price + CTA */}
+              <div className="shrink-0 flex flex-col items-end gap-3">
+                <div className="text-right">
+                  <span className="text-xl font-bold text-gray-900">{plan.price}</span>
+                  <span className="text-xs text-gray-400 ml-1">{plan.period}</span>
+                </div>
+                {isCurrent ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={openPortal}
+                    disabled={loading === "portal"}
+                  >
+                    {loading === "portal" ? "Redirecting…" : "Manage"}
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    onClick={() => upgrade(plan.id as PlanId)}
+                    disabled={!!loading}
+                  >
+                    {loading === plan.id ? "Redirecting…" : `Upgrade`}
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })}
+
       {hasActiveSubscription && (
-        <div className="flex justify-end">
-          <Button
-            variant="outline"
+        <div className="pt-1 flex justify-end">
+          <button
             onClick={openPortal}
             disabled={loading === "portal"}
+            className="text-sm text-gray-400 hover:text-gray-700 transition-colors disabled:opacity-50"
           >
-            {loading === "portal" ? "Redirecting…" : "Manage billing"}
-          </Button>
+            {loading === "portal" ? "Redirecting…" : "Manage billing & invoices →"}
+          </button>
         </div>
       )}
-
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {PLANS.map((plan) => {
-          const isCurrent = currentPlan === plan.id;
-          const isPopular = plan.popular;
-
-          return (
-            <div
-              key={plan.id}
-              className={cn(
-                "relative rounded-xl border p-5 space-y-4",
-                isCurrent
-                  ? "border-gray-900 bg-gray-50"
-                  : isPopular
-                  ? "border-gray-300"
-                  : "border-gray-200"
-              )}
-            >
-              {isPopular && !isCurrent && (
-                <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-2.5 py-0.5 bg-gray-900 text-white text-xs font-medium rounded-full">
-                  Popular
-                </span>
-              )}
-              {isCurrent && (
-                <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-2.5 py-0.5 bg-green-700 text-white text-xs font-medium rounded-full">
-                  Current plan
-                </span>
-              )}
-              <div>
-                <p className="font-semibold text-gray-900">{plan.name}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{plan.users}</p>
-              </div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-2xl font-bold text-gray-900">{plan.price}</span>
-                <span className="text-sm text-gray-500">{plan.period}</span>
-              </div>
-              <ul className="space-y-1.5">
-                {plan.features.map((f) => (
-                  <li key={f} className="text-xs text-gray-600 flex items-start gap-1.5">
-                    <span className="text-green-600 mt-px">✓</span>
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              {isCurrent ? (
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={openPortal}
-                  disabled={loading === "portal"}
-                >
-                  {loading === "portal" ? "Redirecting…" : "Manage"}
-                </Button>
-              ) : (
-                <Button
-                  className="w-full"
-                  onClick={() => upgrade(plan.id as PlanId)}
-                  disabled={!!loading}
-                >
-                  {loading === plan.id ? "Redirecting…" : `Upgrade to ${plan.name}`}
-                </Button>
-              )}
-            </div>
-          );
-        })}
-      </div>
     </div>
   );
 }
