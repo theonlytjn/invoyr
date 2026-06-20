@@ -13,7 +13,9 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm text-gray-600">
             <Link href="/features" className="hover:text-gray-900 transition-colors">Features</Link>
+            <Link href="/use-cases" className="hover:text-gray-900 transition-colors">Use cases</Link>
             <Link href="/pricing" className="hover:text-gray-900 transition-colors">Pricing</Link>
+            <Link href="/about" className="hover:text-gray-900 transition-colors">About</Link>
           </nav>
           <div className="flex items-center gap-3">
             <Link href="/login" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
@@ -33,6 +35,8 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
         <div className="max-w-6xl mx-auto px-6 py-8 flex items-center justify-between text-sm text-gray-500">
           <p>&copy; {new Date().getFullYear()} Invoyr</p>
           <div className="flex gap-4">
+            <Link href="/contact" className="hover:text-gray-900">Contact</Link>
+            <Link href="/about" className="hover:text-gray-900">About</Link>
             <Link href="/privacy" className="hover:text-gray-900">Privacy</Link>
             <Link href="/terms" className="hover:text-gray-900">Terms</Link>
           </div>

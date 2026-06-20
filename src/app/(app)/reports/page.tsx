@@ -23,7 +23,7 @@ export default async function ReportsPage() {
   const org = await requireOrg();
   const supabase = await createClient();
 
-  const [{ data: payments }, { data: overdueInvoices }, { data: paidInvoices }] = await Promise.all([
+  const [{ data: payments }, { data: overdueInvoices }, { data: paidInvoices }, { data: vatInvoices }] = await Promise.all([
     supabase
       .from("payments")
       .select("amount, paid_at, currency")
@@ -40,6 +40,12 @@ export default async function ReportsPage() {
       .select("total, amount_paid, clients(id, name)")
       .eq("org_id", org.id)
       .eq("status", "paid"),
+    supabase
+      .from("invoices")
+      .select("subtotal, vat_amount, total, issue_date")
+      .eq("org_id", org.id)
+      .eq("status", "paid")
+      .order("issue_date"),
   ]);
 
   // Build monthly revenue data (last 12 months)
@@ -97,6 +103,28 @@ export default async function ReportsPage() {
     .sort((a, b) => b.revenue - a.revenue)
     .slice(0, 5);
 
+  // VAT summary by month (last 12 months)
+  const vatMonthMap = new Map<string, { net: number; vat: number; gross: number; sortKey: string }>();
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const key = d.toLocaleDateString("en-GB", { month: "short", year: "numeric" });
+    const sortKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    vatMonthMap.set(key, { net: 0, vat: 0, gross: 0, sortKey });
+  }
+  for (const inv of vatInvoices ?? []) {
+    const d = new Date(inv.issue_date);
+    const key = d.toLocaleDateString("en-GB", { month: "short", year: "numeric" });
+    if (vatMonthMap.has(key)) {
+      const entry = vatMonthMap.get(key)!;
+      entry.net += inv.subtotal ?? 0;
+      entry.vat += inv.vat_amount ?? 0;
+      entry.gross += inv.total ?? 0;
+    }
+  }
+  const vatRows = [...vatMonthMap.entries()]
+    .map(([month, v]) => ({ month, ...v }))
+    .filter((r) => r.gross > 0);
+
   return (
     <div>
       <Topbar title="Reports" />
@@ -148,6 +176,52 @@ export default async function ReportsPage() {
                   </div>
                 );
               })}
+            </div>
+          )}
+        </div>
+        <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-semibold text-gray-900">VAT summary by month</h2>
+            <span className="text-xs text-gray-400">Paid invoices only</span>
+          </div>
+          {vatRows.length === 0 ? (
+            <p className="text-sm text-gray-500 py-4 text-center">No paid invoices with VAT yet.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-100">
+                    <th className="text-left py-2 pr-4 text-xs font-medium text-gray-500 uppercase tracking-wide">Month</th>
+                    <th className="text-right py-2 px-4 text-xs font-medium text-gray-500 uppercase tracking-wide">Net</th>
+                    <th className="text-right py-2 px-4 text-xs font-medium text-gray-500 uppercase tracking-wide">VAT</th>
+                    <th className="text-right py-2 pl-4 text-xs font-medium text-gray-500 uppercase tracking-wide">Gross</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {vatRows.map((row) => (
+                    <tr key={row.month} className="border-b border-gray-50">
+                      <td className="py-2.5 pr-4 font-medium text-gray-900">{row.month}</td>
+                      <td className="py-2.5 px-4 text-right text-gray-600">{formatCurrency(row.net)}</td>
+                      <td className="py-2.5 px-4 text-right text-gray-600">{formatCurrency(row.vat)}</td>
+                      <td className="py-2.5 pl-4 text-right font-semibold text-gray-900">{formatCurrency(row.gross)}</td>
+                    </tr>
+                  ))}
+                  {vatRows.length > 1 && (
+                    <tr className="border-t border-gray-200 bg-gray-50">
+                      <td className="py-2.5 pr-4 font-semibold text-gray-900 text-xs uppercase tracking-wide">Total</td>
+                      <td className="py-2.5 px-4 text-right font-semibold text-gray-900">
+                        {formatCurrency(vatRows.reduce((s, r) => s + r.net, 0))}
+                      </td>
+                      <td className="py-2.5 px-4 text-right font-semibold text-gray-900">
+                        {formatCurrency(vatRows.reduce((s, r) => s + r.vat, 0))}
+                      </td>
+                      <td className="py-2.5 pl-4 text-right font-semibold text-gray-900">
+                        {formatCurrency(vatRows.reduce((s, r) => s + r.gross, 0))}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
