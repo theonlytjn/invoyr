@@ -10,6 +10,7 @@ import {
   XCircleIcon,
   PencilIcon,
   CheckIcon,
+  CopyIcon,
 } from "@/components/icons";
 import {
   DropdownMenu,
@@ -31,6 +32,7 @@ export default function InvoiceActions({ invoice }: Props) {
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [sending, setSending] = useState(false);
   const [issuing, setIssuing] = useState(false);
+  const [duplicating, setDuplicating] = useState(false);
 
   async function handleDownloadPdf() {
     window.open(`/api/invoices/${invoice.id}/pdf`, "_blank");
@@ -57,6 +59,19 @@ export default function InvoiceActions({ invoice }: Props) {
     } else {
       const { error } = await res.json();
       alert(error ?? "Failed to send invoice");
+    }
+  }
+
+  async function handleDuplicate() {
+    setDuplicating(true);
+    const res = await fetch(`/api/invoices/${invoice.id}/duplicate`, { method: "POST" });
+    setDuplicating(false);
+    if (res.ok) {
+      const { id } = await res.json();
+      router.push(`/invoices/${id}`);
+    } else {
+      const { error } = await res.json();
+      alert(error ?? "Failed to duplicate invoice");
     }
   }
 
@@ -107,6 +122,10 @@ export default function InvoiceActions({ invoice }: Props) {
           >
             <PencilIcon size={16} className="mr-2" />
             Edit invoice
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={handleDuplicate} disabled={duplicating}>
+            <CopyIcon size={16} className="mr-2" />
+            {duplicating ? "Duplicating…" : "Duplicate"}
           </DropdownMenuItem>
           {canVoid && (
             <>

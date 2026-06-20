@@ -70,6 +70,7 @@ export interface Client {
   country: string;
   vat_number: string | null;
   notes: string | null;
+  archived: boolean;
   created_at: string;
   updated_at: string;
 }

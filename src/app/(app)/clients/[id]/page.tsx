@@ -5,6 +5,7 @@ import { requireOrg } from "@/lib/auth";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import Topbar from "@/components/shell/Topbar";
 import InvoiceStatusBadge from "@/components/invoices/InvoiceStatusBadge";
+import ClientArchiveButton from "@/components/clients/ClientArchiveButton";
 import type { Metadata } from "next";
 import type { Client, Invoice, InvoiceWithClient } from "@/lib/supabase/types";
 
@@ -35,12 +36,15 @@ export default async function ClientDetailPage({ params }: Props) {
       <Topbar
         title={client.name}
         actions={
-          <Link
-            href={`/clients/${id}/edit`}
-            className="px-3.5 py-2 border border-gray-200 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            Edit client
-          </Link>
+            <div className="flex items-center gap-2">
+            <Link
+              href={`/clients/${id}/edit`}
+              className="px-3.5 py-2 border border-gray-200 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Edit client
+            </Link>
+            <ClientArchiveButton clientId={id} archived={client.archived} />
+          </div>
         }
       />
       <div className="p-6 grid grid-cols-1 xl:grid-cols-3 gap-6">
@@ -64,6 +68,12 @@ export default async function ClientDetailPage({ params }: Props) {
               <p className="font-semibold text-green-700">{formatCurrency(totalPaid)}</p>
             </div>
           </div>
+          {client.notes && (
+            <div className="pt-3 border-t border-gray-100">
+              <p className="text-xs text-gray-500 mb-1">Notes</p>
+              <p className="text-sm text-gray-700 whitespace-pre-wrap">{client.notes}</p>
+            </div>
+          )}
         </div>
 
         {/* Invoice history */}

@@ -4,6 +4,7 @@ import { getStripe } from "@/lib/stripe/client";
 import { createServiceClient } from "@/lib/supabase/server";
 import { sendTransactionalEmail } from "@/lib/resend/send-transactional-email";
 import { PaymentFailedEmail } from "@/emails/transactional/PaymentFailedEmail";
+import { PaymentReceivedEmail } from "@/emails/transactional/PaymentReceivedEmail";
 import { getPlanByPriceId } from "@/config/plans";
 import type Stripe from "stripe";
 
@@ -55,12 +56,13 @@ async function handleInvoiceCheckout(session: Stripe.Checkout.Session) {
 
   const supabase = await createServiceClient();
   const amountPaid = (session.amount_total ?? 0) / 100;
+  const currency = (session.currency ?? "gbp").toUpperCase();
 
   await supabase.from("payments").insert({
     org_id: orgId,
     invoice_id: invoiceId,
     amount: amountPaid,
-    currency: (session.currency ?? "gbp").toUpperCase(),
+    currency,
     method: "stripe",
     stripe_payment_intent_id: session.payment_intent as string | null,
     paid_at: new Date().toISOString(),
@@ -78,6 +80,47 @@ async function handleInvoiceCheckout(session: Stripe.Checkout.Session) {
     entity_id: invoiceId,
     meta: { stripe_session: session.id, amount: amountPaid },
   });
+
+  // Send receipt email to client
+  const { data: invoice } = await supabase
+    .from("invoices")
+    .select("invoice_number, public_token, clients(name, email)")
+    .eq("id", invoiceId)
+    .single();
+
+  const { data: org } = await supabase
+    .from("organisations")
+    .select("name, logo_url, accent_color")
+    .eq("id", orgId)
+    .single();
+
+  if (invoice) {
+    const client = Array.isArray(invoice.clients) ? invoice.clients[0] : invoice.clients;
+    if (client?.email) {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.invoyr.io";
+      const formattedAmount = new Intl.NumberFormat("en-GB", {
+        style: "currency",
+        currency: currency.toLowerCase() === "gbp" ? "GBP" : currency,
+      }).format(amountPaid);
+
+      await sendTransactionalEmail({
+        orgId,
+        invoiceId,
+        to: client.email,
+        subject: `Payment received — Invoice ${invoice.invoice_number}`,
+        templateName: "payment-received",
+        react: createElement(PaymentReceivedEmail, {
+          clientName: client.name,
+          orgName: org?.name ?? "",
+          logoUrl: org?.logo_url ?? null,
+          accentColor: org?.accent_color ?? "#111827",
+          invoiceNumber: invoice.invoice_number,
+          amountPaid: formattedAmount,
+          receiptUrl: `${appUrl}/pay/${invoice.public_token}?paid=1`,
+        }),
+      });
+    }
+  }
 }
 
 async function handleSubscriptionCheckout(session: Stripe.Checkout.Session) {

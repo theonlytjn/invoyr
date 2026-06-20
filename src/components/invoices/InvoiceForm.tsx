@@ -49,6 +49,7 @@ export default function InvoiceForm({ org, clients, invoice, existingItems, invo
   const [template, setTemplate] = useState<InvoiceTemplate>(invoice?.template ?? "tjn_classic");
   const [issueDate, setIssueDate] = useState(invoice?.issue_date ?? formatDateInput(new Date()));
   const [dueDate, setDueDate] = useState(invoice?.due_date ?? "");
+  const [paymentTerms, setPaymentTerms] = useState<"0" | "7" | "14" | "30" | "custom">("30");
   const [notes, setNotes] = useState(invoice?.notes ?? org.default_notes ?? "");
   const [terms, setTerms] = useState(invoice?.terms ?? org.default_terms ?? "");
   const [items, setItems] = useState<LineItemRow[]>(
@@ -56,6 +57,14 @@ export default function InvoiceForm({ org, clients, invoice, existingItems, invo
       { id: crypto.randomUUID(), description: "", quantity: 1, unit_price: 0, vat_rate: 20 },
     ]
   );
+
+  function applyPaymentTerms(terms: "0" | "7" | "14" | "30" | "custom", fromDate: string) {
+    setPaymentTerms(terms);
+    if (terms === "custom") return;
+    const base = new Date(fromDate);
+    base.setDate(base.getDate() + Number(terms));
+    setDueDate(base.toISOString().slice(0, 10));
+  }
 
   const totals = computeTotals(items);
   const TemplatePreview = TEMPLATE_MAP[template];
@@ -193,9 +202,34 @@ export default function InvoiceForm({ org, clients, invoice, existingItems, invo
               <Input
                 type="date"
                 value={issueDate}
-                onChange={(e) => setIssueDate(e.target.value)}
+                onChange={(e) => {
+                  setIssueDate(e.target.value);
+                  if (paymentTerms !== "custom") {
+                    applyPaymentTerms(paymentTerms, e.target.value);
+                  }
+                }}
               />
             </div>
+            <div className="space-y-1.5">
+              <Label>Payment terms</Label>
+              <Select
+                value={paymentTerms}
+                onValueChange={(v) => applyPaymentTerms(v as typeof paymentTerms, issueDate)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">Due immediately</SelectItem>
+                  <SelectItem value="7">Net 7 days</SelectItem>
+                  <SelectItem value="14">Net 14 days</SelectItem>
+                  <SelectItem value="30">Net 30 days</SelectItem>
+                  <SelectItem value="custom">Custom date</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          {paymentTerms === "custom" ? (
             <div className="space-y-1.5">
               <Label>Due date</Label>
               <Input
@@ -204,7 +238,11 @@ export default function InvoiceForm({ org, clients, invoice, existingItems, invo
                 onChange={(e) => setDueDate(e.target.value)}
               />
             </div>
-          </div>
+          ) : dueDate ? (
+            <p className="text-xs text-gray-500">
+              Due on {new Date(dueDate + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
+            </p>
+          ) : null}
         </div>
 
         <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">

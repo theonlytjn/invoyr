@@ -8,6 +8,7 @@ import LatestInvoicesTable from "@/components/dashboard/LatestInvoicesTable";
 import ActivityFeed from "@/components/dashboard/ActivityFeed";
 import type { Metadata } from "next";
 import type { InvoiceWithClient, AuditLog } from "@/lib/supabase/types";
+import { getSubscription } from "@/lib/billing";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -20,6 +21,8 @@ export default async function DashboardPage() {
 
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+
+  const sub = await getSubscription(org.id);
 
   const [invoicesRes, latestRes, revenueAllRes, revenueMonthRes, logsRes] = await Promise.all([
     // All invoices for accurate metric aggregation (status + total only)
@@ -81,6 +84,45 @@ export default async function DashboardPage() {
       />
 
       <div className="p-6 space-y-6">
+        {sub?.status === "trialing" && sub.trial_ends_at && (() => {
+          const daysLeft = Math.max(0, Math.ceil(
+            (new Date(sub.trial_ends_at).getTime() - Date.now()) / 86_400_000
+          ));
+          return (
+            <div className="flex items-center justify-between gap-4 rounded-lg bg-blue-50 border border-blue-200 px-4 py-3 text-sm">
+              <p className="text-blue-800">
+                <span className="font-semibold">Free trial</span>
+                {" — "}
+                {daysLeft === 0
+                  ? "Your trial ends today."
+                  : `${daysLeft} day${daysLeft !== 1 ? "s" : ""} remaining.`}
+              </p>
+              <Link
+                href="/settings/billing"
+                className="shrink-0 px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-md hover:bg-blue-700 transition-colors"
+              >
+                Upgrade now
+              </Link>
+            </div>
+          );
+        })()}
+
+        {sub?.status === "past_due" && (
+          <div className="flex items-center justify-between gap-4 rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm">
+            <p className="text-amber-800">
+              <span className="font-semibold">Payment overdue</span>
+              {" — "}
+              Your last payment failed. Update your billing details to keep your account active.
+            </p>
+            <Link
+              href="/settings/billing"
+              className="shrink-0 px-3 py-1.5 bg-amber-600 text-white text-xs font-medium rounded-md hover:bg-amber-700 transition-colors"
+            >
+              Update billing
+            </Link>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           <MetricCard
             title="Revenue this month"
