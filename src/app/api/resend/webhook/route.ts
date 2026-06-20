@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Webhook } from "svix";
 import { createServiceClient } from "@/lib/supabase/server";
 
 export async function POST(req: NextRequest) {
@@ -10,9 +11,27 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing webhook headers" }, { status: 400 });
   }
 
+  const webhookSecret = process.env.RESEND_WEBHOOK_SECRET;
+  if (!webhookSecret) {
+    return NextResponse.json({ error: "Webhook secret not configured" }, { status: 500 });
+  }
+
+  const body = await req.text();
+
+  try {
+    const wh = new Webhook(webhookSecret);
+    wh.verify(body, {
+      "svix-id": svixId,
+      "svix-timestamp": svixTimestamp,
+      "svix-signature": svixSignature,
+    });
+  } catch {
+    return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
+  }
+
   let payload: Record<string, unknown>;
   try {
-    payload = (await req.json()) as Record<string, unknown>;
+    payload = JSON.parse(body) as Record<string, unknown>;
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
