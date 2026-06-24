@@ -84,6 +84,53 @@ export default function CleanMinimal({ invoice, items, client, org, totals }: In
         </div>
       )}
 
+      {(org.bank_account_name || org.bank_account_number) && (
+        <div className="mt-8 pt-6 border-t border-gray-100">
+          <p className="text-xs text-gray-400 uppercase tracking-widest mb-3">Bank transfer</p>
+          <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+            {org.bank_account_name && (
+              <div>
+                <p className="text-xs text-gray-400">Account name</p>
+                <p className="text-sm text-gray-700">{org.bank_account_name}</p>
+              </div>
+            )}
+            {org.bank_name && (
+              <div>
+                <p className="text-xs text-gray-400">Bank</p>
+                <p className="text-sm text-gray-700">{org.bank_name}</p>
+              </div>
+            )}
+            {org.bank_account_number && (
+              <div>
+                <p className="text-xs text-gray-400">Account number</p>
+                <p className="text-sm text-gray-700">{org.bank_account_number}</p>
+              </div>
+            )}
+            {org.bank_sort_code && (
+              <div>
+                <p className="text-xs text-gray-400">Sort code</p>
+                <p className="text-sm text-gray-700">{org.bank_sort_code}</p>
+              </div>
+            )}
+            {org.bank_iban && (
+              <div className="col-span-2">
+                <p className="text-xs text-gray-400">IBAN</p>
+                <p className="text-sm text-gray-700">{org.bank_iban}</p>
+              </div>
+            )}
+            {org.bank_bic && (
+              <div>
+                <p className="text-xs text-gray-400">BIC / SWIFT</p>
+                <p className="text-sm text-gray-700">{org.bank_bic}</p>
+              </div>
+            )}
+          </div>
+          <p className="text-xs text-gray-400 mt-2">
+            Reference: <span className="text-gray-600">#{invoice.invoice_number}</span>
+          </p>
+        </div>
+      )}
+
       <div className="mt-10 text-xs text-gray-300 text-center">
         {org.name} · Powered by invoyr
       </div>

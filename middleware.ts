@@ -59,6 +59,8 @@ export async function middleware(request: NextRequest) {
   // Refresh session — IMPORTANT: do not remove
   const { data: { user } } = await supabase.auth.getUser();
 
+  const ADMIN_EMAIL = "tony@theonlytjn.com";
+  const isAdminRoute = pathname.startsWith("/admin");
   const isAppRoute =
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/invoices") ||
@@ -71,6 +73,19 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/signup") ||
     pathname.startsWith("/forgot-password");
   const isOnboarding = pathname.startsWith("/onboarding");
+
+  if (isAdminRoute) {
+    if (!user) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      url.searchParams.set("next", pathname);
+      return NextResponse.redirect(url);
+    }
+    if (user.email !== ADMIN_EMAIL) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+    return supabaseResponse;
+  }
 
   if (!user && isAppRoute) {
     const url = request.nextUrl.clone();

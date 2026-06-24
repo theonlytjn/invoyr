@@ -3,6 +3,18 @@ import { createClient } from "@/lib/supabase/server";
 import { computeTotals } from "@/lib/invoice-totals";
 import type { Invoice, InvoiceItem, Client, Organisation } from "@/lib/supabase/types";
 
+async function fetchLogoAsDataUrl(url: string): Promise<string | null> {
+  try {
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) return null;
+    const buf = await res.arrayBuffer();
+    const mime = res.headers.get("content-type") ?? "image/png";
+    return `data:${mime};base64,${Buffer.from(buf).toString("base64")}`;
+  } catch {
+    return null;
+  }
+}
+
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -40,10 +52,14 @@ export async function GET(
 
   if (!orgRawObj) return NextResponse.json({ error: "Org not found" }, { status: 404 });
 
-  // Strip cache-busting query string from logo_url so react-pdf can fetch it cleanly
-  const org: Organisation = orgRawObj.logo_url
-    ? { ...orgRawObj, logo_url: orgRawObj.logo_url.split("?")[0] }
-    : orgRawObj;
+  const logoRawUrl = orgRawObj.logo_url ? orgRawObj.logo_url.split("?")[0] : null;
+  const logoDataUrl = logoRawUrl ? await fetchLogoAsDataUrl(logoRawUrl) : null;
+
+  const org: Organisation & { logoDataUrl?: string | null } = {
+    ...orgRawObj,
+    logo_url: logoRawUrl,
+    logoDataUrl,
+  };
 
   const items: InvoiceItem[] = Array.isArray(invoice.invoice_items) ? invoice.invoice_items : [];
   const client: Client | null = Array.isArray(invoice.clients)
@@ -59,12 +75,28 @@ export async function GET(
     }))
   );
 
-  const { renderToBuffer } = await import("@react-pdf/renderer");
-  const { default: TJNClassicPdf } = await import(
-    "@/components/invoice-templates/pdf/TJNClassicPdf"
-  );
+  const templateName: string = invoice.template ?? "tjn_classic";
 
-  const element = TJNClassicPdf({
+  const { renderToBuffer } = await import("@react-pdf/renderer");
+
+  let pdfModule;
+  switch (templateName) {
+    case "clean_minimal":
+      pdfModule = await import("@/components/invoice-templates/pdf/CleanMinimalPdf");
+      break;
+    case "bold_split":
+      pdfModule = await import("@/components/invoice-templates/pdf/BoldSplitPdf");
+      break;
+    case "modern_studio":
+      pdfModule = await import("@/components/invoice-templates/pdf/ModernStudioPdf");
+      break;
+    default:
+      pdfModule = await import("@/components/invoice-templates/pdf/TJNClassicPdf");
+  }
+
+  const PdfTemplate = pdfModule.default;
+
+  const element = PdfTemplate({
     invoice: invoice as Invoice,
     items,
     client,

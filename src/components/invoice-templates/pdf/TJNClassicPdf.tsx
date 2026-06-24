@@ -42,6 +42,7 @@ const styles = StyleSheet.create({
 
 export default function TJNClassicPdf({ invoice, items, client, org, totals }: InvoiceTemplateProps) {
   const accent = org.accent_color ?? "#111827";
+  const logoSrc = (org as { logoDataUrl?: string | null }).logoDataUrl ?? org.logo_url;
 
   return (
     <Document>
@@ -49,8 +50,8 @@ export default function TJNClassicPdf({ invoice, items, client, org, totals }: I
         {/* Header */}
         <View style={styles.header}>
           <View>
-            {org.logo_url ? (
-              <Image src={org.logo_url} style={styles.logo} />
+            {logoSrc ? (
+              <Image src={logoSrc} style={styles.logo} />
             ) : null}
             <Text style={styles.orgName}>{org.name}</Text>
             {org.address_line1 ? <Text style={styles.orgDetail}>{org.address_line1}</Text> : null}
