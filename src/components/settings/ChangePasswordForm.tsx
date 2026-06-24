@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 
 export default function ChangePasswordForm() {
@@ -45,9 +45,8 @@ export default function ChangePasswordForm() {
     <form onSubmit={handleSubmit} className="space-y-4 max-w-sm">
       <div className="space-y-1.5">
         <Label htmlFor="new-password">New password</Label>
-        <Input
+        <PasswordInput
           id="new-password"
-          type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="At least 8 characters"
@@ -56,9 +55,8 @@ export default function ChangePasswordForm() {
       </div>
       <div className="space-y-1.5">
         <Label htmlFor="confirm-password">Confirm new password</Label>
-        <Input
+        <PasswordInput
           id="confirm-password"
-          type="password"
           value={confirm}
           onChange={(e) => setConfirm(e.target.value)}
           required
