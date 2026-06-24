@@ -95,7 +95,8 @@ export async function middleware(request: NextRequest) {
   }
 
   if (user && isAuthRoute) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    const dest = user.email === ADMIN_EMAIL ? "/admin" : "/dashboard";
+    return NextResponse.redirect(new URL(dest, request.url));
   }
 
   if (user && isAppRoute) {
