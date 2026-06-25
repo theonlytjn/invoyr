@@ -64,9 +64,16 @@ export default async function DashboardPage() {
   const totalRevenue = (revenueAllRes.data ?? []).reduce((s, p) => s + (p.amount ?? 0), 0);
   const monthRevenue = (revenueMonthRes.data ?? []).reduce((s, p) => s + (p.amount ?? 0), 0);
 
-  const overdueInvoices = allInvoices.filter((i) => i.status === "overdue");
-  const outstandingInvoices = allInvoices.filter((i) => ["sent", "issued"].includes(i.status));
-  const overdueTotal = overdueInvoices.reduce((s, i) => s + i.total, 0);
+  const overdueInvoices = allInvoices.filter(
+    (i) =>
+      i.status === "overdue" ||
+      (["sent", "issued"].includes(i.status) && i.due_date && new Date(i.due_date) < now)
+  );
+  const overdueIds = new Set(overdueInvoices.map((i) => i.id));
+  const outstandingInvoices = allInvoices.filter(
+    (i) => ["sent", "issued"].includes(i.status) && !overdueIds.has(i.id)
+  );
+  const overdueTotal = overdueInvoices.reduce((s, i) => s + (i.total - i.amount_paid), 0);
   const outstandingTotal = outstandingInvoices.reduce((s, i) => s + (i.total - i.amount_paid), 0);
 
   return (
@@ -128,17 +135,19 @@ export default async function DashboardPage() {
             title="Revenue this month"
             value={formatCurrency(monthRevenue)}
             subtitle={`${formatCurrency(totalRevenue)} all time`}
+            variant="green"
           />
           <MetricCard
             title="Outstanding"
             value={formatCurrency(outstandingTotal)}
             subtitle={`${outstandingInvoices.length} invoice${outstandingInvoices.length !== 1 ? "s" : ""} awaiting payment`}
+            variant="blue"
           />
           <MetricCard
             title="Overdue"
             value={formatCurrency(overdueTotal)}
             subtitle={`${overdueInvoices.length} invoice${overdueInvoices.length !== 1 ? "s" : ""}`}
-            accentClass={overdueTotal > 0 ? "text-red-600" : undefined}
+            variant={overdueTotal > 0 ? "red" : "default"}
           />
           <MetricCard
             title="Total invoices"
