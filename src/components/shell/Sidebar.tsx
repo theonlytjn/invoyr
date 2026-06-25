@@ -47,7 +47,7 @@ export default function Sidebar({ org, userEmail, plan }: Props) {
   return (
     <aside
       className={cn(
-        "hidden lg:flex flex-col bg-neutral-100 border-r border-neutral-200 h-screen sticky top-0 transition-[width] duration-300 ease-in-out overflow-hidden",
+        "hidden lg:flex flex-col bg-neutral-100 dark:bg-neutral-900 border-r border-neutral-200 dark:border-neutral-800 h-screen sticky top-0 transition-[width] duration-300 ease-in-out overflow-hidden",
         collapsed ? "w-[72px]" : "w-60",
       )}
     >
@@ -56,7 +56,7 @@ export default function Sidebar({ org, userEmail, plan }: Props) {
         {collapsed ? (
           <button
             onClick={() => setCollapsed(false)}
-            className="flex h-10 w-10 items-center justify-center rounded-lg transition-colors hover:bg-neutral-200"
+            className="flex h-10 w-10 items-center justify-center rounded-lg transition-colors hover:bg-neutral-200 dark:hover:bg-neutral-800"
             aria-label="Expand sidebar"
           >
             <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5" className="text-neutral-500">
@@ -68,7 +68,7 @@ export default function Sidebar({ org, userEmail, plan }: Props) {
             <Image src="/main-logo.svg" alt="Invoyr" width={110} height={34} priority />
             <button
               onClick={() => setCollapsed(true)}
-              className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-neutral-200"
+              className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-neutral-200 dark:hover:bg-neutral-800"
               aria-label="Collapse sidebar"
             >
               <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5" className="text-neutral-500">
@@ -82,7 +82,7 @@ export default function Sidebar({ org, userEmail, plan }: Props) {
       {/* Org info */}
       {org && !collapsed && (
         <div className="px-4 pb-4">
-          <div className="bg-white border border-neutral-200 rounded-xl px-3 py-2.5 flex items-center gap-3">
+          <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl px-3 py-2.5 flex items-center gap-3">
             {org.logo_url ? (
               <img
                 src={org.logo_url}
@@ -96,7 +96,7 @@ export default function Sidebar({ org, userEmail, plan }: Props) {
               </div>
             )}
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-neutral-950 truncate leading-5">{org.name}</p>
+              <p className="text-sm font-medium text-neutral-950 dark:text-neutral-50 truncate leading-5">{org.name}</p>
               <p className="text-xs text-neutral-500 capitalize leading-4">
                 {plan ? `${plan} plan` : "Free plan"}
               </p>
@@ -110,7 +110,7 @@ export default function Sidebar({ org, userEmail, plan }: Props) {
         <div className="px-4 pb-3">
           <Link
             href="/invoices/new"
-            className="flex items-center justify-center gap-1.5 w-full py-2 px-3 bg-neutral-950 text-white text-sm font-medium rounded-lg hover:bg-neutral-800 transition-colors"
+            className="flex items-center justify-center gap-1.5 w-full py-2 px-3 bg-neutral-950 dark:bg-neutral-50 text-white dark:text-neutral-950 text-sm font-medium rounded-lg hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors"
           >
             <PlusIcon size={14} />
             New invoice
@@ -132,8 +132,8 @@ export default function Sidebar({ org, userEmail, plan }: Props) {
                     "flex items-center rounded-lg text-sm font-medium border transition-all duration-200 ease-in-out",
                     collapsed ? "justify-center px-0 py-2.5" : "px-3 py-2.5",
                     active
-                      ? "bg-white text-neutral-950 border-neutral-200 shadow-[0_0_0_2px_#ffffff,0_0_0_4px_#0a0a0a]"
-                      : "border-transparent text-neutral-500 hover:text-neutral-950",
+                      ? "bg-white dark:bg-neutral-800 text-neutral-950 dark:text-neutral-50 border-neutral-200 dark:border-neutral-700 shadow-[0_0_0_2px_#ffffff,0_0_0_4px_#0a0a0a] dark:shadow-[0_0_0_2px_#171717,0_0_0_4px_#fafafa]"
+                      : "border-transparent text-neutral-500 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-50",
                   )}
                 >
                   <Icon className={cn("h-5 w-5 shrink-0", !collapsed && "mr-3")} />
@@ -146,7 +146,7 @@ export default function Sidebar({ org, userEmail, plan }: Props) {
       </nav>
 
       {/* User footer */}
-      <div className={cn("border-t border-neutral-200", collapsed ? "py-5 px-3" : "py-6 px-5")}>
+      <div className={cn("border-t border-neutral-200 dark:border-neutral-800", collapsed ? "py-5 px-3" : "py-6 px-5")}>
         <div className="relative flex items-center gap-3">
           <div
             className={cn(
@@ -161,7 +161,7 @@ export default function Sidebar({ org, userEmail, plan }: Props) {
 
           {!collapsed && (
             <div className="flex-1 overflow-hidden space-y-0.5">
-              <p className="text-sm font-medium text-neutral-950 truncate">{userEmail}</p>
+              <p className="text-sm font-medium text-neutral-950 dark:text-neutral-50 truncate">{userEmail}</p>
               <p className="text-xs text-neutral-500 capitalize">{plan ? `${plan} plan` : "Free plan"}</p>
             </div>
           )}
@@ -169,7 +169,7 @@ export default function Sidebar({ org, userEmail, plan }: Props) {
           {!collapsed && (
             <button
               onClick={handleSignOut}
-              className="text-neutral-500 hover:text-neutral-950 transition-colors shrink-0"
+              className="text-neutral-500 hover:text-neutral-950 dark:hover:text-neutral-50 transition-colors shrink-0"
               aria-label="Sign out"
             >
               <LogOutIcon size={16} />

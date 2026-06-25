@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Figtree, Instrument_Serif, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "@/components/shell/ThemeProvider";
 
 const figtree = Figtree({
   variable: "--font-figtree",
@@ -38,8 +39,13 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${figtree.variable} ${instrumentSerif.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full">{children}</body>
+      <body className="min-h-full">
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   );
 }
