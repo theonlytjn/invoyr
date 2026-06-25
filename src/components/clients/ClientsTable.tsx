@@ -38,13 +38,13 @@ export default function ClientsTable({ clients, showArchived }: Props) {
         />
         <Link
           href={showArchived ? "/clients" : "/clients?archived=1"}
-          className="text-sm text-neutral-500 hover:text-neutral-950 whitespace-nowrap"
+          className="text-sm text-neutral-500 hover:text-neutral-950 dark:hover:text-neutral-50 whitespace-nowrap"
         >
           {showArchived ? "Hide archived" : "Show archived"}
         </Link>
       </div>
 
-      <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
+      <div className="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 overflow-hidden">
         {!filtered.length ? (
           <div className="text-center py-16">
             {query ? (
@@ -55,7 +55,7 @@ export default function ClientsTable({ clients, showArchived }: Props) {
                   {showArchived ? "No archived clients." : "No clients yet."}
                 </p>
                 {!showArchived && (
-                  <Link href="/clients/new" className="text-sm font-medium text-neutral-950 underline">
+                  <Link href="/clients/new" className="text-sm font-medium text-neutral-950 dark:text-neutral-50 underline">
                     Add your first client
                   </Link>
                 )}
@@ -64,7 +64,7 @@ export default function ClientsTable({ clients, showArchived }: Props) {
           </div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="border-b border-neutral-100">
+            <thead className="border-b border-neutral-100 dark:border-neutral-800">
               <tr>
                 <th className="text-left py-3 px-5 text-xs font-medium text-neutral-500 uppercase tracking-wide">Name</th>
                 <th className="text-left py-3 px-4 text-xs font-medium text-neutral-500 uppercase tracking-wide">Company</th>
@@ -74,18 +74,18 @@ export default function ClientsTable({ clients, showArchived }: Props) {
             </thead>
             <tbody>
               {filtered.map((client) => (
-                <tr key={client.id} className="border-b border-neutral-100 hover:bg-neutral-50 transition-colors">
+                <tr key={client.id} className="border-b border-neutral-100 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
                   <td className="py-3 px-5">
-                    <Link href={`/clients/${client.id}`} className="font-medium text-neutral-950 hover:underline">
+                    <Link href={`/clients/${client.id}`} className="font-medium text-neutral-950 dark:text-neutral-50 hover:underline">
                       {client.name}
                     </Link>
                     {client.archived && (
-                      <span className="ml-2 text-xs text-neutral-400 bg-neutral-100 px-1.5 py-0.5 rounded">Archived</span>
+                      <span className="ml-2 text-xs text-neutral-400 bg-neutral-100 dark:bg-neutral-800 px-1.5 py-0.5 rounded">Archived</span>
                     )}
                   </td>
-                  <td className="py-3 px-4 text-neutral-600">{client.company_name ?? "—"}</td>
-                  <td className="py-3 px-4 text-neutral-600">{client.email ?? "—"}</td>
-                  <td className="py-3 px-4 text-neutral-500 font-mono text-xs">{client.vat_number ?? "—"}</td>
+                  <td className="py-3 px-4 text-neutral-600 dark:text-neutral-400">{client.company_name ?? "—"}</td>
+                  <td className="py-3 px-4 text-neutral-600 dark:text-neutral-400">{client.email ?? "—"}</td>
+                  <td className="py-3 px-4 text-neutral-500 dark:text-neutral-400 font-mono text-xs">{client.vat_number ?? "—"}</td>
                 </tr>
               ))}
             </tbody>

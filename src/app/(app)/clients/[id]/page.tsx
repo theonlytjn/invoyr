@@ -39,7 +39,7 @@ export default async function ClientDetailPage({ params }: Props) {
             <div className="flex items-center gap-2">
             <Link
               href={`/clients/${id}/edit`}
-              className="px-3.5 py-2 border border-neutral-200 text-sm font-medium rounded-lg hover:bg-neutral-50 transition-colors"
+              className="px-3.5 py-2 border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 text-sm font-medium rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
             >
               Edit client
             </Link>
@@ -49,40 +49,40 @@ export default async function ClientDetailPage({ params }: Props) {
       />
       <div className="p-6 grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Details */}
-        <div className="bg-white rounded-2xl border border-neutral-200 p-5 space-y-4 h-fit">
-          <h3 className="font-semibold text-neutral-950 text-sm">Contact details</h3>
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5 space-y-4 h-fit">
+          <h3 className="font-semibold text-neutral-950 dark:text-neutral-50 text-sm">Contact details</h3>
           <dl className="space-y-2 text-sm">
-            {client.company_name && <div><dt className="text-neutral-500 text-xs">Company</dt><dd>{client.company_name}</dd></div>}
-            {client.email && <div><dt className="text-neutral-500 text-xs">Email</dt><dd>{client.email}</dd></div>}
-            {client.phone && <div><dt className="text-neutral-500 text-xs">Phone</dt><dd>{client.phone}</dd></div>}
-            {client.address_line1 && <div><dt className="text-neutral-500 text-xs">Address</dt><dd>{client.address_line1}, {client.city}</dd></div>}
-            {client.vat_number && <div><dt className="text-neutral-500 text-xs">VAT number</dt><dd className="font-mono">{client.vat_number}</dd></div>}
+            {client.company_name && <div><dt className="text-neutral-500 text-xs">Company</dt><dd className="dark:text-neutral-300">{client.company_name}</dd></div>}
+            {client.email && <div><dt className="text-neutral-500 text-xs">Email</dt><dd className="dark:text-neutral-300">{client.email}</dd></div>}
+            {client.phone && <div><dt className="text-neutral-500 text-xs">Phone</dt><dd className="dark:text-neutral-300">{client.phone}</dd></div>}
+            {client.address_line1 && <div><dt className="text-neutral-500 text-xs">Address</dt><dd className="dark:text-neutral-300">{client.address_line1}, {client.city}</dd></div>}
+            {client.vat_number && <div><dt className="text-neutral-500 text-xs">VAT number</dt><dd className="font-mono dark:text-neutral-300">{client.vat_number}</dd></div>}
           </dl>
-          <div className="pt-3 border-t border-neutral-100 grid grid-cols-2 gap-3">
+          <div className="pt-3 border-t border-neutral-100 dark:border-neutral-800 grid grid-cols-2 gap-3">
             <div>
               <p className="text-xs text-neutral-500">Total billed</p>
-              <p className="font-semibold text-neutral-950">{formatCurrency(totalBilled)}</p>
+              <p className="font-semibold text-neutral-950 dark:text-neutral-50">{formatCurrency(totalBilled)}</p>
             </div>
             <div>
               <p className="text-xs text-neutral-500">Total paid</p>
-              <p className="font-semibold text-green-700">{formatCurrency(totalPaid)}</p>
+              <p className="font-semibold text-green-700 dark:text-green-400">{formatCurrency(totalPaid)}</p>
             </div>
           </div>
           {client.notes && (
-            <div className="pt-3 border-t border-neutral-100">
+            <div className="pt-3 border-t border-neutral-100 dark:border-neutral-800">
               <p className="text-xs text-neutral-500 mb-1">Notes</p>
-              <p className="text-sm text-neutral-700 whitespace-pre-wrap">{client.notes}</p>
+              <p className="text-sm text-neutral-700 dark:text-neutral-300 whitespace-pre-wrap">{client.notes}</p>
             </div>
           )}
         </div>
 
         {/* Invoice history */}
-        <div className="xl:col-span-2 bg-white rounded-2xl border border-neutral-200">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-100">
-            <h3 className="font-semibold text-neutral-950 text-sm">Invoice history</h3>
+        <div className="xl:col-span-2 bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-100 dark:border-neutral-800">
+            <h3 className="font-semibold text-neutral-950 dark:text-neutral-50 text-sm">Invoice history</h3>
             <Link
               href={`/invoices/new?client=${id}`}
-              className="text-xs font-medium text-neutral-500 hover:text-neutral-950"
+              className="text-xs font-medium text-neutral-500 hover:text-neutral-950 dark:hover:text-neutral-50"
             >
               + New invoice
             </Link>
@@ -91,7 +91,7 @@ export default async function ClientDetailPage({ params }: Props) {
             <p className="text-center py-10 text-sm text-neutral-500">No invoices for this client.</p>
           ) : (
             <table className="w-full text-sm">
-              <thead className="border-b border-neutral-100">
+              <thead className="border-b border-neutral-100 dark:border-neutral-800">
                 <tr>
                   <th className="text-left py-3 px-5 text-xs text-neutral-500 font-medium uppercase tracking-wide">Invoice</th>
                   <th className="text-left py-3 px-4 text-xs text-neutral-500 font-medium uppercase tracking-wide">Status</th>
@@ -101,15 +101,15 @@ export default async function ClientDetailPage({ params }: Props) {
               </thead>
               <tbody>
                 {invoices.map((inv) => (
-                  <tr key={inv.id} className="border-b border-neutral-100 hover:bg-neutral-50">
+                  <tr key={inv.id} className="border-b border-neutral-100 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800">
                     <td className="py-3 px-5">
-                      <Link href={`/invoices/${inv.id}`} className="font-medium text-neutral-950 hover:underline">
+                      <Link href={`/invoices/${inv.id}`} className="font-medium text-neutral-950 dark:text-neutral-50 hover:underline">
                         {inv.invoice_number}
                       </Link>
                     </td>
                     <td className="py-3 px-4"><InvoiceStatusBadge status={inv.status} /></td>
-                    <td className="py-3 px-4 text-neutral-600">{formatDate(inv.issue_date)}</td>
-                    <td className="py-3 px-5 text-right font-medium">{formatCurrency(inv.total, inv.currency)}</td>
+                    <td className="py-3 px-4 text-neutral-600 dark:text-neutral-400">{formatDate(inv.issue_date)}</td>
+                    <td className="py-3 px-5 text-right font-medium dark:text-neutral-50">{formatCurrency(inv.total, inv.currency)}</td>
                   </tr>
                 ))}
               </tbody>

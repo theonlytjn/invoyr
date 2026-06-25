@@ -75,11 +75,11 @@ export default async function BillingPage({
         )}
 
         {/* Current plan summary */}
-        <div className="bg-white rounded-2xl border border-neutral-200 p-5 space-y-4">
-          <h2 className="text-lg font-serif text-neutral-950">Current plan</h2>
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5 space-y-4">
+          <h2 className="text-lg font-serif text-neutral-950 dark:text-neutral-50">Current plan</h2>
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-1">
-              <p className="text-lg font-semibold text-neutral-950">
+              <p className="text-lg font-semibold text-neutral-950 dark:text-neutral-50">
                 {planInfo?.name ?? "Free trial"}
               </p>
               {status === "trialing" && trialDaysLeft !== null && (
@@ -106,7 +106,7 @@ export default async function BillingPage({
 
         {/* Plan selection / upgrade */}
         <div className="space-y-3">
-          <h2 className="text-lg font-serif text-neutral-950">
+          <h2 className="text-lg font-serif text-neutral-950 dark:text-neutral-50">
             {isActive && plan ? "Change plan" : "Choose a plan"}
           </h2>
           <BillingActions

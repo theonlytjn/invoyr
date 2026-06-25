@@ -19,14 +19,14 @@ export default async function AdminUsersPage() {
   return (
     <div className="p-8 max-w-6xl">
       <div className="mb-8">
-        <h1 className="text-2xl font-serif text-neutral-950">Users</h1>
+        <h1 className="text-2xl font-serif text-neutral-950 dark:text-neutral-50">Users</h1>
         <p className="text-neutral-500 mt-1 text-sm">{users.length} total accounts</p>
       </div>
 
-      <div className="bg-white border border-neutral-200 rounded-2xl overflow-hidden">
+      <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-neutral-100">
+            <tr className="border-b border-neutral-100 dark:border-neutral-800">
               <th className="px-5 py-3 text-left text-xs text-neutral-400 uppercase tracking-wider">Email</th>
               <th className="px-5 py-3 text-left text-xs text-neutral-400 uppercase tracking-wider">Name</th>
               <th className="px-5 py-3 text-left text-xs text-neutral-400 uppercase tracking-wider">Organisation</th>
@@ -35,23 +35,23 @@ export default async function AdminUsersPage() {
               <th className="px-5 py-3 text-left text-xs text-neutral-400 uppercase tracking-wider"></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-neutral-100">
+          <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800">
             {users.map((u) => {
               const profile = profileMap[u.id];
               const member = memberMap[u.id];
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const orgName = Array.isArray(member?.organisations) ? (member.organisations[0] as any)?.name : (member?.organisations as any)?.name;
               return (
-                <tr key={u.id} className="hover:bg-neutral-50 transition-colors">
-                  <td className="px-5 py-3 text-neutral-950">{u.email}</td>
-                  <td className="px-5 py-3 text-neutral-600">{profile?.full_name ?? "—"}</td>
-                  <td className="px-5 py-3 text-neutral-600">{orgName ?? "—"}</td>
+                <tr key={u.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
+                  <td className="px-5 py-3 text-neutral-950 dark:text-neutral-50">{u.email}</td>
+                  <td className="px-5 py-3 text-neutral-600 dark:text-neutral-400">{profile?.full_name ?? "—"}</td>
+                  <td className="px-5 py-3 text-neutral-600 dark:text-neutral-400">{orgName ?? "—"}</td>
                   <td className="px-5 py-3 text-neutral-400 capitalize">{member?.role ?? "—"}</td>
                   <td className="px-5 py-3 text-neutral-400">
                     {new Date(u.created_at).toLocaleDateString("en-GB")}
                   </td>
                   <td className="px-5 py-3">
-                    <Link href={`/admin/users/${u.id}`} className="text-neutral-400 hover:text-neutral-950 text-xs">
+                    <Link href={`/admin/users/${u.id}`} className="text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-50 text-xs">
                       View →
                     </Link>
                   </td>

@@ -66,7 +66,7 @@ export default async function InvoiceDetailPage({ params }: Props) {
             <Link
               href={`/api/invoices/${invoice.id}/pdf`}
               target="_blank"
-              className="px-3 py-1.5 text-sm border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors"
+              className="px-3 py-1.5 text-sm border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
             >
               Download PDF
             </Link>
@@ -76,7 +76,7 @@ export default async function InvoiceDetailPage({ params }: Props) {
       />
 
       <div className="p-6 grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div className="xl:col-span-2 overflow-auto border border-neutral-200 rounded-xl bg-neutral-50 p-4">
+        <div className="xl:col-span-2 overflow-auto border border-neutral-200 dark:border-neutral-800 rounded-xl bg-neutral-50 dark:bg-neutral-900 p-4">
           <div style={{ transform: "scale(0.8)", transformOrigin: "top left", width: "794px" }}>
             <Template
               invoice={invoice}
@@ -89,8 +89,8 @@ export default async function InvoiceDetailPage({ params }: Props) {
         </div>
 
         <div className="space-y-4">
-          <div className="bg-white rounded-2xl border border-neutral-200 p-5 space-y-3">
-            <h3 className="font-semibold text-neutral-950 text-sm">Invoice summary</h3>
+          <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5 space-y-3">
+            <h3 className="font-semibold text-neutral-950 dark:text-neutral-50 text-sm">Invoice summary</h3>
             <dl className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <dt className="text-neutral-500">Status</dt>
@@ -98,28 +98,28 @@ export default async function InvoiceDetailPage({ params }: Props) {
               </div>
               <div className="flex justify-between">
                 <dt className="text-neutral-500">Issued</dt>
-                <dd className="text-neutral-950">{formatDate(invoice.issue_date)}</dd>
+                <dd className="text-neutral-950 dark:text-neutral-50">{formatDate(invoice.issue_date)}</dd>
               </div>
               {invoice.due_date && (
                 <div className="flex justify-between">
                   <dt className="text-neutral-500">Due</dt>
-                  <dd className="text-neutral-950">{formatDate(invoice.due_date)}</dd>
+                  <dd className="text-neutral-950 dark:text-neutral-50">{formatDate(invoice.due_date)}</dd>
                 </div>
               )}
               <div className="flex justify-between">
                 <dt className="text-neutral-500">Subtotal</dt>
-                <dd>{formatCurrency(invoice.subtotal, invoice.currency)}</dd>
+                <dd className="dark:text-neutral-50">{formatCurrency(invoice.subtotal, invoice.currency)}</dd>
               </div>
               <div className="flex justify-between">
                 <dt className="text-neutral-500">VAT</dt>
-                <dd>{formatCurrency(invoice.vat_amount, invoice.currency)}</dd>
+                <dd className="dark:text-neutral-50">{formatCurrency(invoice.vat_amount, invoice.currency)}</dd>
               </div>
-              <div className="flex justify-between font-bold text-base pt-1 border-t border-neutral-100">
-                <dt>Total</dt>
-                <dd>{formatCurrency(invoice.total, invoice.currency)}</dd>
+              <div className="flex justify-between font-bold text-base pt-1 border-t border-neutral-100 dark:border-neutral-800">
+                <dt className="dark:text-neutral-50">Total</dt>
+                <dd className="dark:text-neutral-50">{formatCurrency(invoice.total, invoice.currency)}</dd>
               </div>
               {invoice.amount_paid > 0 && (
-                <div className="flex justify-between text-green-700">
+                <div className="flex justify-between text-green-700 dark:text-green-400">
                   <dt>Paid</dt>
                   <dd>{formatCurrency(invoice.amount_paid, invoice.currency)}</dd>
                 </div>
@@ -132,14 +132,14 @@ export default async function InvoiceDetailPage({ params }: Props) {
           )}
 
           {client && (
-            <div className="bg-white rounded-2xl border border-neutral-200 p-5 space-y-2">
-              <h3 className="font-semibold text-neutral-950 text-sm">Client</h3>
+            <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5 space-y-2">
+              <h3 className="font-semibold text-neutral-950 dark:text-neutral-50 text-sm">Client</h3>
               <div className="text-sm">
-                <p className="font-medium text-neutral-950">{client.name}</p>
-                {client.company_name && <p className="text-neutral-500">{client.company_name}</p>}
-                {client.email && <p className="text-neutral-500">{client.email}</p>}
+                <p className="font-medium text-neutral-950 dark:text-neutral-50">{client.name}</p>
+                {client.company_name && <p className="text-neutral-500 dark:text-neutral-400">{client.company_name}</p>}
+                {client.email && <p className="text-neutral-500 dark:text-neutral-400">{client.email}</p>}
               </div>
-              <Link href={`/clients/${client.id}`} className="text-xs text-neutral-400 hover:text-neutral-950">
+              <Link href={`/clients/${client.id}`} className="text-xs text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-50">
                 View client →
               </Link>
             </div>

@@ -21,14 +21,14 @@ export default async function AdminOrgsPage() {
   return (
     <div className="p-8 max-w-6xl">
       <div className="mb-8">
-        <h1 className="text-2xl font-serif text-neutral-950">Organisations</h1>
+        <h1 className="text-2xl font-serif text-neutral-950 dark:text-neutral-50">Organisations</h1>
         <p className="text-neutral-500 mt-1 text-sm">{orgs?.length ?? 0} total</p>
       </div>
 
-      <div className="bg-white border border-neutral-200 rounded-2xl overflow-hidden">
+      <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-neutral-100">
+            <tr className="border-b border-neutral-100 dark:border-neutral-800">
               <th className="px-5 py-3 text-left text-xs text-neutral-400 uppercase tracking-wider">Name</th>
               <th className="px-5 py-3 text-left text-xs text-neutral-400 uppercase tracking-wider">Email</th>
               <th className="px-5 py-3 text-left text-xs text-neutral-400 uppercase tracking-wider">Plan</th>
@@ -38,21 +38,21 @@ export default async function AdminOrgsPage() {
               <th className="px-5 py-3"></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-neutral-100">
+          <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800">
             {(orgs ?? []).map((org) => {
               const sub = subMap[org.id];
               return (
-                <tr key={org.id} className="hover:bg-neutral-50 transition-colors">
-                  <td className="px-5 py-3 font-medium text-neutral-950">{org.name}</td>
-                  <td className="px-5 py-3 text-neutral-600">{org.email ?? "—"}</td>
-                  <td className="px-5 py-3 text-neutral-600 capitalize">{sub?.plan ?? "Free"}</td>
+                <tr key={org.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
+                  <td className="px-5 py-3 font-medium text-neutral-950 dark:text-neutral-50">{org.name}</td>
+                  <td className="px-5 py-3 text-neutral-600 dark:text-neutral-400">{org.email ?? "—"}</td>
+                  <td className="px-5 py-3 text-neutral-600 dark:text-neutral-400 capitalize">{sub?.plan ?? "Free"}</td>
                   <td className="px-5 py-3">
                     <StatusBadge status={sub?.status ?? null} />
                   </td>
                   <td className="px-5 py-3 text-neutral-400">{memberCountMap[org.id] ?? 0}</td>
                   <td className="px-5 py-3 text-neutral-400">{new Date(org.created_at).toLocaleDateString("en-GB")}</td>
                   <td className="px-5 py-3">
-                    <Link href={`/admin/organisations/${org.id}`} className="text-neutral-400 hover:text-neutral-950 text-xs">
+                    <Link href={`/admin/organisations/${org.id}`} className="text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-50 text-xs">
                       Manage →
                     </Link>
                   </td>

@@ -9,6 +9,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { useTheme } from "next-themes";
 
 interface DataPoint {
   month: string;
@@ -20,6 +21,9 @@ interface Props {
 }
 
 export default function RevenueChart({ data }: Props) {
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
+
   if (!data.length) {
     return <p className="text-sm text-neutral-500 py-8 text-center">No revenue data yet.</p>;
   }
@@ -27,7 +31,7 @@ export default function RevenueChart({ data }: Props) {
   return (
     <ResponsiveContainer width="100%" height={240}>
       <BarChart data={data} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? "#262626" : "#f3f4f6"} />
         <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
         <YAxis tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
         <Tooltip
@@ -36,9 +40,15 @@ export default function RevenueChart({ data }: Props) {
               ? new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(value)
               : String(value)
           }
-          contentStyle={{ border: "1px solid #e5e7eb", borderRadius: 8, fontSize: 12 }}
+          contentStyle={{
+            border: isDark ? "1px solid #262626" : "1px solid #e5e7eb",
+            borderRadius: 8,
+            fontSize: 12,
+            backgroundColor: isDark ? "#171717" : "#ffffff",
+            color: isDark ? "#fafafa" : "#111827",
+          }}
         />
-        <Bar dataKey="revenue" fill="#111827" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="revenue" fill={isDark ? "#fafafa" : "#111827"} radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );

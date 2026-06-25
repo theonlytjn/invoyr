@@ -34,7 +34,7 @@ export default function InvoicesTable({ invoices }: Props) {
         className="max-w-xs"
       />
 
-      <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
+      <div className="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 overflow-hidden">
         {filtered.length === 0 ? (
           <div className="text-center py-16">
             {query ? (
@@ -50,7 +50,7 @@ export default function InvoicesTable({ invoices }: Props) {
           </div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="border-b border-neutral-100">
+            <thead className="border-b border-neutral-100 dark:border-neutral-800">
               <tr>
                 <th className="text-left py-3 px-5 text-xs font-medium text-neutral-500 uppercase tracking-wide">Invoice</th>
                 <th className="text-left py-3 px-4 text-xs font-medium text-neutral-500 uppercase tracking-wide">Client</th>
@@ -62,23 +62,23 @@ export default function InvoicesTable({ invoices }: Props) {
             </thead>
             <tbody>
               {filtered.map((invoice) => (
-                <tr key={invoice.id} className="border-b border-neutral-100 hover:bg-neutral-50 transition-colors">
+                <tr key={invoice.id} className="border-b border-neutral-100 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
                   <td className="py-3 px-5">
-                    <Link href={`/invoices/${invoice.id}`} className="font-medium text-neutral-950 hover:underline">
+                    <Link href={`/invoices/${invoice.id}`} className="font-medium text-neutral-950 dark:text-neutral-50 hover:underline">
                       {invoice.invoice_number}
                     </Link>
                   </td>
-                  <td className="py-3 px-4 text-neutral-600">
+                  <td className="py-3 px-4 text-neutral-600 dark:text-neutral-400">
                     {invoice.clients?.name ?? <span className="text-neutral-400 italic">No client</span>}
                   </td>
                   <td className="py-3 px-4">
                     <InvoiceStatusBadge status={invoice.status} />
                   </td>
-                  <td className="py-3 px-4 text-neutral-600">{formatDate(invoice.issue_date)}</td>
-                  <td className="py-3 px-4 text-neutral-600">
+                  <td className="py-3 px-4 text-neutral-600 dark:text-neutral-400">{formatDate(invoice.issue_date)}</td>
+                  <td className="py-3 px-4 text-neutral-600 dark:text-neutral-400">
                     {invoice.due_date ? formatDate(invoice.due_date) : "—"}
                   </td>
-                  <td className="py-3 px-5 text-right font-medium text-neutral-950">
+                  <td className="py-3 px-5 text-right font-medium text-neutral-950 dark:text-neutral-50">
                     {formatCurrency(invoice.total, invoice.currency)}
                   </td>
                 </tr>

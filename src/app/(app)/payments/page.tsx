@@ -84,21 +84,21 @@ export default async function PaymentsPage({ searchParams }: Props) {
         </Suspense>
 
         {/* Summary card */}
-        <div className="bg-white rounded-2xl border border-neutral-200 p-5 inline-flex flex-col min-w-[180px]">
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5 inline-flex flex-col min-w-[180px]">
           <p className="text-sm text-neutral-500">Total collected</p>
-          <p className="text-2xl font-bold text-neutral-950 mt-1">{formatCurrency(total)}</p>
+          <p className="text-2xl font-bold text-neutral-950 dark:text-neutral-50 mt-1">{formatCurrency(total)}</p>
           <p className="text-xs text-neutral-400 mt-1">{periodLabel}</p>
         </div>
 
         {/* Table */}
-        <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden">
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 overflow-hidden">
           {!payments.length ? (
             <p className="text-center py-12 text-sm text-neutral-500">
               {period ? "No payments in this period." : "No payments yet."}
             </p>
           ) : (
             <table className="w-full text-sm">
-              <thead className="border-b border-neutral-100">
+              <thead className="border-b border-neutral-100 dark:border-neutral-800">
                 <tr>
                   <th className="text-left py-3 px-5 text-xs text-neutral-500 font-medium uppercase tracking-wide">Invoice</th>
                   <th className="text-left py-3 px-4 text-xs text-neutral-500 font-medium uppercase tracking-wide">Client</th>
@@ -109,12 +109,12 @@ export default async function PaymentsPage({ searchParams }: Props) {
               </thead>
               <tbody>
                 {payments.map((payment) => (
-                  <tr key={payment.id} className="border-b border-neutral-100 hover:bg-neutral-50">
-                    <td className="py-3 px-5 font-medium text-neutral-950">{payment.invoices?.invoice_number ?? "—"}</td>
-                    <td className="py-3 px-4 text-neutral-600">{payment.invoices?.clients?.name ?? "—"}</td>
-                    <td className="py-3 px-4 text-neutral-600">{METHOD_LABELS[payment.method] ?? payment.method}</td>
-                    <td className="py-3 px-4 text-neutral-600">{formatDate(payment.paid_at)}</td>
-                    <td className="py-3 px-5 text-right font-medium text-green-700">{formatCurrency(payment.amount, payment.currency)}</td>
+                  <tr key={payment.id} className="border-b border-neutral-100 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800">
+                    <td className="py-3 px-5 font-medium text-neutral-950 dark:text-neutral-50">{payment.invoices?.invoice_number ?? "—"}</td>
+                    <td className="py-3 px-4 text-neutral-600 dark:text-neutral-400">{payment.invoices?.clients?.name ?? "—"}</td>
+                    <td className="py-3 px-4 text-neutral-600 dark:text-neutral-400">{METHOD_LABELS[payment.method] ?? payment.method}</td>
+                    <td className="py-3 px-4 text-neutral-600 dark:text-neutral-400">{formatDate(payment.paid_at)}</td>
+                    <td className="py-3 px-5 text-right font-medium text-green-700 dark:text-green-400">{formatCurrency(payment.amount, payment.currency)}</td>
                   </tr>
                 ))}
               </tbody>

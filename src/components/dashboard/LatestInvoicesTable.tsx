@@ -26,7 +26,7 @@ export default function LatestInvoicesTable({ invoices }: Props) {
     <div className="overflow-x-auto">
       <table className="w-full">
         <thead>
-          <tr className="border-b-[0.5px] border-neutral-200 bg-neutral-50">
+          <tr className="border-b-[0.5px] border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-800/50">
             <th className="text-left py-3 px-5 text-xs font-medium text-neutral-500">Invoice</th>
             <th className="text-left py-3 px-5 text-xs font-medium text-neutral-500">Client</th>
             <th className="text-left py-3 px-5 text-xs font-medium text-neutral-500">Status</th>
@@ -37,26 +37,26 @@ export default function LatestInvoicesTable({ invoices }: Props) {
         </thead>
         <tbody>
           {invoices.map((invoice) => (
-            <tr key={invoice.id} className="border-b-[0.5px] border-neutral-200 last:border-b-0 hover:bg-neutral-50 transition-colors">
+            <tr key={invoice.id} className="border-b-[0.5px] border-neutral-200 dark:border-neutral-800 last:border-b-0 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
               <td className="py-4 px-5">
-                <Link href={`/invoices/${invoice.id}`} className="text-sm font-medium text-neutral-950 hover:underline">
+                <Link href={`/invoices/${invoice.id}`} className="text-sm font-medium text-neutral-950 dark:text-neutral-50 hover:underline">
                   {invoice.invoice_number}
                 </Link>
               </td>
-              <td className="py-4 px-5 text-sm text-neutral-500">
+              <td className="py-4 px-5 text-sm text-neutral-500 dark:text-neutral-400">
                 {invoice.clients?.name ?? <span className="text-neutral-400 italic">No client</span>}
               </td>
               <td className="py-4 px-5">
                 <InvoiceStatusBadge status={invoice.status} />
               </td>
-              <td className="py-4 px-5 text-sm text-neutral-500">
+              <td className="py-4 px-5 text-sm text-neutral-500 dark:text-neutral-400">
                 {invoice.due_date ? formatDate(invoice.due_date) : "—"}
               </td>
-              <td className="py-4 px-5 text-right text-sm font-medium text-neutral-950">
+              <td className="py-4 px-5 text-right text-sm font-medium text-neutral-950 dark:text-neutral-50">
                 {formatCurrency(invoice.total, invoice.currency)}
               </td>
               <td className="py-4 px-5 text-right">
-                <Link href={`/invoices/${invoice.id}`} className="text-xs text-neutral-400 hover:text-neutral-950">
+                <Link href={`/invoices/${invoice.id}`} className="text-xs text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-50">
                   View →
                 </Link>
               </td>

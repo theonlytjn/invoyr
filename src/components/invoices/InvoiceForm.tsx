@@ -155,8 +155,8 @@ export default function InvoiceForm({ org, clients, invoice, existingItems, invo
     <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
       {/* Form */}
       <div className="space-y-6">
-        <div className="bg-white rounded-2xl border border-neutral-200 p-6 space-y-5">
-          <h2 className="font-semibold text-neutral-950">Invoice details</h2>
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-6 space-y-5">
+          <h2 className="font-semibold text-neutral-950 dark:text-neutral-50">Invoice details</h2>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
@@ -245,8 +245,8 @@ export default function InvoiceForm({ org, clients, invoice, existingItems, invo
           ) : null}
         </div>
 
-        <div className="bg-white rounded-2xl border border-neutral-200 p-6 space-y-4">
-          <h2 className="font-semibold text-neutral-950">Line items</h2>
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-6 space-y-4">
+          <h2 className="font-semibold text-neutral-950 dark:text-neutral-50">Line items</h2>
           <LineItemsEditor items={items} onChange={setItems} />
 
           <div className="flex justify-end">
@@ -259,7 +259,7 @@ export default function InvoiceForm({ org, clients, invoice, existingItems, invo
                 <span>VAT</span>
                 <span>{formatCurrency(totals.vat_amount)}</span>
               </div>
-              <div className="flex justify-between font-bold text-base pt-2 border-t border-neutral-200">
+              <div className="flex justify-between font-bold text-base pt-2 border-t border-neutral-200 dark:border-neutral-700 dark:text-neutral-50">
                 <span>Total</span>
                 <span>{formatCurrency(totals.total)}</span>
               </div>
@@ -267,8 +267,8 @@ export default function InvoiceForm({ org, clients, invoice, existingItems, invo
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-neutral-200 p-6 space-y-4">
-          <h2 className="font-semibold text-neutral-950">Notes & terms</h2>
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-6 space-y-4">
+          <h2 className="font-semibold text-neutral-950 dark:text-neutral-50">Notes & terms</h2>
           <div className="space-y-1.5">
             <Label>Notes</Label>
             <Textarea
@@ -314,7 +314,7 @@ export default function InvoiceForm({ org, clients, invoice, existingItems, invo
       <div className="hidden xl:block">
         <div className="sticky top-6">
           <p className="text-xs font-medium text-neutral-500 uppercase tracking-wide mb-3">Preview</p>
-          <div className="overflow-auto border border-neutral-200 rounded-xl" style={{ maxHeight: "85vh" }}>
+          <div className="overflow-auto border border-neutral-200 dark:border-neutral-800 rounded-xl bg-neutral-50 dark:bg-neutral-900" style={{ maxHeight: "85vh" }}>
             <div style={{ transform: "scale(0.75)", transformOrigin: "top left", width: "794px" }}>
               <TemplatePreview
                 invoice={{

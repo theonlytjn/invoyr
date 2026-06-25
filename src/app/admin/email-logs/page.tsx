@@ -21,14 +21,14 @@ export default async function AdminEmailLogsPage() {
   return (
     <div className="p-8 max-w-6xl">
       <div className="mb-8">
-        <h1 className="text-2xl font-serif text-neutral-950">Email logs</h1>
+        <h1 className="text-2xl font-serif text-neutral-950 dark:text-neutral-50">Email logs</h1>
         <p className="text-neutral-500 mt-1 text-sm">Most recent 200 across all organisations.</p>
       </div>
 
-      <div className="bg-white border border-neutral-200 rounded-2xl overflow-hidden">
+      <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-neutral-100">
+            <tr className="border-b border-neutral-100 dark:border-neutral-800">
               <th className="px-5 py-3 text-left text-xs text-neutral-400 uppercase tracking-wider">To</th>
               <th className="px-5 py-3 text-left text-xs text-neutral-400 uppercase tracking-wider">Subject</th>
               <th className="px-5 py-3 text-left text-xs text-neutral-400 uppercase tracking-wider">Template</th>
@@ -36,11 +36,11 @@ export default async function AdminEmailLogsPage() {
               <th className="px-5 py-3 text-left text-xs text-neutral-400 uppercase tracking-wider">Sent</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-neutral-100">
+          <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800">
             {(logs ?? []).map((log) => (
-              <tr key={log.id} className="hover:bg-neutral-50">
-                <td className="px-5 py-3 text-neutral-950">{log.to_email}</td>
-                <td className="px-5 py-3 text-neutral-600 max-w-[260px] truncate">{log.subject}</td>
+              <tr key={log.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-800">
+                <td className="px-5 py-3 text-neutral-950 dark:text-neutral-50">{log.to_email}</td>
+                <td className="px-5 py-3 text-neutral-600 dark:text-neutral-400 max-w-[260px] truncate">{log.subject}</td>
                 <td className="px-5 py-3 text-neutral-400 text-xs font-mono">{log.template_name}</td>
                 <td className="px-5 py-3">
                   <span className={`text-xs px-2 py-0.5 rounded font-medium capitalize ${STATUS_COLORS[log.status] ?? "text-neutral-500 bg-neutral-100"}`}>

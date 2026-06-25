@@ -129,18 +129,18 @@ export default async function ReportsPage() {
     <div>
       <Topbar title="Reports" />
       <div className="p-6 space-y-6">
-        <div className="bg-white rounded-2xl border border-neutral-200 p-5">
-          <h2 className="text-lg font-serif text-neutral-950 mb-4">Revenue (last 12 months)</h2>
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5">
+          <h2 className="text-lg font-serif text-neutral-950 dark:text-neutral-50 mb-4">Revenue (last 12 months)</h2>
           <RevenueChart data={revenueData} />
         </div>
 
-        <div className="bg-white rounded-2xl border border-neutral-200 p-5">
-          <h2 className="text-lg font-serif text-neutral-950 mb-4">Overdue invoices (aging)</h2>
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5">
+          <h2 className="text-lg font-serif text-neutral-950 dark:text-neutral-50 mb-4">Overdue invoices (aging)</h2>
           <AgingTable buckets={agingBuckets} />
         </div>
 
-        <div className="bg-white rounded-2xl border border-neutral-200 p-5">
-          <h2 className="text-lg font-serif text-neutral-950 mb-4">Top clients by revenue</h2>
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5">
+          <h2 className="text-lg font-serif text-neutral-950 dark:text-neutral-50 mb-4">Top clients by revenue</h2>
           {topClients.length === 0 ? (
             <p className="text-sm text-neutral-500 py-4 text-center">No paid invoices yet.</p>
           ) : (
@@ -153,13 +153,13 @@ export default async function ReportsPage() {
                     <div className="flex items-center justify-between mb-1">
                       <Link
                         href={`/clients/${client.id}`}
-                        className="text-sm font-medium text-neutral-950 hover:underline flex items-center gap-2"
+                        className="text-sm font-medium text-neutral-950 dark:text-neutral-50 hover:underline flex items-center gap-2"
                       >
                         <span className="text-xs text-neutral-400 w-4">{i + 1}</span>
                         {client.name}
                       </Link>
                       <div className="text-right">
-                        <span className="text-sm font-semibold text-neutral-950">
+                        <span className="text-sm font-semibold text-neutral-950 dark:text-neutral-50">
                           {formatCurrency(client.revenue)}
                         </span>
                         <span className="text-xs text-neutral-400 ml-2">
@@ -167,9 +167,9 @@ export default async function ReportsPage() {
                         </span>
                       </div>
                     </div>
-                    <div className="h-1.5 bg-neutral-100 rounded-full overflow-hidden">
+                    <div className="h-1.5 bg-neutral-100 dark:bg-neutral-800 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-neutral-950 rounded-full transition-all"
+                        className="h-full bg-neutral-950 dark:bg-neutral-50 rounded-full transition-all"
                         style={{ width: `${pct}%` }}
                       />
                     </div>
@@ -179,9 +179,9 @@ export default async function ReportsPage() {
             </div>
           )}
         </div>
-        <div className="bg-white rounded-2xl border border-neutral-200 p-5">
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-serif text-neutral-950">VAT summary by month</h2>
+            <h2 className="text-lg font-serif text-neutral-950 dark:text-neutral-50">VAT summary by month</h2>
             <span className="text-xs text-neutral-400">Paid invoices only</span>
           </div>
           {vatRows.length === 0 ? (
@@ -190,7 +190,7 @@ export default async function ReportsPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-neutral-100">
+                  <tr className="border-b border-neutral-100 dark:border-neutral-800">
                     <th className="text-left py-2 pr-4 text-xs font-medium text-neutral-500 uppercase tracking-wide">Month</th>
                     <th className="text-right py-2 px-4 text-xs font-medium text-neutral-500 uppercase tracking-wide">Net</th>
                     <th className="text-right py-2 px-4 text-xs font-medium text-neutral-500 uppercase tracking-wide">VAT</th>
@@ -199,23 +199,23 @@ export default async function ReportsPage() {
                 </thead>
                 <tbody>
                   {vatRows.map((row) => (
-                    <tr key={row.month} className="border-b border-neutral-100">
-                      <td className="py-2.5 pr-4 font-medium text-neutral-950">{row.month}</td>
-                      <td className="py-2.5 px-4 text-right text-neutral-600">{formatCurrency(row.net)}</td>
-                      <td className="py-2.5 px-4 text-right text-neutral-600">{formatCurrency(row.vat)}</td>
-                      <td className="py-2.5 pl-4 text-right font-semibold text-neutral-950">{formatCurrency(row.gross)}</td>
+                    <tr key={row.month} className="border-b border-neutral-100 dark:border-neutral-800">
+                      <td className="py-2.5 pr-4 font-medium text-neutral-950 dark:text-neutral-50">{row.month}</td>
+                      <td className="py-2.5 px-4 text-right text-neutral-600 dark:text-neutral-400">{formatCurrency(row.net)}</td>
+                      <td className="py-2.5 px-4 text-right text-neutral-600 dark:text-neutral-400">{formatCurrency(row.vat)}</td>
+                      <td className="py-2.5 pl-4 text-right font-semibold text-neutral-950 dark:text-neutral-50">{formatCurrency(row.gross)}</td>
                     </tr>
                   ))}
                   {vatRows.length > 1 && (
-                    <tr className="border-t border-neutral-200 bg-neutral-50">
-                      <td className="py-2.5 pr-4 font-semibold text-neutral-950 text-xs uppercase tracking-wide">Total</td>
-                      <td className="py-2.5 px-4 text-right font-semibold text-neutral-950">
+                    <tr className="border-t border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800">
+                      <td className="py-2.5 pr-4 font-semibold text-neutral-950 dark:text-neutral-50 text-xs uppercase tracking-wide">Total</td>
+                      <td className="py-2.5 px-4 text-right font-semibold text-neutral-950 dark:text-neutral-50">
                         {formatCurrency(vatRows.reduce((s, r) => s + r.net, 0))}
                       </td>
-                      <td className="py-2.5 px-4 text-right font-semibold text-neutral-950">
+                      <td className="py-2.5 px-4 text-right font-semibold text-neutral-950 dark:text-neutral-50">
                         {formatCurrency(vatRows.reduce((s, r) => s + r.vat, 0))}
                       </td>
-                      <td className="py-2.5 pl-4 text-right font-semibold text-neutral-950">
+                      <td className="py-2.5 pl-4 text-right font-semibold text-neutral-950 dark:text-neutral-50">
                         {formatCurrency(vatRows.reduce((s, r) => s + r.gross, 0))}
                       </td>
                     </tr>

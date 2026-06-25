@@ -6,9 +6,9 @@ export const metadata = { title: "Admin — Invoyr" };
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   await requireAdmin();
   return (
-    <div className="flex h-screen bg-neutral-100 overflow-hidden">
+    <div className="flex h-screen bg-neutral-100 dark:bg-neutral-950 overflow-hidden">
       <AdminSidebar />
-      <main className="flex-1 overflow-y-auto bg-white">
+      <main className="flex-1 overflow-y-auto bg-white dark:bg-neutral-950">
         {children}
       </main>
     </div>

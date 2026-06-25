@@ -12,12 +12,12 @@ export default function CopyPaymentLink({ url }: { url: string }) {
   }
 
   return (
-    <div className="bg-white rounded-xl border border-neutral-200 p-5 space-y-3">
-      <h3 className="font-semibold text-neutral-950 text-sm">Payment link</h3>
+    <div className="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 p-5 space-y-3">
+      <h3 className="font-semibold text-neutral-950 dark:text-neutral-50 text-sm">Payment link</h3>
       <p className="text-xs text-neutral-400 break-all">{url}</p>
       <button
         onClick={handleCopy}
-        className="flex items-center gap-2 w-full justify-center px-3 py-2 text-sm border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors font-medium text-neutral-700"
+        className="flex items-center gap-2 w-full justify-center px-3 py-2 text-sm border border-neutral-200 dark:border-neutral-700 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors font-medium text-neutral-700 dark:text-neutral-300"
       >
         {copied ? (
           <>

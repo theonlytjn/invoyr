@@ -36,8 +36,8 @@ export default function PaymentsFilter() {
           className={cn(
             "px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
             current === p.value
-              ? "bg-neutral-950 text-white"
-              : "bg-white border border-neutral-200 text-neutral-600 hover:border-neutral-400"
+              ? "bg-neutral-950 dark:bg-neutral-50 text-white dark:text-neutral-950"
+              : "bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 hover:border-neutral-400 dark:hover:border-neutral-500"
           )}
         >
           {p.label}

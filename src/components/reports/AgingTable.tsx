@@ -24,22 +24,22 @@ export default function AgingTable({ buckets }: Props) {
       {buckets.filter((b) => b.invoices.length > 0).map((bucket) => (
         <div key={bucket.label}>
           <div className="flex items-center justify-between mb-2">
-            <h4 className="text-sm font-medium text-neutral-700">{bucket.label}</h4>
-            <span className="text-sm font-semibold text-red-600">{formatCurrency(bucket.total)}</span>
+            <h4 className="text-sm font-medium text-neutral-700 dark:text-neutral-300">{bucket.label}</h4>
+            <span className="text-sm font-semibold text-red-600 dark:text-red-400">{formatCurrency(bucket.total)}</span>
           </div>
-          <div className="bg-white rounded-lg border border-neutral-200 overflow-hidden">
+          <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 overflow-hidden">
             <table className="w-full text-sm">
               <tbody>
                 {bucket.invoices.map((inv) => (
-                  <tr key={inv.id} className="border-b border-neutral-100 last:border-0 hover:bg-neutral-50">
+                  <tr key={inv.id} className="border-b border-neutral-100 dark:border-neutral-700 last:border-0 hover:bg-neutral-50 dark:hover:bg-neutral-700">
                     <td className="py-2.5 px-4">
-                      <Link href={`/invoices/${inv.id}`} className="font-medium text-neutral-950 hover:underline">
+                      <Link href={`/invoices/${inv.id}`} className="font-medium text-neutral-950 dark:text-neutral-50 hover:underline">
                         {inv.invoice_number}
                       </Link>
                     </td>
-                    <td className="py-2.5 px-4 text-neutral-500">{inv.clients?.name ?? "—"}</td>
-                    <td className="py-2.5 px-4 text-neutral-500">Due {inv.due_date ? formatDate(inv.due_date) : "—"}</td>
-                    <td className="py-2.5 px-4 text-right font-medium text-red-700">{formatCurrency(inv.total, inv.currency)}</td>
+                    <td className="py-2.5 px-4 text-neutral-500 dark:text-neutral-400">{inv.clients?.name ?? "—"}</td>
+                    <td className="py-2.5 px-4 text-neutral-500 dark:text-neutral-400">Due {inv.due_date ? formatDate(inv.due_date) : "—"}</td>
+                    <td className="py-2.5 px-4 text-right font-medium text-red-700 dark:text-red-400">{formatCurrency(inv.total, inv.currency)}</td>
                   </tr>
                 ))}
               </tbody>
