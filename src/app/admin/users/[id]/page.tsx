@@ -35,19 +35,19 @@ export default function AdminUserDetailPage() {
     });
   }
 
-  if (loading) return <div className="p-8 text-gray-400">Loading…</div>;
-  if (!user) return <div className="p-8 text-gray-500">User not found.</div>;
+  if (loading) return <div className="p-8 text-neutral-400">Loading…</div>;
+  if (!user) return <div className="p-8 text-neutral-500">User not found.</div>;
 
   return (
     <div className="p-8 max-w-2xl">
       <div className="mb-6">
-        <Link href="/admin/users" className="text-gray-400 hover:text-gray-900 text-sm">← Users</Link>
+        <Link href="/admin/users" className="text-neutral-400 hover:text-neutral-950 text-sm">← Users</Link>
       </div>
 
-      <h1 className="text-xl font-bold text-gray-900 mb-1">{user.email}</h1>
-      <p className="text-gray-400 text-sm mb-8">User ID: {user.id}</p>
+      <h1 className="text-xl font-serif text-neutral-950 mb-1">{user.email}</h1>
+      <p className="text-neutral-400 text-sm mb-8">User ID: {user.id}</p>
 
-      <div className="bg-white border border-gray-200 rounded-xl p-6 mb-6 space-y-3">
+      <div className="bg-white border border-neutral-200 rounded-2xl p-6 mb-6 space-y-3">
         <Row label="Full name" value={user.profile?.full_name ?? "—"} />
         <Row label="Onboarding" value={user.profile?.onboarding_completed ? "Complete" : "Incomplete"} />
         <Row label="Signed up" value={new Date(user.created_at).toLocaleString("en-GB")} />
@@ -55,22 +55,22 @@ export default function AdminUserDetailPage() {
       </div>
 
       {user.org && (
-        <div className="bg-white border border-gray-200 rounded-xl p-6 mb-6 space-y-3">
-          <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Organisation</h2>
+        <div className="bg-white border border-neutral-200 rounded-2xl p-6 mb-6 space-y-3">
+          <h2 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-3">Organisation</h2>
           <Row label="Name" value={user.org.name} />
           <Row label="Plan" value={user.org.plan ?? "Free"} />
           <Row label="Status" value={user.org.status ?? "—"} />
           <div className="pt-2">
-            <Link href={`/admin/organisations/${user.org.id}`} className="text-gray-500 hover:text-gray-900 text-sm">
+            <Link href={`/admin/organisations/${user.org.id}`} className="text-neutral-500 hover:text-neutral-950 text-sm">
               Manage organisation →
             </Link>
           </div>
         </div>
       )}
 
-      <div className="bg-red-50 border border-red-200 rounded-xl p-6">
+      <div className="bg-red-50 border border-red-200 rounded-2xl p-6">
         <h2 className="text-xs font-semibold text-red-500 uppercase tracking-wider mb-2">Danger zone</h2>
-        <p className="text-gray-500 text-sm mb-4">Permanently deletes this user account. This cannot be undone.</p>
+        <p className="text-neutral-500 text-sm mb-4">Permanently deletes this user account. This cannot be undone.</p>
         <button
           onClick={handleDelete}
           disabled={isPending}
@@ -79,7 +79,7 @@ export default function AdminUserDetailPage() {
           {isPending ? "Deleting…" : deleteConfirm ? "Confirm delete" : "Delete user"}
         </button>
         {deleteConfirm && !isPending && (
-          <button onClick={() => setDeleteConfirm(false)} className="ml-3 text-sm text-gray-400 hover:text-gray-900">
+          <button onClick={() => setDeleteConfirm(false)} className="ml-3 text-sm text-neutral-400 hover:text-neutral-950">
             Cancel
           </button>
         )}
@@ -90,9 +90,9 @@ export default function AdminUserDetailPage() {
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between py-1.5 border-b border-gray-100 last:border-0">
-      <span className="text-xs text-gray-400 uppercase tracking-wider">{label}</span>
-      <span className="text-sm text-gray-900">{value}</span>
+    <div className="flex items-center justify-between py-1.5 border-b border-neutral-100 last:border-0">
+      <span className="text-xs text-neutral-400 uppercase tracking-wider">{label}</span>
+      <span className="text-sm text-neutral-950">{value}</span>
     </div>
   );
 }

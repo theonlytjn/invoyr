@@ -74,17 +74,19 @@ export default function AdminSidebar() {
   }
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 bg-white border-r border-gray-200 h-screen sticky top-0">
-      <div className="px-5 pt-5 pb-4 border-b border-gray-100">
-        <Image src="/main-logo.svg" alt="Invoyr" width={135} height={40} priority />
+    <aside className="hidden lg:flex flex-col w-60 bg-neutral-100 border-r border-neutral-200 h-screen sticky top-0">
+      <div className="px-4 pt-5 pb-4">
+        <Link href="/admin">
+          <Image src="/main-logo.svg" alt="Invoyr" width={110} height={34} priority />
+        </Link>
         <div className="mt-3">
-          <span className="px-2 py-0.5 bg-gray-900 text-white text-[10px] font-bold uppercase tracking-widest rounded">
+          <span className="px-2 py-0.5 bg-neutral-950 text-white text-[10px] font-bold uppercase tracking-widest rounded-md">
             Admin
           </span>
         </div>
       </div>
 
-      <nav className="flex-1 px-3 py-3 space-y-0.5 overflow-y-auto">
+      <nav className="flex-1 px-3 py-2 space-y-0.5 overflow-y-auto">
         {NAV.map(({ href, label, icon }) => {
           const active = href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
           return (
@@ -92,10 +94,10 @@ export default function AdminSidebar() {
               key={href}
               href={href}
               className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors",
+                "flex items-center gap-3 px-3 py-2 rounded-lg text-sm border transition-all",
                 active
-                  ? "bg-gray-100 text-gray-900 font-medium"
-                  : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
+                  ? "bg-white text-neutral-950 font-medium border-neutral-200 shadow-[0_0_0_2px_#ffffff,0_0_0_4px_#0a0a0a]"
+                  : "border-transparent text-neutral-500 hover:text-neutral-950 hover:bg-white/60"
               )}
             >
               <span className="flex-shrink-0">{icon}</span>
@@ -105,10 +107,10 @@ export default function AdminSidebar() {
         })}
       </nav>
 
-      <div className="px-3 py-4 border-t border-gray-100">
+      <div className="px-3 py-4 border-t border-neutral-200">
         <button
           onClick={handleSignOut}
-          className="flex items-center gap-2.5 px-3 py-2 text-sm text-gray-500 hover:text-gray-900 transition-colors rounded-lg hover:bg-gray-50 w-full text-left"
+          className="flex items-center gap-2.5 px-3 py-2 text-sm text-neutral-500 hover:text-neutral-950 transition-colors rounded-lg hover:bg-white/60 w-full text-left border border-transparent"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />
