@@ -134,20 +134,19 @@ export default async function DashboardPage() {
           <MetricCard
             title="Revenue this month"
             value={formatCurrency(monthRevenue)}
-            subtitle={`${formatCurrency(totalRevenue)} all time`}
-            variant="green"
+            change={{ value: formatCurrency(totalRevenue), trend: "neutral" }}
+            subtitle="all time"
           />
           <MetricCard
             title="Outstanding"
             value={formatCurrency(outstandingTotal)}
             subtitle={`${outstandingInvoices.length} invoice${outstandingInvoices.length !== 1 ? "s" : ""} awaiting payment`}
-            variant="blue"
           />
           <MetricCard
             title="Overdue"
             value={formatCurrency(overdueTotal)}
-            subtitle={`${overdueInvoices.length} invoice${overdueInvoices.length !== 1 ? "s" : ""}`}
-            variant={overdueTotal > 0 ? "red" : "default"}
+            change={overdueTotal > 0 ? { value: `${overdueInvoices.length} invoice${overdueInvoices.length !== 1 ? "s" : ""}`, trend: "down" } : undefined}
+            subtitle={overdueTotal === 0 ? "None overdue" : undefined}
           />
           <MetricCard
             title="Total invoices"
@@ -157,17 +156,17 @@ export default async function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          <div className="xl:col-span-2 bg-white rounded-2xl border border-[#e5e5e5]">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-[#e5e5e5]">
-              <h2 className="text-sm font-semibold text-[#0a0a0a]">Latest invoices</h2>
-              <Link href="/invoices" className="text-xs text-[#737373] hover:text-[#0a0a0a]">View all →</Link>
+          <div className="xl:col-span-2 bg-white rounded-2xl border border-neutral-200 overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-200">
+              <h2 className="text-lg font-serif text-neutral-950">Latest invoices</h2>
+              <Link href="/invoices" className="text-xs text-neutral-500 hover:text-neutral-950">View all →</Link>
             </div>
             <LatestInvoicesTable invoices={latestInvoices} />
           </div>
 
-          <div className="bg-white rounded-2xl border border-[#e5e5e5]">
-            <div className="px-5 py-4 border-b border-[#e5e5e5]">
-              <h2 className="text-sm font-semibold text-[#0a0a0a]">Activity</h2>
+          <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden">
+            <div className="px-5 py-4 border-b border-neutral-200">
+              <h2 className="text-lg font-serif text-neutral-950">Activity</h2>
             </div>
             <div className="px-5 py-4">
               <ActivityFeed logs={logs} />

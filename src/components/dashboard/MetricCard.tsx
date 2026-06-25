@@ -1,58 +1,54 @@
 import { cn } from "@/lib/utils";
 
-type Variant = "default" | "green" | "blue" | "red";
+type Trend = "up" | "down" | "neutral";
 
 interface Props {
   title: string;
   value: string;
-  delta?: string;
-  deltaPositive?: boolean;
+  change?: { value: string; trend: Trend };
   subtitle?: string;
   icon?: React.ReactNode;
-  variant?: Variant;
 }
 
-export default function MetricCard({ title, value, delta, deltaPositive, subtitle, icon, variant = "default" }: Props) {
+export default function MetricCard({ title, value, change, subtitle, icon }: Props) {
   return (
-    <div className="bg-white border border-[#e5e5e5] rounded-2xl overflow-clip">
-      {/* Top: label + icon */}
-      <div className="flex items-start justify-between px-5 pt-5 pb-3 border-b border-[#e5e5e5]">
-        <div className="flex flex-col gap-2">
-          <p className="text-[11px] font-medium tracking-widest text-[#737373] uppercase">
+    <div className="rounded-2xl border border-neutral-200 bg-white overflow-hidden">
+      {/* Top */}
+      <div className="flex items-start justify-between p-5">
+        <div className="space-y-2">
+          <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
             {title}
           </p>
-          <p
-            className={cn(
-              "text-[32px] leading-10 tracking-tight font-normal",
-              variant === "red" ? "text-red-600" : variant === "green" ? "text-[#00a63e]" : variant === "blue" ? "text-blue-600" : "text-[#0a0a0a]"
-            )}
-            style={{ fontFamily: "var(--font-instrument-serif)" }}
-          >
+          <p className="text-3xl font-serif text-neutral-950">
             {value}
           </p>
         </div>
         {icon && (
-          <div className="border border-[#e5e5e5] rounded-xl p-3 flex-shrink-0">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-neutral-200">
             {icon}
           </div>
         )}
       </div>
-      {/* Bottom: delta / subtitle */}
-      <div className="px-5 py-3 flex items-center gap-2">
-        {delta && (
-          <span
-            className={cn(
-              "text-[13px] font-medium",
-              deltaPositive ? "text-[#00a63e]" : "text-red-600"
-            )}
-          >
-            {delta}
-          </span>
-        )}
-        {subtitle && (
-          <span className="text-[13px] text-[#737373]">{subtitle}</span>
-        )}
-        {!delta && !subtitle && <span className="text-[13px] text-[#737373]">&nbsp;</span>}
+
+      {/* Bottom */}
+      <div className="border-t border-neutral-200 px-5 py-4">
+        <p className="text-sm">
+          {change && (
+            <span
+              className={cn(
+                "font-medium",
+                change.trend === "up" && "text-green-600",
+                change.trend === "down" && "text-red-600",
+                change.trend === "neutral" && "text-neutral-500",
+              )}
+            >
+              {change.value}{" "}
+            </span>
+          )}
+          {subtitle && (
+            <span className="text-neutral-500">{subtitle}</span>
+          )}
+        </p>
       </div>
     </div>
   );

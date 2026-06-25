@@ -7,7 +7,7 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#f5f5f5] px-4 py-12">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-neutral-100 px-4 py-12">
       <div className="mb-8">
         <Link href="/">
           <Image src="/main-logo.svg" alt="Invoyr" width={120} height={36} priority />
