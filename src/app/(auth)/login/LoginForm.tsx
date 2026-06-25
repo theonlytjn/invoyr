@@ -163,8 +163,8 @@ export default function LoginForm() {
       </div>
 
       {/* Right: dark panel */}
-      <div className="hidden lg:flex lg:w-1/2 flex-col justify-between bg-neutral-950 p-24 overflow-hidden">
-        <div className="max-w-md pt-8">
+      <div className="hidden lg:flex lg:w-1/2 flex-col bg-neutral-950 px-16 pt-20 pb-0 overflow-hidden">
+        <div className="max-w-md mb-10">
           <h2 className="text-5xl font-serif text-white leading-tight mb-4">
             Get paid faster with professional invoicing
           </h2>
@@ -173,17 +173,14 @@ export default function LoginForm() {
           </p>
         </div>
 
-        <div className="space-y-4">
-          {[
-            { stat: "2 min", label: "Average time to create an invoice" },
-            { stat: "48 hrs", label: "Average time to get paid after sending" },
-            { stat: "100%", label: "Online, no software to install" },
-          ].map(({ stat, label }) => (
-            <div key={stat} className="flex items-center gap-4">
-              <span className="text-2xl font-serif text-white w-20 shrink-0">{stat}</span>
-              <span className="text-sm text-neutral-400">{label}</span>
-            </div>
-          ))}
+        <div className="relative flex-1 rounded-t-2xl overflow-hidden ring-1 ring-white/10 shadow-[0_-8px_40px_rgba(0,0,0,0.5)]">
+          <Image
+            src="/login.png"
+            alt="Invoyr dashboard preview"
+            fill
+            className="object-cover object-top"
+            priority
+          />
         </div>
       </div>
     </div>

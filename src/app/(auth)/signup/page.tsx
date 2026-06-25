@@ -197,8 +197,8 @@ export default function SignupPage() {
       </div>
 
       {/* Right: dark panel */}
-      <div className="hidden lg:flex lg:w-1/2 flex-col justify-between bg-neutral-950 p-24 overflow-hidden">
-        <div className="max-w-md pt-8">
+      <div className="hidden lg:flex lg:w-1/2 flex-col bg-neutral-950 px-16 pt-20 pb-0 overflow-hidden">
+        <div className="max-w-md mb-10">
           <h2 className="text-5xl font-serif text-white leading-tight mb-4">
             Start sending professional invoices today
           </h2>
@@ -207,22 +207,14 @@ export default function SignupPage() {
           </p>
         </div>
 
-        <div className="space-y-6">
-          {[
-            "Send invoices via email or payment link",
-            "Accept card payments via Stripe Connect",
-            "Automatic overdue reminders",
-            "PDF downloads and branded templates",
-          ].map((feature) => (
-            <div key={feature} className="flex items-center gap-3">
-              <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/10">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M5 13l4 4L19 7"/>
-                </svg>
-              </div>
-              <span className="text-sm text-neutral-400">{feature}</span>
-            </div>
-          ))}
+        <div className="relative flex-1 rounded-t-2xl overflow-hidden ring-1 ring-white/10 shadow-[0_-8px_40px_rgba(0,0,0,0.5)]">
+          <Image
+            src="/login.png"
+            alt="Invoyr dashboard preview"
+            fill
+            className="object-cover object-top"
+            priority
+          />
         </div>
       </div>
     </div>
