@@ -24,6 +24,15 @@ export default async function DashboardPage() {
 
   const sub = await getSubscription(org.id);
 
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name")
+    .eq("id", user!.id)
+    .single();
+
+  const firstName = profile?.full_name?.split(" ")[0] || org.name;
+
   const [invoicesRes, latestRes, revenueAllRes, revenueMonthRes, logsRes] = await Promise.all([
     // All invoices for accurate metric aggregation (status + total only)
     supabase
@@ -91,6 +100,11 @@ export default async function DashboardPage() {
       />
 
       <div className="p-6 space-y-6">
+        <div>
+          <h1 className="text-2xl font-serif text-neutral-950">Welcome back, {firstName}</h1>
+          <p className="text-sm text-neutral-500 mt-0.5">Here&apos;s what&apos;s happening with {org.name}.</p>
+        </div>
+
         {sub?.status === "trialing" && sub.trial_ends_at && (() => {
           const daysLeft = Math.max(0, Math.ceil(
             (new Date(sub.trial_ends_at).getTime() - Date.now()) / 86_400_000
