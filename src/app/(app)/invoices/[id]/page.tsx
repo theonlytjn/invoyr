@@ -7,6 +7,7 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import Topbar from "@/components/shell/Topbar";
 import InvoiceStatusBadge from "@/components/invoices/InvoiceStatusBadge";
 import InvoiceActions from "@/components/invoices/InvoiceActions";
+import CopyPaymentLink from "@/components/invoices/CopyPaymentLink";
 import { TEMPLATE_MAP } from "@/components/invoice-templates";
 import type { Metadata } from "next";
 import type { Invoice, InvoiceItem, Client } from "@/lib/supabase/types";
@@ -125,6 +126,10 @@ export default async function InvoiceDetailPage({ params }: Props) {
               )}
             </dl>
           </div>
+
+          {invoice.public_token && invoice.status !== "void" && (
+            <CopyPaymentLink url={`${process.env.NEXT_PUBLIC_APP_URL ?? "https://app.invoyr.io"}/pay/${invoice.public_token}`} />
+          )}
 
           {client && (
             <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-2">
