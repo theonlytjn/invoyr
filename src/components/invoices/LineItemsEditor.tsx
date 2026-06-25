@@ -38,7 +38,7 @@ export default function LineItemsEditor({ items, currency = "GBP", onChange }: P
 
   return (
     <div className="space-y-2">
-      <div className="grid grid-cols-[1fr_80px_100px_80px_90px_36px] gap-2 text-xs font-medium text-gray-500 px-1">
+      <div className="grid grid-cols-[1fr_80px_100px_80px_90px_36px] gap-2 text-xs font-medium text-neutral-500 px-1">
         <span>Description</span>
         <span className="text-right">Qty</span>
         <span className="text-right">Unit price</span>
@@ -88,7 +88,7 @@ export default function LineItemsEditor({ items, currency = "GBP", onChange }: P
             <button
               type="button"
               onClick={() => remove(item.id)}
-              className="text-gray-400 hover:text-red-500 transition-colors"
+              className="text-neutral-400 hover:text-red-500 transition-colors"
               disabled={items.length === 1}
             >
               <TrashIcon size={16} />

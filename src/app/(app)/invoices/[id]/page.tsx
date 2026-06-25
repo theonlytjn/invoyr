@@ -66,7 +66,7 @@ export default async function InvoiceDetailPage({ params }: Props) {
             <Link
               href={`/api/invoices/${invoice.id}/pdf`}
               target="_blank"
-              className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              className="px-3 py-1.5 text-sm border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors"
             >
               Download PDF
             </Link>
@@ -76,7 +76,7 @@ export default async function InvoiceDetailPage({ params }: Props) {
       />
 
       <div className="p-6 grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div className="xl:col-span-2 overflow-auto border border-gray-200 rounded-xl bg-gray-50 p-4">
+        <div className="xl:col-span-2 overflow-auto border border-neutral-200 rounded-xl bg-neutral-50 p-4">
           <div style={{ transform: "scale(0.8)", transformOrigin: "top left", width: "794px" }}>
             <Template
               invoice={invoice}
@@ -89,32 +89,32 @@ export default async function InvoiceDetailPage({ params }: Props) {
         </div>
 
         <div className="space-y-4">
-          <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
-            <h3 className="font-semibold text-gray-900 text-sm">Invoice summary</h3>
+          <div className="bg-white rounded-2xl border border-neutral-200 p-5 space-y-3">
+            <h3 className="font-semibold text-neutral-950 text-sm">Invoice summary</h3>
             <dl className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <dt className="text-gray-500">Status</dt>
+                <dt className="text-neutral-500">Status</dt>
                 <dd><InvoiceStatusBadge status={invoice.status} /></dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-gray-500">Issued</dt>
-                <dd className="text-gray-900">{formatDate(invoice.issue_date)}</dd>
+                <dt className="text-neutral-500">Issued</dt>
+                <dd className="text-neutral-950">{formatDate(invoice.issue_date)}</dd>
               </div>
               {invoice.due_date && (
                 <div className="flex justify-between">
-                  <dt className="text-gray-500">Due</dt>
-                  <dd className="text-gray-900">{formatDate(invoice.due_date)}</dd>
+                  <dt className="text-neutral-500">Due</dt>
+                  <dd className="text-neutral-950">{formatDate(invoice.due_date)}</dd>
                 </div>
               )}
               <div className="flex justify-between">
-                <dt className="text-gray-500">Subtotal</dt>
+                <dt className="text-neutral-500">Subtotal</dt>
                 <dd>{formatCurrency(invoice.subtotal, invoice.currency)}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-gray-500">VAT</dt>
+                <dt className="text-neutral-500">VAT</dt>
                 <dd>{formatCurrency(invoice.vat_amount, invoice.currency)}</dd>
               </div>
-              <div className="flex justify-between font-bold text-base pt-1 border-t border-gray-100">
+              <div className="flex justify-between font-bold text-base pt-1 border-t border-neutral-100">
                 <dt>Total</dt>
                 <dd>{formatCurrency(invoice.total, invoice.currency)}</dd>
               </div>
@@ -132,14 +132,14 @@ export default async function InvoiceDetailPage({ params }: Props) {
           )}
 
           {client && (
-            <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-2">
-              <h3 className="font-semibold text-gray-900 text-sm">Client</h3>
+            <div className="bg-white rounded-2xl border border-neutral-200 p-5 space-y-2">
+              <h3 className="font-semibold text-neutral-950 text-sm">Client</h3>
               <div className="text-sm">
-                <p className="font-medium text-gray-900">{client.name}</p>
-                {client.company_name && <p className="text-gray-500">{client.company_name}</p>}
-                {client.email && <p className="text-gray-500">{client.email}</p>}
+                <p className="font-medium text-neutral-950">{client.name}</p>
+                {client.company_name && <p className="text-neutral-500">{client.company_name}</p>}
+                {client.email && <p className="text-neutral-500">{client.email}</p>}
               </div>
-              <Link href={`/clients/${client.id}`} className="text-xs text-gray-400 hover:text-gray-900">
+              <Link href={`/clients/${client.id}`} className="text-xs text-neutral-400 hover:text-neutral-950">
                 View client →
               </Link>
             </div>

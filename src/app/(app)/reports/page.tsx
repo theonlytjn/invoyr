@@ -129,20 +129,20 @@ export default async function ReportsPage() {
     <div>
       <Topbar title="Reports" />
       <div className="p-6 space-y-6">
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <h2 className="font-semibold text-gray-900 mb-4">Revenue (last 12 months)</h2>
+        <div className="bg-white rounded-2xl border border-neutral-200 p-5">
+          <h2 className="text-lg font-serif text-neutral-950 mb-4">Revenue (last 12 months)</h2>
           <RevenueChart data={revenueData} />
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <h2 className="font-semibold text-gray-900 mb-4">Overdue invoices (aging)</h2>
+        <div className="bg-white rounded-2xl border border-neutral-200 p-5">
+          <h2 className="text-lg font-serif text-neutral-950 mb-4">Overdue invoices (aging)</h2>
           <AgingTable buckets={agingBuckets} />
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <h2 className="font-semibold text-gray-900 mb-4">Top clients by revenue</h2>
+        <div className="bg-white rounded-2xl border border-neutral-200 p-5">
+          <h2 className="text-lg font-serif text-neutral-950 mb-4">Top clients by revenue</h2>
           {topClients.length === 0 ? (
-            <p className="text-sm text-gray-500 py-4 text-center">No paid invoices yet.</p>
+            <p className="text-sm text-neutral-500 py-4 text-center">No paid invoices yet.</p>
           ) : (
             <div className="space-y-3">
               {topClients.map((client, i) => {
@@ -153,23 +153,23 @@ export default async function ReportsPage() {
                     <div className="flex items-center justify-between mb-1">
                       <Link
                         href={`/clients/${client.id}`}
-                        className="text-sm font-medium text-gray-900 hover:underline flex items-center gap-2"
+                        className="text-sm font-medium text-neutral-950 hover:underline flex items-center gap-2"
                       >
-                        <span className="text-xs text-gray-400 w-4">{i + 1}</span>
+                        <span className="text-xs text-neutral-400 w-4">{i + 1}</span>
                         {client.name}
                       </Link>
                       <div className="text-right">
-                        <span className="text-sm font-semibold text-gray-900">
+                        <span className="text-sm font-semibold text-neutral-950">
                           {formatCurrency(client.revenue)}
                         </span>
-                        <span className="text-xs text-gray-400 ml-2">
+                        <span className="text-xs text-neutral-400 ml-2">
                           {client.invoices} invoice{client.invoices !== 1 ? "s" : ""}
                         </span>
                       </div>
                     </div>
-                    <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="h-1.5 bg-neutral-100 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-gray-900 rounded-full transition-all"
+                        className="h-full bg-neutral-950 rounded-full transition-all"
                         style={{ width: `${pct}%` }}
                       />
                     </div>
@@ -179,43 +179,43 @@ export default async function ReportsPage() {
             </div>
           )}
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
+        <div className="bg-white rounded-2xl border border-neutral-200 p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-gray-900">VAT summary by month</h2>
-            <span className="text-xs text-gray-400">Paid invoices only</span>
+            <h2 className="text-lg font-serif text-neutral-950">VAT summary by month</h2>
+            <span className="text-xs text-neutral-400">Paid invoices only</span>
           </div>
           {vatRows.length === 0 ? (
-            <p className="text-sm text-gray-500 py-4 text-center">No paid invoices with VAT yet.</p>
+            <p className="text-sm text-neutral-500 py-4 text-center">No paid invoices with VAT yet.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-100">
-                    <th className="text-left py-2 pr-4 text-xs font-medium text-gray-500 uppercase tracking-wide">Month</th>
-                    <th className="text-right py-2 px-4 text-xs font-medium text-gray-500 uppercase tracking-wide">Net</th>
-                    <th className="text-right py-2 px-4 text-xs font-medium text-gray-500 uppercase tracking-wide">VAT</th>
-                    <th className="text-right py-2 pl-4 text-xs font-medium text-gray-500 uppercase tracking-wide">Gross</th>
+                  <tr className="border-b border-neutral-100">
+                    <th className="text-left py-2 pr-4 text-xs font-medium text-neutral-500 uppercase tracking-wide">Month</th>
+                    <th className="text-right py-2 px-4 text-xs font-medium text-neutral-500 uppercase tracking-wide">Net</th>
+                    <th className="text-right py-2 px-4 text-xs font-medium text-neutral-500 uppercase tracking-wide">VAT</th>
+                    <th className="text-right py-2 pl-4 text-xs font-medium text-neutral-500 uppercase tracking-wide">Gross</th>
                   </tr>
                 </thead>
                 <tbody>
                   {vatRows.map((row) => (
-                    <tr key={row.month} className="border-b border-gray-50">
-                      <td className="py-2.5 pr-4 font-medium text-gray-900">{row.month}</td>
-                      <td className="py-2.5 px-4 text-right text-gray-600">{formatCurrency(row.net)}</td>
-                      <td className="py-2.5 px-4 text-right text-gray-600">{formatCurrency(row.vat)}</td>
-                      <td className="py-2.5 pl-4 text-right font-semibold text-gray-900">{formatCurrency(row.gross)}</td>
+                    <tr key={row.month} className="border-b border-neutral-100">
+                      <td className="py-2.5 pr-4 font-medium text-neutral-950">{row.month}</td>
+                      <td className="py-2.5 px-4 text-right text-neutral-600">{formatCurrency(row.net)}</td>
+                      <td className="py-2.5 px-4 text-right text-neutral-600">{formatCurrency(row.vat)}</td>
+                      <td className="py-2.5 pl-4 text-right font-semibold text-neutral-950">{formatCurrency(row.gross)}</td>
                     </tr>
                   ))}
                   {vatRows.length > 1 && (
-                    <tr className="border-t border-gray-200 bg-gray-50">
-                      <td className="py-2.5 pr-4 font-semibold text-gray-900 text-xs uppercase tracking-wide">Total</td>
-                      <td className="py-2.5 px-4 text-right font-semibold text-gray-900">
+                    <tr className="border-t border-neutral-200 bg-neutral-50">
+                      <td className="py-2.5 pr-4 font-semibold text-neutral-950 text-xs uppercase tracking-wide">Total</td>
+                      <td className="py-2.5 px-4 text-right font-semibold text-neutral-950">
                         {formatCurrency(vatRows.reduce((s, r) => s + r.net, 0))}
                       </td>
-                      <td className="py-2.5 px-4 text-right font-semibold text-gray-900">
+                      <td className="py-2.5 px-4 text-right font-semibold text-neutral-950">
                         {formatCurrency(vatRows.reduce((s, r) => s + r.vat, 0))}
                       </td>
-                      <td className="py-2.5 pl-4 text-right font-semibold text-gray-900">
+                      <td className="py-2.5 pl-4 text-right font-semibold text-neutral-950">
                         {formatCurrency(vatRows.reduce((s, r) => s + r.gross, 0))}
                       </td>
                     </tr>

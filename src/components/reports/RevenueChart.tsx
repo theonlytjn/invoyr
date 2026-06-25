@@ -21,7 +21,7 @@ interface Props {
 
 export default function RevenueChart({ data }: Props) {
   if (!data.length) {
-    return <p className="text-sm text-gray-500 py-8 text-center">No revenue data yet.</p>;
+    return <p className="text-sm text-neutral-500 py-8 text-center">No revenue data yet.</p>;
   }
 
   return (

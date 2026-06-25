@@ -119,20 +119,20 @@ export default function BrandingForm({ org }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Business details</h2>
-        <p className="text-sm text-gray-500">This information appears on your invoices.</p>
+        <h2 className="text-lg font-semibold text-neutral-950 dark:text-white mb-1">Business details</h2>
+        <p className="text-sm text-neutral-500">This information appears on your invoices.</p>
       </div>
 
       {/* Logo */}
       <div className="space-y-2">
         <Label>Company logo</Label>
-        <p className="text-xs text-gray-500">Shown on PDFs and the payment page. PNG, JPG or WebP, max 2 MB.</p>
+        <p className="text-xs text-neutral-500">Shown on PDFs and the payment page. PNG, JPG or WebP, max 2 MB.</p>
         <div className="flex items-center gap-4">
           {logoUrl ? (
-            <img src={logoUrl} alt="Company logo" className="h-14 w-auto max-w-[140px] object-contain rounded border border-gray-200 dark:border-gray-700 p-1 bg-white" />
+            <img src={logoUrl} alt="Company logo" className="h-14 w-auto max-w-[140px] object-contain rounded border border-neutral-200 dark:border-neutral-700 p-1 bg-white" />
           ) : (
-            <div className="h-14 w-28 rounded border border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center bg-gray-50 dark:bg-gray-800">
-              <span className="text-xs text-gray-400">No logo</span>
+            <div className="h-14 w-28 rounded border border-dashed border-neutral-300 dark:border-neutral-600 flex items-center justify-center bg-neutral-50 dark:bg-neutral-800">
+              <span className="text-xs text-neutral-400">No logo</span>
             </div>
           )}
           <div className="flex flex-col gap-1.5">
@@ -175,7 +175,7 @@ export default function BrandingForm({ org }: Props) {
           role="switch"
           aria-checked={vatRegistered}
           onClick={() => setVatRegistered(!vatRegistered)}
-          className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${vatRegistered ? "bg-gray-900" : "bg-gray-200"}`}
+          className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${vatRegistered ? "bg-neutral-950" : "bg-neutral-200"}`}
         >
           <span className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform ${vatRegistered ? "translate-x-4.5" : "translate-x-0.5"}`} />
         </button>
@@ -218,10 +218,10 @@ export default function BrandingForm({ org }: Props) {
       </div>
 
       {/* Bank details */}
-      <div className="pt-2 border-t border-gray-100 dark:border-gray-800 space-y-4">
+      <div className="pt-2 border-t border-neutral-100 dark:border-neutral-800 space-y-4">
         <div>
-          <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-1">Bank details</h3>
-          <p className="text-sm text-gray-500">Shown on invoices and the payment page so clients can pay by bank transfer.</p>
+          <h3 className="font-serif text-neutral-950 dark:text-white mb-1">Bank details</h3>
+          <p className="text-sm text-neutral-500">Shown on invoices and the payment page so clients can pay by bank transfer.</p>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
@@ -256,16 +256,16 @@ export default function BrandingForm({ org }: Props) {
       </div>
 
       {/* Brand colour */}
-      <div className="pt-2 border-t border-gray-100 dark:border-gray-800 space-y-2">
+      <div className="pt-2 border-t border-neutral-100 dark:border-neutral-800 space-y-2">
         <Label>Brand colour</Label>
         <div className="flex items-center gap-3">
           <input
             type="color"
             value={accentColor}
             onChange={(e) => setAccentColor(e.target.value)}
-            className="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer"
+            className="w-10 h-10 rounded-lg border border-neutral-200 cursor-pointer"
           />
-          <span className="text-sm text-gray-500 font-mono">{accentColor}</span>
+          <span className="text-sm text-neutral-500 font-mono">{accentColor}</span>
         </div>
       </div>
 

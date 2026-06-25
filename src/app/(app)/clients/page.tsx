@@ -38,7 +38,7 @@ export default async function ClientsPage({
         actions={
           <Link
             href="/clients/new"
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-neutral-950 text-white text-sm font-medium rounded-lg hover:bg-neutral-700 transition-colors"
           >
             + Add client
           </Link>

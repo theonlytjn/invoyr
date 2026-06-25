@@ -52,13 +52,13 @@ export default async function InvoicesPage({
             <a
               href="/api/invoices/export"
               download
-              className="flex items-center gap-1.5 px-3.5 py-2 border border-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-1.5 px-3.5 py-2 border border-neutral-200 text-neutral-700 text-sm font-medium rounded-lg hover:bg-neutral-50 transition-colors"
             >
               Export CSV
             </a>
             <Link
               href="/invoices/new"
-              className="flex items-center gap-1.5 px-3.5 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors"
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-neutral-950 text-white text-sm font-medium rounded-lg hover:bg-neutral-800 transition-colors"
             >
               + New invoice
             </Link>
@@ -68,15 +68,15 @@ export default async function InvoicesPage({
 
       <div className="p-6">
         {/* Status filter tabs */}
-        <div className="flex gap-1 mb-5 bg-gray-100 p-1 rounded-lg w-fit">
+        <div className="flex gap-1 mb-5 bg-neutral-100 p-1 rounded-lg w-fit">
           {STATUS_TABS.map((tab) => (
             <Link
               key={tab.value}
               href={tab.value === "all" ? "/invoices" : `/invoices?status=${tab.value}`}
               className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
                 (status ?? "all") === tab.value
-                  ? "bg-white text-gray-900 font-medium shadow-sm"
-                  : "text-gray-500 hover:text-gray-900"
+                  ? "bg-white text-neutral-950 font-medium shadow-sm"
+                  : "text-neutral-500 hover:text-neutral-950"
               }`}
             >
               {tab.label}

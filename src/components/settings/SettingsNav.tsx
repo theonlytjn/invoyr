@@ -16,7 +16,7 @@ export default function SettingsNav() {
   const pathname = usePathname();
 
   return (
-    <div className="border-b border-gray-200 px-6">
+    <div className="border-b border-neutral-200 px-6">
       <nav className="flex gap-1 -mb-px">
         {TABS.map((tab) => {
           const active = tab.href === "/settings"
@@ -29,8 +29,8 @@ export default function SettingsNav() {
               className={cn(
                 "px-4 py-3 text-sm font-medium border-b-2 transition-colors",
                 active
-                  ? "text-gray-900 border-gray-900"
-                  : "text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300"
+                  ? "text-neutral-950 border-neutral-950"
+                  : "text-neutral-500 border-transparent hover:text-neutral-700 hover:border-neutral-300"
               )}
             >
               {tab.label}

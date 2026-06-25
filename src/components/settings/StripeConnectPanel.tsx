@@ -34,7 +34,7 @@ export function StripeConnectPanel({ connected, accountId }: Props) {
             href="https://dashboard.stripe.com/"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-1 flex items-center justify-center px-4 py-2 border border-gray-200 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            className="flex-1 flex items-center justify-center px-4 py-2 border border-neutral-200 text-sm font-medium text-neutral-700 rounded-lg hover:bg-neutral-50 transition-colors"
           >
             Open Stripe Dashboard ↗
           </a>
@@ -53,11 +53,11 @@ export function StripeConnectPanel({ connected, accountId }: Props) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-        <div className="w-2 h-2 rounded-full bg-gray-300 shrink-0" />
-        <p className="text-sm text-gray-600">No Stripe account connected</p>
+      <div className="flex items-center gap-3 p-4 bg-neutral-50 border border-neutral-200 rounded-lg">
+        <div className="w-2 h-2 rounded-full bg-neutral-300 shrink-0" />
+        <p className="text-sm text-neutral-600">No Stripe account connected</p>
       </div>
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-neutral-500">
         Connect your Stripe account so clients can pay invoices online. Payments go directly to your Stripe balance.
       </p>
       <a

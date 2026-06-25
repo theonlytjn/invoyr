@@ -52,19 +52,19 @@ export function BillingActions({ currentPlan, status, hasActiveSubscription }: P
             className={cn(
               "rounded-xl border p-5",
               isCurrent
-                ? "border-gray-900 bg-gray-50"
+                ? "border-neutral-950 bg-neutral-50"
                 : isPopular
-                ? "border-gray-300"
-                : "border-gray-200 bg-white"
+                ? "border-neutral-300"
+                : "border-neutral-200 bg-white"
             )}
           >
             <div className="flex items-start justify-between gap-6">
               {/* Left: name + features */}
               <div className="flex-1 min-w-0 space-y-3">
                 <div className="flex items-center gap-2">
-                  <p className="font-semibold text-gray-900">{plan.name}</p>
+                  <p className="font-semibold text-neutral-950">{plan.name}</p>
                   {isPopular && !isCurrent && (
-                    <span className="px-2 py-0.5 bg-gray-900 text-white text-[10px] font-medium rounded-full leading-none">
+                    <span className="px-2 py-0.5 bg-neutral-950 text-white text-[10px] font-medium rounded-full leading-none">
                       Popular
                     </span>
                   )}
@@ -73,11 +73,11 @@ export function BillingActions({ currentPlan, status, hasActiveSubscription }: P
                       Current plan
                     </span>
                   )}
-                  <span className="text-xs text-gray-400">{plan.users}</span>
+                  <span className="text-xs text-neutral-400">{plan.users}</span>
                 </div>
                 <ul className="flex flex-wrap gap-x-4 gap-y-1">
                   {plan.features.map((f) => (
-                    <li key={f} className="text-xs text-gray-500 flex items-center gap-1">
+                    <li key={f} className="text-xs text-neutral-500 flex items-center gap-1">
                       <span className="text-green-600">✓</span>
                       {f}
                     </li>
@@ -88,8 +88,8 @@ export function BillingActions({ currentPlan, status, hasActiveSubscription }: P
               {/* Right: price + CTA */}
               <div className="shrink-0 flex flex-col items-end gap-3">
                 <div className="text-right">
-                  <span className="text-xl font-bold text-gray-900">{plan.price}</span>
-                  <span className="text-xs text-gray-400 ml-1">{plan.period}</span>
+                  <span className="text-xl font-bold text-neutral-950">{plan.price}</span>
+                  <span className="text-xs text-neutral-400 ml-1">{plan.period}</span>
                 </div>
                 {isCurrent ? (
                   <Button
@@ -120,7 +120,7 @@ export function BillingActions({ currentPlan, status, hasActiveSubscription }: P
           <button
             onClick={openPortal}
             disabled={loading === "portal"}
-            className="text-sm text-gray-400 hover:text-gray-700 transition-colors disabled:opacity-50"
+            className="text-sm text-neutral-400 hover:text-neutral-700 transition-colors disabled:opacity-50"
           >
             {loading === "portal" ? "Redirecting…" : "Manage billing & invoices →"}
           </button>

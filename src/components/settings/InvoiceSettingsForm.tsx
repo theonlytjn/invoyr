@@ -91,13 +91,13 @@ export default function InvoiceSettingsForm({ org }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Invoice settings</h2>
-        <p className="text-sm text-gray-500">Configure defaults for all new invoices.</p>
+        <h2 className="text-lg font-semibold text-neutral-950 dark:text-white mb-1">Invoice settings</h2>
+        <p className="text-sm text-neutral-500">Configure defaults for all new invoices.</p>
       </div>
 
       {/* Numbering */}
       <div className="space-y-4">
-        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Numbering</h3>
+        <h3 className="text-xs font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-300">Numbering</h3>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label htmlFor="prefix">Invoice prefix</Label>
@@ -119,15 +119,15 @@ export default function InvoiceSettingsForm({ org }: Props) {
             />
           </div>
         </div>
-        <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-sm">
-          <span className="text-gray-500">Next invoice will be: </span>
-          <span className="font-mono font-semibold text-gray-900 dark:text-white">{previewNumber}</span>
+        <div className="p-3 bg-neutral-50 dark:bg-neutral-800 rounded-lg text-sm">
+          <span className="text-neutral-500">Next invoice will be: </span>
+          <span className="font-mono font-semibold text-neutral-950 dark:text-white">{previewNumber}</span>
         </div>
       </div>
 
       {/* Currency & VAT */}
-      <div className="space-y-4 pt-2 border-t border-gray-100 dark:border-gray-800">
-        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Financial defaults</h3>
+      <div className="space-y-4 pt-2 border-t border-neutral-100 dark:border-neutral-800">
+        <h3 className="text-xs font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-300">Financial defaults</h3>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label htmlFor="currency">Currency</Label>
@@ -159,8 +159,8 @@ export default function InvoiceSettingsForm({ org }: Props) {
       </div>
 
       {/* Default template */}
-      <div className="space-y-1.5 pt-2 border-t border-gray-100 dark:border-gray-800">
-        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Appearance</h3>
+      <div className="space-y-1.5 pt-2 border-t border-neutral-100 dark:border-neutral-800">
+        <h3 className="text-xs font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-300 mb-3">Appearance</h3>
         <Label htmlFor="defaultTemplate">Default invoice template</Label>
         <Select value={defaultTemplate} onValueChange={setDefaultTemplate}>
           <SelectTrigger id="defaultTemplate">
@@ -175,8 +175,8 @@ export default function InvoiceSettingsForm({ org }: Props) {
       </div>
 
       {/* Defaults */}
-      <div className="space-y-4 pt-2 border-t border-gray-100 dark:border-gray-800">
-        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Default content</h3>
+      <div className="space-y-4 pt-2 border-t border-neutral-100 dark:border-neutral-800">
+        <h3 className="text-xs font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-300">Default content</h3>
         <div className="space-y-1.5">
           <Label htmlFor="defaultTerms">Payment terms</Label>
           <Textarea

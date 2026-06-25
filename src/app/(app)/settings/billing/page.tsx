@@ -13,7 +13,7 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   active: { label: "Active", color: "bg-green-50 text-green-700" },
   past_due: { label: "Payment overdue", color: "bg-amber-50 text-amber-700" },
   canceled: { label: "Canceled", color: "bg-red-50 text-red-700" },
-  incomplete: { label: "Incomplete", color: "bg-gray-100 text-gray-500" },
+  incomplete: { label: "Incomplete", color: "bg-neutral-100 text-neutral-500" },
 };
 
 export default async function BillingPage({
@@ -75,22 +75,22 @@ export default async function BillingPage({
         )}
 
         {/* Current plan summary */}
-        <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
-          <h2 className="font-semibold text-gray-900">Current plan</h2>
+        <div className="bg-white rounded-2xl border border-neutral-200 p-5 space-y-4">
+          <h2 className="text-lg font-serif text-neutral-950">Current plan</h2>
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-1">
-              <p className="text-lg font-semibold text-gray-900">
+              <p className="text-lg font-semibold text-neutral-950">
                 {planInfo?.name ?? "Free trial"}
               </p>
               {status === "trialing" && trialDaysLeft !== null && (
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-neutral-500">
                   {trialDaysLeft > 0
                     ? `${trialDaysLeft} day${trialDaysLeft === 1 ? "" : "s"} remaining in your trial`
                     : "Your trial has ended"}
                 </p>
               )}
               {status === "active" && periodEnd && (
-                <p className="text-sm text-gray-500">Renews {periodEnd}</p>
+                <p className="text-sm text-neutral-500">Renews {periodEnd}</p>
               )}
               {subscription?.cancel_at_period_end && periodEnd && (
                 <p className="text-sm text-amber-600">Cancels on {periodEnd}</p>
@@ -106,7 +106,7 @@ export default async function BillingPage({
 
         {/* Plan selection / upgrade */}
         <div className="space-y-3">
-          <h2 className="font-semibold text-gray-900">
+          <h2 className="text-lg font-serif text-neutral-950">
             {isActive && plan ? "Change plan" : "Choose a plan"}
           </h2>
           <BillingActions

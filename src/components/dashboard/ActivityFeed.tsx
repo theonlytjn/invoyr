@@ -24,17 +24,17 @@ interface Props {
 
 export default function ActivityFeed({ logs }: Props) {
   if (logs.length === 0) {
-    return <p className="text-sm text-gray-500 py-4 text-center">No activity yet.</p>;
+    return <p className="text-sm text-neutral-500 py-4 text-center">No activity yet.</p>;
   }
 
   return (
     <ul className="space-y-3">
       {logs.map((log) => (
         <li key={log.id} className="flex items-start gap-3">
-          <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mt-2 flex-shrink-0" />
+          <div className="w-1.5 h-1.5 rounded-full bg-neutral-400 mt-2 flex-shrink-0" />
           <div className="min-w-0">
-            <p className="text-sm text-gray-900">{logDescription(log)}</p>
-            <p className="text-xs text-gray-400 mt-0.5">{formatDate(log.created_at)}</p>
+            <p className="text-sm text-neutral-950">{logDescription(log)}</p>
+            <p className="text-xs text-neutral-400 mt-0.5">{formatDate(log.created_at)}</p>
           </div>
         </li>
       ))}

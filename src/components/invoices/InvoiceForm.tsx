@@ -155,13 +155,13 @@ export default function InvoiceForm({ org, clients, invoice, existingItems, invo
     <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
       {/* Form */}
       <div className="space-y-6">
-        <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-5">
-          <h2 className="font-semibold text-gray-900">Invoice details</h2>
+        <div className="bg-white rounded-2xl border border-neutral-200 p-6 space-y-5">
+          <h2 className="font-semibold text-neutral-950">Invoice details</h2>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label>Invoice number</Label>
-              <Input value={invoiceNumber} disabled className="bg-gray-50" />
+              <Input value={invoiceNumber} disabled className="bg-neutral-50" />
             </div>
             <div className="space-y-1.5">
               <Label>Template</Label>
@@ -239,27 +239,27 @@ export default function InvoiceForm({ org, clients, invoice, existingItems, invo
               />
             </div>
           ) : dueDate ? (
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-neutral-500">
               Due on {new Date(dueDate + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
             </p>
           ) : null}
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
-          <h2 className="font-semibold text-gray-900">Line items</h2>
+        <div className="bg-white rounded-2xl border border-neutral-200 p-6 space-y-4">
+          <h2 className="font-semibold text-neutral-950">Line items</h2>
           <LineItemsEditor items={items} onChange={setItems} />
 
           <div className="flex justify-end">
             <div className="w-52 space-y-1.5 text-sm">
-              <div className="flex justify-between text-gray-500">
+              <div className="flex justify-between text-neutral-500">
                 <span>Subtotal</span>
                 <span>{formatCurrency(totals.subtotal)}</span>
               </div>
-              <div className="flex justify-between text-gray-500">
+              <div className="flex justify-between text-neutral-500">
                 <span>VAT</span>
                 <span>{formatCurrency(totals.vat_amount)}</span>
               </div>
-              <div className="flex justify-between font-bold text-base pt-2 border-t border-gray-200">
+              <div className="flex justify-between font-bold text-base pt-2 border-t border-neutral-200">
                 <span>Total</span>
                 <span>{formatCurrency(totals.total)}</span>
               </div>
@@ -267,8 +267,8 @@ export default function InvoiceForm({ org, clients, invoice, existingItems, invo
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
-          <h2 className="font-semibold text-gray-900">Notes & terms</h2>
+        <div className="bg-white rounded-2xl border border-neutral-200 p-6 space-y-4">
+          <h2 className="font-semibold text-neutral-950">Notes & terms</h2>
           <div className="space-y-1.5">
             <Label>Notes</Label>
             <Textarea
@@ -313,8 +313,8 @@ export default function InvoiceForm({ org, clients, invoice, existingItems, invo
       {/* Live preview */}
       <div className="hidden xl:block">
         <div className="sticky top-6">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">Preview</p>
-          <div className="overflow-auto border border-gray-200 rounded-xl" style={{ maxHeight: "85vh" }}>
+          <p className="text-xs font-medium text-neutral-500 uppercase tracking-wide mb-3">Preview</p>
+          <div className="overflow-auto border border-neutral-200 rounded-xl" style={{ maxHeight: "85vh" }}>
             <div style={{ transform: "scale(0.75)", transformOrigin: "top left", width: "794px" }}>
               <TemplatePreview
                 invoice={{

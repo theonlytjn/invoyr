@@ -84,36 +84,36 @@ export default async function PaymentsPage({ searchParams }: Props) {
         </Suspense>
 
         {/* Summary card */}
-        <div className="bg-white rounded-xl border border-gray-200 p-5 inline-flex flex-col min-w-[180px]">
-          <p className="text-sm text-gray-500">Total collected</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{formatCurrency(total)}</p>
-          <p className="text-xs text-gray-400 mt-1">{periodLabel}</p>
+        <div className="bg-white rounded-2xl border border-neutral-200 p-5 inline-flex flex-col min-w-[180px]">
+          <p className="text-sm text-neutral-500">Total collected</p>
+          <p className="text-2xl font-bold text-neutral-950 mt-1">{formatCurrency(total)}</p>
+          <p className="text-xs text-neutral-400 mt-1">{periodLabel}</p>
         </div>
 
         {/* Table */}
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden">
           {!payments.length ? (
-            <p className="text-center py-12 text-sm text-gray-500">
+            <p className="text-center py-12 text-sm text-neutral-500">
               {period ? "No payments in this period." : "No payments yet."}
             </p>
           ) : (
             <table className="w-full text-sm">
-              <thead className="border-b border-gray-100">
+              <thead className="border-b border-neutral-100">
                 <tr>
-                  <th className="text-left py-3 px-5 text-xs text-gray-500 font-medium uppercase tracking-wide">Invoice</th>
-                  <th className="text-left py-3 px-4 text-xs text-gray-500 font-medium uppercase tracking-wide">Client</th>
-                  <th className="text-left py-3 px-4 text-xs text-gray-500 font-medium uppercase tracking-wide">Method</th>
-                  <th className="text-left py-3 px-4 text-xs text-gray-500 font-medium uppercase tracking-wide">Date</th>
-                  <th className="text-right py-3 px-5 text-xs text-gray-500 font-medium uppercase tracking-wide">Amount</th>
+                  <th className="text-left py-3 px-5 text-xs text-neutral-500 font-medium uppercase tracking-wide">Invoice</th>
+                  <th className="text-left py-3 px-4 text-xs text-neutral-500 font-medium uppercase tracking-wide">Client</th>
+                  <th className="text-left py-3 px-4 text-xs text-neutral-500 font-medium uppercase tracking-wide">Method</th>
+                  <th className="text-left py-3 px-4 text-xs text-neutral-500 font-medium uppercase tracking-wide">Date</th>
+                  <th className="text-right py-3 px-5 text-xs text-neutral-500 font-medium uppercase tracking-wide">Amount</th>
                 </tr>
               </thead>
               <tbody>
                 {payments.map((payment) => (
-                  <tr key={payment.id} className="border-b border-gray-50 hover:bg-gray-50">
-                    <td className="py-3 px-5 font-medium text-gray-900">{payment.invoices?.invoice_number ?? "—"}</td>
-                    <td className="py-3 px-4 text-gray-600">{payment.invoices?.clients?.name ?? "—"}</td>
-                    <td className="py-3 px-4 text-gray-600">{METHOD_LABELS[payment.method] ?? payment.method}</td>
-                    <td className="py-3 px-4 text-gray-600">{formatDate(payment.paid_at)}</td>
+                  <tr key={payment.id} className="border-b border-neutral-100 hover:bg-neutral-50">
+                    <td className="py-3 px-5 font-medium text-neutral-950">{payment.invoices?.invoice_number ?? "—"}</td>
+                    <td className="py-3 px-4 text-neutral-600">{payment.invoices?.clients?.name ?? "—"}</td>
+                    <td className="py-3 px-4 text-neutral-600">{METHOD_LABELS[payment.method] ?? payment.method}</td>
+                    <td className="py-3 px-4 text-neutral-600">{formatDate(payment.paid_at)}</td>
                     <td className="py-3 px-5 text-right font-medium text-green-700">{formatCurrency(payment.amount, payment.currency)}</td>
                   </tr>
                 ))}

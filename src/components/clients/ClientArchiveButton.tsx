@@ -30,7 +30,7 @@ export default function ClientArchiveButton({ clientId, archived }: Props) {
       size="sm"
       onClick={toggle}
       disabled={loading}
-      className={archived ? "text-gray-600" : "text-amber-600 border-amber-200 hover:bg-amber-50"}
+      className={archived ? "text-neutral-600" : "text-amber-600 border-amber-200 hover:bg-amber-50"}
     >
       {loading ? "…" : archived ? "Unarchive" : "Archive"}
     </Button>
