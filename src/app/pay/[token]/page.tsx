@@ -49,14 +49,14 @@ export default async function PayPage({ params, searchParams }: Props) {
         {/* Header */}
         <div className="p-6 text-white" style={{ backgroundColor: accentColor }}>
           {orgRow?.logo_url ? (
-            <img
-              src={orgRow.logo_url}
-              alt={orgRow.name}
-              className="h-10 w-auto max-w-[140px] object-contain mb-3 brightness-0 invert"
-            />
-          ) : (
-            <p className="text-sm opacity-75 mb-1">Invoice from</p>
-          )}
+            <div className="inline-flex items-center justify-center bg-white rounded-lg px-2 py-1 mb-3">
+              <img
+                src={orgRow.logo_url}
+                alt={orgRow.name}
+                className="h-8 w-auto max-w-[120px] object-contain"
+              />
+            </div>
+          ) : null}
           <p className="text-xl font-bold">{orgRow?.name ?? "Invoice"}</p>
           <p className="text-sm opacity-75 mt-1">#{invoice.invoice_number}</p>
         </div>
