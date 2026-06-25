@@ -8,35 +8,51 @@ interface Props {
   delta?: string;
   deltaPositive?: boolean;
   subtitle?: string;
-  accentClass?: string;
+  icon?: React.ReactNode;
   variant?: Variant;
 }
 
-const VARIANT_STYLES: Record<Variant, { border: string; value: string; bg: string }> = {
-  default: { border: "border-l-gray-200",  value: "text-gray-900",   bg: "bg-white" },
-  green:   { border: "border-l-green-400", value: "text-green-700",  bg: "bg-green-50/40" },
-  blue:    { border: "border-l-blue-400",  value: "text-blue-700",   bg: "bg-blue-50/40" },
-  red:     { border: "border-l-red-400",   value: "text-red-600",    bg: "bg-red-50/40" },
-};
-
-export default function MetricCard({ title, value, delta, deltaPositive, subtitle, accentClass, variant = "default" }: Props) {
-  const styles = VARIANT_STYLES[variant];
+export default function MetricCard({ title, value, delta, deltaPositive, subtitle, icon, variant = "default" }: Props) {
   return (
-    <div className={cn("rounded-xl border border-gray-200 border-l-4 p-5", styles.border, styles.bg)}>
-      <p className="text-sm text-gray-500 font-medium">{title}</p>
-      <p className={cn("text-2xl font-bold mt-1", accentClass ?? styles.value)}>{value}</p>
-      <div className="flex items-center gap-2 mt-1.5">
+    <div className="bg-white border border-[#e5e5e5] rounded-2xl overflow-clip">
+      {/* Top: label + icon */}
+      <div className="flex items-start justify-between px-5 pt-5 pb-3 border-b border-[#e5e5e5]">
+        <div className="flex flex-col gap-2">
+          <p className="text-[11px] font-medium tracking-widest text-[#737373] uppercase">
+            {title}
+          </p>
+          <p
+            className={cn(
+              "text-[32px] leading-10 tracking-tight font-normal",
+              variant === "red" ? "text-red-600" : variant === "green" ? "text-[#00a63e]" : variant === "blue" ? "text-blue-600" : "text-[#0a0a0a]"
+            )}
+            style={{ fontFamily: "var(--font-instrument-serif)" }}
+          >
+            {value}
+          </p>
+        </div>
+        {icon && (
+          <div className="border border-[#e5e5e5] rounded-xl p-3 flex-shrink-0">
+            {icon}
+          </div>
+        )}
+      </div>
+      {/* Bottom: delta / subtitle */}
+      <div className="px-5 py-3 flex items-center gap-2">
         {delta && (
           <span
             className={cn(
-              "text-xs font-medium px-1.5 py-0.5 rounded-full",
-              deltaPositive ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"
+              "text-[13px] font-medium",
+              deltaPositive ? "text-[#00a63e]" : "text-red-600"
             )}
           >
             {delta}
           </span>
         )}
-        {subtitle && <span className="text-xs text-gray-400">{subtitle}</span>}
+        {subtitle && (
+          <span className="text-[13px] text-[#737373]">{subtitle}</span>
+        )}
+        {!delta && !subtitle && <span className="text-[13px] text-[#737373]">&nbsp;</span>}
       </div>
     </div>
   );

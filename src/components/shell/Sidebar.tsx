@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
 import {
   DashboardIcon,
   InvoiceIcon,
@@ -14,9 +15,7 @@ import {
 } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
 import type { Organisation } from "@/lib/supabase/types";
-import Image from "next/image";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Overview", icon: DashboardIcon },
@@ -44,34 +43,43 @@ export default function Sidebar({ org, userEmail, plan }: Props) {
   }
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 bg-white border-r border-gray-200 h-screen sticky top-0">
+    <aside className="hidden lg:flex flex-col w-60 bg-[#f5f5f5] border-r border-[#e5e5e5] h-screen sticky top-0">
       {/* Brand */}
-      <div className="px-5 pt-5 pb-4 border-b border-gray-100">
-        <Image src="/main-logo.svg" alt="Invoyr" width={135} height={40} priority />
-        {org && (
-          <div className="mt-4 flex items-center gap-3">
+      <div className="px-5 pt-6 pb-5">
+        <Image src="/main-logo.svg" alt="Invoyr" width={120} height={36} priority />
+      </div>
+
+      {/* Org info */}
+      {org && (
+        <div className="px-4 pb-4">
+          <div className="bg-white border border-[#e5e5e5] rounded-xl px-3 py-2.5 flex items-center gap-3">
             {org.logo_url ? (
-              <img src={org.logo_url} alt={org.name} className="object-contain flex-shrink-0 bg-white border border-gray-100" style={{ width: 75, height: 75, padding: 1 }} />
+              <img
+                src={org.logo_url}
+                alt={org.name}
+                className="object-contain flex-shrink-0 bg-white border border-[#e5e5e5]"
+                style={{ width: 32, height: 32, padding: 1 }}
+              />
             ) : (
-              <div className="w-9 h-9 rounded-md bg-gray-900 flex items-center justify-center flex-shrink-0">
-                <span className="text-sm font-bold text-white">{org.name?.[0]?.toUpperCase()}</span>
+              <div className="w-8 h-8 rounded-lg bg-[#0a0a0a] flex items-center justify-center flex-shrink-0">
+                <span className="text-xs font-semibold text-white">{org.name?.[0]?.toUpperCase()}</span>
               </div>
             )}
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-gray-900 truncate">{org.name}</p>
-              <p className="text-xs text-gray-400 capitalize">
-                {plan ? `${plan} plan` : "Free trial"}
+              <p className="text-sm font-medium text-[#0a0a0a] truncate leading-5">{org.name}</p>
+              <p className="text-xs text-[#737373] capitalize leading-4">
+                {plan ? `${plan} plan` : "Free plan"}
               </p>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Quick action */}
-      <div className="px-4 pt-4 pb-2">
+      {/* New invoice */}
+      <div className="px-4 pb-3">
         <Link
           href="/invoices/new"
-          className="flex items-center justify-center gap-1.5 w-full py-2 px-3 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors"
+          className="flex items-center justify-center gap-1.5 w-full py-2 px-3 bg-[#0a0a0a] text-white text-sm font-medium rounded-lg hover:bg-[#171717] transition-colors"
         >
           <PlusIcon size={14} />
           New invoice
@@ -79,7 +87,7 @@ export default function Sidebar({ org, userEmail, plan }: Props) {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 py-2 space-y-0.5 overflow-y-auto">
+      <nav className="flex-1 px-3 py-1 space-y-0.5 overflow-y-auto">
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
           const active = pathname === href || (href !== "/dashboard" && pathname.startsWith(href));
           return (
@@ -87,13 +95,13 @@ export default function Sidebar({ org, userEmail, plan }: Props) {
               key={href}
               href={href}
               className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors",
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all",
                 active
-                  ? "bg-gray-100 text-gray-900 font-medium"
-                  : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
+                  ? "bg-white border border-[#e5e5e5] text-[#0a0a0a] font-medium shadow-[0px_0px_0px_2px_#f5f5f5,0px_0px_0px_4px_#1c1917]"
+                  : "text-[#737373] hover:text-[#0a0a0a] hover:bg-white/60"
               )}
             >
-              <Icon className="w-4 h-4 flex-shrink-0" />
+              <Icon className="w-[18px] h-[18px] flex-shrink-0" />
               {label}
             </Link>
           );
@@ -101,17 +109,20 @@ export default function Sidebar({ org, userEmail, plan }: Props) {
       </nav>
 
       {/* User footer */}
-      <div className="px-3 py-4 border-t border-gray-100">
-        <div className="flex items-center gap-2.5 px-2 py-2">
-          <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
-            <span className="text-xs font-medium text-gray-600">
+      <div className="px-3 py-4 border-t border-[#e5e5e5]">
+        <div className="flex items-center gap-2.5 px-2 py-2 rounded-lg hover:bg-white/60 transition-colors">
+          <div className="w-8 h-8 rounded-full bg-[#0a0a0a] flex items-center justify-center flex-shrink-0">
+            <span className="text-xs font-semibold text-white">
               {userEmail?.[0]?.toUpperCase() ?? "U"}
             </span>
           </div>
-          <p className="text-xs text-gray-600 truncate flex-1">{userEmail}</p>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-medium text-[#0a0a0a] truncate leading-4">{userEmail}</p>
+            <p className="text-[11px] text-[#737373] leading-4 capitalize">{plan ? `${plan} plan` : "Free plan"}</p>
+          </div>
           <button
             onClick={handleSignOut}
-            className="text-gray-400 hover:text-gray-900 transition-colors"
+            className="text-[#737373] hover:text-[#0a0a0a] transition-colors flex-shrink-0"
             aria-label="Sign out"
           >
             <LogOutIcon size={14} />

@@ -11,9 +11,9 @@ interface Props {
 
 export default function AppShell({ org, userEmail, plan, children }: Props) {
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
+    <div className="flex h-screen bg-[#f5f5f5] overflow-hidden">
       <Sidebar org={org} userEmail={userEmail} plan={plan} />
-      <main className="flex-1 overflow-y-auto pb-16 lg:pb-0">
+      <main className="flex-1 overflow-y-auto pb-16 lg:pb-0 bg-white">
         {children}
       </main>
       <MobileNav />

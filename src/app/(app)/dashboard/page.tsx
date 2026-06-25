@@ -83,7 +83,7 @@ export default async function DashboardPage() {
         actions={
           <Link
             href="/invoices/new"
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-[#0a0a0a] text-white text-sm font-medium rounded-lg hover:bg-[#171717] transition-colors"
           >
             + New invoice
           </Link>
@@ -157,17 +157,17 @@ export default async function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          <div className="xl:col-span-2 bg-white rounded-xl border border-gray-200">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-              <h2 className="font-semibold text-gray-900">Latest invoices</h2>
-              <Link href="/invoices" className="text-sm text-gray-500 hover:text-gray-900">View all →</Link>
+          <div className="xl:col-span-2 bg-white rounded-2xl border border-[#e5e5e5]">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-[#e5e5e5]">
+              <h2 className="text-sm font-semibold text-[#0a0a0a]">Latest invoices</h2>
+              <Link href="/invoices" className="text-xs text-[#737373] hover:text-[#0a0a0a]">View all →</Link>
             </div>
             <LatestInvoicesTable invoices={latestInvoices} />
           </div>
 
-          <div className="bg-white rounded-xl border border-gray-200">
-            <div className="px-5 py-4 border-b border-gray-100">
-              <h2 className="font-semibold text-gray-900">Activity</h2>
+          <div className="bg-white rounded-2xl border border-[#e5e5e5]">
+            <div className="px-5 py-4 border-b border-[#e5e5e5]">
+              <h2 className="text-sm font-semibold text-[#0a0a0a]">Activity</h2>
             </div>
             <div className="px-5 py-4">
               <ActivityFeed logs={logs} />
