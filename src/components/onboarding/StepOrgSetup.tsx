@@ -1,9 +1,6 @@
 "use client";
 
 import { slugify } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import type { OnboardingData } from "./OnboardingWizard";
 
 interface Props {
@@ -11,6 +8,11 @@ interface Props {
   update: (patch: Partial<OnboardingData>) => void;
   onNext: () => void;
 }
+
+const inputClass =
+  "w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-950 placeholder:text-neutral-400 focus:outline-none focus:shadow-[0_0_0_2px_#ffffff,0_0_0_4px_#0a0a0a] transition-shadow";
+
+const labelClass = "block text-sm font-medium text-neutral-950 mb-1.5";
 
 export default function StepOrgSetup({ data, update, onNext }: Props) {
   function handleSubmit(e: React.FormEvent) {
@@ -23,74 +25,88 @@ export default function StepOrgSetup({ data, update, onNext }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold text-gray-900">Set up your business</h2>
-        <p className="mt-1 text-gray-500">This will appear on your invoices.</p>
+        <h2 className="text-3xl font-serif text-neutral-950 mb-1">Set up your business</h2>
+        <p className="text-sm text-neutral-500">This will appear on your invoices.</p>
       </div>
+
       <div className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="orgName">Business name *</Label>
-          <Input
+        <div>
+          <label htmlFor="orgName" className={labelClass}>Business name <span className="text-neutral-400">(required)</span></label>
+          <input
             id="orgName"
             value={data.orgName}
-            onChange={(e) => {
-              update({ orgName: e.target.value, orgSlug: slugify(e.target.value) });
-            }}
+            onChange={(e) => update({ orgName: e.target.value, orgSlug: slugify(e.target.value) })}
             placeholder="Acme Design Studio"
             required
+            className={inputClass}
           />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="email">Business email</Label>
-          <Input
+
+        <div>
+          <label htmlFor="email" className={labelClass}>Business email</label>
+          <input
             id="email"
             type="email"
             value={data.email}
             onChange={(e) => update({ email: e.target.value })}
             placeholder="hello@acme.com"
+            className={inputClass}
           />
         </div>
+
         <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-2">
-            <Label htmlFor="address">Address</Label>
-            <Input
+          <div>
+            <label htmlFor="address" className={labelClass}>Address</label>
+            <input
               id="address"
               value={data.address}
               onChange={(e) => update({ address: e.target.value })}
               placeholder="123 Main St"
+              className={inputClass}
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="city">City</Label>
-            <Input
+          <div>
+            <label htmlFor="city" className={labelClass}>City</label>
+            <input
               id="city"
               value={data.city}
               onChange={(e) => update({ city: e.target.value })}
               placeholder="London"
+              className={inputClass}
             />
           </div>
         </div>
+
         <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-2">
-            <Label htmlFor="postcode">Postcode</Label>
-            <Input
+          <div>
+            <label htmlFor="postcode" className={labelClass}>Postcode</label>
+            <input
               id="postcode"
               value={data.postcode}
               onChange={(e) => update({ postcode: e.target.value })}
               placeholder="EC1A 1BB"
+              className={inputClass}
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="vatNumber">VAT number</Label>
-            <Input
+          <div>
+            <label htmlFor="vatNumber" className={labelClass}>VAT number</label>
+            <input
               id="vatNumber"
               value={data.vatNumber}
               onChange={(e) => update({ vatNumber: e.target.value })}
               placeholder="GB123456789"
+              className={inputClass}
             />
           </div>
         </div>
       </div>
-      <Button type="submit" className="w-full">Continue</Button>
+
+      <button
+        type="submit"
+        className="w-full rounded-lg bg-neutral-950 px-4 py-2.5 text-sm font-medium text-white hover:bg-neutral-800 transition-colors"
+      >
+        Continue
+      </button>
     </form>
   );
 }
