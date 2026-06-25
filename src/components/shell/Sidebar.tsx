@@ -51,7 +51,7 @@ export default function Sidebar({ org, userEmail, plan }: Props) {
         {org && (
           <div className="mt-4 flex items-center gap-3">
             {org.logo_url ? (
-              <img src={org.logo_url} alt={org.name} className="w-9 h-9 rounded-md object-contain flex-shrink-0 border border-gray-100 bg-white p-0.5" />
+              <img src={org.logo_url} alt={org.name} className="object-contain flex-shrink-0 bg-white border border-gray-100" style={{ width: 75, height: 75, padding: 1 }} />
             ) : (
               <div className="w-9 h-9 rounded-md bg-gray-900 flex items-center justify-center flex-shrink-0">
                 <span className="text-sm font-bold text-white">{org.name?.[0]?.toUpperCase()}</span>

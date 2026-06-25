@@ -49,7 +49,7 @@ export default async function PayPage({ params, searchParams }: Props) {
         {/* Header */}
         <div className="p-6 text-white" style={{ backgroundColor: accentColor }}>
           {orgRow?.logo_url ? (
-            <div className="inline-flex items-center justify-center bg-white p-2 mb-3" style={{ width: 150, height: 150 }}>
+            <div className="inline-flex items-center justify-center bg-white mb-3" style={{ width: 75, height: 75, padding: 1 }}>
               <img
                 src={orgRow.logo_url}
                 alt={orgRow.name}
