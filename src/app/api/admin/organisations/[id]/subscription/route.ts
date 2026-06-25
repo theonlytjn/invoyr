@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/admin";
+import { getAdminUser } from "@/lib/admin";
 import { createServiceClient } from "@/lib/supabase/server";
 import { z } from "zod";
 
@@ -12,7 +12,9 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  await requireAdmin();
+  const admin = await getAdminUser();
+  if (!admin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
   const { id } = await params;
   const body = await req.json();
   const parsed = Schema.safeParse(body);
@@ -21,9 +23,24 @@ export async function POST(
   const supabase = await createServiceClient();
   const { plan, status } = parsed.data;
 
-  const { error } = await supabase
+  // Check if a row already exists
+  const { data: existing } = await supabase
     .from("subscriptions")
-    .upsert({ org_id: id, plan, status, updated_at: new Date().toISOString() }, { onConflict: "org_id" });
+    .select("id")
+    .eq("org_id", id)
+    .maybeSingle();
+
+  let error;
+  if (existing) {
+    ({ error } = await supabase
+      .from("subscriptions")
+      .update({ plan, status, updated_at: new Date().toISOString() })
+      .eq("org_id", id));
+  } else {
+    ({ error } = await supabase
+      .from("subscriptions")
+      .insert({ org_id: id, plan, status }));
+  }
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
 

@@ -31,6 +31,7 @@ export default function AdminOrgDetailPage() {
   const [plan, setPlan] = useState("free");
   const [status, setStatus] = useState<string>("active");
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch(`/api/admin/organisations/${id}`)
@@ -44,12 +45,18 @@ export default function AdminOrgDetailPage() {
   }, [id]);
 
   function handleSaveSub() {
+    setSaveError(null);
     startTransition(async () => {
-      await fetch(`/api/admin/organisations/${id}/subscription`, {
+      const res = await fetch(`/api/admin/organisations/${id}/subscription`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan, status }),
       });
+      const json = await res.json();
+      if (!res.ok) {
+        setSaveError(json.error ?? "Save failed");
+        return;
+      }
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     });
@@ -115,6 +122,7 @@ export default function AdminOrgDetailPage() {
         >
           {saved ? "Saved!" : isPending ? "Saving…" : "Save subscription"}
         </button>
+        {saveError && <p className="mt-2 text-sm text-red-600">{saveError}</p>}
       </div>
 
       <div className="bg-red-50 border border-red-200 rounded-xl p-6">

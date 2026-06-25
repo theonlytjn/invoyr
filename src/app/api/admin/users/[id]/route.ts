@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/admin";
+import { getAdminUser } from "@/lib/admin";
 import { createServiceClient } from "@/lib/supabase/server";
 
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  await requireAdmin();
+  const admin = await getAdminUser();
+  if (!admin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
   const { id } = await params;
   const supabase = await createServiceClient();
 
@@ -25,7 +27,7 @@ export async function GET(
   let plan: string | null = null;
   let status: string | null = null;
   if (orgId) {
-    const { data: sub } = await supabase.from("subscriptions").select("plan, status").eq("org_id", orgId).single();
+    const { data: sub } = await supabase.from("subscriptions").select("plan, status").eq("org_id", orgId).maybeSingle();
     plan = sub?.plan ?? null;
     status = sub?.status ?? null;
   }
