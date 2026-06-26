@@ -79,7 +79,8 @@ export default function AdminSidebar() {
       {/* Brand */}
       <div className="px-5 pt-6 pb-4">
         <Link href="/admin">
-          <Image src="/main-logo.svg" alt="Invoyr" width={110} height={34} priority className="dark:brightness-0 dark:invert" />
+          <Image src="/main-logo.svg" alt="Invoyr" width={110} height={34} priority className="dark:hidden" />
+          <Image src="/main-logo-dark.svg" alt="Invoyr" width={110} height={34} priority className="hidden dark:block" />
         </Link>
         <div className="mt-3">
           <span className="px-2 py-0.5 bg-neutral-950 dark:bg-neutral-50 text-white dark:text-neutral-950 text-[10px] font-bold uppercase tracking-widest rounded-md">
