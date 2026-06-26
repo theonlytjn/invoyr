@@ -128,7 +128,7 @@ export default async function ReportsPage() {
   return (
     <div>
       <Topbar title="Reports" />
-      <div className="p-6 space-y-6">
+      <div className="p-4 sm:p-6 space-y-6">
         <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5">
           <h2 className="text-lg font-serif text-neutral-950 dark:text-neutral-50 mb-4">Revenue (last 12 months)</h2>
           <RevenueChart data={revenueData} />

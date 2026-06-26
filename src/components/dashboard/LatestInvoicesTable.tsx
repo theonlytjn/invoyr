@@ -28,11 +28,11 @@ export default function LatestInvoicesTable({ invoices }: Props) {
         <thead>
           <tr className="border-b-[0.5px] border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-800/50">
             <th className="text-left py-3 px-5 text-xs font-medium text-neutral-500">Invoice</th>
-            <th className="text-left py-3 px-5 text-xs font-medium text-neutral-500">Client</th>
+            <th className="hidden sm:table-cell text-left py-3 px-5 text-xs font-medium text-neutral-500">Client</th>
             <th className="text-left py-3 px-5 text-xs font-medium text-neutral-500">Status</th>
-            <th className="text-left py-3 px-5 text-xs font-medium text-neutral-500">Due</th>
+            <th className="hidden sm:table-cell text-left py-3 px-5 text-xs font-medium text-neutral-500">Due</th>
             <th className="text-right py-3 px-5 text-xs font-medium text-neutral-500">Amount</th>
-            <th className="py-3 px-5" />
+            <th className="hidden sm:table-cell py-3 px-5" />
           </tr>
         </thead>
         <tbody>
@@ -43,19 +43,19 @@ export default function LatestInvoicesTable({ invoices }: Props) {
                   {invoice.invoice_number}
                 </Link>
               </td>
-              <td className="py-4 px-5 text-sm text-neutral-500 dark:text-neutral-400">
+              <td className="hidden sm:table-cell py-4 px-5 text-sm text-neutral-500 dark:text-neutral-400">
                 {invoice.clients?.name ?? <span className="text-neutral-400 italic">No client</span>}
               </td>
               <td className="py-4 px-5">
                 <InvoiceStatusBadge status={invoice.status} />
               </td>
-              <td className="py-4 px-5 text-sm text-neutral-500 dark:text-neutral-400">
+              <td className="hidden sm:table-cell py-4 px-5 text-sm text-neutral-500 dark:text-neutral-400">
                 {invoice.due_date ? formatDate(invoice.due_date) : "—"}
               </td>
-              <td className="py-4 px-5 text-right text-sm font-medium text-neutral-950 dark:text-neutral-50">
+              <td className="py-4 px-5 text-right text-sm font-medium text-neutral-950 dark:text-neutral-50 whitespace-nowrap">
                 {formatCurrency(invoice.total, invoice.currency)}
               </td>
-              <td className="py-4 px-5 text-right">
+              <td className="hidden sm:table-cell py-4 px-5 text-right">
                 <Link href={`/invoices/${invoice.id}`} className="text-xs text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-50">
                   View →
                 </Link>

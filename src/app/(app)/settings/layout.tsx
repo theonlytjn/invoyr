@@ -7,7 +7,7 @@ export default function SettingsLayout({ children }: { children: ReactNode }) {
     <div>
       <Topbar title="Settings" />
       <SettingsNav />
-      <div className="p-6 max-w-2xl">{children}</div>
+      <div className="p-4 sm:p-6 max-w-2xl">{children}</div>
     </div>
   );
 }

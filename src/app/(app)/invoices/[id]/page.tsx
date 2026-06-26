@@ -75,7 +75,7 @@ export default async function InvoiceDetailPage({ params }: Props) {
         }
       />
 
-      <div className="p-6 grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <div className="p-4 sm:p-6 grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className="xl:col-span-2 overflow-auto border border-neutral-200 dark:border-neutral-800 rounded-xl bg-neutral-50 dark:bg-neutral-900 p-4">
           <div style={{ transform: "scale(0.8)", transformOrigin: "top left", width: "794px" }}>
             <Template

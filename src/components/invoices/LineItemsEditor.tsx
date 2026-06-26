@@ -38,7 +38,8 @@ export default function LineItemsEditor({ items, currency = "GBP", onChange }: P
 
   return (
     <div className="space-y-2">
-      <div className="grid grid-cols-[1fr_80px_100px_80px_90px_36px] gap-2 text-xs font-medium text-neutral-500 px-1">
+      {/* Desktop header */}
+      <div className="hidden sm:grid sm:grid-cols-[1fr_80px_100px_80px_90px_36px] gap-2 text-xs font-medium text-neutral-500 px-1">
         <span>Description</span>
         <span className="text-right">Qty</span>
         <span className="text-right">Unit price</span>
@@ -50,49 +51,62 @@ export default function LineItemsEditor({ items, currency = "GBP", onChange }: P
       {items.map((item) => {
         const lineTotal = item.quantity * item.unit_price;
         return (
-          <div key={item.id} className="grid grid-cols-[1fr_80px_100px_80px_90px_36px] gap-2 items-center">
+          <div key={item.id} className="rounded-lg border border-neutral-200 dark:border-neutral-700 p-3 sm:p-0 sm:border-0 sm:rounded-none space-y-2 sm:space-y-0 sm:grid sm:grid-cols-[1fr_80px_100px_80px_90px_36px] sm:gap-2 sm:items-center">
             <Input
               value={item.description}
               onChange={(e) => update(item.id, { description: e.target.value })}
               placeholder="Service description"
               className="h-8 text-sm"
             />
-            <Input
-              type="number"
-              min="0"
-              step="0.01"
-              value={item.quantity}
-              onChange={(e) => update(item.id, { quantity: parseFloat(e.target.value) || 0 })}
-              className="h-8 text-sm text-right"
-            />
-            <Input
-              type="number"
-              min="0"
-              step="0.01"
-              value={item.unit_price}
-              onChange={(e) => update(item.id, { unit_price: parseFloat(e.target.value) || 0 })}
-              className="h-8 text-sm text-right"
-            />
-            <Input
-              type="number"
-              min="0"
-              max="100"
-              step="0.1"
-              value={item.vat_rate}
-              onChange={(e) => update(item.id, { vat_rate: parseFloat(e.target.value) || 0 })}
-              className="h-8 text-sm text-right"
-            />
-            <p className="text-sm font-medium text-right pr-1">
-              {formatCurrency(lineTotal, currency)}
-            </p>
-            <button
-              type="button"
-              onClick={() => remove(item.id)}
-              className="text-neutral-400 hover:text-red-500 transition-colors"
-              disabled={items.length === 1}
-            >
-              <TrashIcon size={16} />
-            </button>
+            <div className="grid grid-cols-3 gap-2 sm:contents">
+              <div className="sm:contents">
+                <label className="text-xs text-neutral-400 sm:hidden">Qty</label>
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={item.quantity}
+                  onChange={(e) => update(item.id, { quantity: parseFloat(e.target.value) || 0 })}
+                  className="h-8 text-sm text-right"
+                />
+              </div>
+              <div className="sm:contents">
+                <label className="text-xs text-neutral-400 sm:hidden">Price</label>
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={item.unit_price}
+                  onChange={(e) => update(item.id, { unit_price: parseFloat(e.target.value) || 0 })}
+                  className="h-8 text-sm text-right"
+                />
+              </div>
+              <div className="sm:contents">
+                <label className="text-xs text-neutral-400 sm:hidden">VAT %</label>
+                <Input
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.1"
+                  value={item.vat_rate}
+                  onChange={(e) => update(item.id, { vat_rate: parseFloat(e.target.value) || 0 })}
+                  className="h-8 text-sm text-right"
+                />
+              </div>
+            </div>
+            <div className="flex items-center justify-between sm:contents">
+              <p className="text-sm font-medium sm:text-right sm:pr-1">
+                {formatCurrency(lineTotal, currency)}
+              </p>
+              <button
+                type="button"
+                onClick={() => remove(item.id)}
+                className="text-neutral-400 hover:text-red-500 transition-colors"
+                disabled={items.length === 1}
+              >
+                <TrashIcon size={16} />
+              </button>
+            </div>
           </div>
         );
       })}

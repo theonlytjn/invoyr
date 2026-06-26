@@ -77,7 +77,7 @@ export default async function PaymentsPage({ searchParams }: Props) {
   return (
     <div>
       <Topbar title="Payments" />
-      <div className="p-6 space-y-5">
+      <div className="p-4 sm:p-6 space-y-5">
         {/* Filter bar */}
         <Suspense>
           <PaymentsFilter />
@@ -91,7 +91,7 @@ export default async function PaymentsPage({ searchParams }: Props) {
         </div>
 
         {/* Table */}
-        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 overflow-hidden">
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 overflow-x-auto">
           {!payments.length ? (
             <p className="text-center py-12 text-sm text-neutral-500">
               {period ? "No payments in this period." : "No payments yet."}
@@ -102,8 +102,8 @@ export default async function PaymentsPage({ searchParams }: Props) {
                 <tr>
                   <th className="text-left py-3 px-5 text-xs text-neutral-500 font-medium uppercase tracking-wide">Invoice</th>
                   <th className="text-left py-3 px-4 text-xs text-neutral-500 font-medium uppercase tracking-wide">Client</th>
-                  <th className="text-left py-3 px-4 text-xs text-neutral-500 font-medium uppercase tracking-wide">Method</th>
-                  <th className="text-left py-3 px-4 text-xs text-neutral-500 font-medium uppercase tracking-wide">Date</th>
+                  <th className="hidden sm:table-cell text-left py-3 px-4 text-xs text-neutral-500 font-medium uppercase tracking-wide">Method</th>
+                  <th className="hidden sm:table-cell text-left py-3 px-4 text-xs text-neutral-500 font-medium uppercase tracking-wide">Date</th>
                   <th className="text-right py-3 px-5 text-xs text-neutral-500 font-medium uppercase tracking-wide">Amount</th>
                 </tr>
               </thead>
@@ -111,10 +111,10 @@ export default async function PaymentsPage({ searchParams }: Props) {
                 {payments.map((payment) => (
                   <tr key={payment.id} className="border-b border-neutral-100 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800">
                     <td className="py-3 px-5 font-medium text-neutral-950 dark:text-neutral-50">{payment.invoices?.invoice_number ?? "—"}</td>
-                    <td className="py-3 px-4 text-neutral-600 dark:text-neutral-400">{payment.invoices?.clients?.name ?? "—"}</td>
-                    <td className="py-3 px-4 text-neutral-600 dark:text-neutral-400">{METHOD_LABELS[payment.method] ?? payment.method}</td>
-                    <td className="py-3 px-4 text-neutral-600 dark:text-neutral-400">{formatDate(payment.paid_at)}</td>
-                    <td className="py-3 px-5 text-right font-medium text-green-700 dark:text-green-400">{formatCurrency(payment.amount, payment.currency)}</td>
+                    <td className="py-3 px-4 text-neutral-600 dark:text-neutral-400 max-w-[120px] truncate">{payment.invoices?.clients?.name ?? "—"}</td>
+                    <td className="hidden sm:table-cell py-3 px-4 text-neutral-600 dark:text-neutral-400">{METHOD_LABELS[payment.method] ?? payment.method}</td>
+                    <td className="hidden sm:table-cell py-3 px-4 text-neutral-600 dark:text-neutral-400">{formatDate(payment.paid_at)}</td>
+                    <td className="py-3 px-5 text-right font-medium text-green-700 dark:text-green-400 whitespace-nowrap">{formatCurrency(payment.amount, payment.currency)}</td>
                   </tr>
                 ))}
               </tbody>

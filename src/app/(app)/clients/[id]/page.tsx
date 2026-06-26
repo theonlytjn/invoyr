@@ -47,7 +47,7 @@ export default async function ClientDetailPage({ params }: Props) {
           </div>
         }
       />
-      <div className="p-6 grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <div className="p-4 sm:p-6 grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Details */}
         <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5 space-y-4 h-fit">
           <h3 className="font-semibold text-neutral-950 dark:text-neutral-50 text-sm">Contact details</h3>

@@ -52,7 +52,7 @@ export default async function InvoicesPage({
             <a
               href="/api/invoices/export"
               download
-              className="flex items-center gap-1.5 px-3.5 py-2 border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 text-sm font-medium rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+              className="hidden sm:flex items-center gap-1.5 px-3.5 py-2 border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 text-sm font-medium rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
             >
               Export CSV
             </a>
@@ -60,28 +60,30 @@ export default async function InvoicesPage({
               href="/invoices/new"
               className="flex items-center gap-1.5 px-3.5 py-2 bg-neutral-950 text-white text-sm font-medium rounded-lg hover:bg-neutral-800 transition-colors"
             >
-              + New invoice
+              + New
             </Link>
           </>
         }
       />
 
-      <div className="p-6">
-        {/* Status filter tabs */}
-        <div className="flex gap-1 mb-5 bg-neutral-100 dark:bg-neutral-800 p-1 rounded-lg w-fit">
-          {STATUS_TABS.map((tab) => (
-            <Link
-              key={tab.value}
-              href={tab.value === "all" ? "/invoices" : `/invoices?status=${tab.value}`}
-              className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
-                (status ?? "all") === tab.value
-                  ? "bg-white dark:bg-neutral-700 text-neutral-950 dark:text-neutral-50 font-medium shadow-sm"
-                  : "text-neutral-500 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-50"
-              }`}
-            >
-              {tab.label}
-            </Link>
-          ))}
+      <div className="p-4 sm:p-6">
+        {/* Status filter tabs — scrollable on mobile */}
+        <div className="overflow-x-auto pb-1 mb-5 -mx-4 px-4 sm:mx-0 sm:px-0">
+          <div className="flex gap-1 bg-neutral-100 dark:bg-neutral-800 p-1 rounded-lg w-fit min-w-max">
+            {STATUS_TABS.map((tab) => (
+              <Link
+                key={tab.value}
+                href={tab.value === "all" ? "/invoices" : `/invoices?status=${tab.value}`}
+                className={`px-3 py-1.5 text-sm rounded-md transition-colors whitespace-nowrap ${
+                  (status ?? "all") === tab.value
+                    ? "bg-white dark:bg-neutral-700 text-neutral-950 dark:text-neutral-50 font-medium shadow-sm"
+                    : "text-neutral-500 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-50"
+                }`}
+              >
+                {tab.label}
+              </Link>
+            ))}
+          </div>
         </div>
 
         <InvoicesTable invoices={invoices} />

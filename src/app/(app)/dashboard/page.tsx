@@ -99,7 +99,7 @@ export default async function DashboardPage() {
         }
       />
 
-      <div className="p-6 space-y-6">
+      <div className="p-4 sm:p-6 space-y-6">
         <div>
           <h1 className="text-2xl font-serif text-neutral-950 dark:text-neutral-50">Welcome back, {firstName}</h1>
           <p className="text-sm text-neutral-500 mt-0.5">Here&apos;s what&apos;s happening with {org.name}.</p>

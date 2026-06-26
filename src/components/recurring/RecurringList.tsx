@@ -63,14 +63,14 @@ export default function RecurringList({ schedules }: Props) {
   }
 
   return (
-    <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 overflow-hidden">
+    <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-neutral-100 dark:border-neutral-800">
             <th className="text-left py-3 px-5 text-xs text-neutral-400 uppercase tracking-wider">Client</th>
             <th className="text-left py-3 px-4 text-xs text-neutral-400 uppercase tracking-wider">Frequency</th>
             <th className="text-left py-3 px-4 text-xs text-neutral-400 uppercase tracking-wider">Amount</th>
-            <th className="text-left py-3 px-4 text-xs text-neutral-400 uppercase tracking-wider">Next invoice</th>
+            <th className="hidden sm:table-cell text-left py-3 px-4 text-xs text-neutral-400 uppercase tracking-wider">Next invoice</th>
             <th className="text-left py-3 px-4 text-xs text-neutral-400 uppercase tracking-wider">Status</th>
             <th className="py-3 px-4" />
           </tr>
@@ -94,7 +94,7 @@ export default function RecurringList({ schedules }: Props) {
                 <td className="py-3 px-4 font-medium text-neutral-950 dark:text-neutral-50">
                   {formatCurrency(totals.total, s.currency)}
                 </td>
-                <td className="py-3 px-4 text-neutral-600 dark:text-neutral-400">
+                <td className="hidden sm:table-cell py-3 px-4 text-neutral-600 dark:text-neutral-400">
                   {s.status === "ended" ? "—" : new Date(s.next_run_at).toLocaleDateString("en-GB")}
                 </td>
                 <td className="py-3 px-4">

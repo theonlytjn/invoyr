@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import type { Client } from "@/lib/supabase/types";
 
@@ -12,7 +11,6 @@ interface Props {
 }
 
 export default function ClientsTable({ clients, showArchived }: Props) {
-  const router = useRouter();
   const [query, setQuery] = useState("");
 
   const filtered = query.trim()
@@ -44,7 +42,7 @@ export default function ClientsTable({ clients, showArchived }: Props) {
         </Link>
       </div>
 
-      <div className="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 overflow-hidden">
+      <div className="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 overflow-x-auto">
         {!filtered.length ? (
           <div className="text-center py-16">
             {query ? (
@@ -67,9 +65,9 @@ export default function ClientsTable({ clients, showArchived }: Props) {
             <thead className="border-b border-neutral-100 dark:border-neutral-800">
               <tr>
                 <th className="text-left py-3 px-5 text-xs font-medium text-neutral-500 uppercase tracking-wide">Name</th>
-                <th className="text-left py-3 px-4 text-xs font-medium text-neutral-500 uppercase tracking-wide">Company</th>
+                <th className="hidden sm:table-cell text-left py-3 px-4 text-xs font-medium text-neutral-500 uppercase tracking-wide">Company</th>
                 <th className="text-left py-3 px-4 text-xs font-medium text-neutral-500 uppercase tracking-wide">Email</th>
-                <th className="text-left py-3 px-4 text-xs font-medium text-neutral-500 uppercase tracking-wide">VAT</th>
+                <th className="hidden md:table-cell text-left py-3 px-4 text-xs font-medium text-neutral-500 uppercase tracking-wide">VAT</th>
               </tr>
             </thead>
             <tbody>
@@ -83,9 +81,9 @@ export default function ClientsTable({ clients, showArchived }: Props) {
                       <span className="ml-2 text-xs text-neutral-400 bg-neutral-100 dark:bg-neutral-800 px-1.5 py-0.5 rounded">Archived</span>
                     )}
                   </td>
-                  <td className="py-3 px-4 text-neutral-600 dark:text-neutral-400">{client.company_name ?? "—"}</td>
-                  <td className="py-3 px-4 text-neutral-600 dark:text-neutral-400">{client.email ?? "—"}</td>
-                  <td className="py-3 px-4 text-neutral-500 dark:text-neutral-400 font-mono text-xs">{client.vat_number ?? "—"}</td>
+                  <td className="hidden sm:table-cell py-3 px-4 text-neutral-600 dark:text-neutral-400">{client.company_name ?? "—"}</td>
+                  <td className="py-3 px-4 text-neutral-600 dark:text-neutral-400 max-w-[140px] truncate">{client.email ?? "—"}</td>
+                  <td className="hidden md:table-cell py-3 px-4 text-neutral-500 dark:text-neutral-400 font-mono text-xs">{client.vat_number ?? "—"}</td>
                 </tr>
               ))}
             </tbody>

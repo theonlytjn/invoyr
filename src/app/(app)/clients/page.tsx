@@ -44,7 +44,7 @@ export default async function ClientsPage({
           </Link>
         }
       />
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <ClientsTable clients={clients} showArchived={showArchived} />
       </div>
     </div>

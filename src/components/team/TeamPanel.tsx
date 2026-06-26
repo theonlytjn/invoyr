@@ -79,7 +79,7 @@ export default function TeamPanel({ members, invites, currentUserId, currentUser
   return (
     <div className="space-y-6">
       {/* Current members */}
-      <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 overflow-hidden">
+      <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 overflow-x-auto">
         <div className="px-5 py-4 border-b border-neutral-100 dark:border-neutral-800">
           <h2 className="font-semibold text-neutral-950 dark:text-neutral-50">Team members</h2>
         </div>
