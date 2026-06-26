@@ -32,7 +32,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       .select("plan, status")
       .eq("org_id", rawOrg.id)
       .single();
-    plan = sub?.plan ?? (sub?.status === "trialing" ? "trial" : null);
+    plan = sub?.plan ?? null;
   }
 
   return (

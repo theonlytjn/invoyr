@@ -75,5 +75,3 @@ export function getPriceId(planId: PlanId): string {
   };
   return ids[planId];
 }
-
-export const TRIAL_DAYS = 14;

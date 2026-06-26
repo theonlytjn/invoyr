@@ -43,7 +43,7 @@ export default function StepPlanSelection({ data, update, onBack, onNext }: Prop
     <div className="space-y-6">
       <div>
         <h2 className="text-3xl font-serif text-neutral-950 mb-1">Choose your plan</h2>
-        <p className="text-sm text-neutral-500">14-day free trial · No credit card needed</p>
+        <p className="text-sm text-neutral-500">Annual billing · Cancel anytime</p>
       </div>
 
       <div className="space-y-2.5">

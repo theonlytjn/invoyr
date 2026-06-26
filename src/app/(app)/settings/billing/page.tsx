@@ -9,11 +9,11 @@ import type { Metadata } from "next";
 export const metadata: Metadata = { title: "Billing" };
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  trialing: { label: "Free trial", color: "bg-blue-50 text-blue-700" },
-  active: { label: "Active", color: "bg-green-50 text-green-700" },
-  past_due: { label: "Payment overdue", color: "bg-amber-50 text-amber-700" },
-  canceled: { label: "Canceled", color: "bg-red-50 text-red-700" },
-  incomplete: { label: "Incomplete", color: "bg-neutral-100 text-neutral-500" },
+  active: { label: "Active", color: "bg-green-50 text-green-700 dark:bg-green-950/30 dark:text-green-400" },
+  past_due: { label: "Payment overdue", color: "bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400" },
+  canceled: { label: "Canceled", color: "bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-400" },
+  incomplete: { label: "Incomplete", color: "bg-neutral-100 text-neutral-500 dark:bg-neutral-800" },
+  none: { label: "No plan", color: "bg-neutral-100 text-neutral-500 dark:bg-neutral-800" },
 };
 
 export default async function BillingPage({
@@ -31,18 +31,11 @@ export default async function BillingPage({
     .eq("org_id", org.id)
     .single();
 
-  const status = subscription?.status ?? "trialing";
+  const status = subscription?.status ?? "none";
   const plan = subscription?.plan ?? null;
   const planInfo = plan ? PLAN_MAP[plan as keyof typeof PLAN_MAP] ?? null : null;
-  const statusMeta = STATUS_LABELS[status] ?? STATUS_LABELS.trialing;
+  const statusMeta = STATUS_LABELS[status] ?? STATUS_LABELS.none;
   const isActive = isSubscriptionActive(status);
-
-  const trialEnd = subscription?.trial_ends_at
-    ? new Date(subscription.trial_ends_at)
-    : null;
-  const trialDaysLeft = trialEnd
-    ? Math.max(0, Math.ceil((trialEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
-    : null;
 
   const periodEnd = subscription?.current_period_end
     ? new Date(subscription.current_period_end).toLocaleDateString("en-GB", {
@@ -80,15 +73,8 @@ export default async function BillingPage({
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-1">
               <p className="text-lg font-semibold text-neutral-950 dark:text-neutral-50">
-                {planInfo?.name ?? "Free trial"}
+                {planInfo?.name ?? "No active plan"}
               </p>
-              {status === "trialing" && trialDaysLeft !== null && (
-                <p className="text-sm text-neutral-500">
-                  {trialDaysLeft > 0
-                    ? `${trialDaysLeft} day${trialDaysLeft === 1 ? "" : "s"} remaining in your trial`
-                    : "Your trial has ended"}
-                </p>
-              )}
               {status === "active" && periodEnd && (
                 <p className="text-sm text-neutral-500">Renews {periodEnd}</p>
               )}

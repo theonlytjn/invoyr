@@ -4,8 +4,6 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { sendTransactionalEmail } from "@/lib/resend/send-transactional-email";
 import { syncContactToAudience } from "@/lib/resend/sync-audience";
 import { WelcomeEmail } from "@/emails/transactional/WelcomeEmail";
-import { TRIAL_DAYS } from "@/config/plans";
-
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -33,23 +31,12 @@ export async function POST(req: NextRequest) {
   const serviceClient = await createServiceClient();
 
   if (orgId) {
-    const trialEndsAt = new Date(Date.now() + TRIAL_DAYS * 24 * 60 * 60 * 1000).toISOString();
-    await serviceClient.from("subscriptions").upsert(
-      {
-        org_id: orgId,
-        plan: plan ?? "starter",
-        status: "trialing",
-        trial_ends_at: trialEndsAt,
-      },
-      { onConflict: "org_id" }
-    );
-
     await serviceClient.from("audit_logs").insert({
       org_id: orgId,
-      action: "subscription.trial_started",
-      entity_type: "subscription",
+      action: "org.created",
+      entity_type: "organisation",
       entity_id: orgId,
-      meta: { plan, trial_ends_at: trialEndsAt },
+      meta: { plan },
     });
   }
 
