@@ -65,7 +65,7 @@ export default function Sidebar({ org, userEmail, plan }: Props) {
           </button>
         ) : (
           <>
-            <Image src="/main-logo.svg" alt="Invoyr" width={110} height={34} priority />
+            <Image src="/main-logo.svg" alt="Invoyr" width={110} height={34} priority className="dark:brightness-0 dark:invert" />
             <button
               onClick={() => setCollapsed(true)}
               className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-neutral-200 dark:hover:bg-neutral-800"

@@ -79,7 +79,7 @@ export default function AdminSidebar() {
       {/* Brand */}
       <div className="px-5 pt-6 pb-4">
         <Link href="/admin">
-          <Image src="/main-logo.svg" alt="Invoyr" width={110} height={34} priority />
+          <Image src="/main-logo.svg" alt="Invoyr" width={110} height={34} priority className="dark:brightness-0 dark:invert" />
         </Link>
         <div className="mt-3">
           <span className="px-2 py-0.5 bg-neutral-950 dark:bg-neutral-50 text-white dark:text-neutral-950 text-[10px] font-bold uppercase tracking-widest rounded-md">
@@ -89,7 +89,7 @@ export default function AdminSidebar() {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 py-2 space-y-0.5 overflow-y-auto">
+      <nav className="flex-1 px-5 py-4 space-y-1.5 overflow-y-auto">
         {NAV.map(({ href, label, icon }) => {
           const active = href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
           return (
@@ -97,10 +97,10 @@ export default function AdminSidebar() {
               key={href}
               href={href}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm border transition-all",
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
                 active
-                  ? "bg-white dark:bg-neutral-800 text-neutral-950 dark:text-neutral-50 font-medium border-neutral-200 dark:border-neutral-700 shadow-[0_0_0_2px_#ffffff,0_0_0_4px_#0a0a0a] dark:shadow-[0_0_0_2px_#171717,0_0_0_4px_#fafafa]"
-                  : "border-transparent text-neutral-500 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-50 hover:bg-white/60 dark:hover:bg-neutral-800/60"
+                  ? "bg-white dark:bg-neutral-800 text-neutral-950 dark:text-neutral-50 border border-neutral-200 dark:border-neutral-700 shadow-[0_0_0_2px_#ffffff,0_0_0_4px_#0a0a0a] dark:shadow-[0_0_0_2px_#171717,0_0_0_4px_#fafafa]"
+                  : "text-neutral-500 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-50 hover:bg-white/60 dark:hover:bg-neutral-800/60"
               )}
             >
               <span className="flex-shrink-0">{icon}</span>
