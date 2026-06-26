@@ -9,6 +9,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = { title: "Billing" };
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
+  trialing: { label: "Trial", color: "bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400" },
   active: { label: "Active", color: "bg-green-50 text-green-700 dark:bg-green-950/30 dark:text-green-400" },
   past_due: { label: "Payment overdue", color: "bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400" },
   canceled: { label: "Canceled", color: "bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-400" },
@@ -36,6 +37,14 @@ export default async function BillingPage({
   const planInfo = plan ? PLAN_MAP[plan as keyof typeof PLAN_MAP] ?? null : null;
   const statusMeta = STATUS_LABELS[status] ?? STATUS_LABELS.none;
   const isActive = isSubscriptionActive(status);
+
+  const trialEnd = subscription?.trial_ends_at
+    ? new Date(subscription.trial_ends_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
+    : null;
+
+  const trialDaysLeft = subscription?.trial_ends_at
+    ? Math.max(0, Math.ceil((new Date(subscription.trial_ends_at).getTime() - Date.now()) / 86_400_000))
+    : null;
 
   const periodEnd = subscription?.current_period_end
     ? new Date(subscription.current_period_end).toLocaleDateString("en-GB", {
@@ -75,6 +84,13 @@ export default async function BillingPage({
               <p className="text-lg font-semibold text-neutral-950 dark:text-neutral-50">
                 {planInfo?.name ?? "No active plan"}
               </p>
+              {status === "trialing" && trialEnd && (
+                <p className="text-sm text-neutral-500">
+                  {trialDaysLeft === 0
+                    ? "Trial ends today — your card will be charged."
+                    : `${trialDaysLeft} day${trialDaysLeft === 1 ? "" : "s"} left · Your card will be charged on ${trialEnd}`}
+                </p>
+              )}
               {status === "active" && periodEnd && (
                 <p className="text-sm text-neutral-500">Renews {periodEnd}</p>
               )}

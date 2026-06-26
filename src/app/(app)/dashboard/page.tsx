@@ -105,6 +105,30 @@ export default async function DashboardPage() {
           <p className="text-sm text-neutral-500 mt-0.5">Here&apos;s what&apos;s happening with {org.name}.</p>
         </div>
 
+        {sub?.status === "trialing" && sub.trial_ends_at && (() => {
+          const daysLeft = Math.max(0, Math.ceil(
+            (new Date(sub.trial_ends_at).getTime() - Date.now()) / 86_400_000
+          ));
+          const endsOn = new Date(sub.trial_ends_at).toLocaleDateString("en-GB", { day: "numeric", month: "long" });
+          return (
+            <div className="flex items-center justify-between gap-4 rounded-lg bg-blue-50 border border-blue-200 px-4 py-3 text-sm">
+              <p className="text-blue-800">
+                <span className="font-semibold">7-day trial</span>
+                {" — "}
+                {daysLeft === 0
+                  ? "Trial ends today. Your card will be charged when it expires."
+                  : `${daysLeft} day${daysLeft !== 1 ? "s" : ""} remaining. Your card will be charged on ${endsOn}.`}
+              </p>
+              <Link
+                href="/settings/billing"
+                className="shrink-0 px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-md hover:bg-blue-700 transition-colors"
+              >
+                View billing
+              </Link>
+            </div>
+          );
+        })()}
+
         {sub?.status === "past_due" && (
           <div className="flex items-center justify-between gap-4 rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm">
             <p className="text-amber-800">

@@ -32,5 +32,5 @@ export async function getSubscription(orgId: string) {
 }
 
 export function isSubscriptionActive(status: string | null | undefined): boolean {
-  return status === "active";
+  return status === "active" || status === "trialing";
 }
