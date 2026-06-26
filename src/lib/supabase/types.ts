@@ -139,6 +139,56 @@ export interface Subscription {
   updated_at: string;
 }
 
+export interface RecurringInvoice {
+  id: string;
+  org_id: string;
+  client_id: string | null;
+  frequency: "weekly" | "monthly" | "quarterly" | "yearly";
+  next_run_at: string;
+  last_run_at: string | null;
+  start_date: string;
+  end_date: string | null;
+  template: InvoiceTemplate;
+  currency: string;
+  notes: string | null;
+  terms: string | null;
+  status: "active" | "paused" | "ended";
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RecurringInvoiceItem {
+  id: number;
+  recurring_invoice_id: string;
+  description: string;
+  quantity: number;
+  unit_price: number;
+  vat_rate: number;
+  sort_order: number;
+}
+
+export interface RecurringInvoiceWithClient extends RecurringInvoice {
+  clients: { name: string } | null;
+  recurring_invoice_items: RecurringInvoiceItem[];
+}
+
+export interface OrgInvite {
+  id: string;
+  org_id: string;
+  email: string;
+  role: "admin" | "member";
+  token: string;
+  invited_by: string | null;
+  accepted_at: string | null;
+  expires_at: string;
+  created_at: string;
+}
+
+export interface OrgMemberWithProfile extends OrgMember {
+  profiles: { full_name: string | null } | null;
+  users?: { email: string } | null;
+}
+
 export interface AuditLog {
   id: number;
   org_id: string;
