@@ -37,7 +37,7 @@ export default function MobileNav() {
                 : "text-neutral-400 dark:text-neutral-500"
             )}
           >
-            <Icon className={cn("w-5 h-5", active ? "text-neutral-950 dark:text-neutral-50" : "text-neutral-400 dark:text-neutral-500")} />
+            <Icon size={20} className={cn(active ? "text-neutral-950 dark:text-neutral-50" : "text-neutral-400 dark:text-neutral-500")} />
             <span>{label}</span>
           </Link>
         );

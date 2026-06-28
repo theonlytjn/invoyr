@@ -9,6 +9,7 @@ import ActivityFeed from "@/components/dashboard/ActivityFeed";
 import type { Metadata } from "next";
 import type { InvoiceWithClient, AuditLog } from "@/lib/supabase/types";
 import { getSubscription } from "@/lib/billing";
+import { InvoiceIcon, UsersIcon, CreditCardIcon, XCircleIcon } from "@/components/icons";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -175,28 +176,28 @@ export default async function DashboardPage() {
             href="/invoices/new"
             className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
           >
-            <span className="text-xl">📄</span>
+            <InvoiceIcon size={22} />
             New invoice
           </Link>
           <Link
             href="/clients/new"
             className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
           >
-            <span className="text-xl">👤</span>
+            <UsersIcon size={22} />
             Add client
           </Link>
           <Link
             href="/invoices?status=sent"
             className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
           >
-            <span className="text-xl">💳</span>
+            <CreditCardIcon size={22} />
             Record payment
           </Link>
           <Link
             href="/invoices?status=overdue"
             className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
           >
-            <span className="text-xl">⏰</span>
+            <XCircleIcon size={22} />
             Overdue
           </Link>
         </div>

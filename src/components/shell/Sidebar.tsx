@@ -20,7 +20,7 @@ import { createClient } from "@/lib/supabase/client";
 import type { Organisation } from "@/lib/supabase/types";
 import { canAccess, type Feature } from "@/config/plans";
 
-const NAV_ITEMS: { href: string; label: string; icon: React.ComponentType<{ className?: string }>; requires?: Feature }[] = [
+const NAV_ITEMS: { href: string; label: string; icon: React.ComponentType<{ size?: number; className?: string }>; requires?: Feature }[] = [
   { href: "/dashboard", label: "Overview", icon: DashboardIcon },
   { href: "/invoices", label: "Invoices", icon: InvoiceIcon },
   { href: "/clients", label: "Clients", icon: UsersIcon },
@@ -142,7 +142,7 @@ export default function Sidebar({ org, userEmail, plan }: Props) {
                       : "border-transparent text-neutral-500 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-50",
                   )}
                 >
-                  <Icon className={cn("h-5 w-5 shrink-0", !collapsed && "mr-3")} />
+                  <Icon size={20} className={cn("shrink-0", !collapsed && "mr-3")} />
                   {!collapsed && (
                     <>
                       <span className="flex-1">{label}</span>
