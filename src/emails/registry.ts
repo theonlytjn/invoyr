@@ -5,10 +5,14 @@ export type TransactionalTemplateName =
   | "verify-email"
   | "password-reset"
   | "invoice-sent"
+  | "invoice-paid-owner"
   | "estimate-sent"
+  | "estimate-approved"
+  | "estimate-rejected"
   | "payment-received"
   | "payment-reminder"
   | "overdue-reminder"
+  | "subscription-activated"
   | "trial-ending"
   | "payment-failed"
   | "team-invite";
@@ -40,9 +44,21 @@ export const EMAIL_REGISTRY: Record<TransactionalTemplateName, EmailRegistryEntr
     templateName: "invoice-sent",
     defaultSubject: "Your invoice",
   },
+  "invoice-paid-owner": {
+    templateName: "invoice-paid-owner",
+    defaultSubject: "Payment received",
+  },
   "estimate-sent": {
     templateName: "estimate-sent",
     defaultSubject: "Your estimate",
+  },
+  "estimate-approved": {
+    templateName: "estimate-approved",
+    defaultSubject: "Estimate approved",
+  },
+  "estimate-rejected": {
+    templateName: "estimate-rejected",
+    defaultSubject: "Estimate declined",
   },
   "payment-received": {
     templateName: "payment-received",
@@ -55,6 +71,10 @@ export const EMAIL_REGISTRY: Record<TransactionalTemplateName, EmailRegistryEntr
   "overdue-reminder": {
     templateName: "overdue-reminder",
     defaultSubject: "Overdue invoice",
+  },
+  "subscription-activated": {
+    templateName: "subscription-activated",
+    defaultSubject: "Your Invoyr subscription is active",
   },
   "trial-ending": {
     templateName: "trial-ending",

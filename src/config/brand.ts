@@ -1,8 +1,13 @@
+const _appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.invoyr.io";
+
 export const BRAND = {
-  name: "invoyr",
+  name: "Invoyr",
+  displayName: "invoyr",
   url: "https://invoyr.io",
-  appUrl: process.env.NEXT_PUBLIC_APP_URL ?? "https://app.invoyr.io",
+  appUrl: _appUrl,
   supportEmail: "support@invoyr.io",
-  defaultAccentColor: "#111827",
-  logoUrl: null as string | null,
-} as const;
+  accentColor: "#111827",
+  /** Absolute URL to the Invoyr wordmark (SVG, works in Gmail/Apple Mail/Outlook.com) */
+  logoUrl: `${_appUrl}/main-logo.svg`,
+  faviconUrl: `${_appUrl}/favicon.png`,
+};

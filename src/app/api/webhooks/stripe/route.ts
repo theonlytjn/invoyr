@@ -5,7 +5,10 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { sendTransactionalEmail } from "@/lib/resend/send-transactional-email";
 import { PaymentFailedEmail } from "@/emails/transactional/PaymentFailedEmail";
 import { PaymentReceivedEmail } from "@/emails/transactional/PaymentReceivedEmail";
+import { SubscriptionActivatedEmail } from "@/emails/transactional/SubscriptionActivatedEmail";
+import { InvoicePaidOwnerEmail } from "@/emails/transactional/InvoicePaidOwnerEmail";
 import { getPlanByPriceId } from "@/config/plans";
+import { formatDate } from "@/lib/utils";
 import type Stripe from "stripe";
 
 export async function POST(req: NextRequest) {
@@ -81,45 +84,90 @@ async function handleInvoiceCheckout(session: Stripe.Checkout.Session) {
     meta: { stripe_session: session.id, amount: amountPaid },
   });
 
-  // Send receipt email to client
-  const { data: invoice } = await supabase
-    .from("invoices")
-    .select("invoice_number, public_token, clients(name, email)")
-    .eq("id", invoiceId)
-    .single();
-
-  const { data: org } = await supabase
-    .from("organisations")
-    .select("name, logo_url, accent_color")
-    .eq("id", orgId)
-    .single();
+  // Send receipt email to client + payment notification to org owner
+  const [{ data: invoice }, { data: org }, { data: members }] = await Promise.all([
+    supabase
+      .from("invoices")
+      .select("invoice_number, public_token, paid_at, clients(name, email)")
+      .eq("id", invoiceId)
+      .single(),
+    supabase
+      .from("organisations")
+      .select("name, logo_url, accent_color")
+      .eq("id", orgId)
+      .single(),
+    supabase
+      .from("org_members")
+      .select("user_id")
+      .eq("org_id", orgId)
+      .eq("role", "owner")
+      .limit(1),
+  ]);
 
   if (invoice) {
     const client = Array.isArray(invoice.clients) ? invoice.clients[0] : invoice.clients;
-    if (client?.email) {
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.invoyr.io";
-      const formattedAmount = new Intl.NumberFormat("en-GB", {
-        style: "currency",
-        currency: currency.toLowerCase() === "gbp" ? "GBP" : currency,
-      }).format(amountPaid);
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.invoyr.io";
+    const formattedAmount = new Intl.NumberFormat("en-GB", {
+      style: "currency",
+      currency: currency.toLowerCase() === "gbp" ? "GBP" : currency,
+    }).format(amountPaid);
+    const logoUrl = org?.logo_url ? org.logo_url.split("?")[0] : null;
 
-      await sendTransactionalEmail({
-        orgId,
-        invoiceId,
-        to: client.email,
-        subject: `Payment received — Invoice ${invoice.invoice_number}`,
-        templateName: "payment-received",
-        react: createElement(PaymentReceivedEmail, {
-          clientName: client.name,
-          orgName: org?.name ?? "",
-          logoUrl: org?.logo_url ?? null,
-          accentColor: org?.accent_color ?? "#111827",
-          invoiceNumber: invoice.invoice_number,
-          amountPaid: formattedAmount,
-          receiptUrl: `${appUrl}/pay/${invoice.public_token}?paid=1`,
-        }),
-      });
-    }
+    await Promise.allSettled([
+      // Client receipt
+      client?.email
+        ? sendTransactionalEmail({
+            orgId,
+            invoiceId,
+            to: client.email,
+            subject: `Payment received — Invoice ${invoice.invoice_number}`,
+            templateName: "payment-received",
+            react: createElement(PaymentReceivedEmail, {
+              clientName: client.name,
+              orgName: org?.name ?? "",
+              logoUrl,
+              accentColor: org?.accent_color ?? "#111827",
+              invoiceNumber: invoice.invoice_number,
+              amountPaid: formattedAmount,
+              receiptUrl: `${appUrl}/pay/${invoice.public_token}?paid=1`,
+            }),
+          })
+        : Promise.resolve(),
+
+      // Owner notification
+      (async () => {
+        const ownerId = members?.[0]?.user_id;
+        if (!ownerId) return;
+        const { data: authUser } = await supabase.auth.admin.getUserById(ownerId);
+        const ownerEmail = authUser?.user?.email;
+        if (!ownerEmail || ownerEmail === client?.email) return;
+
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("first_name")
+          .eq("id", ownerId)
+          .single();
+
+        await sendTransactionalEmail({
+          orgId,
+          invoiceId,
+          to: ownerEmail,
+          subject: `Payment received — ${formattedAmount} for invoice ${invoice.invoice_number}`,
+          templateName: "invoice-paid-owner",
+          react: createElement(InvoicePaidOwnerEmail, {
+            firstName: profile?.first_name ?? org?.name ?? "there",
+            orgName: org?.name ?? "",
+            logoUrl,
+            accentColor: org?.accent_color ?? "#111827",
+            invoiceNumber: invoice.invoice_number,
+            clientName: client?.name ?? "Your client",
+            amountPaid: formattedAmount,
+            paidAt: invoice.paid_at ? formatDate(invoice.paid_at) : formatDate(new Date().toISOString()),
+            viewUrl: `${appUrl}/invoices/${invoiceId}`,
+          }),
+        });
+      })(),
+    ]);
   }
 }
 
@@ -139,6 +187,44 @@ async function handleSubscriptionCheckout(session: Stripe.Checkout.Session) {
   const stripeSub = await stripe.subscriptions.retrieve(stripeSubscriptionId);
 
   await upsertSubscription(orgId, stripeSub, planId);
+
+  // Send subscription activated email to org owner
+  const supabase = await createServiceClient();
+  const [{ data: members }] = await Promise.all([
+    supabase
+      .from("org_members")
+      .select("user_id")
+      .eq("org_id", orgId)
+      .eq("role", "owner")
+      .limit(1),
+  ]);
+
+  const ownerId = members?.[0]?.user_id;
+  if (!ownerId) return;
+
+  const [{ data: authUser }, { data: profile }] = await Promise.all([
+    supabase.auth.admin.getUserById(ownerId),
+    supabase.from("profiles").select("first_name").eq("id", ownerId).single(),
+  ]);
+
+  const ownerEmail = authUser?.user?.email;
+  if (!ownerEmail) return;
+
+  const resolvedPlan = planId ?? "Pro";
+  const planLabel = `${resolvedPlan.charAt(0).toUpperCase()}${resolvedPlan.slice(1)}`;
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.invoyr.io";
+
+  await sendTransactionalEmail({
+    orgId,
+    to: ownerEmail,
+    subject: `You're now on Invoyr ${planLabel}`,
+    templateName: "subscription-activated",
+    react: createElement(SubscriptionActivatedEmail, {
+      firstName: profile?.first_name ?? "there",
+      planName: `Invoyr ${planLabel}`,
+      ctaUrl: `${appUrl}/dashboard`,
+    }),
+  });
 }
 
 async function handleSubscriptionUpsert(stripeSub: Stripe.Subscription) {

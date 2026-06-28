@@ -1,12 +1,13 @@
 import { Section, Text } from "@react-email/components";
 import type { ReactNode } from "react";
 
-type Variant = "warning" | "error" | "info";
+type Variant = "warning" | "error" | "info" | "success";
 
 const VARIANTS: Record<Variant, { bg: string; border: string; color: string }> = {
   warning: { bg: "#fffbeb", border: "#fbbf24", color: "#92400e" },
   error: { bg: "#fef2f2", border: "#f87171", color: "#991b1b" },
   info: { bg: "#eff6ff", border: "#93c5fd", color: "#1e40af" },
+  success: { bg: "#f0fdf4", border: "#4ade80", color: "#166534" },
 };
 
 interface Props {
