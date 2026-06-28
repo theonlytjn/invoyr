@@ -1,6 +1,9 @@
 -- ============================================================
 --  INVOYR — Full Schema + RLS
---  Run this entire file once in Supabase SQL Editor.
+--  Idempotent: safe to re-run on an existing database.
+--  New databases: run this file once in Supabase SQL Editor.
+--  Existing databases: ALTER TABLE blocks at the bottom add
+--  any columns/tables introduced after the initial setup.
 -- ============================================================
 
 create extension if not exists "pgcrypto";
@@ -53,6 +56,17 @@ create table if not exists public.organisations (
   next_invoice_number integer not null default 1,
   default_terms       text,
   default_notes       text,
+  -- bank / payment details
+  bank_account_name   text,
+  bank_name           text,
+  bank_account_number text,
+  bank_sort_code      text,
+  bank_iban           text,
+  bank_bic            text,
+  -- email settings (Pro)
+  from_email          text,
+  reminder_days       integer[],
+  -- Stripe
   stripe_account_id   text,
   stripe_customer_id  text,
   created_at          timestamptz not null default now(),
@@ -75,6 +89,25 @@ create index if not exists org_members_user_idx on public.org_members(user_id);
 create index if not exists org_members_org_idx  on public.org_members(org_id);
 
 -- ----------------------------------------------------------------
+-- 3. ORG_INVITES
+-- ----------------------------------------------------------------
+create table if not exists public.org_invites (
+  id              uuid primary key default gen_random_uuid(),
+  org_id          uuid not null references public.organisations(id) on delete cascade,
+  email           text not null,
+  role            text not null default 'member',
+  invited_by      uuid references auth.users(id) on delete set null,
+  token           text not null unique default encode(gen_random_bytes(32), 'hex'),
+  accepted_at     timestamptz,
+  expires_at      timestamptz not null default (now() + interval '7 days'),
+  created_at      timestamptz not null default now(),
+  unique (org_id, email)
+);
+
+create index if not exists invites_org_idx   on public.org_invites(org_id);
+create index if not exists invites_token_idx on public.org_invites(token);
+
+-- ----------------------------------------------------------------
 -- SECURITY HELPERS
 -- ----------------------------------------------------------------
 create or replace function public.is_org_member(p_org_id uuid)
@@ -94,7 +127,7 @@ returns boolean language sql security definer stable set search_path = public as
 $$;
 
 -- ----------------------------------------------------------------
--- 3. CLIENTS
+-- 4. CLIENTS
 -- ----------------------------------------------------------------
 create table if not exists public.clients (
   id              uuid primary key default gen_random_uuid(),
@@ -118,7 +151,7 @@ create table if not exists public.clients (
 create index if not exists clients_org_idx on public.clients(org_id);
 
 -- ----------------------------------------------------------------
--- 4. INVOICES
+-- 5. INVOICES
 -- ----------------------------------------------------------------
 do $$ begin
   create type public.invoice_status as enum ('draft', 'issued', 'sent', 'paid', 'overdue', 'void');
@@ -140,7 +173,9 @@ create table if not exists public.invoices (
   issue_date          date not null default current_date,
   due_date            date,
   currency            text not null default 'GBP',
+  po_number           text,
   subtotal            numeric(12,2) not null default 0,
+  discount            numeric(12,2) not null default 0,
   vat_amount          numeric(12,2) not null default 0,
   total               numeric(12,2) not null default 0,
   amount_paid         numeric(12,2) not null default 0,
@@ -163,7 +198,7 @@ create index if not exists invoices_due_date_idx  on public.invoices(due_date);
 create index if not exists invoices_token_idx     on public.invoices(public_token);
 
 -- ----------------------------------------------------------------
--- 5. INVOICE_ITEMS
+-- 6. INVOICE_ITEMS
 -- ----------------------------------------------------------------
 create table if not exists public.invoice_items (
   id              bigint generated always as identity primary key,
@@ -179,7 +214,56 @@ create table if not exists public.invoice_items (
 create index if not exists items_invoice_idx on public.invoice_items(invoice_id);
 
 -- ----------------------------------------------------------------
--- 6. PAYMENTS
+-- 7. RECURRING_INVOICES
+-- ----------------------------------------------------------------
+do $$ begin
+  create type public.recurring_frequency as enum ('weekly', 'monthly', 'quarterly', 'yearly');
+exception when duplicate_object then null;
+end $$;
+
+do $$ begin
+  create type public.recurring_status as enum ('active', 'paused', 'ended');
+exception when duplicate_object then null;
+end $$;
+
+create table if not exists public.recurring_invoices (
+  id              uuid primary key default gen_random_uuid(),
+  org_id          uuid not null references public.organisations(id) on delete cascade,
+  client_id       uuid references public.clients(id) on delete set null,
+  frequency       public.recurring_frequency not null,
+  start_date      date not null,
+  end_date        date,
+  template        public.invoice_template not null default 'tjn_classic',
+  currency        text not null default 'GBP',
+  notes           text,
+  terms           text,
+  auto_send       boolean not null default false,
+  status          public.recurring_status not null default 'active',
+  next_run_at     date not null,
+  created_at      timestamptz not null default now(),
+  updated_at      timestamptz not null default now()
+);
+
+create index if not exists recurring_org_idx      on public.recurring_invoices(org_id);
+create index if not exists recurring_next_run_idx on public.recurring_invoices(next_run_at);
+
+-- ----------------------------------------------------------------
+-- 8. RECURRING_INVOICE_ITEMS
+-- ----------------------------------------------------------------
+create table if not exists public.recurring_invoice_items (
+  id                    bigint generated always as identity primary key,
+  recurring_invoice_id  uuid not null references public.recurring_invoices(id) on delete cascade,
+  description           text not null,
+  quantity              numeric(12,4) not null default 1,
+  unit_price            numeric(12,2) not null,
+  vat_rate              numeric(5,2) not null default 0,
+  sort_order            integer not null default 0
+);
+
+create index if not exists rec_items_rec_idx on public.recurring_invoice_items(recurring_invoice_id);
+
+-- ----------------------------------------------------------------
+-- 9. PAYMENTS
 -- ----------------------------------------------------------------
 do $$ begin
   create type public.payment_method as enum ('stripe', 'bank_transfer', 'cash', 'cheque', 'other');
@@ -187,20 +271,20 @@ exception when duplicate_object then null;
 end $$;
 
 create table if not exists public.payments (
-  id                  uuid primary key default gen_random_uuid(),
-  org_id              uuid not null references public.organisations(id) on delete cascade,
-  invoice_id          uuid not null references public.invoices(id) on delete cascade,
-  amount              numeric(12,2) not null,
-  currency            text not null default 'GBP',
-  method              public.payment_method not null default 'bank_transfer',
-  reference           text,
-  stripe_payment_intent_id text,
-  paid_at             timestamptz not null default now(),
-  created_at          timestamptz not null default now()
+  id                          uuid primary key default gen_random_uuid(),
+  org_id                      uuid not null references public.organisations(id) on delete cascade,
+  invoice_id                  uuid not null references public.invoices(id) on delete cascade,
+  amount                      numeric(12,2) not null,
+  currency                    text not null default 'GBP',
+  method                      public.payment_method not null default 'bank_transfer',
+  reference                   text,
+  stripe_payment_intent_id    text,
+  paid_at                     timestamptz not null default now(),
+  created_at                  timestamptz not null default now()
 );
 
 -- ----------------------------------------------------------------
--- 7. SUBSCRIPTIONS
+-- 10. SUBSCRIPTIONS
 -- ----------------------------------------------------------------
 do $$ begin
   create type public.subscription_status as enum ('trialing', 'active', 'past_due', 'canceled', 'incomplete');
@@ -223,7 +307,7 @@ create table if not exists public.subscriptions (
 );
 
 -- ----------------------------------------------------------------
--- 8. AUDIT_LOGS
+-- 11. AUDIT_LOGS
 -- ----------------------------------------------------------------
 create table if not exists public.audit_logs (
   id          bigint generated always as identity primary key,
@@ -240,7 +324,7 @@ create index if not exists audit_org_idx  on public.audit_logs(org_id);
 create index if not exists audit_time_idx on public.audit_logs(created_at desc);
 
 -- ----------------------------------------------------------------
--- 9. EMAIL_LOGS
+-- 12. EMAIL_LOGS
 -- ----------------------------------------------------------------
 do $$ begin
   create type public.email_log_status as enum ('sent', 'delivered', 'bounced', 'failed');
@@ -262,7 +346,7 @@ create table if not exists public.email_logs (
 );
 
 -- ----------------------------------------------------------------
--- 10. EMAIL_PREFERENCES
+-- 13. EMAIL_PREFERENCES
 -- ----------------------------------------------------------------
 create table if not exists public.email_preferences (
   id                  uuid primary key default gen_random_uuid(),
@@ -276,7 +360,7 @@ create table if not exists public.email_preferences (
 );
 
 -- ----------------------------------------------------------------
--- 11. MARKETING_CONTACTS
+-- 14. MARKETING_CONTACTS
 -- ----------------------------------------------------------------
 create table if not exists public.marketing_contacts (
   id                  uuid primary key default gen_random_uuid(),
@@ -311,6 +395,10 @@ do $$ begin
     create trigger trg_invoices_updated_at before update on public.invoices
       for each row execute function public.touch_updated_at();
   end if;
+  if not exists (select 1 from pg_trigger where tgname = 'trg_recurring_updated_at') then
+    create trigger trg_recurring_updated_at before update on public.recurring_invoices
+      for each row execute function public.touch_updated_at();
+  end if;
   if not exists (select 1 from pg_trigger where tgname = 'trg_subs_updated_at') then
     create trigger trg_subs_updated_at before update on public.subscriptions
       for each row execute function public.touch_updated_at();
@@ -320,18 +408,21 @@ end $$;
 -- ----------------------------------------------------------------
 -- ROW-LEVEL SECURITY
 -- ----------------------------------------------------------------
-alter table public.profiles      enable row level security;
-alter table public.organisations  enable row level security;
-alter table public.org_members    enable row level security;
-alter table public.clients        enable row level security;
-alter table public.invoices       enable row level security;
-alter table public.invoice_items  enable row level security;
-alter table public.payments       enable row level security;
-alter table public.subscriptions  enable row level security;
-alter table public.audit_logs          enable row level security;
-alter table public.email_logs          enable row level security;
-alter table public.email_preferences   enable row level security;
-alter table public.marketing_contacts  enable row level security;
+alter table public.profiles             enable row level security;
+alter table public.organisations        enable row level security;
+alter table public.org_members          enable row level security;
+alter table public.org_invites          enable row level security;
+alter table public.clients              enable row level security;
+alter table public.invoices             enable row level security;
+alter table public.invoice_items        enable row level security;
+alter table public.recurring_invoices   enable row level security;
+alter table public.recurring_invoice_items enable row level security;
+alter table public.payments             enable row level security;
+alter table public.subscriptions        enable row level security;
+alter table public.audit_logs           enable row level security;
+alter table public.email_logs           enable row level security;
+alter table public.email_preferences    enable row level security;
+alter table public.marketing_contacts   enable row level security;
 
 -- PROFILES
 drop policy if exists profiles_select on public.profiles;
@@ -354,8 +445,14 @@ drop policy if exists members_select on public.org_members;
 create policy members_select on public.org_members for select to authenticated using (is_org_member(org_id));
 drop policy if exists members_insert on public.org_members;
 create policy members_insert on public.org_members for insert to authenticated with check (user_id = auth.uid() or is_org_owner(org_id));
+drop policy if exists members_update on public.org_members;
+create policy members_update on public.org_members for update to authenticated using (is_org_owner(org_id)) with check (is_org_owner(org_id));
 drop policy if exists members_delete on public.org_members;
 create policy members_delete on public.org_members for delete to authenticated using (is_org_owner(org_id) or user_id = auth.uid());
+
+-- ORG_INVITES (service-role writes; authenticated users can read by token via invite page)
+drop policy if exists invites_select on public.org_invites;
+create policy invites_select on public.org_invites for select to authenticated using (is_org_member(org_id) or email = (select email from auth.users where id = auth.uid()));
 
 -- CLIENTS
 drop policy if exists clients_select on public.clients;
@@ -396,6 +493,30 @@ drop policy if exists items_public_token on public.invoice_items;
 create policy items_public_token on public.invoice_items for select to anon
   using (exists (select 1 from public.invoices i where i.id = invoice_id and i.public_token is not null));
 
+-- RECURRING_INVOICES
+drop policy if exists recurring_select on public.recurring_invoices;
+create policy recurring_select on public.recurring_invoices for select to authenticated using (is_org_member(org_id));
+drop policy if exists recurring_insert on public.recurring_invoices;
+create policy recurring_insert on public.recurring_invoices for insert to authenticated with check (is_org_member(org_id));
+drop policy if exists recurring_update on public.recurring_invoices;
+create policy recurring_update on public.recurring_invoices for update to authenticated using (is_org_member(org_id)) with check (is_org_member(org_id));
+drop policy if exists recurring_delete on public.recurring_invoices;
+create policy recurring_delete on public.recurring_invoices for delete to authenticated using (is_org_member(org_id));
+
+-- RECURRING_INVOICE_ITEMS
+drop policy if exists rec_items_select on public.recurring_invoice_items;
+create policy rec_items_select on public.recurring_invoice_items for select to authenticated
+  using (exists (select 1 from public.recurring_invoices r where r.id = recurring_invoice_id and is_org_member(r.org_id)));
+drop policy if exists rec_items_insert on public.recurring_invoice_items;
+create policy rec_items_insert on public.recurring_invoice_items for insert to authenticated
+  with check (exists (select 1 from public.recurring_invoices r where r.id = recurring_invoice_id and is_org_member(r.org_id)));
+drop policy if exists rec_items_update on public.recurring_invoice_items;
+create policy rec_items_update on public.recurring_invoice_items for update to authenticated
+  using (exists (select 1 from public.recurring_invoices r where r.id = recurring_invoice_id and is_org_member(r.org_id)));
+drop policy if exists rec_items_delete on public.recurring_invoice_items;
+create policy rec_items_delete on public.recurring_invoice_items for delete to authenticated
+  using (exists (select 1 from public.recurring_invoices r where r.id = recurring_invoice_id and is_org_member(r.org_id)));
+
 -- PAYMENTS
 drop policy if exists payments_select on public.payments;
 create policy payments_select on public.payments for select to authenticated using (is_org_member(org_id));
@@ -426,6 +547,28 @@ create policy email_prefs_insert on public.email_preferences for insert to authe
 drop policy if exists email_prefs_update on public.email_preferences;
 create policy email_prefs_update on public.email_preferences for update to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
 
--- MARKETING_CONTACTS (service-role only — no authenticated user policies needed)
+-- MARKETING_CONTACTS (service-role only)
 drop policy if exists marketing_contacts_none on public.marketing_contacts;
 create policy marketing_contacts_none on public.marketing_contacts for all to authenticated using (false);
+
+-- ================================================================
+-- MIGRATION — add columns/tables to EXISTING databases.
+-- These are no-ops on a fresh database (columns already exist
+-- from the CREATE TABLE statements above).
+-- ================================================================
+
+-- organisations: bank details
+alter table public.organisations add column if not exists bank_account_name   text;
+alter table public.organisations add column if not exists bank_name           text;
+alter table public.organisations add column if not exists bank_account_number text;
+alter table public.organisations add column if not exists bank_sort_code      text;
+alter table public.organisations add column if not exists bank_iban           text;
+alter table public.organisations add column if not exists bank_bic            text;
+
+-- organisations: email settings (Pro)
+alter table public.organisations add column if not exists from_email    text;
+alter table public.organisations add column if not exists reminder_days integer[];
+
+-- invoices: PO number and discount
+alter table public.invoices add column if not exists po_number text;
+alter table public.invoices add column if not exists discount  numeric(12,2) not null default 0;
