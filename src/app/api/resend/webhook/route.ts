@@ -63,10 +63,33 @@ export async function POST(req: NextRequest) {
   }
 
   if (type === "email.opened") {
-    await supabase
+    const openedAt = new Date().toISOString();
+
+    const { data: log } = await supabase
       .from("email_logs")
-      .update({ opened_at: new Date().toISOString() })
-      .eq("resend_id", resendId);
+      .select("id, invoice_id, org_id, opened_at, template_name")
+      .eq("resend_id", resendId)
+      .maybeSingle();
+
+    if (log) {
+      // Only update and audit on first open
+      if (!log.opened_at) {
+        await supabase
+          .from("email_logs")
+          .update({ opened_at: openedAt })
+          .eq("id", log.id);
+
+        if (log.invoice_id && log.org_id) {
+          await supabase.from("audit_logs").insert({
+            org_id: log.org_id,
+            action: "invoice.viewed",
+            entity_type: "invoice",
+            entity_id: log.invoice_id,
+            meta: { template_name: log.template_name },
+          });
+        }
+      }
+    }
   }
 
   return NextResponse.json({ ok: true });

@@ -16,6 +16,7 @@ const ACTION_LABELS: Record<string, string> = {
   "invoice.created": "Invoice created",
   "invoice.issued": "Issued",
   "invoice.sent": "Sent to client",
+  "invoice.viewed": "Viewed by client",
   "invoice.paid": "Marked as paid",
   "invoice.voided": "Voided",
   "invoice.overdue": "Marked overdue",
@@ -37,7 +38,7 @@ export default async function InvoiceDetailPage({ params }: Props) {
   const org = await requireOrg();
   const supabase = await createClient();
 
-  const [{ data }, { data: auditLogs }] = await Promise.all([
+  const [{ data }, { data: auditLogs }, { data: emailLogs }] = await Promise.all([
     supabase
       .from("invoices")
       .select("*, clients(*), invoice_items(*)")
@@ -51,6 +52,12 @@ export default async function InvoiceDetailPage({ params }: Props) {
       .eq("entity_type", "invoice")
       .eq("entity_id", id)
       .order("created_at", { ascending: true }),
+    supabase
+      .from("email_logs")
+      .select("opened_at, template_name")
+      .eq("invoice_id", id)
+      .not("opened_at", "is", null)
+      .order("opened_at", { ascending: true }),
   ]);
 
   if (!data) notFound();
@@ -75,6 +82,30 @@ export default async function InvoiceDetailPage({ params }: Props) {
   );
 
   const Template = TEMPLATE_MAP[invoice.template] ?? TEMPLATE_MAP.tjn_classic;
+
+  // Merge audit log entries with email open events into a single sorted timeline.
+  // Email opens that already have an audit_log entry (invoice.viewed) are deduplicated
+  // by checking whether an audit entry exists within 60 seconds of the open timestamp.
+  const auditViewedTimes = new Set(
+    (auditLogs ?? [])
+      .filter((l) => l.action === "invoice.viewed")
+      .map((l) => Math.floor(new Date(l.created_at).getTime() / 60000))
+  );
+
+  const emailOpenEvents = (emailLogs ?? [])
+    .filter((e) => {
+      const bucket = Math.floor(new Date(e.opened_at!).getTime() / 60000);
+      return !auditViewedTimes.has(bucket);
+    })
+    .map((e) => ({
+      action: "invoice.viewed",
+      created_at: e.opened_at!,
+      meta: null as null,
+    }));
+
+  const timeline = [...(auditLogs ?? []), ...emailOpenEvents].sort(
+    (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+  );
 
   return (
     <div>
@@ -177,13 +208,13 @@ export default async function InvoiceDetailPage({ params }: Props) {
             </div>
           )}
 
-          {auditLogs && auditLogs.length > 0 && (
+          {timeline.length > 0 && (
             <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5">
               <h3 className="font-semibold text-neutral-950 dark:text-neutral-50 text-base mb-4">History</h3>
               <ol className="relative border-l border-neutral-200 dark:border-neutral-700 space-y-4 ml-1">
-                {auditLogs.map((log, i) => (
+                {timeline.map((log, i) => (
                   <li key={i} className="pl-4">
-                    <span className="absolute -left-1.5 mt-1 h-3 w-3 rounded-full border-2 border-white dark:border-neutral-900 bg-neutral-300 dark:bg-neutral-600" />
+                    <span className={`absolute -left-1.5 mt-1 h-3 w-3 rounded-full border-2 border-white dark:border-neutral-900 ${log.action === "invoice.viewed" ? "bg-blue-400 dark:bg-blue-500" : "bg-neutral-300 dark:bg-neutral-600"}`} />
                     <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
                       {ACTION_LABELS[log.action] ?? log.action}
                     </p>
