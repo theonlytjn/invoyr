@@ -8,7 +8,12 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { OrgMemberWithProfile, OrgInvite } from "@/lib/supabase/types";
 
-const ROLE_LABELS: Record<string, string> = { owner: "Owner", admin: "Admin", member: "Member" };
+const ROLE_LABELS: Record<string, string> = {
+  owner: "Owner",
+  admin: "Admin",
+  finance: "Finance",
+  member: "Member",
+};
 
 interface Props {
   members: OrgMemberWithProfile[];
@@ -68,6 +73,18 @@ export default function TeamPanel({ members, invites, currentUserId, currentUser
     });
   }
 
+  function handleTransferOwnership(memberId: number, memberName: string) {
+    if (!confirm(`Transfer ownership to ${memberName}? This will make them the owner and downgrade you to admin.`)) return;
+    startTransition(async () => {
+      await fetch(`/api/team/transfer-ownership`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ member_id: memberId }),
+      });
+      router.refresh();
+    });
+  }
+
   function handleRevokeInvite(id: string) {
     startTransition(async () => {
       await fetch(`/api/team/invite/${id}`, { method: "DELETE" });
@@ -113,6 +130,7 @@ export default function TeamPanel({ members, invites, currentUserId, currentUser
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="admin">Admin</SelectItem>
+                          <SelectItem value="finance">Finance</SelectItem>
                           <SelectItem value="member">Member</SelectItem>
                         </SelectContent>
                       </Select>
@@ -124,15 +142,26 @@ export default function TeamPanel({ members, invites, currentUserId, currentUser
                     )}
                   </td>
                   <td className="py-3 px-4 text-right">
-                    {(isSelf || (isOwnerOrAdmin && m.role !== "owner")) && (
-                      <button
-                        onClick={() => handleRemoveMember(m.id)}
-                        disabled={isPending}
-                        className="text-xs text-neutral-400 hover:text-red-600 transition-colors"
-                      >
-                        {isSelf ? "Leave" : "Remove"}
-                      </button>
-                    )}
+                    <div className="flex items-center justify-end gap-3">
+                      {currentUserRole === "owner" && !isSelf && m.role !== "owner" && (
+                        <button
+                          onClick={() => handleTransferOwnership(m.id, m.profiles?.full_name ?? m.users?.email ?? "this member")}
+                          disabled={isPending}
+                          className="text-xs text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-50 transition-colors"
+                        >
+                          Make owner
+                        </button>
+                      )}
+                      {(isSelf || (isOwnerOrAdmin && m.role !== "owner")) && (
+                        <button
+                          onClick={() => handleRemoveMember(m.id)}
+                          disabled={isPending}
+                          className="text-xs text-neutral-400 hover:text-red-600 transition-colors"
+                        >
+                          {isSelf ? "Leave" : "Remove"}
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               );
@@ -205,6 +234,7 @@ export default function TeamPanel({ members, invites, currentUserId, currentUser
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="finance">Finance</SelectItem>
                   <SelectItem value="member">Member</SelectItem>
                 </SelectContent>
               </Select>
@@ -216,7 +246,9 @@ export default function TeamPanel({ members, invites, currentUserId, currentUser
           {inviteSent && <p className="text-sm text-green-600">Invite sent!</p>}
           {error && <p className="text-sm text-red-600">{error}</p>}
           <p className="text-xs text-neutral-400">
-            Admins can invite members and manage invoices. Members can view and create invoices.
+            <span className="font-medium">Admin:</span> full access except billing.{" "}
+            <span className="font-medium">Finance:</span> view and export invoices, record payments.{" "}
+            <span className="font-medium">Member:</span> create and view invoices only.
           </p>
         </div>
       )}

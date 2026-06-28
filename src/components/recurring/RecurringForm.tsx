@@ -41,6 +41,7 @@ export default function RecurringForm({ clients, existing }: Props) {
   const [currency, setCurrency] = useState(existing?.currency ?? "GBP");
   const [notes, setNotes] = useState(existing?.notes ?? "");
   const [terms, setTerms] = useState(existing?.terms ?? "");
+  const [autoSend, setAutoSend] = useState(existing?.auto_send ?? false);
   const [items, setItems] = useState<LineItemRow[]>(makeRows(existing?.recurring_invoice_items));
 
   const totals = computeTotals(items.map((i) => ({
@@ -61,6 +62,7 @@ export default function RecurringForm({ clients, existing }: Props) {
         currency,
         notes: notes || null,
         terms: terms || null,
+        auto_send: autoSend,
         items: items.map((i, idx) => ({
           description: i.description,
           quantity: i.quantity,
@@ -143,6 +145,30 @@ export default function RecurringForm({ clients, existing }: Props) {
             <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} min={startDate} />
           </div>
         </div>
+
+        <label className="flex items-center justify-between cursor-pointer">
+          <div>
+            <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100">Auto-send to client</p>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400">
+              Automatically send each generated invoice to the client by email
+            </p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={autoSend}
+            onClick={() => setAutoSend((v) => !v)}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 ${
+              autoSend ? "bg-neutral-950 dark:bg-white" : "bg-neutral-200 dark:bg-neutral-700"
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 rounded-full bg-white dark:bg-neutral-950 shadow transition-transform ${
+                autoSend ? "translate-x-6" : "translate-x-1"
+              }`}
+            />
+          </button>
+        </label>
       </div>
 
       {/* Line items */}

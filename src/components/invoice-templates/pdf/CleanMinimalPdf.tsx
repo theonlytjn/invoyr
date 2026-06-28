@@ -63,6 +63,7 @@ export default function CleanMinimalPdf({ invoice, items, client, org, totals }:
             <Text style={[styles.invoiceNumber, { color: accent }]}>{invoice.invoice_number}</Text>
             <View style={styles.metaRow}><Text style={styles.metaText}>Issued {formatDate(invoice.issue_date)}</Text></View>
             {invoice.due_date ? <View style={styles.metaRow}><Text style={styles.metaText}>Due {formatDate(invoice.due_date)}</Text></View> : null}
+            {invoice.po_number ? <View style={styles.metaRow}><Text style={styles.metaText}>PO: {invoice.po_number}</Text></View> : null}
           </View>
         </View>
 
@@ -103,6 +104,12 @@ export default function CleanMinimalPdf({ invoice, items, client, org, totals }:
               <Text style={styles.totalsLabel}>VAT</Text>
               <Text>{formatCurrency(totals.vatAmount, invoice.currency)}</Text>
             </View>
+            {(totals.discount ?? 0) > 0 ? (
+              <View style={styles.totalsRow}>
+                <Text style={styles.totalsLabel}>Discount</Text>
+                <Text>−{formatCurrency(totals.discount!, invoice.currency)}</Text>
+              </View>
+            ) : null}
             <View style={styles.totalRow}>
               <Text style={styles.totalLabel}>Total</Text>
               <Text style={[styles.totalValue, { color: accent }]}>{formatCurrency(totals.total, invoice.currency)}</Text>

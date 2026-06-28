@@ -33,6 +33,9 @@ export default function BoldSplit({ invoice, items, client, org, totals }: Invoi
           {invoice.due_date && (
             <span className="text-xs opacity-75">Due {formatDate(invoice.due_date)}</span>
           )}
+          {invoice.po_number && (
+            <span className="text-xs opacity-75">PO: {invoice.po_number}</span>
+          )}
         </div>
       </div>
 
@@ -84,6 +87,11 @@ export default function BoldSplit({ invoice, items, client, org, totals }: Invoi
             <div className="flex justify-between opacity-75">
               <span>VAT</span><span>{formatCurrency(totals.vatAmount, invoice.currency)}</span>
             </div>
+            {(totals.discount ?? 0) > 0 && (
+              <div className="flex justify-between opacity-75">
+                <span>Discount</span><span>−{formatCurrency(totals.discount!, invoice.currency)}</span>
+              </div>
+            )}
             <div className="flex justify-between font-bold text-base pt-2 border-t border-white/20">
               <span>Total due</span><span>{formatCurrency(totals.total, invoice.currency)}</span>
             </div>

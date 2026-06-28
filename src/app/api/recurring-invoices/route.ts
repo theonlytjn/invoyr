@@ -14,6 +14,7 @@ const schema = z.object({
   currency: z.string().default("GBP"),
   notes: z.string().nullable().optional(),
   terms: z.string().nullable().optional(),
+  auto_send: z.boolean().default(false),
   items: z.array(z.object({
     description: z.string().min(1),
     quantity: z.number().positive(),

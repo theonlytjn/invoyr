@@ -52,6 +52,8 @@ export default function InvoiceForm({ org, clients, invoice, existingItems, invo
   const [paymentTerms, setPaymentTerms] = useState<"0" | "7" | "14" | "30" | "custom">("30");
   const [notes, setNotes] = useState(invoice?.notes ?? org.default_notes ?? "");
   const [terms, setTerms] = useState(invoice?.terms ?? org.default_terms ?? "");
+  const [poNumber, setPoNumber] = useState(invoice?.po_number ?? "");
+  const [discount, setDiscount] = useState(invoice?.discount ?? 0);
   const [items, setItems] = useState<LineItemRow[]>(
     existingItems?.map(itemToRow) ?? [
       { id: crypto.randomUUID(), description: "", quantity: 1, unit_price: 0, vat_rate: 20 },
@@ -66,7 +68,7 @@ export default function InvoiceForm({ org, clients, invoice, existingItems, invo
     setDueDate(base.toISOString().slice(0, 10));
   }
 
-  const totals = computeTotals(items);
+  const totals = computeTotals(items, discount);
   const TemplatePreview = TEMPLATE_MAP[template];
 
   async function handleSave(status: "draft" | "issued") {
@@ -85,9 +87,11 @@ export default function InvoiceForm({ org, clients, invoice, existingItems, invo
       currency: "GBP",
       subtotal: totals.subtotal,
       vat_amount: totals.vat_amount,
+      discount: totals.discount,
       total: totals.total,
       notes: notes || null,
       terms: terms || null,
+      po_number: poNumber || null,
     };
 
     if (mode === "create") {
@@ -181,6 +185,15 @@ export default function InvoiceForm({ org, clients, invoice, existingItems, invo
           </div>
 
           <div className="space-y-1.5">
+            <Label>PO number <span className="text-neutral-400">(optional)</span></Label>
+            <Input
+              value={poNumber}
+              onChange={(e) => setPoNumber(e.target.value)}
+              placeholder="e.g. PO-12345"
+            />
+          </div>
+
+          <div className="space-y-1.5">
             <Label>Client</Label>
             <Select value={clientId} onValueChange={setClientId}>
               <SelectTrigger>
@@ -249,7 +262,18 @@ export default function InvoiceForm({ org, clients, invoice, existingItems, invo
           <h2 className="font-semibold text-neutral-950 dark:text-neutral-50">Line items</h2>
           <LineItemsEditor items={items} onChange={setItems} />
 
-          <div className="flex justify-end">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+            <div className="space-y-1.5 sm:w-48">
+              <Label>Discount ({invoice?.currency ?? "GBP"})</Label>
+              <Input
+                type="number"
+                min="0"
+                step="0.01"
+                value={discount === 0 ? "" : discount}
+                onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
+                placeholder="0.00"
+              />
+            </div>
             <div className="w-52 space-y-1.5 text-sm">
               <div className="flex justify-between text-neutral-500">
                 <span>Subtotal</span>
@@ -259,6 +283,12 @@ export default function InvoiceForm({ org, clients, invoice, existingItems, invo
                 <span>VAT</span>
                 <span>{formatCurrency(totals.vat_amount)}</span>
               </div>
+              {totals.discount > 0 && (
+                <div className="flex justify-between text-neutral-500">
+                  <span>Discount</span>
+                  <span>−{formatCurrency(totals.discount)}</span>
+                </div>
+              )}
               <div className="flex justify-between font-bold text-base pt-2 border-t border-neutral-200 dark:border-neutral-700 dark:text-neutral-50">
                 <span>Total</span>
                 <span>{formatCurrency(totals.total)}</span>
@@ -324,6 +354,7 @@ export default function InvoiceForm({ org, clients, invoice, existingItems, invo
                   due_date: dueDate || null,
                   subtotal: totals.subtotal,
                   vat_amount: totals.vat_amount,
+                  discount: totals.discount,
                   total: totals.total,
                   currency: "GBP",
                   notes: notes || null,
@@ -341,6 +372,7 @@ export default function InvoiceForm({ org, clients, invoice, existingItems, invo
                   created_at: "",
                   updated_at: "",
                   client_id: clientId || null,
+                  po_number: poNumber || null,
                 }}
                 items={items.map((item, idx) => ({
                   id: idx,

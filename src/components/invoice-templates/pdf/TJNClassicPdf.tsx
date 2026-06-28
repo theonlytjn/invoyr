@@ -72,6 +72,12 @@ export default function TJNClassicPdf({ invoice, items, client, org, totals }: I
                 <Text>{formatDate(invoice.due_date)}</Text>
               </View>
             ) : null}
+            {invoice.po_number ? (
+              <View style={styles.metaRow}>
+                <Text style={styles.metaLabel}>PO number:</Text>
+                <Text>{invoice.po_number}</Text>
+              </View>
+            ) : null}
           </View>
         </View>
 
@@ -118,6 +124,12 @@ export default function TJNClassicPdf({ invoice, items, client, org, totals }: I
               <Text style={styles.totalsLabel}>VAT</Text>
               <Text>{formatCurrency(totals.vatAmount, invoice.currency)}</Text>
             </View>
+            {(totals.discount ?? 0) > 0 ? (
+              <View style={styles.totalsRow}>
+                <Text style={styles.totalsLabel}>Discount</Text>
+                <Text>−{formatCurrency(totals.discount!, invoice.currency)}</Text>
+              </View>
+            ) : null}
             <View style={[styles.totalRow, { borderTopWidth: 2, borderTopColor: accent }]}>
               <Text style={styles.totalLabel}>Total</Text>
               <Text style={[styles.totalValue, { color: accent }]}>

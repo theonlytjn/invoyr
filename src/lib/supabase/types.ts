@@ -1,4 +1,4 @@
-export type InvoiceStatus = "draft" | "issued" | "sent" | "paid" | "overdue" | "void";
+export type InvoiceStatus = "draft" | "issued" | "sent" | "partial" | "paid" | "overdue" | "void";
 export type InvoiceTemplate = "tjn_classic" | "clean_minimal" | "bold_split" | "modern_studio";
 export type PaymentMethod = "stripe" | "bank_transfer" | "cash" | "cheque" | "other";
 export type SubscriptionStatus = "trialing" | "active" | "past_due" | "canceled" | "incomplete";
@@ -89,6 +89,8 @@ export interface Invoice {
   vat_amount: number;
   total: number;
   amount_paid: number;
+  po_number: string | null;
+  discount: number;
   notes: string | null;
   terms: string | null;
   stripe_payment_link: string | null;
@@ -152,6 +154,7 @@ export interface RecurringInvoice {
   currency: string;
   notes: string | null;
   terms: string | null;
+  auto_send: boolean;
   status: "active" | "paused" | "ended";
   created_at: string;
   updated_at: string;

@@ -170,6 +170,37 @@ export default async function DashboardPage() {
           />
         </div>
 
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <Link
+            href="/invoices/new"
+            className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+          >
+            <span className="text-xl">📄</span>
+            New invoice
+          </Link>
+          <Link
+            href="/clients/new"
+            className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+          >
+            <span className="text-xl">👤</span>
+            Add client
+          </Link>
+          <Link
+            href="/invoices?status=sent"
+            className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+          >
+            <span className="text-xl">💳</span>
+            Record payment
+          </Link>
+          <Link
+            href="/invoices?status=overdue"
+            className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+          >
+            <span className="text-xl">⏰</span>
+            Overdue
+          </Link>
+        </div>
+
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           <div className="xl:col-span-2 bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 overflow-hidden">
             <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-800">

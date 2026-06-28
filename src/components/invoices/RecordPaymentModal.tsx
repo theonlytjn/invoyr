@@ -61,12 +61,13 @@ export default function RecordPaymentModal({ invoice, open, onClose, onSuccess }
 
     const newAmountPaid = invoice.amount_paid + parseFloat(amount);
     const isPaid = newAmountPaid >= invoice.total;
+    const isPartial = !isPaid && newAmountPaid > 0;
 
     await supabase
       .from("invoices")
       .update({
         amount_paid: newAmountPaid,
-        status: isPaid ? "paid" : "sent",
+        status: isPaid ? "paid" : isPartial ? "partial" : "sent",
         paid_at: isPaid ? new Date().toISOString() : null,
       })
       .eq("id", invoice.id);

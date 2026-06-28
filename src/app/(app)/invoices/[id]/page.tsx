@@ -12,6 +12,17 @@ import { TEMPLATE_MAP } from "@/components/invoice-templates";
 import type { Metadata } from "next";
 import type { Invoice, InvoiceItem, Client } from "@/lib/supabase/types";
 
+const ACTION_LABELS: Record<string, string> = {
+  "invoice.created": "Invoice created",
+  "invoice.issued": "Issued",
+  "invoice.sent": "Sent to client",
+  "invoice.paid": "Marked as paid",
+  "invoice.voided": "Voided",
+  "invoice.overdue": "Marked overdue",
+  "payment.recorded": "Payment recorded",
+  "invoice.reminder_sent": "Reminder sent",
+};
+
 interface Props {
   params: Promise<{ id: string }>;
 }
@@ -26,12 +37,21 @@ export default async function InvoiceDetailPage({ params }: Props) {
   const org = await requireOrg();
   const supabase = await createClient();
 
-  const { data } = await supabase
-    .from("invoices")
-    .select("*, clients(*), invoice_items(*)")
-    .eq("id", id)
-    .eq("org_id", org.id)
-    .single();
+  const [{ data }, { data: auditLogs }] = await Promise.all([
+    supabase
+      .from("invoices")
+      .select("*, clients(*), invoice_items(*)")
+      .eq("id", id)
+      .eq("org_id", org.id)
+      .single(),
+    supabase
+      .from("audit_logs")
+      .select("action, created_at, meta")
+      .eq("org_id", org.id)
+      .eq("entity_type", "invoice")
+      .eq("entity_id", id)
+      .order("created_at", { ascending: true }),
+  ]);
 
   if (!data) notFound();
 
@@ -83,7 +103,7 @@ export default async function InvoiceDetailPage({ params }: Props) {
               items={items}
               client={client}
               org={org}
-              totals={{ subtotal: totals.subtotal, vatAmount: totals.vat_amount, total: totals.total }}
+              totals={{ subtotal: totals.subtotal, vatAmount: totals.vat_amount, discount: totals.discount, total: totals.total }}
             />
           </div>
         </div>
@@ -114,6 +134,12 @@ export default async function InvoiceDetailPage({ params }: Props) {
                 <dt className="text-neutral-500">VAT</dt>
                 <dd className="dark:text-neutral-50">{formatCurrency(invoice.vat_amount, invoice.currency)}</dd>
               </div>
+              {invoice.discount > 0 && (
+                <div className="flex justify-between text-neutral-500">
+                  <dt>Discount</dt>
+                  <dd>−{formatCurrency(invoice.discount, invoice.currency)}</dd>
+                </div>
+              )}
               <div className="flex justify-between font-bold text-base pt-1 border-t border-neutral-100 dark:border-neutral-800">
                 <dt className="dark:text-neutral-50">Total</dt>
                 <dd className="dark:text-neutral-50">{formatCurrency(invoice.total, invoice.currency)}</dd>
@@ -122,6 +148,12 @@ export default async function InvoiceDetailPage({ params }: Props) {
                 <div className="flex justify-between text-green-700 dark:text-green-400">
                   <dt>Paid</dt>
                   <dd>{formatCurrency(invoice.amount_paid, invoice.currency)}</dd>
+                </div>
+              )}
+              {invoice.amount_paid > 0 && invoice.amount_paid < invoice.total && (
+                <div className="flex justify-between font-semibold text-orange-600 dark:text-orange-400 pt-1 border-t border-neutral-100 dark:border-neutral-800">
+                  <dt>Balance due</dt>
+                  <dd>{formatCurrency(invoice.total - invoice.amount_paid, invoice.currency)}</dd>
                 </div>
               )}
             </dl>
@@ -142,6 +174,31 @@ export default async function InvoiceDetailPage({ params }: Props) {
               <Link href={`/clients/${client.id}`} className="text-sm text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-50">
                 View client →
               </Link>
+            </div>
+          )}
+
+          {auditLogs && auditLogs.length > 0 && (
+            <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5">
+              <h3 className="font-semibold text-neutral-950 dark:text-neutral-50 text-base mb-4">History</h3>
+              <ol className="relative border-l border-neutral-200 dark:border-neutral-700 space-y-4 ml-1">
+                {auditLogs.map((log, i) => (
+                  <li key={i} className="pl-4">
+                    <span className="absolute -left-1.5 mt-1 h-3 w-3 rounded-full border-2 border-white dark:border-neutral-900 bg-neutral-300 dark:bg-neutral-600" />
+                    <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+                      {ACTION_LABELS[log.action] ?? log.action}
+                    </p>
+                    {log.meta && typeof log.meta === "object" && "amount" in log.meta && (
+                      <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                        {formatCurrency((log.meta as { amount: number }).amount, invoice.currency)}
+                        {(log.meta as { method?: string }).method ? ` via ${(log.meta as { method: string }).method.replace("_", " ")}` : ""}
+                      </p>
+                    )}
+                    <time className="text-xs text-neutral-400 dark:text-neutral-500">
+                      {new Date(log.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                    </time>
+                  </li>
+                ))}
+              </ol>
             </div>
           )}
         </div>

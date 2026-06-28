@@ -23,6 +23,7 @@ export default function CleanMinimal({ invoice, items, client, org, totals }: In
           <div className="mt-3 text-sm text-gray-500 space-y-0.5">
             <p>Issued {formatDate(invoice.issue_date)}</p>
             {invoice.due_date && <p>Due {formatDate(invoice.due_date)}</p>}
+            {invoice.po_number && <p>PO: {invoice.po_number}</p>}
           </div>
         </div>
       </div>
@@ -70,6 +71,11 @@ export default function CleanMinimal({ invoice, items, client, org, totals }: In
           <div className="flex justify-between text-gray-500">
             <span>VAT</span><span>{formatCurrency(totals.vatAmount, invoice.currency)}</span>
           </div>
+          {(totals.discount ?? 0) > 0 && (
+            <div className="flex justify-between text-gray-500">
+              <span>Discount</span><span>−{formatCurrency(totals.discount!, invoice.currency)}</span>
+            </div>
+          )}
           <div className="flex justify-between font-bold text-base pt-2 border-t border-gray-200 mt-2">
             <span>Total</span>
             <span style={{ color: org.accent_color }}>{formatCurrency(totals.total, invoice.currency)}</span>

@@ -8,10 +8,11 @@ export interface LineItemInput {
 export interface InvoiceTotals {
   subtotal: number;
   vat_amount: number;
+  discount: number;
   total: number;
 }
 
-export function computeTotals(items: LineItemInput[]): InvoiceTotals {
+export function computeTotals(items: LineItemInput[], discount = 0): InvoiceTotals {
   let subtotal = 0;
   let vat_amount = 0;
 
@@ -21,9 +22,10 @@ export function computeTotals(items: LineItemInput[]): InvoiceTotals {
     vat_amount += lineTotal * (item.vat_rate / 100);
   }
 
-  return {
-    subtotal: Math.round(subtotal * 100) / 100,
-    vat_amount: Math.round(vat_amount * 100) / 100,
-    total: Math.round((subtotal + vat_amount) * 100) / 100,
-  };
+  subtotal = Math.round(subtotal * 100) / 100;
+  vat_amount = Math.round(vat_amount * 100) / 100;
+  const discountAmt = Math.round(Math.min(discount, subtotal + vat_amount) * 100) / 100;
+  const total = Math.round((subtotal + vat_amount - discountAmt) * 100) / 100;
+
+  return { subtotal, vat_amount, discount: discountAmt, total };
 }

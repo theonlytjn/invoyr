@@ -3,6 +3,7 @@ import type { Client, Invoice, InvoiceItem, Organisation } from "@/lib/supabase/
 export interface ComputedTotals {
   subtotal: number;
   vatAmount: number;
+  discount?: number;
   total: number;
 }
 

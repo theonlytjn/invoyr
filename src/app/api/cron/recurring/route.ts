@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
+import { createElement } from "react";
 import { createServiceClient } from "@/lib/supabase/server";
+import { sendTransactionalEmail } from "@/lib/resend/send-transactional-email";
+import { InvoiceSentEmail } from "@/emails/transactional/InvoiceSentEmail";
+import { formatCurrency, formatDate } from "@/lib/utils";
 
 function calcNextRun(frequency: string, from: Date): string {
   const d = new Date(from);
@@ -21,7 +25,7 @@ export async function GET(req: Request) {
 
   const { data: due, error } = await supabase
     .from("recurring_invoices")
-    .select("*, recurring_invoice_items(*), organisations(invoice_prefix, next_invoice_number)")
+    .select("*, recurring_invoice_items(*), organisations(invoice_prefix, next_invoice_number, name, accent_color, logo_url, bank_account_name, bank_name, bank_account_number, bank_sort_code, bank_iban, bank_bic)")
     .eq("status", "active")
     .lte("next_run_at", today);
 
@@ -49,13 +53,14 @@ export async function GET(req: Request) {
     vatAmount = Math.round(vatAmount * 100) / 100;
     const total = Math.round((subtotal + vatAmount) * 100) / 100;
 
+    const shouldAutoSend = rec.auto_send && rec.client_id;
     const { data: invoice } = await supabase
       .from("invoices")
       .insert({
         org_id: rec.org_id,
         client_id: rec.client_id,
         invoice_number: invoiceNumber,
-        status: "draft",
+        status: shouldAutoSend ? "issued" : "draft",
         template: rec.template,
         issue_date: today,
         currency: rec.currency,
@@ -95,6 +100,64 @@ export async function GET(req: Request) {
       entity_id: invoice.id,
       meta: { invoice_number: invoiceNumber, source: "recurring" },
     });
+
+    if (shouldAutoSend) {
+      const { data: clientData } = await supabase
+        .from("clients")
+        .select("name, email")
+        .eq("id", rec.client_id)
+        .single();
+
+      if (clientData?.email) {
+        const payUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`;
+        const hasBankDetails = org.bank_account_name || org.bank_account_number;
+        const logoUrl = org.logo_url ? org.logo_url.split("?")[0] : null;
+
+        const emailResult = await sendTransactionalEmail({
+          orgId: rec.org_id,
+          invoiceId: invoice.id,
+          to: clientData.email,
+          subject: `Invoice ${invoiceNumber}${org.name ? ` from ${org.name}` : ""}`,
+          templateName: "invoice-sent",
+          react: createElement(InvoiceSentEmail, {
+            clientName: clientData.name ?? "there",
+            orgName: org.name ?? "",
+            logoUrl,
+            accentColor: org.accent_color ?? "#111827",
+            invoiceNumber,
+            invoiceTotal: formatCurrency(total, rec.currency),
+            issueDate: formatDate(today),
+            dueDate: undefined,
+            payUrl,
+            bankDetails: hasBankDetails
+              ? {
+                  accountName: org.bank_account_name,
+                  bankName: org.bank_name,
+                  accountNumber: org.bank_account_number,
+                  sortCode: org.bank_sort_code,
+                  iban: org.bank_iban,
+                  bic: org.bank_bic,
+                }
+              : null,
+          }),
+        });
+
+        if (emailResult.ok) {
+          await supabase
+            .from("invoices")
+            .update({ status: "sent", sent_at: new Date().toISOString() })
+            .eq("id", invoice.id);
+
+          await supabase.from("audit_logs").insert({
+            org_id: rec.org_id,
+            action: "invoice.sent",
+            entity_type: "invoice",
+            entity_id: invoice.id,
+            meta: { to: clientData.email, invoice_number: invoiceNumber, source: "recurring_auto_send" },
+          });
+        }
+      }
+    }
 
     const nextRun = calcNextRun(rec.frequency, new Date(rec.next_run_at));
     const ended = rec.end_date && nextRun > rec.end_date;

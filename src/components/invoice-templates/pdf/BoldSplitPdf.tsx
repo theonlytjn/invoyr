@@ -73,6 +73,7 @@ export default function BoldSplitPdf({ invoice, items, client, org, totals }: In
           <View style={styles.statusBadge}>
             <Text style={styles.badge}>{STATUS_LABEL[invoice.status] ?? invoice.status.toUpperCase()}</Text>
             {invoice.due_date ? <Text style={styles.dueText}>Due {formatDate(invoice.due_date)}</Text> : null}
+            {invoice.po_number ? <Text style={styles.dueText}>PO: {invoice.po_number}</Text> : null}
           </View>
         </View>
 
@@ -114,6 +115,12 @@ export default function BoldSplitPdf({ invoice, items, client, org, totals }: In
                 <Text style={styles.totalsLabel}>VAT</Text>
                 <Text style={styles.totalsValue}>{formatCurrency(totals.vatAmount, invoice.currency)}</Text>
               </View>
+              {(totals.discount ?? 0) > 0 ? (
+                <View style={styles.totalsRow}>
+                  <Text style={styles.totalsLabel}>Discount</Text>
+                  <Text style={styles.totalsValue}>−{formatCurrency(totals.discount!, invoice.currency)}</Text>
+                </View>
+              ) : null}
               <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>Total due</Text>
                 <Text style={styles.totalValue}>{formatCurrency(totals.total, invoice.currency)}</Text>

@@ -34,6 +34,9 @@ export default function TJNClassic({ invoice, items, client, org, totals }: Invo
             {invoice.due_date && (
               <p><span className="text-gray-500">Due date:</span> {formatDate(invoice.due_date)}</p>
             )}
+            {invoice.po_number && (
+              <p><span className="text-gray-500">PO number:</span> {invoice.po_number}</p>
+            )}
           </div>
         </div>
       </div>
@@ -86,6 +89,12 @@ export default function TJNClassic({ invoice, items, client, org, totals }: Invo
             <span className="text-gray-500">VAT</span>
             <span>{formatCurrency(totals.vatAmount, invoice.currency)}</span>
           </div>
+          {(totals.discount ?? 0) > 0 && (
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-500">Discount</span>
+              <span>−{formatCurrency(totals.discount!, invoice.currency)}</span>
+            </div>
+          )}
           <div
             className="flex justify-between font-bold text-base pt-2 mt-2"
             style={{ borderTop: `2px solid ${org.accent_color}` }}

@@ -53,6 +53,9 @@ export default function ModernStudio({ invoice, items, client, org, totals }: In
             {invoice.due_date && (
               <p className="text-sm"><span className="text-gray-400">Due:</span> {formatDate(invoice.due_date)}</p>
             )}
+            {invoice.po_number && (
+              <p className="text-sm"><span className="text-gray-400">PO:</span> {invoice.po_number}</p>
+            )}
           </div>
         </div>
       </div>
@@ -98,6 +101,11 @@ export default function ModernStudio({ invoice, items, client, org, totals }: In
           <div className="flex justify-between text-gray-500">
             <span>VAT</span><span>{formatCurrency(totals.vatAmount, invoice.currency)}</span>
           </div>
+          {(totals.discount ?? 0) > 0 && (
+            <div className="flex justify-between text-gray-500">
+              <span>Discount</span><span>−{formatCurrency(totals.discount!, invoice.currency)}</span>
+            </div>
+          )}
           <div className="flex justify-between font-black text-lg pt-2 border-t-2 border-gray-900">
             <span>Total</span>
             <span style={{ color: org.accent_color }}>{formatCurrency(totals.total, invoice.currency)}</span>

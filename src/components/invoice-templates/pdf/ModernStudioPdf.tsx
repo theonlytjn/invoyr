@@ -91,6 +91,11 @@ export default function ModernStudioPdf({ invoice, items, client, org, totals }:
                 <Text style={{ color: "#9ca3af" }}>Due: </Text>{formatDate(invoice.due_date)}
               </Text>
             ) : null}
+            {invoice.po_number ? (
+              <Text style={styles.detail}>
+                <Text style={{ color: "#9ca3af" }}>PO: </Text>{invoice.po_number}
+              </Text>
+            ) : null}
           </View>
         </View>
 
@@ -129,6 +134,12 @@ export default function ModernStudioPdf({ invoice, items, client, org, totals }:
               <Text style={styles.subLabel}>VAT</Text>
               <Text style={styles.subValue}>{formatCurrency(totals.vatAmount, invoice.currency)}</Text>
             </View>
+            {(totals.discount ?? 0) > 0 ? (
+              <View style={styles.subRow}>
+                <Text style={styles.subLabel}>Discount</Text>
+                <Text style={styles.subValue}>−{formatCurrency(totals.discount!, invoice.currency)}</Text>
+              </View>
+            ) : null}
             <View style={styles.totalRowFinal}>
               <Text style={styles.totalLabel}>Total</Text>
               <Text style={[styles.totalValue, { color: accent }]}>{formatCurrency(totals.total, invoice.currency)}</Text>

@@ -15,8 +15,10 @@ const STATUS_TABS: { value: InvoiceStatus | "all"; label: string }[] = [
   { value: "draft", label: "Draft" },
   { value: "issued", label: "Issued" },
   { value: "sent", label: "Sent" },
-  { value: "paid", label: "Paid" },
+  { value: "partial", label: "Partial" },
   { value: "overdue", label: "Overdue" },
+  { value: "paid", label: "Paid" },
+  { value: "void", label: "Void" },
 ];
 
 interface SearchParams {

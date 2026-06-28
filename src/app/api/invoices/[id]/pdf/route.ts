@@ -72,7 +72,8 @@ export async function GET(
       quantity: i.quantity,
       unit_price: i.unit_price,
       vat_rate: i.vat_rate,
-    }))
+    })),
+    (invoice as Invoice & { discount?: number }).discount ?? 0
   );
 
   const templateName: string = invoice.template ?? "tjn_classic";
@@ -101,7 +102,7 @@ export async function GET(
     items,
     client,
     org,
-    totals: { subtotal: totals.subtotal, vatAmount: totals.vat_amount, total: totals.total },
+    totals: { subtotal: totals.subtotal, vatAmount: totals.vat_amount, discount: totals.discount, total: totals.total },
   });
 
   const buffer = await renderToBuffer(element);
