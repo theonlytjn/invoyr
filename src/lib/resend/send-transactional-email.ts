@@ -9,7 +9,7 @@ interface SendTransactionalEmailOptions {
   invoiceId?: string | null;
   to: string;
   subject: string;
-  templateName: TransactionalTemplateName;
+  templateName: TransactionalTemplateName | string;
   react: ReactElement;
 }
 
