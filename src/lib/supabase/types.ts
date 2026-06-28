@@ -44,6 +44,8 @@ export interface Organisation {
   bank_bic: string | null;
   stripe_account_id: string | null;
   stripe_customer_id: string | null;
+  from_email: string | null;
+  reminder_days: number[] | null;
   created_at: string;
   updated_at: string;
 }

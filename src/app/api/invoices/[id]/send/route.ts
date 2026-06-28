@@ -21,7 +21,7 @@ export async function POST(
   const { data: invoice } = await supabase
     .from("invoices")
     .select(
-      "*, clients(*), invoice_items(*), organisations(name, accent_color, logo_url, bank_account_name, bank_name, bank_account_number, bank_sort_code, bank_iban, bank_bic)"
+      "*, clients(*), invoice_items(*), organisations(name, accent_color, logo_url, from_email, bank_account_name, bank_name, bank_account_number, bank_sort_code, bank_iban, bank_bic)"
     )
     .eq("id", id)
     .single();
@@ -60,6 +60,7 @@ export async function POST(
     to: client.email,
     subject: `Invoice ${invoice.invoice_number}${org?.name ? ` from ${org.name}` : ""}`,
     templateName: "invoice-sent",
+    fromEmail: (org as { from_email?: string | null })?.from_email,
     react: createElement(InvoiceSentEmail, {
       clientName: client.name ?? "there",
       orgName: org?.name ?? "",

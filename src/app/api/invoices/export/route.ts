@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
+import { requireOrgPermission } from "@/lib/permissions";
 import { formatDate } from "@/lib/utils";
 
 export async function GET() {
@@ -9,6 +10,9 @@ export async function GET() {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const org = await requireOrg();
+
+  const permErr = await requireOrgPermission(org.id, "export_csv");
+  if (permErr) return NextResponse.json({ error: permErr.error }, { status: permErr.status });
 
   const { data: invoices } = await supabase
     .from("invoices")

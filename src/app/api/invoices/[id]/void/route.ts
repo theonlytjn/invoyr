@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { requireOrgPermission } from "@/lib/permissions";
 
 export async function POST(
   _req: NextRequest,
@@ -18,6 +19,9 @@ export async function POST(
     .single();
 
   if (!invoice) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  const permErr = await requireOrgPermission(invoice.org_id, "void_invoice");
+  if (permErr) return NextResponse.json({ error: permErr.error }, { status: permErr.status });
   if (["paid", "void"].includes(invoice.status)) {
     return NextResponse.json({ error: "Cannot void a paid or already voided invoice" }, { status: 400 });
   }

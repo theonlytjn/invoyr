@@ -11,6 +11,7 @@ interface SendTransactionalEmailOptions {
   subject: string;
   templateName: TransactionalTemplateName | string;
   react: ReactElement;
+  fromEmail?: string | null;
 }
 
 interface SendResult {
@@ -26,6 +27,7 @@ export async function sendTransactionalEmail({
   subject,
   templateName,
   react,
+  fromEmail,
 }: SendTransactionalEmailOptions): Promise<SendResult> {
   let html: string;
 
@@ -37,7 +39,7 @@ export async function sendTransactionalEmail({
   }
 
   const resend = getResend();
-  const from = process.env.RESEND_FROM_EMAIL ?? "invoices@invoyr.io";
+  const from = fromEmail ?? process.env.RESEND_FROM_EMAIL ?? "invoices@invoyr.io";
 
   const { data, error: resendErr } = await resend.emails.send({ from, to, subject, html });
 

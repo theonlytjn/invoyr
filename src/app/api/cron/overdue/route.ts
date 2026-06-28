@@ -6,7 +6,7 @@ import { sendTransactionalEmail } from "@/lib/resend/send-transactional-email";
 import { OverdueReminderEmail } from "@/emails/transactional/OverdueReminderEmail";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
-const REMINDER_DAYS = [3, 7, 14, 21, 30];
+const DEFAULT_REMINDER_DAYS = [3, 7, 14, 21, 30];
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
   const { data: overdueInvoices } = await supabase
     .from("invoices")
     .select(
-      "id, org_id, invoice_number, total, currency, due_date, public_token, clients(name, email), organisations(name, accent_color, logo_url)"
+      "id, org_id, invoice_number, total, currency, due_date, public_token, clients(name, email), organisations(name, accent_color, logo_url, reminder_days)"
     )
     .eq("status", "overdue")
     .in("org_id", [...proOrgIds])
@@ -82,7 +82,8 @@ export async function GET(req: NextRequest) {
         (today.getTime() - new Date(inv.due_date).getTime()) / 86_400_000
       );
 
-      const matchingDay = REMINDER_DAYS.find((d) => d === daysOverdue);
+      const orgReminderDays: number[] = (org as { reminder_days?: number[] | null }).reminder_days ?? DEFAULT_REMINDER_DAYS;
+      const matchingDay = orgReminderDays.find((d) => d === daysOverdue);
       if (!matchingDay) return;
 
       const templateName = `overdue-reminder-${matchingDay}d`;
