@@ -90,7 +90,7 @@ export default async function InvoiceDetailPage({ params }: Props) {
 
         <div className="space-y-4">
           <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5 space-y-3">
-            <h3 className="font-semibold text-neutral-950 dark:text-neutral-50 text-sm">Invoice summary</h3>
+            <h3 className="font-semibold text-neutral-950 dark:text-neutral-50 text-base">Invoice summary</h3>
             <dl className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <dt className="text-neutral-500">Status</dt>
@@ -133,13 +133,13 @@ export default async function InvoiceDetailPage({ params }: Props) {
 
           {client && (
             <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5 space-y-2">
-              <h3 className="font-semibold text-neutral-950 dark:text-neutral-50 text-sm">Client</h3>
+              <h3 className="font-semibold text-neutral-950 dark:text-neutral-50 text-base">Client</h3>
               <div className="text-sm">
                 <p className="font-medium text-neutral-950 dark:text-neutral-50">{client.name}</p>
                 {client.company_name && <p className="text-neutral-500 dark:text-neutral-400">{client.company_name}</p>}
                 {client.email && <p className="text-neutral-500 dark:text-neutral-400">{client.email}</p>}
               </div>
-              <Link href={`/clients/${client.id}`} className="text-xs text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-50">
+              <Link href={`/clients/${client.id}`} className="text-sm text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-50">
                 View client →
               </Link>
             </div>

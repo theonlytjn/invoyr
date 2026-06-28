@@ -97,7 +97,7 @@ export default function InvoiceSettingsForm({ org }: Props) {
 
       {/* Numbering */}
       <div className="space-y-4">
-        <h3 className="text-xs font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-300">Numbering</h3>
+        <h3 className="text-sm font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-300">Numbering</h3>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label htmlFor="prefix">Invoice prefix</Label>
@@ -127,7 +127,7 @@ export default function InvoiceSettingsForm({ org }: Props) {
 
       {/* Currency & VAT */}
       <div className="space-y-4 pt-2 border-t border-neutral-100 dark:border-neutral-800">
-        <h3 className="text-xs font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-300">Financial defaults</h3>
+        <h3 className="text-sm font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-300">Financial defaults</h3>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label htmlFor="currency">Currency</Label>
@@ -160,7 +160,7 @@ export default function InvoiceSettingsForm({ org }: Props) {
 
       {/* Default template */}
       <div className="space-y-1.5 pt-2 border-t border-neutral-100 dark:border-neutral-800">
-        <h3 className="text-xs font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-300 mb-3">Appearance</h3>
+        <h3 className="text-sm font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-300 mb-3">Appearance</h3>
         <Label htmlFor="defaultTemplate">Default invoice template</Label>
         <Select value={defaultTemplate} onValueChange={setDefaultTemplate}>
           <SelectTrigger id="defaultTemplate">
@@ -176,7 +176,7 @@ export default function InvoiceSettingsForm({ org }: Props) {
 
       {/* Defaults */}
       <div className="space-y-4 pt-2 border-t border-neutral-100 dark:border-neutral-800">
-        <h3 className="text-xs font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-300">Default content</h3>
+        <h3 className="text-sm font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-300">Default content</h3>
         <div className="space-y-1.5">
           <Label htmlFor="defaultTerms">Payment terms</Label>
           <Textarea

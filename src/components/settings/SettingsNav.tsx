@@ -28,7 +28,7 @@ export default function SettingsNav() {
               key={tab.href}
               href={tab.href}
               className={cn(
-                "px-4 py-3 text-sm font-medium border-b-2 transition-colors",
+                "px-4 py-3 text-base font-medium border-b-2 transition-colors",
                 active
                   ? "text-neutral-950 dark:text-neutral-50 border-neutral-950 dark:border-neutral-50"
                   : "text-neutral-500 border-transparent hover:text-neutral-700 dark:hover:text-neutral-300 hover:border-neutral-300 dark:hover:border-neutral-600"

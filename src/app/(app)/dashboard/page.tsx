@@ -102,7 +102,7 @@ export default async function DashboardPage() {
       <div className="p-4 sm:p-6 space-y-6">
         <div>
           <h1 className="text-2xl font-serif text-neutral-950 dark:text-neutral-50">Welcome back, {firstName}</h1>
-          <p className="text-sm text-neutral-500 mt-0.5">Here&apos;s what&apos;s happening with {org.name}.</p>
+          <p className="text-base text-neutral-500 mt-0.5">Here&apos;s what&apos;s happening with {org.name}.</p>
         </div>
 
         {sub?.status === "trialing" && sub.trial_ends_at && (() => {
@@ -174,7 +174,7 @@ export default async function DashboardPage() {
           <div className="xl:col-span-2 bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 overflow-hidden">
             <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-800">
               <h2 className="text-lg font-serif text-neutral-950 dark:text-neutral-50">Latest invoices</h2>
-              <Link href="/invoices" className="text-xs text-neutral-500 hover:text-neutral-950 dark:hover:text-neutral-50">View all →</Link>
+              <Link href="/invoices" className="text-sm text-neutral-500 hover:text-neutral-950 dark:hover:text-neutral-50">View all →</Link>
             </div>
             <LatestInvoicesTable invoices={latestInvoices} />
           </div>

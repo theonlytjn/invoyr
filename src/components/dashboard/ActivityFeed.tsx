@@ -34,7 +34,7 @@ export default function ActivityFeed({ logs }: Props) {
           <div className="w-1.5 h-1.5 rounded-full bg-neutral-400 mt-2 flex-shrink-0" />
           <div className="min-w-0">
             <p className="text-sm text-neutral-950 dark:text-neutral-50">{logDescription(log)}</p>
-            <p className="text-xs text-neutral-400 mt-0.5">{formatDate(log.created_at)}</p>
+            <p className="text-sm text-neutral-400 mt-0.5">{formatDate(log.created_at)}</p>
           </div>
         </li>
       ))}

@@ -239,7 +239,7 @@ export default function InvoiceForm({ org, clients, invoice, existingItems, invo
               />
             </div>
           ) : dueDate ? (
-            <p className="text-xs text-neutral-500">
+            <p className="text-sm text-neutral-500">
               Due on {new Date(dueDate + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
             </p>
           ) : null}
@@ -313,7 +313,7 @@ export default function InvoiceForm({ org, clients, invoice, existingItems, invo
       {/* Live preview */}
       <div className="hidden xl:block">
         <div className="sticky top-6">
-          <p className="text-xs font-medium text-neutral-500 uppercase tracking-wide mb-3">Preview</p>
+          <p className="text-sm font-medium text-neutral-500 uppercase tracking-wide mb-3">Preview</p>
           <div className="overflow-auto border border-neutral-200 dark:border-neutral-800 rounded-xl bg-neutral-50 dark:bg-neutral-900" style={{ maxHeight: "85vh" }}>
             <div style={{ transform: "scale(0.75)", transformOrigin: "top left", width: "794px" }}>
               <TemplatePreview
