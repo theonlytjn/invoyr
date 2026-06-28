@@ -13,4 +13,5 @@ export interface InvoiceTemplateProps {
   client: Client | null;
   org: Organisation;
   totals: ComputedTotals;
+  documentType?: "invoice" | "estimate";
 }

@@ -100,3 +100,7 @@ export function CopyIcon({ size = 20, className }: IconProps) {
 export function LockIcon({ size = 20, className }: IconProps) {
   return <Hi name="lock" size={size} className={className} />;
 }
+
+export function EstimateIcon({ size = 20, className }: IconProps) {
+  return <Hi name="estimate-01" size={size} className={className} />;
+}

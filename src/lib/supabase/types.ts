@@ -1,4 +1,5 @@
 export type InvoiceStatus = "draft" | "issued" | "sent" | "partial" | "paid" | "overdue" | "void";
+export type EstimateStatus = "draft" | "sent" | "approved" | "rejected" | "converted";
 export type InvoiceTemplate = "tjn_classic" | "clean_minimal" | "bold_split" | "modern_studio";
 export type PaymentMethod = "stripe" | "bank_transfer" | "cash" | "cheque" | "other";
 export type SubscriptionStatus = "trialing" | "active" | "past_due" | "canceled" | "incomplete";
@@ -10,6 +11,53 @@ export interface Profile {
   avatar_url: string | null;
   onboarding_completed: boolean;
   created_at: string;
+}
+
+export interface Estimate {
+  id: string;
+  org_id: string;
+  client_id: string | null;
+  estimate_number: string;
+  status: EstimateStatus;
+  template: InvoiceTemplate;
+  issue_date: string;
+  expiry_date: string | null;
+  currency: string;
+  po_number: string | null;
+  subtotal: number;
+  discount: number;
+  vat_amount: number;
+  total: number;
+  notes: string | null;
+  terms: string | null;
+  public_token: string | null;
+  sent_at: string | null;
+  approved_at: string | null;
+  rejected_at: string | null;
+  converted_at: string | null;
+  converted_invoice_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EstimateItem {
+  id: number;
+  estimate_id: string;
+  description: string;
+  quantity: number;
+  unit_price: number;
+  vat_rate: number;
+  line_total: number;
+  sort_order: number;
+}
+
+export interface EstimateWithClient extends Estimate {
+  clients: Pick<Client, "id" | "name" | "email" | "company_name"> | null;
+}
+
+export interface EstimateWithItems extends Estimate {
+  estimate_items: EstimateItem[];
+  clients: Client | null;
 }
 
 export interface Organisation {
@@ -29,6 +77,7 @@ export interface Organisation {
   accent_color: string;
   invoice_prefix: string;
   next_invoice_number: number;
+  next_estimate_number: number;
   default_terms: string | null;
   default_notes: string | null;
   company_registration_number: string | null;

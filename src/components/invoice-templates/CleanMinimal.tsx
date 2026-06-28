@@ -1,7 +1,7 @@
 import { formatCurrency, formatDate } from "@/lib/utils";
 import type { InvoiceTemplateProps } from "./types";
 
-export default function CleanMinimal({ invoice, items, client, org, totals }: InvoiceTemplateProps) {
+export default function CleanMinimal({ invoice, items, client, org, totals, documentType = "invoice" }: InvoiceTemplateProps) {
   return (
     <div className="bg-white p-10 font-sans text-gray-900" style={{ width: 794, minHeight: 1123 }}>
       {/* Top strip */}
@@ -16,7 +16,7 @@ export default function CleanMinimal({ invoice, items, client, org, totals }: In
           {org.email && <p className="text-sm text-gray-400">{org.email}</p>}
         </div>
         <div className="text-right">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">Invoice</p>
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">{documentType === "estimate" ? "Estimate" : "Invoice"}</p>
           <p className="text-2xl font-bold" style={{ color: org.accent_color }}>
             {invoice.invoice_number}
           </p>

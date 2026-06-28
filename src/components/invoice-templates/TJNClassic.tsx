@@ -1,7 +1,7 @@
 import { formatCurrency, formatDate } from "@/lib/utils";
 import type { InvoiceTemplateProps } from "./types";
 
-export default function TJNClassic({ invoice, items, client, org, totals }: InvoiceTemplateProps) {
+export default function TJNClassic({ invoice, items, client, org, totals, documentType = "invoice" }: InvoiceTemplateProps) {
   return (
     <div className="bg-white p-10 font-sans text-gray-900" style={{ width: 794, minHeight: 1123 }}>
       {/* Header */}
@@ -25,7 +25,7 @@ export default function TJNClassic({ invoice, items, client, org, totals }: Invo
         </div>
 
         <div className="text-right">
-          <p className="text-3xl font-bold text-gray-900 mb-1">INVOICE</p>
+          <p className="text-3xl font-bold text-gray-900 mb-1">{documentType === "estimate" ? "ESTIMATE" : "INVOICE"}</p>
           <p className="text-lg font-semibold" style={{ color: org.accent_color }}>
             #{invoice.invoice_number}
           </p>

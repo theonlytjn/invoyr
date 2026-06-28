@@ -53,7 +53,8 @@ create table if not exists public.organisations (
   website             text,
   accent_color        text default '#111827',
   invoice_prefix      text not null default 'INV',
-  next_invoice_number integer not null default 1,
+  next_invoice_number  integer not null default 1,
+  next_estimate_number integer not null default 1,
   default_terms       text,
   default_notes       text,
   -- bank / payment details
@@ -263,7 +264,64 @@ create table if not exists public.recurring_invoice_items (
 create index if not exists rec_items_rec_idx on public.recurring_invoice_items(recurring_invoice_id);
 
 -- ----------------------------------------------------------------
--- 9. PAYMENTS
+-- 9. ESTIMATES
+-- ----------------------------------------------------------------
+do $$ begin
+  create type public.estimate_status as enum ('draft', 'sent', 'approved', 'rejected', 'converted');
+exception when duplicate_object then null;
+end $$;
+
+create table if not exists public.estimates (
+  id                    uuid primary key default gen_random_uuid(),
+  org_id                uuid not null references public.organisations(id) on delete cascade,
+  client_id             uuid references public.clients(id) on delete set null,
+  estimate_number       text not null,
+  status                public.estimate_status not null default 'draft',
+  template              public.invoice_template not null default 'tjn_classic',
+  issue_date            date not null default current_date,
+  expiry_date           date,
+  currency              text not null default 'GBP',
+  po_number             text,
+  subtotal              numeric(12,2) not null default 0,
+  discount              numeric(12,2) not null default 0,
+  vat_amount            numeric(12,2) not null default 0,
+  total                 numeric(12,2) not null default 0,
+  notes                 text,
+  terms                 text,
+  public_token          text unique default encode(gen_random_bytes(24), 'base64url'),
+  sent_at               timestamptz,
+  approved_at           timestamptz,
+  rejected_at           timestamptz,
+  converted_at          timestamptz,
+  converted_invoice_id  uuid references public.invoices(id) on delete set null,
+  created_at            timestamptz not null default now(),
+  updated_at            timestamptz not null default now(),
+  unique (org_id, estimate_number)
+);
+
+create index if not exists estimates_org_idx    on public.estimates(org_id);
+create index if not exists estimates_client_idx on public.estimates(client_id);
+create index if not exists estimates_status_idx on public.estimates(status);
+create index if not exists estimates_token_idx  on public.estimates(public_token);
+
+-- ----------------------------------------------------------------
+-- 10. ESTIMATE_ITEMS
+-- ----------------------------------------------------------------
+create table if not exists public.estimate_items (
+  id              bigint generated always as identity primary key,
+  estimate_id     uuid not null references public.estimates(id) on delete cascade,
+  description     text not null,
+  quantity        numeric(12,4) not null default 1,
+  unit_price      numeric(12,2) not null,
+  vat_rate        numeric(5,2) not null default 0,
+  line_total      numeric(12,2) generated always as (quantity * unit_price) stored,
+  sort_order      integer not null default 0
+);
+
+create index if not exists estimate_items_idx on public.estimate_items(estimate_id);
+
+-- ----------------------------------------------------------------
+-- 11. PAYMENTS
 -- ----------------------------------------------------------------
 do $$ begin
   create type public.payment_method as enum ('stripe', 'bank_transfer', 'cash', 'cheque', 'other');
@@ -415,6 +473,8 @@ alter table public.org_invites          enable row level security;
 alter table public.clients              enable row level security;
 alter table public.invoices             enable row level security;
 alter table public.invoice_items        enable row level security;
+alter table public.estimates            enable row level security;
+alter table public.estimate_items       enable row level security;
 alter table public.recurring_invoices   enable row level security;
 alter table public.recurring_invoice_items enable row level security;
 alter table public.payments             enable row level security;
@@ -492,6 +552,35 @@ create policy items_delete on public.invoice_items for delete to authenticated
 drop policy if exists items_public_token on public.invoice_items;
 create policy items_public_token on public.invoice_items for select to anon
   using (exists (select 1 from public.invoices i where i.id = invoice_id and i.public_token is not null));
+
+-- ESTIMATES
+drop policy if exists estimates_select on public.estimates;
+create policy estimates_select on public.estimates for select to authenticated using (is_org_member(org_id));
+drop policy if exists estimates_insert on public.estimates;
+create policy estimates_insert on public.estimates for insert to authenticated with check (is_org_member(org_id));
+drop policy if exists estimates_update on public.estimates;
+create policy estimates_update on public.estimates for update to authenticated using (is_org_member(org_id)) with check (is_org_member(org_id));
+drop policy if exists estimates_delete on public.estimates;
+create policy estimates_delete on public.estimates for delete to authenticated using (is_org_member(org_id));
+drop policy if exists estimates_public_token on public.estimates;
+create policy estimates_public_token on public.estimates for select to anon using (public_token is not null);
+
+-- ESTIMATE_ITEMS
+drop policy if exists est_items_select on public.estimate_items;
+create policy est_items_select on public.estimate_items for select to authenticated
+  using (exists (select 1 from public.estimates e where e.id = estimate_id and is_org_member(e.org_id)));
+drop policy if exists est_items_insert on public.estimate_items;
+create policy est_items_insert on public.estimate_items for insert to authenticated
+  with check (exists (select 1 from public.estimates e where e.id = estimate_id and is_org_member(e.org_id)));
+drop policy if exists est_items_update on public.estimate_items;
+create policy est_items_update on public.estimate_items for update to authenticated
+  using (exists (select 1 from public.estimates e where e.id = estimate_id and is_org_member(e.org_id)));
+drop policy if exists est_items_delete on public.estimate_items;
+create policy est_items_delete on public.estimate_items for delete to authenticated
+  using (exists (select 1 from public.estimates e where e.id = estimate_id and is_org_member(e.org_id)));
+drop policy if exists est_items_public_token on public.estimate_items;
+create policy est_items_public_token on public.estimate_items for select to anon
+  using (exists (select 1 from public.estimates e where e.id = estimate_id and e.public_token is not null));
 
 -- RECURRING_INVOICES
 drop policy if exists recurring_select on public.recurring_invoices;
@@ -572,3 +661,6 @@ alter table public.organisations add column if not exists reminder_days integer[
 -- invoices: PO number and discount
 alter table public.invoices add column if not exists po_number text;
 alter table public.invoices add column if not exists discount  numeric(12,2) not null default 0;
+
+-- organisations: estimate number counter
+alter table public.organisations add column if not exists next_estimate_number integer not null default 1;

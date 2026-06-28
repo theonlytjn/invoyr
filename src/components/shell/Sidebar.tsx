@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   DashboardIcon,
   InvoiceIcon,
+  EstimateIcon,
   UsersIcon,
   CreditCardIcon,
   AnalyticsIcon,
@@ -23,6 +24,7 @@ import { canAccess, type Feature } from "@/config/plans";
 const NAV_ITEMS: { href: string; label: string; icon: React.ComponentType<{ size?: number; className?: string }>; requires?: Feature }[] = [
   { href: "/dashboard", label: "Overview", icon: DashboardIcon },
   { href: "/invoices", label: "Invoices", icon: InvoiceIcon },
+  { href: "/estimates", label: "Estimates", icon: EstimateIcon },
   { href: "/clients", label: "Clients", icon: UsersIcon },
   { href: "/payments", label: "Payments", icon: CreditCardIcon },
   { href: "/reports", label: "Reports", icon: AnalyticsIcon, requires: "advanced_reports" },

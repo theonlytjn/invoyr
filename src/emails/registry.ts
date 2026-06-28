@@ -5,6 +5,7 @@ export type TransactionalTemplateName =
   | "verify-email"
   | "password-reset"
   | "invoice-sent"
+  | "estimate-sent"
   | "payment-received"
   | "payment-reminder"
   | "overdue-reminder"
@@ -38,6 +39,10 @@ export const EMAIL_REGISTRY: Record<TransactionalTemplateName, EmailRegistryEntr
   "invoice-sent": {
     templateName: "invoice-sent",
     defaultSubject: "Your invoice",
+  },
+  "estimate-sent": {
+    templateName: "estimate-sent",
+    defaultSubject: "Your estimate",
   },
   "payment-received": {
     templateName: "payment-received",
