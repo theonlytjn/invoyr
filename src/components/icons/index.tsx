@@ -54,7 +54,7 @@ export function DownloadIcon({ size = 20, className }: IconProps) {
 }
 
 export function SendIcon({ size = 20, className }: IconProps) {
-  return <Hi name="sent-01" size={size} className={className} />;
+  return <Hi name="send-01" size={size} className={className} />;
 }
 
 export function XCircleIcon({ size = 20, className }: IconProps) {
