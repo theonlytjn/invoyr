@@ -1,13 +1,23 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg, requireUser } from "@/lib/auth";
+import { getOrgPlan } from "@/lib/billing";
 import TeamPanel from "@/components/team/TeamPanel";
+import UpgradePrompt from "@/components/ui/UpgradePrompt";
 import type { Metadata } from "next";
 import type { OrgMemberWithProfile, OrgInvite } from "@/lib/supabase/types";
+import { canAccess, TEAM_MEMBER_CAP, type PlanId } from "@/config/plans";
 
 export const metadata: Metadata = { title: "Settings — Team" };
 
 export default async function TeamSettingsPage() {
   const org = await requireOrg();
+  const plan = await getOrgPlan(org.id);
+
+  if (!canAccess(plan, "team_members")) {
+    return <UpgradePrompt feature="team_members" />;
+  }
+
+  const memberCap = TEAM_MEMBER_CAP[(plan as PlanId) ?? "starter"];
   const user = await requireUser();
   const supabase = await createClient();
 
@@ -41,6 +51,7 @@ export default async function TeamSettingsPage() {
       invites={invites}
       currentUserId={user.id}
       currentUserRole={currentUserRole}
+      memberCap={memberCap}
     />
   );
 }

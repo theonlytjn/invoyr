@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createElement } from "react";
 import { createServiceClient } from "@/lib/supabase/server";
+import { isSubscriptionActive } from "@/lib/billing";
 import { sendTransactionalEmail } from "@/lib/resend/send-transactional-email";
 import { OverdueReminderEmail } from "@/emails/transactional/OverdueReminderEmail";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -41,8 +42,20 @@ export async function GET(req: NextRequest) {
     }))
   );
 
+  // Fetch Pro orgs to gate reminder emails
+  const { data: proSubs } = await supabase
+    .from("subscriptions")
+    .select("org_id, status, plan")
+    .eq("plan", "pro");
+  const proOrgIds = new Set(
+    (proSubs ?? [])
+      .filter((s) => isSubscriptionActive(s.status))
+      .map((s) => s.org_id)
+  );
+
   const reminderResults = await Promise.allSettled(
     overdueInvoices.map(async (inv) => {
+      if (!proOrgIds.has(inv.org_id)) return; // reminder automation is Pro only
       const client = Array.isArray(inv.clients) ? inv.clients[0] : inv.clients;
       const org = Array.isArray(inv.organisations) ? inv.organisations[0] : inv.organisations;
       if (!client?.email) return;

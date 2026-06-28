@@ -13,17 +13,19 @@ import {
   SettingsIcon,
   LogOutIcon,
   PlusIcon,
+  LockIcon,
 } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import type { Organisation } from "@/lib/supabase/types";
+import { canAccess, type Feature } from "@/config/plans";
 
-const NAV_ITEMS = [
+const NAV_ITEMS: { href: string; label: string; icon: React.ComponentType<{ className?: string }>; requires?: Feature }[] = [
   { href: "/dashboard", label: "Overview", icon: DashboardIcon },
   { href: "/invoices", label: "Invoices", icon: InvoiceIcon },
   { href: "/clients", label: "Clients", icon: UsersIcon },
   { href: "/payments", label: "Payments", icon: CreditCardIcon },
-  { href: "/reports", label: "Reports", icon: AnalyticsIcon },
+  { href: "/reports", label: "Reports", icon: AnalyticsIcon, requires: "advanced_reports" },
   { href: "/settings", label: "Settings", icon: SettingsIcon },
 ];
 
@@ -122,23 +124,31 @@ export default function Sidebar({ org, userEmail, plan }: Props) {
       {/* Nav */}
       <nav className={cn("flex-1 py-4 overflow-y-auto", collapsed ? "px-3" : "px-5")}>
         <ul className="space-y-1.5">
-          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-            const active = pathname === href || (href !== "/dashboard" && pathname.startsWith(href));
+          {NAV_ITEMS.map(({ href, label, icon: Icon, requires }) => {
+            const locked = requires ? !canAccess(plan, requires) : false;
+            const active = !locked && (pathname === href || (href !== "/dashboard" && pathname.startsWith(href)));
             return (
               <li key={href}>
                 <Link
                   href={href}
-                  title={collapsed ? label : undefined}
+                  title={collapsed ? (locked ? `${label} — upgrade required` : label) : undefined}
                   className={cn(
                     "flex items-center rounded-lg text-sm font-medium border transition-all duration-200 ease-in-out",
                     collapsed ? "justify-center px-0 py-2.5" : "px-3 py-2.5",
                     active
                       ? "bg-white dark:bg-neutral-800 text-neutral-950 dark:text-neutral-50 border-neutral-200 dark:border-neutral-700 shadow-[0_0_0_2px_#ffffff,0_0_0_4px_#0a0a0a] dark:shadow-[0_0_0_2px_#171717,0_0_0_4px_#fafafa]"
+                      : locked
+                      ? "border-transparent text-neutral-400 dark:text-neutral-600 cursor-pointer"
                       : "border-transparent text-neutral-500 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-50",
                   )}
                 >
                   <Icon className={cn("h-5 w-5 shrink-0", !collapsed && "mr-3")} />
-                  {!collapsed && label}
+                  {!collapsed && (
+                    <>
+                      <span className="flex-1">{label}</span>
+                      {locked && <LockIcon size={13} className="text-neutral-400 dark:text-neutral-600 ml-1" />}
+                    </>
+                  )}
                 </Link>
               </li>
             );

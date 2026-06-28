@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg, requireUser } from "@/lib/auth";
+import { getOrgPlan } from "@/lib/billing";
+import { canAccess, TEAM_MEMBER_CAP, type PlanId } from "@/config/plans";
 import { sendTransactionalEmail } from "@/lib/resend/send-transactional-email";
 import { TeamInviteEmail } from "@/emails/transactional/TeamInviteEmail";
 import { z } from "zod";
@@ -13,8 +15,25 @@ const schema = z.object({
 
 export async function POST(req: Request) {
   const org = await requireOrg();
+  const plan = await getOrgPlan(org.id);
+  if (!canAccess(plan, "team_members")) {
+    return NextResponse.json({ error: "Team members require the Business plan or above." }, { status: 403 });
+  }
+
   const user = await requireUser();
   const supabase = await createClient();
+
+  // Enforce member cap
+  const cap = TEAM_MEMBER_CAP[(plan as PlanId) ?? "starter"];
+  if (cap !== Infinity) {
+    const { count } = await supabase
+      .from("org_members")
+      .select("id", { count: "exact", head: true })
+      .eq("org_id", org.id);
+    if ((count ?? 0) >= cap) {
+      return NextResponse.json({ error: `Your ${plan} plan is limited to ${cap} team members. Upgrade to Pro for unlimited seats.` }, { status: 403 });
+    }
+  }
 
   // Only owner/admin can invite
   const { data: member } = await supabase

@@ -14,9 +14,9 @@ const schema = z.object({
   website: z.string().url("Invalid URL").or(z.literal("")),
 });
 
-interface Props { org: Organisation }
+interface Props { org: Organisation; canUploadLogo?: boolean }
 
-export default function BrandingForm({ org }: Props) {
+export default function BrandingForm({ org, canUploadLogo = false }: Props) {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -126,28 +126,41 @@ export default function BrandingForm({ org }: Props) {
       {/* Logo */}
       <div className="space-y-2">
         <Label>Company logo</Label>
-        <p className="text-xs text-neutral-500">Shown on PDFs and the payment page. PNG, JPG or WebP, max 2 MB.</p>
-        <div className="flex items-center gap-4">
-          {logoUrl ? (
-            <img src={logoUrl} alt="Company logo" className="h-14 w-auto max-w-[140px] object-contain rounded border border-neutral-200 dark:border-neutral-700 p-1 bg-white" />
-          ) : (
-            <div className="h-14 w-28 rounded border border-dashed border-neutral-300 dark:border-neutral-600 flex items-center justify-center bg-neutral-50 dark:bg-neutral-800">
-              <span className="text-xs text-neutral-400">No logo</span>
+        {canUploadLogo ? (
+          <>
+            <p className="text-xs text-neutral-500">Shown on PDFs and the payment page. PNG, JPG or WebP, max 2 MB.</p>
+            <div className="flex items-center gap-4">
+              {logoUrl ? (
+                <img src={logoUrl} alt="Company logo" className="h-14 w-auto max-w-[140px] object-contain rounded border border-neutral-200 dark:border-neutral-700 p-1 bg-white" />
+              ) : (
+                <div className="h-14 w-28 rounded border border-dashed border-neutral-300 dark:border-neutral-600 flex items-center justify-center bg-neutral-50 dark:bg-neutral-800">
+                  <span className="text-xs text-neutral-400">No logo</span>
+                </div>
+              )}
+              <div className="flex flex-col gap-1.5">
+                <Button type="button" variant="outline" size="sm" disabled={logoUploading} onClick={() => fileInputRef.current?.click()}>
+                  {logoUploading ? "Uploading…" : logoUrl ? "Replace logo" : "Upload logo"}
+                </Button>
+                {logoUrl && (
+                  <button type="button" onClick={handleRemoveLogo} className="text-xs text-red-500 hover:text-red-700 text-left">
+                    Remove
+                  </button>
+                )}
+              </div>
+              <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleLogoChange} />
             </div>
-          )}
-          <div className="flex flex-col gap-1.5">
-            <Button type="button" variant="outline" size="sm" disabled={logoUploading} onClick={() => fileInputRef.current?.click()}>
-              {logoUploading ? "Uploading…" : logoUrl ? "Replace logo" : "Upload logo"}
-            </Button>
-            {logoUrl && (
-              <button type="button" onClick={handleRemoveLogo} className="text-xs text-red-500 hover:text-red-700 text-left">
-                Remove
-              </button>
-            )}
+            {logoError && <p className="text-xs text-red-600">{logoError}</p>}
+          </>
+        ) : (
+          <div className="flex items-center gap-3 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/50 px-4 py-3">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-neutral-400 shrink-0">
+              <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            <p className="text-sm text-neutral-500">
+              Custom logo & branding is available on the <a href="/settings/billing" className="font-medium text-neutral-950 dark:text-neutral-50 underline">Business plan</a>.
+            </p>
           </div>
-          <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleLogoChange} />
-        </div>
-        {logoError && <p className="text-xs text-red-600">{logoError}</p>}
+        )}
       </div>
 
       {/* Business name */}

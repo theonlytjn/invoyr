@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
+import { getOrgPlan } from "@/lib/billing";
 import Topbar from "@/components/shell/Topbar";
 import InvoicesTable from "@/components/invoices/InvoicesTable";
 import type { Metadata } from "next";
 import type { InvoiceWithClient, InvoiceStatus } from "@/lib/supabase/types";
+import { canAccess } from "@/config/plans";
 
 export const metadata: Metadata = { title: "Invoices" };
 
@@ -27,6 +29,8 @@ export default async function InvoicesPage({
   searchParams: Promise<SearchParams>;
 }) {
   const org = await requireOrg();
+  const plan = await getOrgPlan(org.id);
+  const canExportCsv = canAccess(plan, "csv_export");
   const supabase = await createClient();
   const { status } = await searchParams;
 
@@ -49,13 +53,15 @@ export default async function InvoicesPage({
         title="Invoices"
         actions={
           <>
-            <a
-              href="/api/invoices/export"
-              download
-              className="hidden sm:flex items-center gap-1.5 px-3.5 py-2 border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 text-sm font-medium rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
-            >
-              Export CSV
-            </a>
+            {canExportCsv && (
+              <a
+                href="/api/invoices/export"
+                download
+                className="hidden sm:flex items-center gap-1.5 px-3.5 py-2 border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 text-sm font-medium rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+              >
+                Export CSV
+              </a>
+            )}
             <Link
               href="/invoices/new"
               className="flex items-center gap-1.5 px-3.5 py-2 bg-neutral-950 text-white text-sm font-medium rounded-lg hover:bg-neutral-800 transition-colors"

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
+import { getOrgPlan } from "@/lib/billing";
+import { canAccess } from "@/config/plans";
 import { z } from "zod";
 
 const schema = z.object({
@@ -46,6 +48,11 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const org = await requireOrg();
+  const plan = await getOrgPlan(org.id);
+  if (!canAccess(plan, "recurring_invoices")) {
+    return NextResponse.json({ error: "Recurring invoices require the Business plan or above." }, { status: 403 });
+  }
+
   const supabase = await createClient();
 
   const body = await req.json();

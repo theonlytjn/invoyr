@@ -1,12 +1,15 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
+import { getOrgPlan } from "@/lib/billing";
 import { formatCurrency } from "@/lib/utils";
 import Topbar from "@/components/shell/Topbar";
 import RevenueChart from "@/components/reports/RevenueChart";
 import AgingTable from "@/components/reports/AgingTable";
+import UpgradePrompt from "@/components/ui/UpgradePrompt";
 import type { Metadata } from "next";
 import type { InvoiceWithClient } from "@/lib/supabase/types";
+import { canAccess } from "@/config/plans";
 
 export const metadata: Metadata = { title: "Reports" };
 
@@ -21,6 +24,17 @@ function getAgingBucket(dueDate: string | null): string {
 
 export default async function ReportsPage() {
   const org = await requireOrg();
+  const plan = await getOrgPlan(org.id);
+
+  if (!canAccess(plan, "advanced_reports")) {
+    return (
+      <div>
+        <Topbar title="Reports" />
+        <UpgradePrompt feature="advanced_reports" />
+      </div>
+    );
+  }
+
   const supabase = await createClient();
 
   const [{ data: payments }, { data: overdueInvoices }, { data: paidInvoices }, { data: vatInvoices }] = await Promise.all([

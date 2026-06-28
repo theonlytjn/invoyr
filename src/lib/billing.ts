@@ -34,3 +34,14 @@ export async function getSubscription(orgId: string) {
 export function isSubscriptionActive(status: string | null | undefined): boolean {
   return status === "active" || status === "trialing";
 }
+
+export async function getOrgPlan(orgId: string): Promise<string | null> {
+  const supabase = await createServiceClient();
+  const { data } = await supabase
+    .from("subscriptions")
+    .select("plan, status")
+    .eq("org_id", orgId)
+    .single();
+  if (!data || !isSubscriptionActive(data.status)) return null;
+  return data.plan ?? null;
+}

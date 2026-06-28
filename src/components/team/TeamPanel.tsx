@@ -15,9 +15,10 @@ interface Props {
   invites: OrgInvite[];
   currentUserId: string;
   currentUserRole: string;
+  memberCap?: number;
 }
 
-export default function TeamPanel({ members, invites, currentUserId, currentUserRole }: Props) {
+export default function TeamPanel({ members, invites, currentUserId, currentUserRole, memberCap = Infinity }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -176,7 +177,17 @@ export default function TeamPanel({ members, invites, currentUserId, currentUser
       {/* Invite form */}
       {isOwnerOrAdmin && (
         <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-6 space-y-4">
-          <h2 className="font-semibold text-neutral-950 dark:text-neutral-50">Invite a team member</h2>
+          <div className="flex items-center justify-between gap-4">
+            <h2 className="font-semibold text-neutral-950 dark:text-neutral-50">Invite a team member</h2>
+            {memberCap !== Infinity && (
+              <span className="text-sm text-neutral-500">{members.length} / {memberCap} seats used</span>
+            )}
+          </div>
+          {members.length >= memberCap && (
+            <div className="rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 px-4 py-3 text-sm text-amber-800 dark:text-amber-400">
+              You&apos;ve reached your {memberCap}-seat limit. <a href="/settings/billing" className="underline font-medium">Upgrade to Pro</a> for unlimited members.
+            </div>
+          )}
           <form onSubmit={handleInvite} className="flex gap-3 items-end">
             <div className="space-y-1.5 flex-1">
               <Label>Email address</Label>
@@ -198,7 +209,7 @@ export default function TeamPanel({ members, invites, currentUserId, currentUser
                 </SelectContent>
               </Select>
             </div>
-            <Button type="submit" disabled={isPending || !inviteEmail}>
+            <Button type="submit" disabled={isPending || !inviteEmail || members.length >= memberCap}>
               {isPending ? "Sending…" : "Send invite"}
             </Button>
           </form>
