@@ -96,6 +96,9 @@ export interface Organisation {
   from_email: string | null;
   reminder_days: number[] | null;
   payment_reminder_days: number[] | null;
+  late_fee_type: 'none' | 'percentage' | 'fixed';
+  late_fee_value: number;
+  late_fee_grace_days: number;
   created_at: string;
   updated_at: string;
 }
@@ -151,6 +154,8 @@ export interface Invoice {
   sent_at: string | null;
   paid_at: string | null;
   voided_at: string | null;
+  late_fee_amount: number;
+  late_fee_applied_at: string | null;
   created_at: string;
   updated_at: string;
 }

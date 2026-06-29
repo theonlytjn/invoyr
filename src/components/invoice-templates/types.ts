@@ -5,6 +5,7 @@ export interface ComputedTotals {
   vatAmount: number;
   discount?: number;
   total: number;
+  lateFeeAmount?: number;
 }
 
 export interface InvoiceTemplateProps {

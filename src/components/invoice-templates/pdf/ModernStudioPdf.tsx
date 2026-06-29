@@ -144,6 +144,12 @@ export default function ModernStudioPdf({ invoice, items, client, org, totals }:
               <Text style={styles.totalLabel}>Total</Text>
               <Text style={[styles.totalValue, { color: accent }]}>{formatCurrency(totals.total, invoice.currency)}</Text>
             </View>
+            {(totals.lateFeeAmount ?? 0) > 0 ? (
+              <View style={[styles.subRow, { marginTop: 4 }]}>
+                <Text style={[styles.subLabel, { color: "#ea580c" }]}>Late fee</Text>
+                <Text style={[styles.subValue, { color: "#ea580c" }]}>+{formatCurrency(totals.lateFeeAmount!, invoice.currency)}</Text>
+              </View>
+            ) : null}
           </View>
         </View>
 

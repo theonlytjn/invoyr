@@ -114,6 +114,12 @@ export default function CleanMinimalPdf({ invoice, items, client, org, totals }:
               <Text style={styles.totalLabel}>Total</Text>
               <Text style={[styles.totalValue, { color: accent }]}>{formatCurrency(totals.total, invoice.currency)}</Text>
             </View>
+            {(totals.lateFeeAmount ?? 0) > 0 ? (
+              <View style={[styles.totalsRow, { marginTop: 4 }]}>
+                <Text style={[styles.totalsLabel, { color: "#ea580c" }]}>Late fee</Text>
+                <Text style={{ color: "#ea580c" }}>+{formatCurrency(totals.lateFeeAmount!, invoice.currency)}</Text>
+              </View>
+            ) : null}
           </View>
         </View>
 

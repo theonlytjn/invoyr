@@ -102,7 +102,7 @@ export async function GET(
     items,
     client,
     org,
-    totals: { subtotal: totals.subtotal, vatAmount: totals.vat_amount, discount: totals.discount, total: totals.total },
+    totals: { subtotal: totals.subtotal, vatAmount: totals.vat_amount, discount: totals.discount, total: totals.total, lateFeeAmount: (invoice as Invoice & { late_fee_amount?: number }).late_fee_amount ?? 0 },
   });
 
   const buffer = await renderToBuffer(element);

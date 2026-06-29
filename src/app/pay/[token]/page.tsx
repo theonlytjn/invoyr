@@ -16,7 +16,7 @@ export default async function PayPage({ params, searchParams }: Props) {
 
   const { data: invoice } = await supabase
     .from("invoices")
-    .select("*, clients(*), invoice_items(*)")
+    .select("*, clients(*), invoice_items(*), late_fee_amount, late_fee_applied_at")
     .eq("public_token", token)
     .single();
 
@@ -39,7 +39,8 @@ export default async function PayPage({ params, searchParams }: Props) {
     }))
   );
 
-  const amountDue = invoice.total - invoice.amount_paid;
+  const lateFeeAmount = (invoice as { late_fee_amount?: number }).late_fee_amount ?? 0;
+  const amountDue = invoice.total + lateFeeAmount - invoice.amount_paid;
   const accentColor = orgRow?.accent_color ?? "#111827";
   const isPaid = invoice.status === "paid" || paid === "1";
 
@@ -118,6 +119,12 @@ export default async function PayPage({ params, searchParams }: Props) {
                   <span>VAT</span>
                   <span>{formatCurrency(totals.vat_amount, invoice.currency)}</span>
                 </div>
+                {lateFeeAmount > 0 && (
+                  <div className="flex justify-between text-sm text-orange-600">
+                    <span>Late fee</span>
+                    <span>+{formatCurrency(lateFeeAmount, invoice.currency)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between font-bold text-lg border-t border-gray-200 pt-3">
                   <span>Amount due</span>
                   <span style={{ color: accentColor }}>

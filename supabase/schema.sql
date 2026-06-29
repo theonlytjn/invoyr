@@ -670,3 +670,12 @@ alter table public.organisations add column if not exists next_estimate_number i
 
 -- clients: portal token (backfills existing rows automatically)
 alter table public.clients add column if not exists portal_token text unique default encode(gen_random_bytes(24), 'base64url');
+
+-- organisations: late fee defaults
+alter table public.organisations add column if not exists late_fee_type       text not null default 'none' check (late_fee_type in ('none','percentage','fixed'));
+alter table public.organisations add column if not exists late_fee_value      numeric(10,2) not null default 0;
+alter table public.organisations add column if not exists late_fee_grace_days integer not null default 0;
+
+-- invoices: late fee tracking
+alter table public.invoices add column if not exists late_fee_amount     numeric(12,2) not null default 0;
+alter table public.invoices add column if not exists late_fee_applied_at timestamptz;

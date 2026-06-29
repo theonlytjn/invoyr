@@ -175,16 +175,22 @@ export default async function InvoiceDetailPage({ params }: Props) {
                 <dt className="dark:text-neutral-50">Total</dt>
                 <dd className="dark:text-neutral-50">{formatCurrency(invoice.total, invoice.currency)}</dd>
               </div>
+              {(invoice.late_fee_amount ?? 0) > 0 && (
+                <div className="flex justify-between text-orange-600 dark:text-orange-400">
+                  <dt>Late fee</dt>
+                  <dd>+{formatCurrency(invoice.late_fee_amount, invoice.currency)}</dd>
+                </div>
+              )}
               {invoice.amount_paid > 0 && (
                 <div className="flex justify-between text-green-700 dark:text-green-400">
                   <dt>Paid</dt>
                   <dd>{formatCurrency(invoice.amount_paid, invoice.currency)}</dd>
                 </div>
               )}
-              {invoice.amount_paid > 0 && invoice.amount_paid < invoice.total && (
+              {invoice.amount_paid > 0 && invoice.amount_paid < invoice.total + (invoice.late_fee_amount ?? 0) && (
                 <div className="flex justify-between font-semibold text-orange-600 dark:text-orange-400 pt-1 border-t border-neutral-100 dark:border-neutral-800">
                   <dt>Balance due</dt>
-                  <dd>{formatCurrency(invoice.total - invoice.amount_paid, invoice.currency)}</dd>
+                  <dd>{formatCurrency(invoice.total + (invoice.late_fee_amount ?? 0) - invoice.amount_paid, invoice.currency)}</dd>
                 </div>
               )}
             </dl>

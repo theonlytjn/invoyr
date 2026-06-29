@@ -141,6 +141,8 @@ export default function EstimateForm({ org, clients, estimate, existingItems, mo
     sent_at: null,
     paid_at: null,
     voided_at: null,
+    late_fee_amount: 0,
+    late_fee_applied_at: null,
     created_at: "",
     updated_at: "",
   };

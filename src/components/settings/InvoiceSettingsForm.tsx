@@ -31,10 +31,18 @@ const VAT_RATES = [
   { value: "20", label: "20% — Standard rate" },
 ];
 
+const LATE_FEE_TYPES = [
+  { value: "none", label: "No late fee" },
+  { value: "percentage", label: "Percentage of invoice total" },
+  { value: "fixed", label: "Fixed amount" },
+] as const;
+
 const schema = z.object({
   prefix: z.string().min(1, "Prefix is required").max(10, "Prefix too long"),
   nextNumber: z.coerce.number().int().min(1, "Must be at least 1"),
   defaultVatRate: z.coerce.number().min(0).max(100),
+  lateFeeValue: z.coerce.number().min(0, "Must be 0 or more"),
+  lateFeeGraceDays: z.coerce.number().int().min(0, "Must be 0 or more"),
 });
 
 interface Props { org: Organisation }
@@ -51,6 +59,9 @@ export default function InvoiceSettingsForm({ org }: Props) {
   const [defaultTemplate, setDefaultTemplate] = useState(org.default_template ?? "tjn_classic");
   const [defaultTerms, setDefaultTerms] = useState(org.default_terms ?? "");
   const [defaultNotes, setDefaultNotes] = useState(org.default_notes ?? "");
+  const [lateFeeType, setLateFeeType] = useState<'none' | 'percentage' | 'fixed'>(org.late_fee_type ?? 'none');
+  const [lateFeeValue, setLateFeeValue] = useState(String(org.late_fee_value ?? 0));
+  const [lateFeeGraceDays, setLateFeeGraceDays] = useState(String(org.late_fee_grace_days ?? 0));
 
   const previewNumber = `${prefix}-${String(parseInt(nextNumber, 10) || 1).padStart(4, "0")}`;
 
@@ -58,7 +69,7 @@ export default function InvoiceSettingsForm({ org }: Props) {
     e.preventDefault();
     setError(null);
 
-    const result = schema.safeParse({ prefix, nextNumber, defaultVatRate });
+    const result = schema.safeParse({ prefix, nextNumber, defaultVatRate, lateFeeValue, lateFeeGraceDays });
     if (!result.success) {
       setError(result.error.issues[0].message);
       return;
@@ -76,6 +87,9 @@ export default function InvoiceSettingsForm({ org }: Props) {
         default_template: defaultTemplate,
         default_terms: defaultTerms || null,
         default_notes: defaultNotes || null,
+        late_fee_type: lateFeeType,
+        late_fee_value: lateFeeType === 'none' ? 0 : result.data.lateFeeValue,
+        late_fee_grace_days: result.data.lateFeeGraceDays,
       })
       .eq("id", org.id);
 
@@ -197,6 +211,57 @@ export default function InvoiceSettingsForm({ org }: Props) {
             rows={2}
           />
         </div>
+      </div>
+
+      {/* Late fees */}
+      <div className="space-y-4 pt-2 border-t border-neutral-100 dark:border-neutral-800">
+        <div>
+          <h3 className="text-sm font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-300">Late fees</h3>
+          <p className="text-xs text-neutral-400 mt-0.5">Automatically added to overdue invoices.</p>
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="lateFeeType">Late fee type</Label>
+          <Select value={lateFeeType} onValueChange={(v) => setLateFeeType(v as typeof lateFeeType)}>
+            <SelectTrigger id="lateFeeType">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {LATE_FEE_TYPES.map((t) => (
+                <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        {lateFeeType !== 'none' && (
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="lateFeeValue">
+                {lateFeeType === 'percentage' ? 'Rate (%)' : `Amount (${currency})`}
+              </Label>
+              <Input
+                id="lateFeeValue"
+                type="number"
+                min="0"
+                step={lateFeeType === 'percentage' ? '0.1' : '0.01'}
+                value={lateFeeValue}
+                onChange={(e) => setLateFeeValue(e.target.value)}
+                placeholder={lateFeeType === 'percentage' ? '1.5' : '25'}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="lateFeeGraceDays">Grace period (days)</Label>
+              <Input
+                id="lateFeeGraceDays"
+                type="number"
+                min="0"
+                value={lateFeeGraceDays}
+                onChange={(e) => setLateFeeGraceDays(e.target.value)}
+                placeholder="0"
+              />
+              <p className="text-xs text-neutral-400">Days after due date before fee applies.</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}

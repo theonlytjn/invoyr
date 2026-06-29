@@ -88,6 +88,8 @@ export default async function EstimateDetailPage({ params }: Props) {
     sent_at: estimate.sent_at,
     paid_at: null,
     voided_at: null,
+    late_fee_amount: 0,
+    late_fee_applied_at: null,
     created_at: estimate.created_at,
     updated_at: estimate.updated_at,
   };

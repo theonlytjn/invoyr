@@ -40,7 +40,49 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  // Step 2: Fetch Pro orgs for reminder emails
+  // Step 2: Auto-apply late fees for orgs that have them configured
+  const { data: feeEligible } = await supabase
+    .from("invoices")
+    .select("id, org_id, total, due_date, organisations(late_fee_type, late_fee_value, late_fee_grace_days)")
+    .eq("status", "overdue")
+    .is("late_fee_applied_at", null)
+    .not("due_date", "is", null);
+
+  if (feeEligible?.length) {
+    await Promise.allSettled(
+      feeEligible.map(async (inv) => {
+        const org = Array.isArray(inv.organisations) ? inv.organisations[0] : inv.organisations;
+        if (!org || org.late_fee_type === "none" || !org.late_fee_value) return;
+
+        const daysOverdue = Math.floor(
+          (today.getTime() - new Date(inv.due_date!).getTime()) / 86_400_000
+        );
+        if (daysOverdue < (org.late_fee_grace_days ?? 0)) return;
+
+        const feeAmount =
+          org.late_fee_type === "percentage"
+            ? Math.round(inv.total * (org.late_fee_value / 100) * 100) / 100
+            : org.late_fee_value;
+
+        if (feeAmount <= 0) return;
+
+        await supabase
+          .from("invoices")
+          .update({ late_fee_amount: feeAmount, late_fee_applied_at: today.toISOString() })
+          .eq("id", inv.id);
+
+        await supabase.from("audit_logs").insert({
+          org_id: inv.org_id,
+          action: "invoice.late_fee_applied",
+          entity_type: "invoice",
+          entity_id: inv.id,
+          meta: { fee_type: org.late_fee_type, fee_value: org.late_fee_value, fee_amount: feeAmount },
+        });
+      })
+    );
+  }
+
+  // Step 3: Fetch Pro orgs for reminder emails
   const { data: proSubs } = await supabase
     .from("subscriptions")
     .select("org_id, status, plan")
