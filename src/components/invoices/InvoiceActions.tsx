@@ -31,6 +31,7 @@ export default function InvoiceActions({ invoice }: Props) {
   const router = useRouter();
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [sending, setSending] = useState(false);
+  const [reminding, setReminding] = useState(false);
   const [issuing, setIssuing] = useState(false);
   const [duplicating, setDuplicating] = useState(false);
 
@@ -62,6 +63,18 @@ export default function InvoiceActions({ invoice }: Props) {
     }
   }
 
+  async function handleRemind() {
+    setReminding(true);
+    const res = await fetch(`/api/invoices/${invoice.id}/remind`, { method: "POST" });
+    setReminding(false);
+    if (res.ok) {
+      router.refresh();
+    } else {
+      const { error } = await res.json();
+      alert(error ?? "Failed to send reminder");
+    }
+  }
+
   async function handleDuplicate() {
     setDuplicating(true);
     const res = await fetch(`/api/invoices/${invoice.id}/duplicate`, { method: "POST" });
@@ -83,6 +96,7 @@ export default function InvoiceActions({ invoice }: Props) {
 
   const canIssue = invoice.status === "draft";
   const canSend = ["draft", "issued"].includes(invoice.status);
+  const canRemind = ["sent", "issued", "overdue"].includes(invoice.status);
   const canPay = ["sent", "issued", "overdue"].includes(invoice.status);
   const canVoid = !["paid", "void"].includes(invoice.status);
 
@@ -109,6 +123,12 @@ export default function InvoiceActions({ invoice }: Props) {
             <DropdownMenuItem onClick={handleSend} disabled={sending}>
               <SendIcon size={16} className="mr-2" />
               {sending ? "Sending…" : "Send to client"}
+            </DropdownMenuItem>
+          )}
+          {canRemind && (
+            <DropdownMenuItem onClick={handleRemind} disabled={reminding}>
+              <SendIcon size={16} className="mr-2" />
+              {reminding ? "Sending…" : "Send reminder"}
             </DropdownMenuItem>
           )}
           {canPay && (

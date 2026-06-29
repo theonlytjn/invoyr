@@ -76,7 +76,7 @@ export default async function InvoicesPage({
 
       <div className="p-4 sm:p-6">
         {/* Status filter tabs — scrollable on mobile */}
-        <div className="overflow-x-auto pb-1 mb-5 -mx-4 px-4 sm:mx-0 sm:px-0">
+        <div className="overflow-x-auto mb-5">
           <div className="flex gap-1 bg-neutral-100 dark:bg-neutral-800 p-1 rounded-lg w-fit min-w-max">
             {STATUS_TABS.map((tab) => (
               <Link
