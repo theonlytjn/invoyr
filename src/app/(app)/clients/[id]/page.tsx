@@ -7,6 +7,7 @@ import Topbar from "@/components/shell/Topbar";
 import InvoiceStatusBadge from "@/components/invoices/InvoiceStatusBadge";
 import ClientArchiveButton from "@/components/clients/ClientArchiveButton";
 import CopyPortalLinkButton from "@/components/clients/CopyPortalLinkButton";
+import EmailStatementButton from "@/components/clients/EmailStatementButton";
 import type { Metadata } from "next";
 import type { Client, Invoice, InvoiceWithClient } from "@/lib/supabase/types";
 
@@ -41,6 +42,14 @@ export default async function ClientDetailPage({ params }: Props) {
             {client.portal_token && (
               <CopyPortalLinkButton portalToken={client.portal_token} />
             )}
+            <a
+              href={`/api/clients/${id}/statement`}
+              download
+              className="px-3.5 py-2 border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 text-sm font-medium rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+            >
+              Download statement
+            </a>
+            <EmailStatementButton clientId={id} clientEmail={client.email} />
             <Link
               href={`/clients/${id}/edit`}
               className="px-3.5 py-2 border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 text-sm font-medium rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"

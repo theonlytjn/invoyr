@@ -15,7 +15,8 @@ export type TransactionalTemplateName =
   | "subscription-activated"
   | "trial-ending"
   | "payment-failed"
-  | "team-invite";
+  | "team-invite"
+  | "client-statement";
 
 export type MarketingTemplateName =
   | "newsletter"
@@ -87,6 +88,10 @@ export const EMAIL_REGISTRY: Record<TransactionalTemplateName, EmailRegistryEntr
   "team-invite": {
     templateName: "team-invite",
     defaultSubject: "You've been invited to join a workspace on Invoyr",
+  },
+  "client-statement": {
+    templateName: "client-statement",
+    defaultSubject: "Statement of account",
   },
 };
 
