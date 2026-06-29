@@ -5,8 +5,8 @@ import { usePathname } from "next/navigation";
 import {
   DashboardIcon,
   InvoiceIcon,
+  EstimateIcon,
   UsersIcon,
-  CreditCardIcon,
   SettingsIcon,
 } from "@/components/icons";
 import { cn } from "@/lib/utils";
@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils";
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Overview", icon: DashboardIcon },
   { href: "/invoices", label: "Invoices", icon: InvoiceIcon },
+  { href: "/estimates", label: "Estimates", icon: EstimateIcon },
   { href: "/clients", label: "Clients", icon: UsersIcon },
-  { href: "/payments", label: "Payments", icon: CreditCardIcon },
   { href: "/settings", label: "Settings", icon: SettingsIcon },
 ];
 

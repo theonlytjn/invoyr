@@ -32,7 +32,7 @@ export async function GET() {
       inv.due_date ? formatDate(inv.due_date) : "",
       inv.currency,
       inv.subtotal,
-      inv.vat_total,
+      inv.vat_amount,
       inv.total,
       inv.amount_paid,
       inv.paid_at ? formatDate(inv.paid_at) : "",

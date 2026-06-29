@@ -141,7 +141,27 @@ export default async function ReportsPage() {
 
   return (
     <div>
-      <Topbar title="Reports" />
+      <Topbar
+        title="Reports"
+        actions={
+          <div className="flex items-center gap-2">
+            <a
+              href="/api/payments/export"
+              download
+              className="hidden sm:flex items-center gap-1.5 px-3.5 py-2 border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 text-sm font-medium rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+            >
+              Payments CSV
+            </a>
+            <a
+              href="/api/reports/export"
+              download
+              className="hidden sm:flex items-center gap-1.5 px-3.5 py-2 border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 text-sm font-medium rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+            >
+              Invoices CSV
+            </a>
+          </div>
+        }
+      />
       <div className="p-4 sm:p-6 space-y-6">
         <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5">
           <h2 className="text-lg font-serif text-neutral-950 dark:text-neutral-50 mb-4">Revenue (last 12 months)</h2>
