@@ -9,6 +9,7 @@ import Link from "next/link";
 import type { Organisation } from "@/lib/supabase/types";
 
 const ALL_REMINDER_DAYS = [3, 7, 14, 21, 30];
+const ALL_PRE_DUE_DAYS = [1, 3, 7];
 
 interface Props {
   org: Organisation;
@@ -19,12 +20,19 @@ interface Props {
 export default function EmailSettingsForm({ org, canCustomEmail, canReminderAutomation }: Props) {
   const [fromEmail, setFromEmail] = useState(org.from_email ?? "");
   const [reminderDays, setReminderDays] = useState<number[]>(org.reminder_days ?? ALL_REMINDER_DAYS);
+  const [preDueDays, setPreDueDays] = useState<number[]>(org.payment_reminder_days ?? [3]);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   function toggleDay(day: number) {
     setReminderDays((prev) =>
+      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day].sort((a, b) => a - b)
+    );
+  }
+
+  function togglePreDueDay(day: number) {
+    setPreDueDays((prev) =>
       prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day].sort((a, b) => a - b)
     );
   }
@@ -39,6 +47,7 @@ export default function EmailSettingsForm({ org, canCustomEmail, canReminderAuto
       .update({
         from_email: fromEmail || null,
         reminder_days: reminderDays.length > 0 ? reminderDays : ALL_REMINDER_DAYS,
+        payment_reminder_days: preDueDays,
       })
       .eq("id", org.id);
     setSaving(false);
@@ -132,6 +141,48 @@ export default function EmailSettingsForm({ org, canCustomEmail, canReminderAuto
           <div className="rounded-lg border border-neutral-200 dark:border-neutral-700 p-4 text-sm text-neutral-500 dark:text-neutral-400 bg-neutral-50 dark:bg-neutral-800/50">
             Automated overdue reminders are sent to clients at day 3, 7, 14, 21, and 30.{" "}
             Upgrade to Pro to customise the reminder schedule.
+          </div>
+        )}
+      </div>
+
+      {/* Pre-due reminder schedule */}
+      <div className="space-y-3 pt-4 border-t border-neutral-100 dark:border-neutral-800">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-300">
+            Pre-due reminder schedule
+          </h3>
+          {!canReminderAutomation && (
+            <Link href="/settings/billing" className="text-xs font-medium px-2 py-1 rounded-md bg-neutral-100 dark:bg-neutral-800 text-neutral-500 hover:text-neutral-950 dark:hover:text-neutral-50 transition-colors">
+              Pro feature
+            </Link>
+          )}
+        </div>
+        {canReminderAutomation ? (
+          <div className="space-y-2">
+            <p className="text-sm text-neutral-500">Send automatic reminders to clients before an invoice is due:</p>
+            <div className="flex flex-wrap gap-2">
+              {ALL_PRE_DUE_DAYS.map((day) => (
+                <button
+                  key={day}
+                  type="button"
+                  onClick={() => togglePreDueDay(day)}
+                  className={`px-3 py-1.5 text-sm rounded-lg border font-medium transition-colors ${
+                    preDueDays.includes(day)
+                      ? "bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 border-neutral-950 dark:border-white"
+                      : "bg-white dark:bg-neutral-900 text-neutral-500 border-neutral-200 dark:border-neutral-700 hover:border-neutral-400"
+                  }`}
+                >
+                  {day === 1 ? "1 day before" : `${day} days before`}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-neutral-400">
+              Reminders are sent once per invoice. Leave all unselected to disable pre-due reminders.
+            </p>
+          </div>
+        ) : (
+          <div className="rounded-lg border border-neutral-200 dark:border-neutral-700 p-4 text-sm text-neutral-500 dark:text-neutral-400 bg-neutral-50 dark:bg-neutral-800/50">
+            Upgrade to Pro to send automatic reminders before invoices are due.
           </div>
         )}
       </div>

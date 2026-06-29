@@ -95,6 +95,7 @@ export interface Organisation {
   stripe_customer_id: string | null;
   from_email: string | null;
   reminder_days: number[] | null;
+  payment_reminder_days: number[] | null;
   created_at: string;
   updated_at: string;
 }

@@ -67,6 +67,7 @@ create table if not exists public.organisations (
   -- email settings (Pro)
   from_email          text,
   reminder_days       integer[],
+  payment_reminder_days integer[],
   -- Stripe
   stripe_account_id   text,
   stripe_customer_id  text,
@@ -657,6 +658,7 @@ alter table public.organisations add column if not exists bank_bic            te
 -- organisations: email settings (Pro)
 alter table public.organisations add column if not exists from_email    text;
 alter table public.organisations add column if not exists reminder_days integer[];
+alter table public.organisations add column if not exists payment_reminder_days integer[];
 
 -- invoices: PO number and discount
 alter table public.invoices add column if not exists po_number text;
