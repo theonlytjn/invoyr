@@ -123,6 +123,7 @@ export interface Client {
   vat_number: string | null;
   notes: string | null;
   archived: boolean;
+  portal_token: string | null;
   created_at: string;
   updated_at: string;
 }

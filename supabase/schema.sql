@@ -146,6 +146,7 @@ create table if not exists public.clients (
   vat_number      text,
   notes           text,
   archived        boolean not null default false,
+  portal_token    text unique default encode(gen_random_bytes(24), 'base64url'),
   created_at      timestamptz not null default now(),
   updated_at      timestamptz not null default now()
 );
@@ -666,3 +667,6 @@ alter table public.invoices add column if not exists discount  numeric(12,2) not
 
 -- organisations: estimate number counter
 alter table public.organisations add column if not exists next_estimate_number integer not null default 1;
+
+-- clients: portal token (backfills existing rows automatically)
+alter table public.clients add column if not exists portal_token text unique default encode(gen_random_bytes(24), 'base64url');
