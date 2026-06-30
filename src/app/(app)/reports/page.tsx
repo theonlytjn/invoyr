@@ -6,6 +6,7 @@ import { formatCurrency } from "@/lib/utils";
 import Topbar from "@/components/shell/Topbar";
 import RevenueChart from "@/components/reports/RevenueChart";
 import AgingTable from "@/components/reports/AgingTable";
+import AccountingExports from "@/components/reports/AccountingExports";
 import UpgradePrompt from "@/components/ui/UpgradePrompt";
 import type { Metadata } from "next";
 import type { InvoiceWithClient } from "@/lib/supabase/types";
@@ -213,6 +214,12 @@ export default async function ReportsPage() {
             </div>
           )}
         </div>
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5">
+          <h2 className="text-lg font-serif text-neutral-950 dark:text-neutral-50 mb-1">Accounting exports</h2>
+          <p className="text-sm text-neutral-500 mb-5">Download your data in Xero or QuickBooks format for easy import into your accounting software.</p>
+          <AccountingExports />
+        </div>
+
         <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-serif text-neutral-950 dark:text-neutral-50">VAT summary by month</h2>
