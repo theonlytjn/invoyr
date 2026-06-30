@@ -774,3 +774,44 @@ alter table public.organisations add column if not exists smtp_user text;
 alter table public.organisations add column if not exists smtp_password text;
 alter table public.organisations add column if not exists smtp_from_name text;
 alter table public.organisations add column if not exists smtp_from_email text;
+
+-- expenses table (v3)
+create table if not exists public.expenses (
+  id          uuid primary key default gen_random_uuid(),
+  org_id      uuid not null references public.organisations(id) on delete cascade,
+  client_id   uuid references public.clients(id) on delete set null,
+  title       text not null,
+  category    text not null default 'other'
+                check (category in ('travel','software','office','meals','marketing','professional','equipment','other')),
+  amount      numeric(12,2) not null check (amount > 0),
+  currency    text not null default 'GBP',
+  date        date not null,
+  receipt_url text,
+  notes       text,
+  is_billable boolean not null default false,
+  invoice_id  uuid references public.invoices(id) on delete set null,
+  invoiced_at timestamptz,
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now()
+);
+
+create index if not exists expenses_org_idx    on public.expenses(org_id);
+create index if not exists expenses_client_idx on public.expenses(client_id);
+create index if not exists expenses_date_idx   on public.expenses(date desc);
+
+alter table public.expenses enable row level security;
+
+create policy "Org members can manage expenses"
+  on public.expenses for all
+  using (exists (
+    select 1 from public.org_members
+    where org_id = expenses.org_id and user_id = auth.uid()
+  ));
+
+-- SMTP columns
+alter table public.organisations add column if not exists smtp_host text;
+alter table public.organisations add column if not exists smtp_port integer default 587;
+alter table public.organisations add column if not exists smtp_user text;
+alter table public.organisations add column if not exists smtp_password text;
+alter table public.organisations add column if not exists smtp_from_name text;
+alter table public.organisations add column if not exists smtp_from_email text;

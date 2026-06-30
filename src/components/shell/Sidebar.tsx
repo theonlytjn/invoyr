@@ -15,6 +15,7 @@ import {
   LogOutIcon,
   PlusIcon,
   LockIcon,
+  ExpenseIcon,
 } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
@@ -27,6 +28,7 @@ const NAV_ITEMS: { href: string; label: string; icon: React.ComponentType<{ size
   { href: "/estimates", label: "Estimates", icon: EstimateIcon },
   { href: "/clients", label: "Clients", icon: UsersIcon },
   { href: "/payments", label: "Payments", icon: CreditCardIcon },
+  { href: "/expenses", label: "Expenses", icon: ExpenseIcon },
   { href: "/reports", label: "Reports", icon: AnalyticsIcon, requires: "advanced_reports" },
   { href: "/settings", label: "Settings", icon: SettingsIcon },
 ];

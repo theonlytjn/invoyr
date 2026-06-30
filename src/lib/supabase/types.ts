@@ -307,6 +307,30 @@ export interface MarketingContact {
   updated_at: string;
 }
 
+export type ExpenseCategory = "travel" | "software" | "office" | "meals" | "marketing" | "professional" | "equipment" | "other";
+
+export interface Expense {
+  id: string;
+  org_id: string;
+  client_id: string | null;
+  title: string;
+  category: ExpenseCategory;
+  amount: number;
+  currency: string;
+  date: string;
+  receipt_url: string | null;
+  notes: string | null;
+  is_billable: boolean;
+  invoice_id: string | null;
+  invoiced_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ExpenseWithClient extends Expense {
+  clients: Pick<Client, "id" | "name" | "company_name"> | null;
+}
+
 export interface InvoiceAttachment {
   id: string;
   org_id: string;
@@ -386,6 +410,7 @@ export type Database = {
       credit_notes: TableDef<CreditNote>;
       refunds: TableDef<Refund>;
       invoice_attachments: TableDef<InvoiceAttachment>;
+      expenses: TableDef<Expense>;
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

@@ -104,3 +104,19 @@ export function LockIcon({ size = 20, className }: IconProps) {
 export function EstimateIcon({ size = 20, className }: IconProps) {
   return <Hi name="estimate-01" size={size} className={className} />;
 }
+
+export function ExpenseIcon({ size = 20, className }: IconProps) {
+  return <Hi name="receipt-01" size={size} className={className} />;
+}
+
+export function UploadIcon({ size = 20, className }: IconProps) {
+  return <Hi name="upload-01" size={size} className={className} />;
+}
+
+export function AttachmentIcon({ size = 20, className }: IconProps) {
+  return <Hi name="attachment-01" size={size} className={className} />;
+}
+
+export function FilterIcon({ size = 20, className }: IconProps) {
+  return <Hi name="filter" size={size} className={className} />;
+}
