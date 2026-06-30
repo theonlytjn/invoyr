@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { StripeLogo } from "@phosphor-icons/react";
 
 interface Props {
   connected: boolean;
@@ -64,9 +65,7 @@ export function StripeConnectPanel({ connected, accountId }: Props) {
         href="/api/stripe/connect/authorize"
         className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#635BFF] text-white text-sm font-medium rounded-lg hover:bg-[#5851e6] transition-colors"
       >
-        <svg width="16" height="16" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-          <path d="M13.5 11.5c0-1.1.9-1.8 2.3-1.8 2 0 4.6.7 6.2 1.6V5.2C20.2 4.4 18.3 4 16 4 10.5 4 7 7 7 11.7c0 7.2 9.5 6 9.5 9.1 0 1.3-1.1 1.7-2.6 1.7-2.3 0-5.2-.9-7.4-2.2v6.2c2.5 1.1 5 1.5 7.4 1.5 5.7 0 9.6-2.8 9.6-7.6-.1-7.8-9.5-6.4-9.5-8.9z" fill="white"/>
-        </svg>
+        <StripeLogo size={18} weight="fill" />
         Connect with Stripe
       </a>
     </div>

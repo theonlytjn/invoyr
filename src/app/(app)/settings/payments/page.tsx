@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
 import { StripeConnectPanel } from "@/components/settings/StripeConnectPanel";
 import { PayPalSettingsPanel } from "@/components/settings/PayPalSettingsPanel";
+import { StripeLogo, PaypalLogo } from "@phosphor-icons/react/dist/ssr";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Settings — Payments" };
@@ -38,11 +39,16 @@ export default async function PaymentsSettingsPage({
       )}
 
       <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5 space-y-4">
-        <div>
-          <h2 className="text-lg font-serif text-neutral-950 dark:text-neutral-50">Stripe account</h2>
-          <p className="text-sm text-neutral-500 mt-1">
-            Connect your Stripe account to accept card payments on invoices. Funds are transferred directly to you.
-          </p>
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: "#635BFF" }}>
+            <StripeLogo size={20} color="white" weight="fill" />
+          </div>
+          <div>
+            <h2 className="text-base font-semibold text-neutral-950 dark:text-neutral-50">Stripe</h2>
+            <p className="text-sm text-neutral-500">
+              Accept card payments directly on invoices.
+            </p>
+          </div>
         </div>
         <StripeConnectPanel
           connected={!!stripeAccountId}
@@ -51,11 +57,16 @@ export default async function PaymentsSettingsPage({
       </div>
 
       <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5 space-y-4">
-        <div>
-          <h2 className="text-lg font-serif text-neutral-950 dark:text-neutral-50">PayPal</h2>
-          <p className="text-sm text-neutral-500 mt-1">
-            Accept PayPal payments on invoices. Clients can pay directly from the invoice payment page.
-          </p>
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: "#003087" }}>
+            <PaypalLogo size={20} color="white" weight="fill" />
+          </div>
+          <div>
+            <h2 className="text-base font-semibold text-neutral-950 dark:text-neutral-50">PayPal</h2>
+            <p className="text-sm text-neutral-500">
+              Accept PayPal payments directly on invoices.
+            </p>
+          </div>
         </div>
         <PayPalSettingsPanel orgId={org.id} initialEmail={paypalEmail} />
       </div>

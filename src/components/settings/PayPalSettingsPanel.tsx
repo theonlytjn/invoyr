@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { PaypalLogo } from "@phosphor-icons/react";
 
 interface Props {
   orgId: string;
@@ -41,7 +42,7 @@ export function PayPalSettingsPanel({ orgId, initialEmail }: Props) {
     <form onSubmit={handleSave} className="space-y-4">
       <div className="flex items-start gap-3">
         <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5" style={{ backgroundColor: "#003087" }}>
-          <span className="text-white font-bold text-xs">PP</span>
+          <PaypalLogo size={20} color="white" weight="fill" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
