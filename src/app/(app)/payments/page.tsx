@@ -4,6 +4,7 @@ import { requireOrg } from "@/lib/auth";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import Topbar from "@/components/shell/Topbar";
 import PaymentsFilter from "@/components/payments/PaymentsFilter";
+import PaymentRefundButton from "@/components/payments/PaymentRefundButton";
 import type { Metadata } from "next";
 import type { PaymentWithInvoice } from "@/lib/supabase/types";
 
@@ -11,6 +12,7 @@ export const metadata: Metadata = { title: "Payments" };
 
 const METHOD_LABELS: Record<string, string> = {
   stripe: "Stripe",
+  paypal: "PayPal",
   bank_transfer: "Bank transfer",
   cash: "Cash",
   cheque: "Cheque",
@@ -105,6 +107,7 @@ export default async function PaymentsPage({ searchParams }: Props) {
                   <th className="hidden sm:table-cell text-left py-3 px-4 text-xs text-neutral-500 font-medium uppercase tracking-wide">Method</th>
                   <th className="hidden sm:table-cell text-left py-3 px-4 text-xs text-neutral-500 font-medium uppercase tracking-wide">Date</th>
                   <th className="text-right py-3 px-5 text-xs text-neutral-500 font-medium uppercase tracking-wide">Amount</th>
+                  <th className="py-3 px-4 text-xs text-neutral-500 font-medium uppercase tracking-wide"></th>
                 </tr>
               </thead>
               <tbody>
@@ -115,6 +118,9 @@ export default async function PaymentsPage({ searchParams }: Props) {
                     <td className="hidden sm:table-cell py-3 px-4 text-neutral-600 dark:text-neutral-400">{METHOD_LABELS[payment.method] ?? payment.method}</td>
                     <td className="hidden sm:table-cell py-3 px-4 text-neutral-600 dark:text-neutral-400">{formatDate(payment.paid_at)}</td>
                     <td className="py-3 px-5 text-right font-medium text-green-700 dark:text-green-400 whitespace-nowrap">{formatCurrency(payment.amount, payment.currency)}</td>
+                    <td className="py-3 px-4 text-right">
+                      <PaymentRefundButton payment={payment} />
+                    </td>
                   </tr>
                 ))}
               </tbody>

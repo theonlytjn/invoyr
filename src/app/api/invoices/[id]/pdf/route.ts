@@ -52,6 +52,14 @@ export async function GET(
 
   if (!orgRawObj) return NextResponse.json({ error: "Org not found" }, { status: 404 });
 
+  const { data: subscription } = await supabase
+    .from("subscriptions")
+    .select("status")
+    .eq("org_id", orgRawObj.id)
+    .single();
+
+  const watermark = subscription?.status === "trialing" ? "TRIAL" : undefined;
+
   const logoRawUrl = orgRawObj.logo_url ? orgRawObj.logo_url.split("?")[0] : null;
   const logoDataUrl = logoRawUrl ? await fetchLogoAsDataUrl(logoRawUrl) : null;
 
@@ -103,6 +111,7 @@ export async function GET(
     client,
     org,
     totals: { subtotal: totals.subtotal, vatAmount: totals.vat_amount, discount: totals.discount, total: totals.total, lateFeeAmount: (invoice as Invoice & { late_fee_amount?: number }).late_fee_amount ?? 0 },
+    watermark,
   });
 
   const buffer = await renderToBuffer(element);

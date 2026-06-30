@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
   footerText: { fontSize: 8, color: "#9ca3af" },
 });
 
-export default function TJNClassicPdf({ invoice, items, client, org, totals }: InvoiceTemplateProps) {
+export default function TJNClassicPdf({ invoice, items, client, org, totals, watermark }: InvoiceTemplateProps) {
   const accent = org.accent_color ?? "#111827";
   const logoSrc = (org as { logoDataUrl?: string | null }).logoDataUrl ?? org.logo_url;
 
@@ -216,6 +216,14 @@ export default function TJNClassicPdf({ invoice, items, client, org, totals }: I
           <Text style={styles.footerText}>{org.name}</Text>
           <Text style={styles.footerText}>Powered by invoyr</Text>
         </View>
+
+        {watermark ? (
+          <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, alignItems: "center", justifyContent: "center" }}>
+            <Text style={{ fontSize: 96, fontFamily: "Helvetica-Bold", color: "#e5e7eb", opacity: 0.35, transform: "rotate(-45deg)" }}>
+              {watermark}
+            </Text>
+          </View>
+        ) : null}
       </Page>
     </Document>
   );

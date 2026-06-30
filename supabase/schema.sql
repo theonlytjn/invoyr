@@ -679,3 +679,98 @@ alter table public.organisations add column if not exists late_fee_grace_days in
 -- invoices: late fee tracking
 alter table public.invoices add column if not exists late_fee_amount     numeric(12,2) not null default 0;
 alter table public.invoices add column if not exists late_fee_applied_at timestamptz;
+
+-- invoices: total credits applied (from credit notes)
+alter table public.invoices add column if not exists credit_applied numeric(12,2) not null default 0;
+
+-- organisations: credit note numbering
+alter table public.organisations add column if not exists credit_note_prefix       text not null default 'CN';
+alter table public.organisations add column if not exists next_credit_note_number  integer not null default 1;
+
+-- organisations: PayPal
+alter table public.organisations add column if not exists paypal_email text;
+
+-- invoice_attachments
+create table if not exists public.invoice_attachments (
+  id          uuid primary key default gen_random_uuid(),
+  org_id      uuid not null references public.organisations(id) on delete cascade,
+  invoice_id  uuid not null references public.invoices(id) on delete cascade,
+  file_name   text not null,
+  file_url    text not null,
+  file_size   integer not null,
+  mime_type   text not null,
+  created_at  timestamptz not null default now()
+);
+
+create index if not exists invoice_attachments_invoice_idx on public.invoice_attachments(invoice_id);
+create index if not exists invoice_attachments_org_idx     on public.invoice_attachments(org_id);
+
+alter table public.invoice_attachments enable row level security;
+
+create policy "Org members can manage invoice attachments"
+  on public.invoice_attachments for all
+  using (exists (
+    select 1 from public.org_members
+    where org_id = invoice_attachments.org_id and user_id = auth.uid()
+  ));
+
+-- refunds
+create table if not exists public.refunds (
+  id          uuid primary key default gen_random_uuid(),
+  org_id      uuid not null references public.organisations(id) on delete cascade,
+  payment_id  uuid not null references public.payments(id) on delete cascade,
+  invoice_id  uuid not null references public.invoices(id) on delete cascade,
+  amount      numeric(12,2) not null check (amount > 0),
+  reason      text,
+  refunded_at timestamptz not null default now(),
+  created_at  timestamptz not null default now()
+);
+
+create index if not exists refunds_org_idx     on public.refunds(org_id);
+create index if not exists refunds_payment_idx on public.refunds(payment_id);
+create index if not exists refunds_invoice_idx on public.refunds(invoice_id);
+
+alter table public.refunds enable row level security;
+
+create policy "Org members can manage refunds"
+  on public.refunds for all
+  using (exists (
+    select 1 from public.org_members
+    where org_id = refunds.org_id and user_id = auth.uid()
+  ));
+
+-- credit notes table
+create table if not exists public.credit_notes (
+  id                  uuid primary key default gen_random_uuid(),
+  org_id              uuid not null references public.organisations(id) on delete cascade,
+  invoice_id          uuid not null references public.invoices(id) on delete cascade,
+  client_id           uuid references public.clients(id) on delete set null,
+  credit_note_number  text not null,
+  amount              numeric(12,2) not null check (amount > 0),
+  reason              text,
+  status              text not null default 'issued' check (status in ('issued','void')),
+  public_token        text unique default encode(gen_random_bytes(24), 'base64url'),
+  issued_at           timestamptz not null default now(),
+  created_at          timestamptz not null default now(),
+  updated_at          timestamptz not null default now()
+);
+
+create index if not exists credit_notes_org_idx     on public.credit_notes(org_id);
+create index if not exists credit_notes_invoice_idx on public.credit_notes(invoice_id);
+
+alter table public.credit_notes enable row level security;
+
+create policy "Org members can manage credit notes"
+  on public.credit_notes for all
+  using (exists (
+    select 1 from public.org_members
+    where org_id = credit_notes.org_id and user_id = auth.uid()
+  ));
+
+-- SMTP settings columns on organisations
+alter table public.organisations add column if not exists smtp_host text;
+alter table public.organisations add column if not exists smtp_port integer default 587;
+alter table public.organisations add column if not exists smtp_user text;
+alter table public.organisations add column if not exists smtp_password text;
+alter table public.organisations add column if not exists smtp_from_name text;
+alter table public.organisations add column if not exists smtp_from_email text;

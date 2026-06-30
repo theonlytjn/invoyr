@@ -15,4 +15,5 @@ export interface InvoiceTemplateProps {
   org: Organisation;
   totals: ComputedTotals;
   documentType?: "invoice" | "estimate";
+  watermark?: string;
 }

@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
 import { StripeConnectPanel } from "@/components/settings/StripeConnectPanel";
+import { PayPalSettingsPanel } from "@/components/settings/PayPalSettingsPanel";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Settings — Payments" };
@@ -16,11 +17,12 @@ export default async function PaymentsSettingsPage({
 
   const { data: freshOrg } = await supabase
     .from("organisations")
-    .select("stripe_account_id")
+    .select("stripe_account_id, paypal_email")
     .eq("id", org.id)
     .single();
 
   const stripeAccountId = freshOrg?.stripe_account_id ?? null;
+  const paypalEmail = freshOrg?.paypal_email ?? null;
 
   return (
     <div className="space-y-6">
@@ -46,6 +48,16 @@ export default async function PaymentsSettingsPage({
           connected={!!stripeAccountId}
           accountId={stripeAccountId}
         />
+      </div>
+
+      <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5 space-y-4">
+        <div>
+          <h2 className="text-lg font-serif text-neutral-950 dark:text-neutral-50">PayPal</h2>
+          <p className="text-sm text-neutral-500 mt-1">
+            Accept PayPal payments on invoices. Clients can pay directly from the invoice payment page.
+          </p>
+        </div>
+        <PayPalSettingsPanel orgId={org.id} initialEmail={paypalEmail} />
       </div>
 
       <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5 space-y-3">

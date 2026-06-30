@@ -7,6 +7,8 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { EyeIcon, EyeSlashIcon } from "@phosphor-icons/react";
 
+type LoginMode = "password" | "magic-link" | "magic-sent";
+
 export default function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -15,6 +17,8 @@ export default function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
+  const [mode, setMode] = useState<LoginMode>("password");
+  const [magicEmail, setMagicEmail] = useState("");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -34,6 +38,27 @@ export default function LoginForm() {
       return;
     }
     router.push(next);
+  }
+
+  async function handleMagicLink(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    const supabase = createClient();
+
+    const { error } = await supabase.auth.signInWithOtp({
+      email: magicEmail,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
+      },
+    });
+
+    setLoading(false);
+    if (error) {
+      setError(error.message);
+      return;
+    }
+    setMode("magic-sent");
   }
 
   async function handleGoogle() {
@@ -93,65 +118,129 @@ export default function LoginForm() {
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-1.5">
-                <label htmlFor="email" className="block text-sm font-medium text-neutral-950">
-                  Email
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  required
-                  className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-950 placeholder:text-neutral-400 focus:outline-none focus:shadow-[0_0_0_2px_#ffffff,0_0_0_4px_#0a0a0a] transition-shadow"
-                />
+            {mode === "magic-sent" ? (
+              <div className="rounded-lg border border-neutral-200 bg-white p-6 text-center space-y-3">
+                <p className="text-2xl">✉️</p>
+                <p className="font-medium text-neutral-950">Check your inbox</p>
+                <p className="text-sm text-neutral-500">
+                  We sent a sign-in link to <strong>{magicEmail}</strong>. Click it to log in — no password needed.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => { setMode("magic-link"); setError(null); }}
+                  className="text-sm text-neutral-500 hover:text-neutral-950 transition-colors underline underline-offset-4"
+                >
+                  Use a different email
+                </button>
               </div>
-
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label htmlFor="password" className="block text-sm font-medium text-neutral-950">
-                    Password
+            ) : mode === "magic-link" ? (
+              <form onSubmit={handleMagicLink} className="space-y-4">
+                <div className="space-y-1.5">
+                  <label htmlFor="magic-email" className="block text-sm font-medium text-neutral-950">
+                    Email
                   </label>
-                  <Link href="/forgot-password" className="text-xs text-neutral-500 hover:text-neutral-950 transition-colors">
-                    Forgot password?
-                  </Link>
-                </div>
-                <div className="relative">
                   <input
-                    id="password"
-                    name="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
+                    id="magic-email"
+                    type="email"
+                    placeholder="you@example.com"
                     required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 pr-10 text-sm text-neutral-950 placeholder:text-neutral-400 focus:outline-none focus:shadow-[0_0_0_2px_#ffffff,0_0_0_4px_#0a0a0a] transition-shadow"
+                    value={magicEmail}
+                    onChange={(e) => setMagicEmail(e.target.value)}
+                    className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-950 placeholder:text-neutral-400 focus:outline-none focus:shadow-[0_0_0_2px_#ffffff,0_0_0_4px_#0a0a0a] transition-shadow"
                   />
-                  {password && (
-                    <button
-                      type="button"
-                      tabIndex={-1}
-                      onClick={() => setShowPassword((v) => !v)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 transition-colors"
-                      aria-label={showPassword ? "Hide password" : "Show password"}
-                    >
-                      {showPassword ? <EyeSlashIcon size={18} /> : <EyeIcon size={18} />}
-                    </button>
-                  )}
                 </div>
-              </div>
 
-              {error && <p className="text-sm text-red-600">{error}</p>}
+                {error && <p className="text-sm text-red-600">{error}</p>}
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full rounded-lg bg-neutral-950 px-4 py-2.5 text-sm font-medium text-white hover:bg-neutral-800 transition-colors disabled:opacity-50"
-              >
-                {loading ? "Signing in…" : "Sign in"}
-              </button>
-            </form>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full rounded-lg bg-neutral-950 px-4 py-2.5 text-sm font-medium text-white hover:bg-neutral-800 transition-colors disabled:opacity-50"
+                >
+                  {loading ? "Sending link…" : "Send magic link"}
+                </button>
+
+                <p className="text-center text-sm text-neutral-500">
+                  <button
+                    type="button"
+                    onClick={() => { setMode("password"); setError(null); }}
+                    className="font-medium text-neutral-950 underline underline-offset-4 hover:no-underline"
+                  >
+                    Use password instead
+                  </button>
+                </p>
+              </form>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-1.5">
+                  <label htmlFor="email" className="block text-sm font-medium text-neutral-950">
+                    Email
+                  </label>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    required
+                    className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-950 placeholder:text-neutral-400 focus:outline-none focus:shadow-[0_0_0_2px_#ffffff,0_0_0_4px_#0a0a0a] transition-shadow"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label htmlFor="password" className="block text-sm font-medium text-neutral-950">
+                      Password
+                    </label>
+                    <Link href="/forgot-password" className="text-xs text-neutral-500 hover:text-neutral-950 transition-colors">
+                      Forgot password?
+                    </Link>
+                  </div>
+                  <div className="relative">
+                    <input
+                      id="password"
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 pr-10 text-sm text-neutral-950 placeholder:text-neutral-400 focus:outline-none focus:shadow-[0_0_0_2px_#ffffff,0_0_0_4px_#0a0a0a] transition-shadow"
+                    />
+                    {password && (
+                      <button
+                        type="button"
+                        tabIndex={-1}
+                        onClick={() => setShowPassword((v) => !v)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 transition-colors"
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                      >
+                        {showPassword ? <EyeSlashIcon size={18} /> : <EyeIcon size={18} />}
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {error && <p className="text-sm text-red-600">{error}</p>}
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full rounded-lg bg-neutral-950 px-4 py-2.5 text-sm font-medium text-white hover:bg-neutral-800 transition-colors disabled:opacity-50"
+                >
+                  {loading ? "Signing in…" : "Sign in"}
+                </button>
+
+                <p className="text-center text-sm text-neutral-500">
+                  <button
+                    type="button"
+                    onClick={() => { setMode("magic-link"); setMagicEmail(""); setError(null); }}
+                    className="font-medium text-neutral-950 underline underline-offset-4 hover:no-underline"
+                  >
+                    Sign in with magic link
+                  </button>
+                </p>
+              </form>
+            )}
           </div>
         </div>
 

@@ -16,7 +16,9 @@ export type TransactionalTemplateName =
   | "trial-ending"
   | "payment-failed"
   | "team-invite"
-  | "client-statement";
+  | "client-statement"
+  | "credit-note"
+  | "weekly-digest";
 
 export type MarketingTemplateName =
   | "newsletter"
@@ -92,6 +94,14 @@ export const EMAIL_REGISTRY: Record<TransactionalTemplateName, EmailRegistryEntr
   "client-statement": {
     templateName: "client-statement",
     defaultSubject: "Statement of account",
+  },
+  "credit-note": {
+    templateName: "credit-note",
+    defaultSubject: "Credit note",
+  },
+  "weekly-digest": {
+    templateName: "weekly-digest",
+    defaultSubject: "Your weekly summary",
   },
 };
 

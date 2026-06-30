@@ -10,7 +10,8 @@ import InvoiceActions from "@/components/invoices/InvoiceActions";
 import CopyPaymentLink from "@/components/invoices/CopyPaymentLink";
 import { TEMPLATE_MAP } from "@/components/invoice-templates";
 import type { Metadata } from "next";
-import type { Invoice, InvoiceItem, Client } from "@/lib/supabase/types";
+import InvoiceAttachments from "@/components/invoices/InvoiceAttachments";
+import type { Invoice, InvoiceItem, Client, CreditNote, InvoiceAttachment } from "@/lib/supabase/types";
 
 const ACTION_LABELS: Record<string, string> = {
   "invoice.created": "Invoice created",
@@ -22,6 +23,7 @@ const ACTION_LABELS: Record<string, string> = {
   "invoice.overdue": "Marked overdue",
   "payment.recorded": "Payment recorded",
   "invoice.reminder_sent": "Reminder sent",
+  "invoice.credit_note_issued": "Credit note issued",
 };
 
 interface Props {
@@ -58,6 +60,22 @@ export default async function InvoiceDetailPage({ params }: Props) {
       .eq("invoice_id", id)
       .not("opened_at", "is", null)
       .order("opened_at", { ascending: true }),
+  ]);
+
+  const [{ data: creditNotes }, { data: attachments }] = await Promise.all([
+    supabase
+      .from("credit_notes")
+      .select("id, credit_note_number, amount, reason, issued_at")
+      .eq("invoice_id", id)
+      .eq("org_id", org.id)
+      .eq("status", "issued")
+      .order("issued_at", { ascending: true }),
+    supabase
+      .from("invoice_attachments")
+      .select("*")
+      .eq("invoice_id", id)
+      .eq("org_id", org.id)
+      .order("created_at", { ascending: true }),
   ]);
 
   if (!data) notFound();
@@ -121,7 +139,7 @@ export default async function InvoiceDetailPage({ params }: Props) {
             >
               Download PDF
             </Link>
-            <InvoiceActions invoice={invoice} />
+            <InvoiceActions invoice={invoice} clientEmail={client?.email ?? null} />
           </div>
         }
       />
@@ -181,18 +199,27 @@ export default async function InvoiceDetailPage({ params }: Props) {
                   <dd>+{formatCurrency(invoice.late_fee_amount, invoice.currency)}</dd>
                 </div>
               )}
+              {(invoice.credit_applied ?? 0) > 0 && (
+                <div className="flex justify-between text-blue-600 dark:text-blue-400">
+                  <dt>Credit applied</dt>
+                  <dd>−{formatCurrency(invoice.credit_applied, invoice.currency)}</dd>
+                </div>
+              )}
               {invoice.amount_paid > 0 && (
                 <div className="flex justify-between text-green-700 dark:text-green-400">
                   <dt>Paid</dt>
                   <dd>{formatCurrency(invoice.amount_paid, invoice.currency)}</dd>
                 </div>
               )}
-              {invoice.amount_paid > 0 && invoice.amount_paid < invoice.total + (invoice.late_fee_amount ?? 0) && (
-                <div className="flex justify-between font-semibold text-orange-600 dark:text-orange-400 pt-1 border-t border-neutral-100 dark:border-neutral-800">
-                  <dt>Balance due</dt>
-                  <dd>{formatCurrency(invoice.total + (invoice.late_fee_amount ?? 0) - invoice.amount_paid, invoice.currency)}</dd>
-                </div>
-              )}
+              {(() => {
+                const balanceDue = invoice.total + (invoice.late_fee_amount ?? 0) - invoice.amount_paid - (invoice.credit_applied ?? 0);
+                return balanceDue > 0.001 ? (
+                  <div className="flex justify-between font-semibold text-orange-600 dark:text-orange-400 pt-1 border-t border-neutral-100 dark:border-neutral-800">
+                    <dt>Balance due</dt>
+                    <dd>{formatCurrency(balanceDue, invoice.currency)}</dd>
+                  </div>
+                ) : null;
+              })()}
             </dl>
           </div>
 
@@ -214,6 +241,34 @@ export default async function InvoiceDetailPage({ params }: Props) {
             </div>
           )}
 
+          {(creditNotes ?? []).length > 0 && (
+            <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5 space-y-3">
+              <h3 className="font-semibold text-neutral-950 dark:text-neutral-50 text-base">Credit notes</h3>
+              <ul className="space-y-2">
+                {(creditNotes as Pick<CreditNote, "id" | "credit_note_number" | "amount" | "reason" | "issued_at">[]).map((cn) => (
+                  <li key={cn.id} className="flex justify-between items-start text-sm">
+                    <div>
+                      <p className="font-medium text-neutral-800 dark:text-neutral-200">{cn.credit_note_number}</p>
+                      {cn.reason && <p className="text-neutral-500 dark:text-neutral-400 text-xs">{cn.reason}</p>}
+                      <time className="text-xs text-neutral-400 dark:text-neutral-500">
+                        {new Date(cn.issued_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                      </time>
+                    </div>
+                    <span className="text-blue-600 dark:text-blue-400 font-medium">
+                      −{formatCurrency(cn.amount, invoice.currency)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <InvoiceAttachments
+            invoiceId={id}
+            orgId={org.id}
+            initialAttachments={(attachments ?? []) as InvoiceAttachment[]}
+          />
+
           {timeline.length > 0 && (
             <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5">
               <h3 className="font-semibold text-neutral-950 dark:text-neutral-50 text-base mb-4">History</h3>
@@ -226,6 +281,9 @@ export default async function InvoiceDetailPage({ params }: Props) {
                     </p>
                     {log.meta && typeof log.meta === "object" && "amount" in log.meta && (
                       <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                        {(log.meta as { credit_note_number?: string }).credit_note_number && (
+                          <span className="mr-1">{(log.meta as { credit_note_number: string }).credit_note_number} ·</span>
+                        )}
                         {formatCurrency((log.meta as { amount: number }).amount, invoice.currency)}
                         {(log.meta as { method?: string }).method ? ` via ${(log.meta as { method: string }).method.replace("_", " ")}` : ""}
                       </p>

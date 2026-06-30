@@ -3,6 +3,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { computeTotals } from "@/lib/invoice-totals";
 import PayButton from "./PayButton";
+import PayPalButton from "./PayPalButton";
 
 interface Props {
   params: Promise<{ token: string }>;
@@ -24,7 +25,7 @@ export default async function PayPage({ params, searchParams }: Props) {
 
   const { data: orgRow } = await supabase
     .from("organisations")
-    .select("name, logo_url, accent_color, email, bank_account_name, bank_name, bank_account_number, bank_sort_code, bank_iban, bank_bic")
+    .select("name, logo_url, accent_color, email, bank_account_name, bank_name, bank_account_number, bank_sort_code, bank_iban, bank_bic, paypal_email")
     .eq("id", invoice.org_id)
     .single();
 
@@ -40,7 +41,8 @@ export default async function PayPage({ params, searchParams }: Props) {
   );
 
   const lateFeeAmount = (invoice as { late_fee_amount?: number }).late_fee_amount ?? 0;
-  const amountDue = invoice.total + lateFeeAmount - invoice.amount_paid;
+  const creditApplied = (invoice as { credit_applied?: number }).credit_applied ?? 0;
+  const amountDue = invoice.total + lateFeeAmount - invoice.amount_paid - creditApplied;
   const accentColor = orgRow?.accent_color ?? "#111827";
   const isPaid = invoice.status === "paid" || paid === "1";
 
@@ -125,6 +127,12 @@ export default async function PayPage({ params, searchParams }: Props) {
                     <span>+{formatCurrency(lateFeeAmount, invoice.currency)}</span>
                   </div>
                 )}
+                {creditApplied > 0 && (
+                  <div className="flex justify-between text-sm text-blue-600">
+                    <span>Credit applied</span>
+                    <span>−{formatCurrency(creditApplied, invoice.currency)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between font-bold text-lg border-t border-gray-200 pt-3">
                   <span>Amount due</span>
                   <span style={{ color: accentColor }}>
@@ -134,6 +142,20 @@ export default async function PayPage({ params, searchParams }: Props) {
               </div>
 
               <PayButton token={token} accentColor={accentColor} />
+
+              {orgRow?.paypal_email && amountDue > 0 && (
+                <div className="border-t border-gray-100 pt-4">
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">
+                    Or pay with PayPal
+                  </p>
+                  <PayPalButton
+                    token={token}
+                    currency={invoice.currency}
+                    accentColor={accentColor}
+                    onSuccess={() => { window.location.href = `/pay/${token}?paid=1`; }}
+                  />
+                </div>
+              )}
 
               {(orgRow?.bank_account_name || orgRow?.bank_account_number) && (
                 <div className="border-t border-gray-100 pt-4 space-y-3">

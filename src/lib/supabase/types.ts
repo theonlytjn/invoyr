@@ -1,7 +1,7 @@
 export type InvoiceStatus = "draft" | "issued" | "sent" | "partial" | "paid" | "overdue" | "void";
 export type EstimateStatus = "draft" | "sent" | "approved" | "rejected" | "converted";
 export type InvoiceTemplate = "tjn_classic" | "clean_minimal" | "bold_split" | "modern_studio";
-export type PaymentMethod = "stripe" | "bank_transfer" | "cash" | "cheque" | "other";
+export type PaymentMethod = "stripe" | "paypal" | "bank_transfer" | "cash" | "cheque" | "other";
 export type SubscriptionStatus = "trialing" | "active" | "past_due" | "canceled" | "incomplete";
 export type OrgRole = "owner" | "admin" | "member";
 
@@ -99,6 +99,15 @@ export interface Organisation {
   late_fee_type: 'none' | 'percentage' | 'fixed';
   late_fee_value: number;
   late_fee_grace_days: number;
+  credit_note_prefix: string;
+  next_credit_note_number: number;
+  paypal_email: string | null;
+  smtp_host: string | null;
+  smtp_port: number | null;
+  smtp_user: string | null;
+  smtp_password: string | null;
+  smtp_from_name: string | null;
+  smtp_from_email: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -156,6 +165,7 @@ export interface Invoice {
   voided_at: string | null;
   late_fee_amount: number;
   late_fee_applied_at: string | null;
+  credit_applied: number;
   created_at: string;
   updated_at: string;
 }
@@ -297,6 +307,43 @@ export interface MarketingContact {
   updated_at: string;
 }
 
+export interface InvoiceAttachment {
+  id: string;
+  org_id: string;
+  invoice_id: string;
+  file_name: string;
+  file_url: string;
+  file_size: number;
+  mime_type: string;
+  created_at: string;
+}
+
+export interface Refund {
+  id: string;
+  org_id: string;
+  payment_id: string;
+  invoice_id: string;
+  amount: number;
+  reason: string | null;
+  refunded_at: string;
+  created_at: string;
+}
+
+export interface CreditNote {
+  id: string;
+  org_id: string;
+  invoice_id: string;
+  client_id: string | null;
+  credit_note_number: string;
+  amount: number;
+  reason: string | null;
+  status: 'issued' | 'void';
+  public_token: string | null;
+  issued_at: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface InvoiceWithClient extends Invoice {
   clients: Pick<Client, "id" | "name" | "email" | "company_name"> | null;
 }
@@ -336,6 +383,9 @@ export type Database = {
       email_logs: TableDef<EmailLog>;
       email_preferences: TableDef<EmailPreferences>;
       marketing_contacts: TableDef<MarketingContact>;
+      credit_notes: TableDef<CreditNote>;
+      refunds: TableDef<Refund>;
+      invoice_attachments: TableDef<InvoiceAttachment>;
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

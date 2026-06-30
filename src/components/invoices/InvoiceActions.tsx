@@ -21,15 +21,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import RecordPaymentModal from "./RecordPaymentModal";
+import CreditNoteModal from "./CreditNoteModal";
 import type { Invoice } from "@/lib/supabase/types";
 
 interface Props {
   invoice: Invoice;
+  clientEmail?: string | null;
 }
 
-export default function InvoiceActions({ invoice }: Props) {
+export default function InvoiceActions({ invoice, clientEmail }: Props) {
   const router = useRouter();
   const [paymentOpen, setPaymentOpen] = useState(false);
+  const [creditNoteOpen, setCreditNoteOpen] = useState(false);
   const [sending, setSending] = useState(false);
   const [reminding, setReminding] = useState(false);
   const [issuing, setIssuing] = useState(false);
@@ -99,6 +102,9 @@ export default function InvoiceActions({ invoice }: Props) {
   const canRemind = ["sent", "issued", "overdue"].includes(invoice.status);
   const canPay = ["sent", "issued", "overdue"].includes(invoice.status);
   const canVoid = !["paid", "void"].includes(invoice.status);
+  const canCreditNote = ["issued", "sent", "partial", "paid", "overdue"].includes(invoice.status);
+  const remainingBalance =
+    invoice.total + (invoice.late_fee_amount ?? 0) - invoice.amount_paid - (invoice.credit_applied ?? 0);
 
   return (
     <>
@@ -137,6 +143,12 @@ export default function InvoiceActions({ invoice }: Props) {
               Record payment
             </DropdownMenuItem>
           )}
+          {canCreditNote && remainingBalance > 0 && (
+            <DropdownMenuItem onClick={() => setCreditNoteOpen(true)}>
+              <CreditCardIcon size={16} className="mr-2" />
+              Issue credit note
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem
             onClick={() => router.push(`/invoices/${invoice.id}/edit`)}
           >
@@ -166,6 +178,13 @@ export default function InvoiceActions({ invoice }: Props) {
         invoice={invoice}
         open={paymentOpen}
         onClose={() => setPaymentOpen(false)}
+        onSuccess={() => router.refresh()}
+      />
+      <CreditNoteModal
+        invoice={invoice}
+        clientEmail={clientEmail ?? null}
+        open={creditNoteOpen}
+        onClose={() => setCreditNoteOpen(false)}
         onSuccess={() => router.refresh()}
       />
     </>

@@ -96,6 +96,16 @@ last_updated: 2026-06-19
 8. Accessibility pass.
 9. Performance pass.
 
+## Phase 9 — V2 features (post-launch)
+
+1. Late fees — configurable percentage/fixed, auto-applied via cron, shown in all PDF templates.
+2. Client statements — PDF download and email (with attachment) from client detail page.
+3. Bulk invoice actions — multi-select send, CSV export, and void with floating action bar.
+4. Manual overdue reminder — on-demand from invoice actions dropdown.
+5. Mobile scroll fix — settings tab nav and invoices status tabs.
+6. Credit notes — `credit_notes` table, modal UI, email notification, balance deduction on pay portal and Stripe checkout.
+7. Weekly digest email — Monday 8AM cron, outstanding/overdue/collected/issued stats to org owner.
+
 ## Phase 8 — Launch readiness
 
 1. Production env audit.

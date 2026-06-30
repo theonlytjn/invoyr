@@ -11,7 +11,7 @@ export async function POST(
 
   const { data: invoice } = await supabase
     .from("invoices")
-    .select("id, org_id, invoice_number, total, amount_paid, currency, status, late_fee_amount, clients(email)")
+    .select("id, org_id, invoice_number, total, amount_paid, currency, status, late_fee_amount, credit_applied, clients(email)")
     .eq("public_token", token)
     .single();
 
@@ -20,7 +20,8 @@ export async function POST(
   if (invoice.status === "void") return NextResponse.json({ error: "Invoice is void" }, { status: 400 });
 
   const lateFeeAmount = (invoice as { late_fee_amount?: number }).late_fee_amount ?? 0;
-  const amountDue = Math.round((invoice.total + lateFeeAmount - invoice.amount_paid) * 100);
+  const creditApplied = (invoice as { credit_applied?: number }).credit_applied ?? 0;
+  const amountDue = Math.round((invoice.total + lateFeeAmount - invoice.amount_paid - creditApplied) * 100);
   if (amountDue <= 0) return NextResponse.json({ error: "Nothing due" }, { status: 400 });
 
   const { data: org } = await supabase
