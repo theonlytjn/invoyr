@@ -3,6 +3,7 @@ import { requireOrg } from "@/lib/auth";
 import Topbar from "@/components/shell/Topbar";
 import ChangePasswordForm from "@/components/settings/ChangePasswordForm";
 import DeleteAccountForm from "@/components/settings/DeleteAccountForm";
+import { ConnectedAccountsPanel } from "@/components/settings/ConnectedAccountsPanel";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Settings — Account" };
@@ -23,6 +24,18 @@ export default async function AccountSettingsPage() {
           </p>
         </div>
         <ChangePasswordForm />
+      </div>
+
+      {/* Connected accounts */}
+      <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5 space-y-4">
+        <div>
+          <h2 className="text-lg font-serif text-neutral-950 dark:text-neutral-50">Connected accounts</h2>
+          <p className="text-sm text-neutral-500 mt-1">
+            Link your Google account so you can sign in via either method — useful if you lose
+            access to your password or switch devices.
+          </p>
+        </div>
+        <ConnectedAccountsPanel />
       </div>
 
       {/* Data export */}

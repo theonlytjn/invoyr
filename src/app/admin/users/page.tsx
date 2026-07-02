@@ -1,6 +1,7 @@
 import { requireAdmin } from "@/lib/admin";
 import { createServiceClient } from "@/lib/supabase/server";
 import Link from "next/link";
+import { CreateUserModal } from "@/components/admin/CreateUserModal";
 
 export default async function AdminUsersPage() {
   await requireAdmin();
@@ -18,9 +19,12 @@ export default async function AdminUsersPage() {
 
   return (
     <div className="p-8 max-w-6xl">
-      <div className="mb-8">
-        <h1 className="text-2xl font-serif text-neutral-950 dark:text-neutral-50">Users</h1>
-        <p className="text-neutral-500 mt-1 text-sm">{users.length} total accounts</p>
+      <div className="mb-8 flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-serif text-neutral-950 dark:text-neutral-50">Users</h1>
+          <p className="text-neutral-500 mt-1 text-sm">{users.length} total accounts</p>
+        </div>
+        <CreateUserModal onCreated={() => {}} />
       </div>
 
       <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl overflow-hidden">
