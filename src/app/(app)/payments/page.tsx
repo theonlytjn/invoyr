@@ -5,6 +5,7 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import Topbar from "@/components/shell/Topbar";
 import PaymentsFilter from "@/components/payments/PaymentsFilter";
 import PaymentRefundButton from "@/components/payments/PaymentRefundButton";
+import MetricCard from "@/components/dashboard/MetricCard";
 import type { Metadata } from "next";
 import type { PaymentWithInvoice } from "@/lib/supabase/types";
 
@@ -86,10 +87,12 @@ export default async function PaymentsPage({ searchParams }: Props) {
         </Suspense>
 
         {/* Summary card */}
-        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5 inline-flex flex-col min-w-[180px]">
-          <p className="text-sm text-neutral-500">Total collected</p>
-          <p className="text-2xl font-bold text-neutral-950 dark:text-neutral-50 mt-1">{formatCurrency(total)}</p>
-          <p className="text-xs text-neutral-400 mt-1">{periodLabel}</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          <MetricCard
+            title="Total collected"
+            value={formatCurrency(total)}
+            subtitle={periodLabel}
+          />
         </div>
 
         {/* Table */}
