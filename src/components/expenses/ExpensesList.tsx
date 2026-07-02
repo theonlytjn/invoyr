@@ -8,6 +8,7 @@ import ExpenseCategoryBadge from "./ExpenseCategoryBadge";
 import ExpenseModal from "./ExpenseModal";
 import { EXPENSE_CATEGORIES } from "./expense-config";
 import { PlusIcon, PencilIcon, TrashIcon, AttachmentIcon } from "@/components/icons";
+import MetricCard from "@/components/dashboard/MetricCard";
 
 const PERIODS = [
   { value: "this_month", label: "This month" },
@@ -126,18 +127,23 @@ export default function ExpensesList({ initialExpenses, clients, orgId, orgCurre
       </div>
 
       {/* Summary cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-        <div className="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 p-4">
-          <p className="text-xs text-neutral-500 mb-1">Total expenses</p>
-          <p className="text-xl font-semibold text-neutral-950 dark:text-neutral-50">{formatCurrency(total, topCurrency)}</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 p-4">
-          <p className="text-xs text-neutral-500 mb-1">Unbilled billable</p>
-          <p className="text-xl font-semibold text-green-700 dark:text-green-400">{formatCurrency(billableTotal, topCurrency)}</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 p-4 hidden sm:block">
-          <p className="text-xs text-neutral-500 mb-1">Expenses logged</p>
-          <p className="text-xl font-semibold text-neutral-950 dark:text-neutral-50">{expenses.length}</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+        <MetricCard
+          title="Total expenses"
+          value={formatCurrency(total, topCurrency)}
+          subtitle={PERIODS.find((p) => p.value === period)?.label ?? "This month"}
+        />
+        <MetricCard
+          title="Unbilled billable"
+          value={formatCurrency(billableTotal, topCurrency)}
+          subtitle="ready to invoice"
+        />
+        <div className="hidden sm:block">
+          <MetricCard
+            title="Expenses logged"
+            value={String(expenses.length)}
+            subtitle={PERIODS.find((p) => p.value === period)?.label ?? "This month"}
+          />
         </div>
       </div>
 
