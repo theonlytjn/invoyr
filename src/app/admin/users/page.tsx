@@ -24,7 +24,7 @@ export default async function AdminUsersPage() {
           <h1 className="text-2xl font-serif text-neutral-950 dark:text-neutral-50">Users</h1>
           <p className="text-neutral-500 mt-1 text-sm">{users.length} total accounts</p>
         </div>
-        <CreateUserModal onCreated={() => {}} />
+        <CreateUserModal />
       </div>
 
       <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl overflow-hidden">

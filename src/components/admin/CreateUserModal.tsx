@@ -1,13 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
-interface Props {
-  onCreated: () => void;
-}
-
-export function CreateUserModal({ onCreated }: Props) {
+export function CreateUserModal() {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,7 +20,7 @@ export function CreateUserModal({ onCreated }: Props) {
   }
 
   function close() {
-    if (result) onCreated();
+    if (result) router.refresh();
     setOpen(false);
     reset();
   }
