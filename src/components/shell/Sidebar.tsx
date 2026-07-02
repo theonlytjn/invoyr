@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import type { Organisation } from "@/lib/supabase/types";
 import { canAccess, type Feature } from "@/config/plans";
+import OrgSwitcher from "./OrgSwitcher";
 
 const NAV_ITEMS: { href: string; label: string; icon: React.ComponentType<{ size?: number; className?: string }>; requires?: Feature }[] = [
   { href: "/dashboard", label: "Overview", icon: DashboardIcon },
@@ -35,11 +36,12 @@ const NAV_ITEMS: { href: string; label: string; icon: React.ComponentType<{ size
 
 interface Props {
   org: Organisation | null;
+  orgs: Organisation[];
   userEmail: string;
   plan?: string | null;
 }
 
-export default function Sidebar({ org, userEmail, plan }: Props) {
+export default function Sidebar({ org, orgs, userEmail, plan }: Props) {
   const pathname = usePathname();
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
@@ -86,30 +88,9 @@ export default function Sidebar({ org, userEmail, plan }: Props) {
         )}
       </div>
 
-      {/* Org info */}
+      {/* Org switcher */}
       {org && !collapsed && (
-        <div className="px-4 pb-4">
-          <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl px-3 py-2.5 flex items-center gap-3">
-            {org.logo_url ? (
-              <img
-                src={org.logo_url}
-                alt={org.name}
-                className="object-contain flex-shrink-0 bg-white border border-neutral-200 rounded"
-                style={{ width: 32, height: 32, padding: 1 }}
-              />
-            ) : (
-              <div className="w-8 h-8 rounded-lg bg-neutral-950 flex items-center justify-center flex-shrink-0">
-                <span className="text-xs font-semibold text-white">{org.name?.[0]?.toUpperCase()}</span>
-              </div>
-            )}
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-neutral-950 dark:text-neutral-50 truncate leading-5">{org.name}</p>
-              <p className="text-xs text-neutral-500 capitalize leading-4">
-                {plan ? `${plan} plan` : "Free plan"}
-              </p>
-            </div>
-          </div>
-        </div>
+        <OrgSwitcher activeOrg={org} orgs={orgs} plan={plan} />
       )}
 
       {/* New invoice */}

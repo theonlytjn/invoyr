@@ -4,6 +4,8 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { isSubscriptionActive } from "@/lib/billing";
 import { sendTransactionalEmail } from "@/lib/resend/send-transactional-email";
 import { OverdueReminderEmail } from "@/emails/transactional/OverdueReminderEmail";
+import { dispatchWebhook } from "@/lib/webhooks/dispatch";
+import { runAutomations } from "@/lib/automations/execute";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 const DEFAULT_REMINDER_DAYS = [3, 7, 14, 21, 30];
@@ -37,6 +39,41 @@ export async function GET(req: NextRequest) {
         entity_id: inv.id,
         meta: { invoice_number: inv.invoice_number },
       }))
+    );
+    // Fire webhooks + automations for each newly-overdue invoice (best-effort)
+    await Promise.allSettled(
+      newlyOverdue.map((inv) => Promise.all([
+        dispatchWebhook(inv.org_id, "invoice.overdue", {
+          id: inv.id,
+          invoice_number: inv.invoice_number,
+        }),
+        runAutomations(inv.org_id, "invoice.overdue", {
+          invoice_id: inv.id,
+          invoice_number: inv.invoice_number,
+        }),
+      ]))
+    );
+  }
+
+  // Check for expired estimates and fire automations
+  const { data: expiredEstimates } = await supabase
+    .from("estimates")
+    .select("id, org_id, estimate_number, total, currency, clients(name)")
+    .eq("status", "sent")
+    .lt("expiry_date", todayStr);
+
+  if (expiredEstimates?.length) {
+    await Promise.allSettled(
+      expiredEstimates.map(async (est) => {
+        const client = Array.isArray(est.clients) ? est.clients[0] : est.clients;
+        return runAutomations(est.org_id, "estimate.expired", {
+          estimate_id: est.id,
+          estimate_number: est.estimate_number,
+          client_name: client?.name ?? undefined,
+          amount: est.total,
+          currency: est.currency,
+        });
+      })
     );
   }
 

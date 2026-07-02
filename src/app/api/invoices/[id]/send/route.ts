@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createElement } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { sendTransactionalEmail } from "@/lib/resend/send-transactional-email";
+import { dispatchWebhook } from "@/lib/webhooks/dispatch";
+import { runAutomations } from "@/lib/automations/execute";
 import { InvoiceSentEmail } from "@/emails/transactional/InvoiceSentEmail";
 import { computeTotals } from "@/lib/invoice-totals";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -100,6 +102,23 @@ export async function POST(
     entity_id: id,
     meta: { to: client.email, invoice_number: invoice.invoice_number },
   });
+
+  runAutomations(invoice.org_id, "invoice.sent", {
+    invoice_id: invoice.id,
+    invoice_number: invoice.invoice_number,
+    client_name: client.name ?? undefined,
+    client_email: client.email ?? undefined,
+    amount: invoice.total,
+    currency: invoice.currency,
+  }).catch(() => {});
+
+  dispatchWebhook(invoice.org_id, "invoice.sent", {
+    id: invoice.id,
+    invoice_number: invoice.invoice_number,
+    client_email: client.email,
+    total: invoice.total,
+    currency: invoice.currency,
+  }).catch(() => {});
 
   return NextResponse.json({ ok: true });
 }

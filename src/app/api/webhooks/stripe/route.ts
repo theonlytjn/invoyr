@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createElement } from "react";
 import { getStripe } from "@/lib/stripe/client";
 import { createServiceClient } from "@/lib/supabase/server";
+import { dispatchWebhook } from "@/lib/webhooks/dispatch";
+import { runAutomations } from "@/lib/automations/execute";
 import { sendTransactionalEmail } from "@/lib/resend/send-transactional-email";
 import { PaymentFailedEmail } from "@/emails/transactional/PaymentFailedEmail";
 import { PaymentReceivedEmail } from "@/emails/transactional/PaymentReceivedEmail";
@@ -84,6 +86,18 @@ async function handleInvoiceCheckout(session: Stripe.Checkout.Session) {
     meta: { stripe_session: session.id, amount: amountPaid },
   });
 
+  dispatchWebhook(orgId, "payment.received", {
+    invoice_id: invoiceId,
+    amount: amountPaid,
+    currency,
+    method: "stripe",
+  }).catch(() => {});
+  dispatchWebhook(orgId, "invoice.paid", {
+    id: invoiceId,
+    amount_paid: amountPaid,
+    currency,
+  }).catch(() => {});
+
   // Send receipt email to client + payment notification to org owner
   const [{ data: invoice }, { data: org }, { data: members }] = await Promise.all([
     supabase
@@ -107,6 +121,16 @@ async function handleInvoiceCheckout(session: Stripe.Checkout.Session) {
   if (invoice) {
     const client = Array.isArray(invoice.clients) ? invoice.clients[0] : invoice.clients;
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.invoyr.io";
+
+    runAutomations(orgId, "invoice.paid", {
+      invoice_id: invoiceId,
+      invoice_number: invoice.invoice_number,
+      client_name: client?.name ?? undefined,
+      client_email: client?.email ?? undefined,
+      amount: amountPaid,
+      currency,
+      pay_url: invoice.public_token ? `${appUrl}/pay/${invoice.public_token}` : undefined,
+    }).catch(() => {});
     const formattedAmount = new Intl.NumberFormat("en-GB", {
       style: "currency",
       currency: currency.toLowerCase() === "gbp" ? "GBP" : currency,

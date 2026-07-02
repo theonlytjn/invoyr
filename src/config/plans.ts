@@ -9,7 +9,9 @@ export type Feature =
   | "csv_export"
   | "reminder_automation"
   | "custom_email_domain"
-  | "audit_log";
+  | "audit_log"
+  | "white_label"
+  | "api_access";
 
 export interface Plan {
   id: PlanId;
@@ -61,7 +63,8 @@ export const PLANS: Plan[] = [
       "Everything in Business",
       "Automated reminders",
       "CSV export",
-      "Custom email send domain",
+      "Custom email domain",
+      "White-label client portal",
       "Audit log access",
       "Priority support",
     ],
@@ -88,6 +91,8 @@ const PLAN_FEATURES: Record<PlanId, Set<Feature>> = {
     "reminder_automation",
     "custom_email_domain",
     "audit_log",
+    "white_label",
+    "api_access",
   ]),
 };
 
@@ -107,6 +112,8 @@ export const FEATURE_UPGRADE_TARGET: Record<Feature, PlanId> = {
   reminder_automation: "pro",
   custom_email_domain: "pro",
   audit_log: "pro",
+  white_label: "pro",
+  api_access: "pro",
 };
 
 export const FEATURE_LABELS: Record<Feature, string> = {
@@ -119,6 +126,8 @@ export const FEATURE_LABELS: Record<Feature, string> = {
   reminder_automation: "Automated reminders",
   custom_email_domain: "Custom email domain",
   audit_log: "Audit log access",
+  white_label: "White-label client portal",
+  api_access: "API access & webhooks",
 };
 
 export function canAccess(plan: string | null | undefined, feature: Feature): boolean {

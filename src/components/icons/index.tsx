@@ -106,7 +106,7 @@ export function EstimateIcon({ size = 20, className }: IconProps) {
 }
 
 export function ExpenseIcon({ size = 20, className }: IconProps) {
-  return <Hi name="receipt-01" size={size} className={className} />;
+  return <Hi name="wallet-02" size={size} className={className} />;
 }
 
 export function UploadIcon({ size = 20, className }: IconProps) {

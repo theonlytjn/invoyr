@@ -815,3 +815,104 @@ alter table public.organisations add column if not exists smtp_user text;
 alter table public.organisations add column if not exists smtp_password text;
 alter table public.organisations add column if not exists smtp_from_name text;
 alter table public.organisations add column if not exists smtp_from_email text;
+
+-- api_keys table (v3 — developer API access)
+create table if not exists public.api_keys (
+  id            uuid primary key default gen_random_uuid(),
+  org_id        uuid not null references public.organisations(id) on delete cascade,
+  name          text not null,
+  key_prefix    text not null,
+  key_hash      text not null unique,
+  last_used_at  timestamptz,
+  expires_at    timestamptz,
+  revoked_at    timestamptz,
+  created_at    timestamptz not null default now()
+);
+
+create index if not exists api_keys_org_idx      on public.api_keys(org_id);
+create index if not exists api_keys_hash_idx     on public.api_keys(key_hash);
+
+alter table public.api_keys enable row level security;
+
+create policy "Org members can manage api keys"
+  on public.api_keys for all
+  using (exists (
+    select 1 from public.org_members
+    where org_id = api_keys.org_id and user_id = auth.uid()
+  ));
+
+-- webhook_endpoints table (v3 — outbound webhooks)
+create table if not exists public.webhook_endpoints (
+  id                  uuid primary key default gen_random_uuid(),
+  org_id              uuid not null references public.organisations(id) on delete cascade,
+  url                 text not null,
+  events              text[] not null default '{}',
+  secret              text not null,
+  enabled             boolean not null default true,
+  last_triggered_at   timestamptz,
+  failure_count       integer not null default 0,
+  created_at          timestamptz not null default now()
+);
+
+create index if not exists webhook_endpoints_org_idx on public.webhook_endpoints(org_id);
+
+alter table public.webhook_endpoints enable row level security;
+
+create policy "Org members can manage webhook endpoints"
+  on public.webhook_endpoints for all
+  using (exists (
+    select 1 from public.org_members
+    where org_id = webhook_endpoints.org_id and user_id = auth.uid()
+  ));
+
+-- webhook_deliveries table (v3 — delivery log)
+create table if not exists public.webhook_deliveries (
+  id            uuid primary key default gen_random_uuid(),
+  endpoint_id   uuid not null references public.webhook_endpoints(id) on delete cascade,
+  org_id        uuid not null references public.organisations(id) on delete cascade,
+  event         text not null,
+  status_code   integer,
+  success       boolean not null default false,
+  error         text,
+  created_at    timestamptz not null default now()
+);
+
+create index if not exists webhook_deliveries_endpoint_idx on public.webhook_deliveries(endpoint_id);
+create index if not exists webhook_deliveries_org_idx      on public.webhook_deliveries(org_id);
+
+alter table public.webhook_deliveries enable row level security;
+
+create policy "Org members can view webhook deliveries"
+  on public.webhook_deliveries for all
+  using (exists (
+    select 1 from public.org_members
+    where org_id = webhook_deliveries.org_id and user_id = auth.uid()
+  ));
+
+-- automation_rules table (v3 — event-driven automations)
+create table if not exists public.automation_rules (
+  id            uuid primary key default gen_random_uuid(),
+  org_id        uuid not null references public.organisations(id) on delete cascade,
+  name          text not null,
+  trigger       text not null,
+  conditions    jsonb not null default '{}',
+  action_type   text not null,
+  action_config jsonb not null default '{}',
+  enabled       boolean not null default true,
+  run_count     integer not null default 0,
+  last_run_at   timestamptz,
+  created_at    timestamptz not null default now(),
+  updated_at    timestamptz not null default now()
+);
+
+create index if not exists automation_rules_org_idx     on public.automation_rules(org_id);
+create index if not exists automation_rules_trigger_idx on public.automation_rules(trigger);
+
+alter table public.automation_rules enable row level security;
+
+create policy "Org members can manage automation rules"
+  on public.automation_rules for all
+  using (exists (
+    select 1 from public.org_members
+    where org_id = automation_rules.org_id and user_id = auth.uid()
+  ));

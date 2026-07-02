@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Instrument_Serif, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/shell/ThemeProvider";
+import { PwaRegistration } from "@/components/shell/PwaRegistration";
 
 const instrumentSerif = Instrument_Serif({
   variable: "--font-instrument-serif",
@@ -22,6 +23,22 @@ export const metadata: Metadata = {
   },
   description:
     "Professional invoicing platform for freelancers, agencies, and service businesses. Create, send, and get paid faster.",
+  appleWebApp: {
+    capable: true,
+    title: "Invoyr",
+    statusBarStyle: "default",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+  ],
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({
@@ -44,6 +61,7 @@ export default function RootLayout({
       <body className="min-h-full">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           {children}
+          <PwaRegistration />
         </ThemeProvider>
       </body>
     </html>

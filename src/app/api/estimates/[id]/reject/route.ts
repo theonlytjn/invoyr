@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createElement } from "react";
 import { createServiceClient } from "@/lib/supabase/server";
 import { sendTransactionalEmail } from "@/lib/resend/send-transactional-email";
+import { dispatchWebhook } from "@/lib/webhooks/dispatch";
+import { runAutomations } from "@/lib/automations/execute";
 import { EstimateResponseEmail } from "@/emails/transactional/EstimateResponseEmail";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
@@ -34,6 +36,22 @@ export async function POST(_req: NextRequest, { params }: Params) {
     entity_id: id,
     meta: { estimate_number: estimate.estimate_number },
   });
+
+  const rejectClient = Array.isArray(estimate.clients) ? estimate.clients[0] : estimate.clients;
+  runAutomations(estimate.org_id, "estimate.rejected", {
+    estimate_id: estimate.id,
+    estimate_number: estimate.estimate_number,
+    client_name: rejectClient?.name ?? undefined,
+    amount: estimate.total,
+    currency: estimate.currency,
+  }).catch(() => {});
+
+  dispatchWebhook(estimate.org_id, "estimate.rejected", {
+    id: estimate.id,
+    estimate_number: estimate.estimate_number,
+    total: estimate.total,
+    currency: estimate.currency,
+  }).catch(() => {});
 
   // Notify org owner
   const [{ data: org }, { data: members }] = await Promise.all([

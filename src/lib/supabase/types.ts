@@ -108,6 +108,9 @@ export interface Organisation {
   smtp_password: string | null;
   smtp_from_name: string | null;
   smtp_from_email: string | null;
+  portal_tagline: string | null;
+  portal_support_email: string | null;
+  hide_invoyr_branding: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -384,6 +387,85 @@ export interface PaymentWithInvoice extends Payment {
   } | null;
 }
 
+export type AutomationTrigger =
+  | "invoice.overdue"
+  | "invoice.paid"
+  | "invoice.sent"
+  | "estimate.approved"
+  | "estimate.expired";
+
+export type AutomationActionType = "send_client_email" | "notify_owner";
+
+export interface AutomationConditions {
+  amount_gt?: number;
+  days_overdue_gt?: number;
+  currency?: string;
+}
+
+export interface AutomationActionConfig {
+  subject?: string;
+  body?: string;
+}
+
+export interface AutomationRule {
+  id: string;
+  org_id: string;
+  name: string;
+  trigger: AutomationTrigger;
+  conditions: AutomationConditions;
+  action_type: AutomationActionType;
+  action_config: AutomationActionConfig;
+  enabled: boolean;
+  run_count: number;
+  last_run_at: string | null;
+  created_at: string;
+}
+
+export type WebhookEventType =
+  | "invoice.sent"
+  | "invoice.paid"
+  | "invoice.void"
+  | "invoice.overdue"
+  | "estimate.approved"
+  | "estimate.rejected"
+  | "payment.received"
+  | "client.created";
+
+export interface ApiKey {
+  id: string;
+  org_id: string;
+  name: string;
+  key_prefix: string;
+  key_hash: string;
+  last_used_at: string | null;
+  expires_at: string | null;
+  revoked_at: string | null;
+  created_at: string;
+}
+
+export interface WebhookEndpoint {
+  id: string;
+  org_id: string;
+  url: string;
+  events: WebhookEventType[];
+  secret: string;
+  enabled: boolean;
+  last_triggered_at: string | null;
+  failure_count: number;
+  created_at: string;
+}
+
+export interface WebhookDelivery {
+  id: string;
+  endpoint_id: string;
+  org_id: string;
+  event: string;
+  status_code: number | null;
+  success: boolean;
+  error: string | null;
+  created_at: string;
+}
+
 // Supabase Database type — matches the format expected by createClient<Database>
 type TableDef<T> = {
   Row: T;
@@ -411,6 +493,10 @@ export type Database = {
       refunds: TableDef<Refund>;
       invoice_attachments: TableDef<InvoiceAttachment>;
       expenses: TableDef<Expense>;
+      automation_rules: TableDef<AutomationRule>;
+      api_keys: TableDef<ApiKey>;
+      webhook_endpoints: TableDef<WebhookEndpoint>;
+      webhook_deliveries: TableDef<WebhookDelivery>;
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

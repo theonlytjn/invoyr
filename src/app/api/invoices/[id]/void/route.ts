@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrgPermission } from "@/lib/permissions";
+import { dispatchWebhook } from "@/lib/webhooks/dispatch";
 
 export async function POST(
   _req: NextRequest,
@@ -38,6 +39,11 @@ export async function POST(
     entity_id: id,
     meta: { invoice_number: invoice.invoice_number },
   });
+
+  dispatchWebhook(invoice.org_id, "invoice.void", {
+    id: invoice.id,
+    invoice_number: invoice.invoice_number,
+  }).catch(() => {});
 
   return NextResponse.json({ ok: true });
 }

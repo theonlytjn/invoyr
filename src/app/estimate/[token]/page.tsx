@@ -22,7 +22,7 @@ export default async function PublicEstimatePage({ params }: Props) {
 
   const { data: orgRow } = await supabase
     .from("organisations")
-    .select("name, logo_url, accent_color")
+    .select("name, logo_url, accent_color, portal_tagline, portal_support_email, hide_invoyr_branding")
     .eq("id", estimate.org_id)
     .single();
 
@@ -158,8 +158,25 @@ export default async function PublicEstimatePage({ params }: Props) {
           )}
         </div>
 
-        <div className="px-6 pb-4 text-center">
-          <p className="text-xs text-gray-400">Powered by invoyr</p>
+        <div className="px-6 pb-5 text-center space-y-1">
+          {orgRow?.portal_tagline && (
+            <p className="text-xs text-gray-500">{orgRow.portal_tagline}</p>
+          )}
+          {orgRow?.portal_support_email && (
+            <p className="text-xs text-gray-400">
+              Need help?{" "}
+              <a
+                href={`mailto:${orgRow.portal_support_email}`}
+                className="underline"
+                style={{ color: accentColor }}
+              >
+                {orgRow.portal_support_email}
+              </a>
+            </p>
+          )}
+          {!orgRow?.hide_invoyr_branding && (
+            <p className="text-xs text-gray-400">Powered by Invoyr</p>
+          )}
         </div>
       </div>
     </div>
