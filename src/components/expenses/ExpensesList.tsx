@@ -11,11 +11,12 @@ import { PlusIcon, PencilIcon, TrashIcon, AttachmentIcon } from "@/components/ic
 import MetricCard from "@/components/dashboard/MetricCard";
 
 const PERIODS = [
-  { value: "this_month", label: "This month" },
-  { value: "last_month", label: "Last month" },
+  { value: "this_month",    label: "This month" },
+  { value: "last_month",    label: "Last month" },
   { value: "last_3_months", label: "Last 3 months" },
-  { value: "this_year", label: "This year" },
-  { value: "all", label: "All time" },
+  { value: "this_year",     label: "This year" },
+  { value: "all",           label: "All time" },
+  { value: "custom",        label: "Custom" },
 ];
 
 function periodToDates(period: string): { from?: string; to?: string } {
@@ -63,14 +64,23 @@ export default function ExpensesList({ initialExpenses, clients, orgId, orgCurre
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Expense | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [customFrom, setCustomFrom] = useState("");
+  const [customTo,   setCustomTo]   = useState("");
 
-  async function fetchExpenses(newPeriod = period, newCategory = category) {
+  async function fetchExpenses(
+    newPeriod = period,
+    newCategory = category,
+    overrideFrom?: string,
+    overrideTo?: string,
+  ) {
     setLoading(true);
-    const { from, to } = periodToDates(newPeriod);
+    const { from, to } = newPeriod === "custom"
+      ? { from: overrideFrom ?? customFrom, to: overrideTo ?? customTo }
+      : periodToDates(newPeriod);
     const params = new URLSearchParams();
     if (newCategory !== "all") params.set("category", newCategory);
     if (from) params.set("from", from);
-    if (to) params.set("to", to);
+    if (to)   params.set("to", `${to}T23:59:59`);
 
     const res = await fetch(`/api/expenses?${params}`);
     const body = await res.json();
@@ -80,12 +90,22 @@ export default function ExpensesList({ initialExpenses, clients, orgId, orgCurre
 
   function handlePeriodChange(p: string) {
     setPeriod(p);
-    fetchExpenses(p, category);
+    if (p !== "custom") fetchExpenses(p, category);
   }
 
   function handleCategoryChange(c: string) {
     setCategory(c);
     fetchExpenses(period, c);
+  }
+
+  function handleCustomFrom(val: string) {
+    setCustomFrom(val);
+    if (val || customTo) fetchExpenses("custom", category, val, customTo);
+  }
+
+  function handleCustomTo(val: string) {
+    setCustomTo(val);
+    if (customFrom || val) fetchExpenses("custom", category, customFrom, val);
   }
 
   function handleSave(saved: Expense) {
@@ -127,54 +147,93 @@ export default function ExpensesList({ initialExpenses, clients, orgId, orgCurre
       </div>
 
       {/* Summary cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-        <MetricCard
-          title="Total expenses"
-          value={formatCurrency(total, topCurrency)}
-          subtitle={PERIODS.find((p) => p.value === period)?.label ?? "This month"}
-        />
-        <MetricCard
-          title="Unbilled billable"
-          value={formatCurrency(billableTotal, topCurrency)}
-          subtitle="ready to invoice"
-        />
-        <div className="hidden sm:block">
-          <MetricCard
-            title="Expenses logged"
-            value={String(expenses.length)}
-            subtitle={PERIODS.find((p) => p.value === period)?.label ?? "This month"}
-          />
-        </div>
-      </div>
+      {(() => {
+        const periodLabel = period === "custom"
+          ? (customFrom || customTo)
+            ? `${customFrom || "Start"} – ${customTo || "Today"}`
+            : "Custom range"
+          : (PERIODS.find((p) => p.value === period)?.label ?? "This month");
+        return (
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            <MetricCard
+              title="Total expenses"
+              value={formatCurrency(total, topCurrency)}
+              subtitle={periodLabel}
+            />
+            <MetricCard
+              title="Unbilled billable"
+              value={formatCurrency(billableTotal, topCurrency)}
+              subtitle="ready to invoice"
+            />
+            <div className="hidden sm:block">
+              <MetricCard
+                title="Expenses logged"
+                value={String(expenses.length)}
+                subtitle={periodLabel}
+              />
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="flex gap-1 overflow-x-auto pb-1 sm:pb-0">
-          {PERIODS.map((p) => (
-            <button
-              key={p.value}
-              onClick={() => handlePeriodChange(p.value)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium shrink-0 transition-colors ${
-                period === p.value
-                  ? "bg-neutral-950 dark:bg-neutral-50 text-white dark:text-neutral-950"
-                  : "bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800"
-              }`}
-            >
-              {p.label}
-            </button>
-          ))}
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex gap-1 overflow-x-auto pb-1 sm:pb-0">
+            {PERIODS.map((p) => (
+              <button
+                key={p.value}
+                onClick={() => handlePeriodChange(p.value)}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium shrink-0 transition-colors ${
+                  period === p.value
+                    ? "bg-neutral-950 dark:bg-neutral-50 text-white dark:text-neutral-950"
+                    : "bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800"
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+
+          <select
+            value={category}
+            onChange={(e) => handleCategoryChange(e.target.value)}
+            className="sm:ml-auto rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-1.5 text-sm text-neutral-950 dark:text-neutral-50 focus:outline-none"
+          >
+            <option value="all">All categories</option>
+            {EXPENSE_CATEGORIES.map((c) => (
+              <option key={c.value} value={c.value}>{c.label}</option>
+            ))}
+          </select>
         </div>
 
-        <select
-          value={category}
-          onChange={(e) => handleCategoryChange(e.target.value)}
-          className="sm:ml-auto rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-1.5 text-sm text-neutral-950 dark:text-neutral-50 focus:outline-none"
-        >
-          <option value="all">All categories</option>
-          {EXPENSE_CATEGORIES.map((c) => (
-            <option key={c.value} value={c.value}>{c.label}</option>
-          ))}
-        </select>
+        {period === "custom" && (
+          <div className="flex flex-wrap items-center gap-2">
+            <input
+              type="date"
+              value={customFrom}
+              onChange={(e) => handleCustomFrom(e.target.value)}
+              max={customTo || undefined}
+              className="rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-1.5 text-sm text-neutral-950 dark:text-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-950 dark:focus:ring-neutral-50"
+            />
+            <span className="text-sm text-neutral-400">to</span>
+            <input
+              type="date"
+              value={customTo}
+              onChange={(e) => handleCustomTo(e.target.value)}
+              min={customFrom || undefined}
+              className="rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-1.5 text-sm text-neutral-950 dark:text-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-950 dark:focus:ring-neutral-50"
+            />
+            {(customFrom || customTo) && (
+              <button
+                onClick={() => { setCustomFrom(""); setCustomTo(""); handlePeriodChange("all"); }}
+                className="text-xs text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Table */}

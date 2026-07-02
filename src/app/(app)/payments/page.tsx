@@ -52,16 +52,23 @@ const PERIOD_LABELS: Record<string, string> = {
   this_year: "This year",
 };
 
+function fmtDate(d: string) {
+  return new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+}
+
 interface Props {
-  searchParams: Promise<{ period?: string }>;
+  searchParams: Promise<{ period?: string; from?: string; to?: string }>;
 }
 
 export default async function PaymentsPage({ searchParams }: Props) {
-  const { period } = await searchParams;
+  const { period, from: fromParam, to: toParam } = await searchParams;
   const org = await requireOrg();
   const supabase = await createClient();
 
-  const { from, to } = getDateRange(period);
+  const isCustom = !!(fromParam || toParam);
+  const { from, to } = isCustom
+    ? { from: fromParam, to: toParam ? `${toParam}T23:59:59` : undefined }
+    : getDateRange(period);
 
   let query = supabase
     .from("payments")
@@ -75,7 +82,9 @@ export default async function PaymentsPage({ searchParams }: Props) {
   const { data } = await query;
   const payments = (data ?? []) as unknown as PaymentWithInvoice[];
   const total = payments.reduce((sum, p) => sum + p.amount, 0);
-  const periodLabel = period ? (PERIOD_LABELS[period] ?? "Filtered") : "All time";
+  const periodLabel = isCustom
+    ? `${fromParam ? fmtDate(fromParam) : "Start"} – ${toParam ? fmtDate(toParam) : "Today"}`
+    : period ? (PERIOD_LABELS[period] ?? "Filtered") : "All time";
 
   return (
     <div>
