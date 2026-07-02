@@ -64,10 +64,13 @@ export async function middleware(request: NextRequest) {
   const isAppRoute =
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/invoices") ||
+    pathname.startsWith("/estimates") ||
     pathname.startsWith("/clients") ||
     pathname.startsWith("/payments") ||
+    pathname.startsWith("/expenses") ||
     pathname.startsWith("/reports") ||
-    pathname.startsWith("/settings");
+    pathname.startsWith("/settings") ||
+    pathname.startsWith("/org");
   const isAuthRoute =
     pathname.startsWith("/login") ||
     pathname.startsWith("/signup") ||
