@@ -9,6 +9,7 @@ import ExpenseModal from "./ExpenseModal";
 import { EXPENSE_CATEGORIES } from "./expense-config";
 import { PlusIcon, PencilIcon, TrashIcon, AttachmentIcon } from "@/components/icons";
 import MetricCard from "@/components/dashboard/MetricCard";
+import BankImportModal from "./BankImportModal";
 
 const PERIODS = [
   { value: "this_month",    label: "This month" },
@@ -136,8 +137,8 @@ export default function ExpensesList({ initialExpenses, clients, orgId, orgCurre
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div />
+      <div className="flex items-center justify-end gap-2">
+        <BankImportModal onImported={() => fetchExpenses()} />
         <button
           onClick={() => { setEditing(null); setModalOpen(true); }}
           className="hidden lg:inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-neutral-950 dark:bg-neutral-50 text-white dark:text-neutral-950 text-sm font-medium hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors"

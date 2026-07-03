@@ -916,3 +916,63 @@ create policy "Org members can manage automation rules"
     select 1 from public.org_members
     where org_id = automation_rules.org_id and user_id = auth.uid()
   ));
+
+-- ─────────────────────────────────────────────
+-- Open Banking
+-- ─────────────────────────────────────────────
+
+create table if not exists public.bank_connections (
+  id               uuid primary key default gen_random_uuid(),
+  org_id           uuid not null references public.organisations(id) on delete cascade,
+  provider         text not null default 'truelayer',
+  account_id       text not null,
+  account_name     text not null,
+  account_type     text,
+  currency         text not null default 'GBP',
+  access_token     text not null,
+  refresh_token    text not null,
+  token_expires_at timestamptz not null,
+  last_synced_at   timestamptz,
+  created_at       timestamptz not null default now(),
+  unique(org_id, account_id)
+);
+
+create index if not exists bank_connections_org_idx on public.bank_connections(org_id);
+
+alter table public.bank_connections enable row level security;
+
+create policy "Org members can manage bank connections"
+  on public.bank_connections for all
+  using (exists (
+    select 1 from public.org_members
+    where org_id = bank_connections.org_id and user_id = auth.uid()
+  ));
+
+create table if not exists public.bank_transactions (
+  id                   uuid primary key default gen_random_uuid(),
+  org_id               uuid not null references public.organisations(id) on delete cascade,
+  connection_id        uuid not null references public.bank_connections(id) on delete cascade,
+  transaction_id       text not null,
+  date                 date not null,
+  description          text not null,
+  amount               numeric(12,2) not null,
+  currency             text not null default 'GBP',
+  merchant_name        text,
+  transaction_category text,
+  expense_id           uuid references public.expenses(id) on delete set null,
+  created_at           timestamptz not null default now(),
+  unique(connection_id, transaction_id)
+);
+
+create index if not exists bank_transactions_org_idx        on public.bank_transactions(org_id);
+create index if not exists bank_transactions_connection_idx on public.bank_transactions(connection_id);
+create index if not exists bank_transactions_expense_idx    on public.bank_transactions(expense_id);
+
+alter table public.bank_transactions enable row level security;
+
+create policy "Org members can manage bank transactions"
+  on public.bank_transactions for all
+  using (exists (
+    select 1 from public.org_members
+    where org_id = bank_transactions.org_id and user_id = auth.uid()
+  ));

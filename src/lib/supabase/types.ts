@@ -298,6 +298,36 @@ export interface EmailPreferences {
   updated_at: string;
 }
 
+export interface BankConnection {
+  id: string;
+  org_id: string;
+  provider: string;
+  account_id: string;
+  account_name: string;
+  account_type: string | null;
+  currency: string;
+  access_token: string;
+  refresh_token: string;
+  token_expires_at: string;
+  last_synced_at: string | null;
+  created_at: string;
+}
+
+export interface BankTransaction {
+  id: string;
+  org_id: string;
+  connection_id: string;
+  transaction_id: string;
+  date: string;
+  description: string;
+  amount: number;
+  currency: string;
+  merchant_name: string | null;
+  transaction_category: string | null;
+  expense_id: string | null;
+  created_at: string;
+}
+
 export interface MarketingContact {
   id: string;
   user_id: string | null;

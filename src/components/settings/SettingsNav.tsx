@@ -11,6 +11,7 @@ const TABS = [
   { href: "/settings/email", label: "Email" },
   { href: "/settings/portal", label: "Portal" },
   { href: "/settings/automations", label: "Automations" },
+  { href: "/settings/banking", label: "Banking" },
   { href: "/settings/developer", label: "Developer" },
   { href: "/settings/billing", label: "Billing" },
   { href: "/settings/team", label: "Team" },
