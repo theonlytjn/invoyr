@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { EXPENSE_CATEGORIES } from "./expense-config";
 import type { Expense, ExpenseCategory, Client } from "@/lib/supabase/types";
 import { XIcon, UploadIcon, TrashIcon } from "@/components/icons";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 interface Props {
   orgId: string;
@@ -143,15 +144,11 @@ export default function ExpenseModal({ orgId, orgCurrency, clients, expense, ope
           {/* Category */}
           <div className="space-y-1.5">
             <label className="block text-sm font-medium text-neutral-900 dark:text-neutral-100">Category</label>
-            <select
+            <SearchableSelect
               value={category}
-              onChange={(e) => setCategory(e.target.value as ExpenseCategory)}
-              className="w-full rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2.5 text-sm text-neutral-950 dark:text-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-950/20 dark:focus:ring-neutral-50/20"
-            >
-              {EXPENSE_CATEGORIES.map((c) => (
-                <option key={c.value} value={c.value}>{c.label}</option>
-              ))}
-            </select>
+              onChange={(v) => setCategory(v as ExpenseCategory)}
+              options={EXPENSE_CATEGORIES.map((c) => ({ value: c.value, label: c.label }))}
+            />
           </div>
 
           {/* Amount + Currency + Date */}
@@ -195,16 +192,16 @@ export default function ExpenseModal({ orgId, orgCurrency, clients, expense, ope
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <label className="block text-sm font-medium text-neutral-900 dark:text-neutral-100">Client <span className="text-neutral-400 font-normal">(optional)</span></label>
-              <select
+              <SearchableSelect
                 value={clientId}
-                onChange={(e) => setClientId(e.target.value)}
-                className="w-full rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2.5 text-sm text-neutral-950 dark:text-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-950/20 dark:focus:ring-neutral-50/20"
-              >
-                <option value="">No client</option>
-                {clients.map((c) => (
-                  <option key={c.id} value={c.id}>{c.company_name ?? c.name}</option>
-                ))}
-              </select>
+                onChange={setClientId}
+                placeholder="No client"
+                emptyOption="No client"
+                options={clients.map((c) => ({
+                  value: c.id,
+                  label: c.company_name ?? c.name,
+                }))}
+              />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium text-neutral-900 dark:text-neutral-100">Billable</label>

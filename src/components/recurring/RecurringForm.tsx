@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { Textarea } from "@/components/ui/textarea";
 import LineItemsEditor, { type LineItemRow } from "@/components/invoices/LineItemsEditor";
 import { computeTotals } from "@/lib/invoice-totals";
@@ -102,14 +103,16 @@ export default function RecurringForm({ clients, existing }: Props) {
 
         <div className="space-y-1.5">
           <Label>Client</Label>
-          <Select value={clientId} onValueChange={setClientId}>
-            <SelectTrigger><SelectValue placeholder="Select a client (optional)" /></SelectTrigger>
-            <SelectContent>
-              {clients.map((c) => (
-                <SelectItem key={c.id} value={c.id}>{c.name}{c.company_name ? ` — ${c.company_name}` : ""}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <SearchableSelect
+            value={clientId}
+            onChange={setClientId}
+            placeholder="Select a client (optional)"
+            options={clients.map((c) => ({
+              value: c.id,
+              label: c.name,
+              sublabel: c.company_name ?? undefined,
+            }))}
+          />
         </div>
 
         <div className="grid grid-cols-2 gap-4">

@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { formatCurrency } from "@/lib/utils";
 import type { Client, Invoice, InvoiceItem, Organisation, InvoiceTemplate } from "@/lib/supabase/types";
 
@@ -195,18 +196,16 @@ export default function InvoiceForm({ org, clients, invoice, existingItems, invo
 
           <div className="space-y-1.5">
             <Label>Client</Label>
-            <Select value={clientId} onValueChange={setClientId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a client" />
-              </SelectTrigger>
-              <SelectContent>
-                {clients.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>
-                    {c.name}{c.company_name ? ` — ${c.company_name}` : ""}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              value={clientId}
+              onChange={setClientId}
+              placeholder="Select a client"
+              options={clients.map((c) => ({
+                value: c.id,
+                label: c.name,
+                sublabel: c.company_name ?? undefined,
+              }))}
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
