@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import type { Expense, ExpenseWithClient, Client } from "@/lib/supabase/types";
 import type { ExpenseCategory } from "@/lib/supabase/types";
@@ -12,13 +12,16 @@ import MetricCard from "@/components/dashboard/MetricCard";
 import BankImportModal from "./BankImportModal";
 
 const PERIODS = [
+  { value: "all",           label: "All time" },
   { value: "this_month",    label: "This month" },
   { value: "last_month",    label: "Last month" },
   { value: "last_3_months", label: "Last 3 months" },
   { value: "this_year",     label: "This year" },
-  { value: "all",           label: "All time" },
-  { value: "custom",        label: "Custom" },
 ];
+
+function fmtDate(iso: string) {
+  return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+}
 
 function periodToDates(period: string): { from?: string; to?: string } {
   const now = new Date();
@@ -67,6 +70,21 @@ export default function ExpensesList({ initialExpenses, clients, orgId, orgCurre
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [customFrom, setCustomFrom] = useState("");
   const [customTo,   setCustomTo]   = useState("");
+
+  const [periodOpen,   setPeriodOpen]   = useState(false);
+  const [categoryOpen, setCategoryOpen] = useState(false);
+  const [showDates,    setShowDates]    = useState(false);
+  const periodRef   = useRef<HTMLDivElement>(null);
+  const categoryRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handle(e: MouseEvent) {
+      if (periodRef.current && !periodRef.current.contains(e.target as Node))   setPeriodOpen(false);
+      if (categoryRef.current && !categoryRef.current.contains(e.target as Node)) setCategoryOpen(false);
+    }
+    document.addEventListener("mousedown", handle);
+    return () => document.removeEventListener("mousedown", handle);
+  }, []);
 
   async function fetchExpenses(
     newPeriod = period,
@@ -178,63 +196,132 @@ export default function ExpensesList({ initialExpenses, clients, orgId, orgCurre
       })()}
 
       {/* Filters */}
-      <div className="flex flex-col gap-3">
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="flex gap-1 overflow-x-auto pb-1 sm:pb-0">
-            {PERIODS.map((p) => (
-              <button
-                key={p.value}
-                onClick={() => handlePeriodChange(p.value)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium shrink-0 transition-colors ${
-                  period === p.value
-                    ? "bg-neutral-950 dark:bg-neutral-50 text-white dark:text-neutral-950"
-                    : "bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800"
-                }`}
-              >
-                {p.label}
-              </button>
-            ))}
-          </div>
-
-          <select
-            value={category}
-            onChange={(e) => handleCategoryChange(e.target.value)}
-            className="sm:ml-auto rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-1.5 text-sm text-neutral-950 dark:text-neutral-50 focus:outline-none"
+      <div className="flex items-center gap-2 flex-wrap">
+        {/* Period dropdown */}
+        <div ref={periodRef} className="relative">
+          <button
+            onClick={() => { setPeriodOpen((o) => !o); setCategoryOpen(false); }}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-500 transition-colors"
           >
-            <option value="all">All categories</option>
-            {EXPENSE_CATEGORIES.map((c) => (
-              <option key={c.value} value={c.value}>{c.label}</option>
-            ))}
-          </select>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5 text-neutral-400">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            {period === "custom"
+              ? customFrom && customTo
+                ? `${fmtDate(customFrom)} – ${fmtDate(customTo)}`
+                : customFrom ? `From ${fmtDate(customFrom)}` : customTo ? `To ${fmtDate(customTo)}` : "Custom"
+              : (PERIODS.find((p) => p.value === period)?.label ?? "All time")}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className={`w-3 h-3 text-neutral-400 transition-transform ${periodOpen ? "rotate-180" : ""}`}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {periodOpen && (
+            <div className="absolute left-0 top-full mt-1.5 z-30 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl shadow-lg min-w-[180px] py-1 overflow-hidden">
+              {PERIODS.map((p) => (
+                <button
+                  key={p.value}
+                  onClick={() => { handlePeriodChange(p.value); setShowDates(false); setPeriodOpen(false); }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-left text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+                >
+                  <span className="w-3.5 h-3.5 shrink-0">
+                    {period === p.value && period !== "custom" && (
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="text-neutral-950 dark:text-neutral-50">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </span>
+                  {p.label}
+                </button>
+              ))}
+
+              <div className="my-1 border-t border-neutral-100 dark:border-neutral-800" />
+
+              <button
+                onClick={() => { handlePeriodChange("custom"); setShowDates(true); }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-left text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+              >
+                <span className="w-3.5 h-3.5 shrink-0">
+                  {period === "custom" && (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="text-neutral-950 dark:text-neutral-50">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </span>
+                Custom range
+              </button>
+
+              {(showDates || period === "custom") && (
+                <div className="px-3 pb-3 pt-1 space-y-2">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs text-neutral-400">From</label>
+                    <input
+                      type="date"
+                      value={customFrom}
+                      onChange={(e) => handleCustomFrom(e.target.value)}
+                      max={customTo || undefined}
+                      className="w-full rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-2.5 py-1.5 text-xs text-neutral-950 dark:text-neutral-50 focus:outline-none focus:ring-1 focus:ring-neutral-950 dark:focus:ring-neutral-50"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs text-neutral-400">To</label>
+                    <input
+                      type="date"
+                      value={customTo}
+                      onChange={(e) => handleCustomTo(e.target.value)}
+                      min={customFrom || undefined}
+                      className="w-full rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-2.5 py-1.5 text-xs text-neutral-950 dark:text-neutral-50 focus:outline-none focus:ring-1 focus:ring-neutral-950 dark:focus:ring-neutral-50"
+                    />
+                  </div>
+                  {(customFrom || customTo) && (
+                    <button
+                      onClick={() => { setCustomFrom(""); setCustomTo(""); handlePeriodChange("all"); setShowDates(false); setPeriodOpen(false); }}
+                      className="text-xs text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors"
+                    >
+                      Clear range
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
-        {period === "custom" && (
-          <div className="flex flex-wrap items-center gap-2">
-            <input
-              type="date"
-              value={customFrom}
-              onChange={(e) => handleCustomFrom(e.target.value)}
-              max={customTo || undefined}
-              className="rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-1.5 text-sm text-neutral-950 dark:text-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-950 dark:focus:ring-neutral-50"
-            />
-            <span className="text-sm text-neutral-400">to</span>
-            <input
-              type="date"
-              value={customTo}
-              onChange={(e) => handleCustomTo(e.target.value)}
-              min={customFrom || undefined}
-              className="rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-1.5 text-sm text-neutral-950 dark:text-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-950 dark:focus:ring-neutral-50"
-            />
-            {(customFrom || customTo) && (
-              <button
-                onClick={() => { setCustomFrom(""); setCustomTo(""); handlePeriodChange("all"); }}
-                className="text-xs text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors"
-              >
-                Clear
-              </button>
-            )}
-          </div>
-        )}
+        {/* Category dropdown */}
+        <div ref={categoryRef} className="relative">
+          <button
+            onClick={() => { setCategoryOpen((o) => !o); setPeriodOpen(false); }}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-500 transition-colors"
+          >
+            {category === "all"
+              ? "All categories"
+              : (EXPENSE_CATEGORIES.find((c) => c.value === category)?.label ?? "Category")}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className={`w-3 h-3 text-neutral-400 transition-transform ${categoryOpen ? "rotate-180" : ""}`}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {categoryOpen && (
+            <div className="absolute left-0 top-full mt-1.5 z-30 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl shadow-lg min-w-[200px] py-1 overflow-hidden">
+              {[{ value: "all", label: "All categories" }, ...EXPENSE_CATEGORIES].map((c) => (
+                <button
+                  key={c.value}
+                  onClick={() => { handleCategoryChange(c.value); setCategoryOpen(false); }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-left text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+                >
+                  <span className="w-3.5 h-3.5 shrink-0">
+                    {category === c.value && (
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="text-neutral-950 dark:text-neutral-50">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </span>
+                  {c.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Table */}
