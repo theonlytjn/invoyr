@@ -4,6 +4,7 @@ import { render } from "@react-email/render";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
+import { orgHasFeature } from "@/lib/billing";
 import { getResend } from "@/lib/resend/client";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { ClientStatementEmail } from "@/emails/transactional/ClientStatementEmail";
@@ -34,6 +35,9 @@ export async function POST(
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const org = await requireOrg();
+  if (!(await orgHasFeature(org.id, "client_statements"))) {
+    return NextResponse.json({ error: "Client statements require the Business plan." }, { status: 403 });
+  }
 
   const [{ data: clientData }, { data: invoicesData }] = await Promise.all([
     supabase.from("clients").select("*").eq("id", id).eq("org_id", org.id).single(),
@@ -92,7 +96,7 @@ export async function POST(
   const { default: ClientStatementPdf } = await import("@/components/statements/ClientStatementPdf");
   const { renderToBuffer } = await import("@react-pdf/renderer");
 
-  const pdfElement = ClientStatementPdf({ org: orgWithLogo, client, invoices, statementDate, currency });
+  const pdfElement = ClientStatementPdf({ org: orgWithLogo, client, invoices, statementDate, currency, showInvoyrBranding: !(await orgHasFeature(org.id, "white_label")) });
   const pdfBuffer = await renderToBuffer(pdfElement);
 
   const resend = getResend();

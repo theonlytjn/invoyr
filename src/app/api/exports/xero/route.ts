@@ -1,6 +1,7 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
+import { orgHasFeature } from "@/lib/billing";
 import { csvResponse } from "@/lib/exports/csv-utils";
 import {
   buildXeroInvoiceCsv,
@@ -11,6 +12,9 @@ import {
 
 export async function GET(req: NextRequest) {
   const org = await requireOrg();
+  if (!(await orgHasFeature(org.id, "accounting_export"))) {
+    return NextResponse.json({ error: "Accounting exports require the Business plan." }, { status: 403 });
+  }
   const supabase = await createClient();
   const { searchParams } = new URL(req.url);
 

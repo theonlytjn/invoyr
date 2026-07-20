@@ -10,11 +10,11 @@ export default function HomePage() {
           Now in early access
         </div>
         <h1 className="text-5xl font-bold text-gray-900 leading-tight max-w-3xl mx-auto">
-          Invoicing that gets you paid faster
+          Get paid faster
         </h1>
         <p className="mt-6 text-xl text-gray-500 max-w-2xl mx-auto leading-relaxed">
-          Professional invoices, Stripe payments, and revenue tracking — built for freelancers,
-          agencies, and service businesses.
+          Send professional invoices and take card payments with Stripe — on every plan.
+          Built for freelancers, agencies, and service businesses.
         </p>
         <div className="mt-10 flex items-center justify-center gap-4">
           <Link
@@ -30,7 +30,7 @@ export default function HomePage() {
             View pricing
           </Link>
         </div>
-        <p className="mt-4 text-xs text-gray-400">14-day free trial · No credit card required</p>
+        <p className="mt-4 text-xs text-gray-400">7-day free trial · No credit card required</p>
       </section>
 
       {/* Features */}

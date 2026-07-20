@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
 import { createServiceClient } from "@/lib/supabase/server";
+import { getOrgPlan } from "@/lib/billing";
+import { canAccess } from "@/config/plans";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { computeTotals } from "@/lib/invoice-totals";
 import PayButton from "./PayButton";
@@ -28,6 +30,10 @@ export default async function PayPage({ params, searchParams }: Props) {
     .select("name, logo_url, accent_color, email, bank_account_name, bank_name, bank_account_number, bank_sort_code, bank_iban, bank_bic, paypal_email, portal_tagline, portal_support_email, hide_invoyr_branding")
     .eq("id", invoice.org_id)
     .single();
+
+  const plan = await getOrgPlan(invoice.org_id);
+  const canPaypal = canAccess(plan, "paypal_payments");
+  const showBranding = !canAccess(plan, "white_label");
 
   const items = invoice.invoice_items ?? [];
   const client = Array.isArray(invoice.clients) ? invoice.clients[0] : invoice.clients;
@@ -143,7 +149,7 @@ export default async function PayPage({ params, searchParams }: Props) {
 
               <PayButton token={token} accentColor={accentColor} />
 
-              {orgRow?.paypal_email && amountDue > 0 && (
+              {canPaypal && orgRow?.paypal_email && amountDue > 0 && (
                 <div className="border-t border-gray-100 pt-4">
                   <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">
                     Or pay with PayPal
@@ -225,7 +231,7 @@ export default async function PayPage({ params, searchParams }: Props) {
               </a>
             </p>
           )}
-          {!orgRow?.hide_invoyr_branding && (
+          {showBranding && (
             <p className="text-xs text-gray-400">Powered by Invoyr</p>
           )}
         </div>

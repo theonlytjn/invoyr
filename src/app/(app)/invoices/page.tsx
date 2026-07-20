@@ -33,6 +33,7 @@ export default async function InvoicesPage({
   const org = await requireOrg();
   const plan = await getOrgPlan(org.id);
   const canExportCsv = canAccess(plan, "csv_export");
+  const canBulk = canAccess(plan, "bulk_invoice_actions");
   const supabase = await createClient();
   const { status } = await searchParams;
 
@@ -94,7 +95,7 @@ export default async function InvoicesPage({
           </div>
         </div>
 
-        <InvoicesTable invoices={invoices} />
+        <InvoicesTable invoices={invoices} canBulk={canBulk} />
       </div>
     </div>
   );

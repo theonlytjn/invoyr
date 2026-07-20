@@ -1,7 +1,7 @@
 import { formatCurrency, formatDate } from "@/lib/utils";
 import type { InvoiceTemplateProps } from "./types";
 
-export default function ModernStudio({ invoice, items, client, org, totals, documentType = "invoice" }: InvoiceTemplateProps) {
+export default function ModernStudio({ invoice, items, client, org, totals, documentType = "invoice", showInvoyrBranding = true }: InvoiceTemplateProps) {
   return (
     <div className="bg-white p-10 font-sans text-gray-900" style={{ width: 794, minHeight: 1123 }}>
       {/* Header */}
@@ -164,7 +164,7 @@ export default function ModernStudio({ invoice, items, client, org, totals, docu
       {/* Footer */}
       <div className="mt-12 pt-4 border-t border-gray-100 flex justify-between text-xs text-gray-400">
         <p>{org.website ?? org.email ?? org.name}</p>
-        <p>Powered by invoyr</p>
+        {showInvoyrBranding && <p>Powered by invoyr</p>}
       </div>
     </div>
   );

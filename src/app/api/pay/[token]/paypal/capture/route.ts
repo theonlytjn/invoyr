@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createElement } from "react";
 import { createServiceClient } from "@/lib/supabase/server";
+import { getOrgPlan } from "@/lib/billing";
+import { canAccess } from "@/config/plans";
 import { capturePayPalOrder } from "@/lib/paypal/client";
 import { sendTransactionalEmail } from "@/lib/resend/send-transactional-email";
 import { PaymentReceivedEmail } from "@/emails/transactional/PaymentReceivedEmail";
@@ -25,6 +27,10 @@ export async function POST(
 
   if (!invoice) return NextResponse.json({ error: "Not found" }, { status: 404 });
   if (invoice.status === "paid") return NextResponse.json({ ok: true });
+
+  if (!canAccess(await getOrgPlan(invoice.org_id), "paypal_payments")) {
+    return NextResponse.json({ error: "PayPal payments require the Business plan." }, { status: 403 });
+  }
 
   const capture = await capturePayPalOrder(orderId);
 

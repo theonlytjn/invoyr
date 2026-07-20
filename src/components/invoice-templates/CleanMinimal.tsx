@@ -1,7 +1,7 @@
 import { formatCurrency, formatDate } from "@/lib/utils";
 import type { InvoiceTemplateProps } from "./types";
 
-export default function CleanMinimal({ invoice, items, client, org, totals, documentType = "invoice" }: InvoiceTemplateProps) {
+export default function CleanMinimal({ invoice, items, client, org, totals, documentType = "invoice", showInvoyrBranding = true }: InvoiceTemplateProps) {
   return (
     <div className="bg-white p-10 font-sans text-gray-900" style={{ width: 794, minHeight: 1123 }}>
       {/* Top strip */}
@@ -138,7 +138,7 @@ export default function CleanMinimal({ invoice, items, client, org, totals, docu
       )}
 
       <div className="mt-10 text-xs text-gray-300 text-center">
-        {org.name} · Powered by invoyr
+        {org.name}{showInvoyrBranding ? " · Powered by invoyr" : ""}
       </div>
     </div>
   );

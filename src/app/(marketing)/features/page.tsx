@@ -100,7 +100,7 @@ export default function FeaturesPage() {
 
       <section className="bg-gray-50 border-t border-gray-100 py-20 text-center">
         <h2 className="text-2xl font-bold text-gray-900 mb-3">Everything included from day one</h2>
-        <p className="text-gray-500 mb-8">14-day free trial. No credit card required.</p>
+        <p className="text-gray-500 mb-8">7-day free trial. No credit card required.</p>
         <Link
           href="/signup"
           className="inline-block px-8 py-3.5 bg-gray-900 text-white font-medium rounded-xl hover:bg-gray-700 transition-colors"

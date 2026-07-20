@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createElement } from "react";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { requireOrg } from "@/lib/auth";
+import { orgHasFeature } from "@/lib/billing";
 import { sendTransactionalEmail } from "@/lib/resend/send-transactional-email";
 import { InvoiceSentEmail } from "@/emails/transactional/InvoiceSentEmail";
 import { computeTotals } from "@/lib/invoice-totals";
@@ -15,6 +17,11 @@ export async function POST(req: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const org = await requireOrg();
+  if (!(await orgHasFeature(org.id, "bulk_invoice_actions"))) {
+    return NextResponse.json({ error: "Bulk actions require the Business plan." }, { status: 403 });
+  }
 
   const body = await req.json().catch(() => null);
   const parsed = schema.safeParse(body);

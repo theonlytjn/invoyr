@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
   footerText: { fontSize: 8, color: "#d1d5db" },
 });
 
-export default function CleanMinimalPdf({ invoice, items, client, org, totals, watermark }: InvoiceTemplateProps & { logoDataUrl?: string | null }) {
+export default function CleanMinimalPdf({ invoice, items, client, org, totals, watermark, showInvoyrBranding = true }: InvoiceTemplateProps & { logoDataUrl?: string | null }) {
   const accent = org.accent_color ?? "#111827";
   const logoSrc = (org as { logoDataUrl?: string | null }).logoDataUrl ?? org.logo_url;
 
@@ -146,7 +146,7 @@ export default function CleanMinimalPdf({ invoice, items, client, org, totals, w
         ) : null}
 
         <View style={styles.footer}>
-          <Text style={styles.footerText}>{org.name} · Powered by invoyr</Text>
+          <Text style={styles.footerText}>{org.name}{showInvoyrBranding ? " · Powered by invoyr" : ""}</Text>
         </View>
 
         {watermark ? (

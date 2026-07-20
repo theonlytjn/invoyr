@@ -10,6 +10,7 @@ import type { InvoiceWithClient } from "@/lib/supabase/types";
 
 interface Props {
   invoices: InvoiceWithClient[];
+  canBulk?: boolean;
 }
 
 const SENDABLE = new Set(["draft", "issued", "sent"]);
@@ -36,7 +37,7 @@ function buildCsv(rows: InvoiceWithClient[]): string {
   return [headers.join(","), ...lines].join("\n");
 }
 
-export default function InvoicesTable({ invoices }: Props) {
+export default function InvoicesTable({ invoices, canBulk = false }: Props) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -129,7 +130,7 @@ export default function InvoicesTable({ invoices }: Props) {
       />
 
       {/* Bulk action bar */}
-      {someSelected && (
+      {canBulk && someSelected && (
         <div className="flex items-center gap-3 px-4 py-3 bg-neutral-950 dark:bg-neutral-800 text-white rounded-xl text-sm">
           <span className="font-medium mr-1">{selected.size} selected</span>
           {canSend && (
@@ -183,15 +184,17 @@ export default function InvoicesTable({ invoices }: Props) {
           <table className="w-full text-sm">
             <thead className="border-b border-neutral-100 dark:border-neutral-800">
               <tr>
-                <th className="py-3 pl-4 pr-2 w-8">
-                  <input
-                    type="checkbox"
-                    checked={allSelected}
-                    onChange={toggleAll}
-                    className="rounded border-neutral-300 dark:border-neutral-600 accent-neutral-950"
-                    aria-label="Select all"
-                  />
-                </th>
+                {canBulk && (
+                  <th className="py-3 pl-4 pr-2 w-8">
+                    <input
+                      type="checkbox"
+                      checked={allSelected}
+                      onChange={toggleAll}
+                      className="rounded border-neutral-300 dark:border-neutral-600 accent-neutral-950"
+                      aria-label="Select all"
+                    />
+                  </th>
+                )}
                 <th className="text-left py-3 px-3 text-xs font-medium text-neutral-500 uppercase tracking-wide">Invoice</th>
                 <th className="text-left py-3 px-4 text-xs font-medium text-neutral-500 uppercase tracking-wide">Client</th>
                 <th className="text-left py-3 px-4 text-xs font-medium text-neutral-500 uppercase tracking-wide">Status</th>
@@ -208,15 +211,17 @@ export default function InvoicesTable({ invoices }: Props) {
                     key={invoice.id}
                     className={`border-b border-neutral-100 dark:border-neutral-800 transition-colors ${isSelected ? "bg-neutral-50 dark:bg-neutral-800/60" : "hover:bg-neutral-50 dark:hover:bg-neutral-800"}`}
                   >
-                    <td className="py-3 pl-4 pr-2">
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => toggleOne(invoice.id)}
-                        className="rounded border-neutral-300 dark:border-neutral-600 accent-neutral-950"
-                        aria-label={`Select ${invoice.invoice_number}`}
-                      />
-                    </td>
+                    {canBulk && (
+                      <td className="py-3 pl-4 pr-2">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleOne(invoice.id)}
+                          className="rounded border-neutral-300 dark:border-neutral-600 accent-neutral-950"
+                          aria-label={`Select ${invoice.invoice_number}`}
+                        />
+                      </td>
+                    )}
                     <td className="py-3 px-3">
                       <Link href={`/invoices/${invoice.id}`} className="font-medium text-neutral-950 dark:text-neutral-50 hover:underline">
                         {invoice.invoice_number}

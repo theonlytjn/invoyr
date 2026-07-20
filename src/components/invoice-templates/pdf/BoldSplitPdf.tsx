@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
   footerText: { fontSize: 8, color: "#9ca3af" },
 });
 
-export default function BoldSplitPdf({ invoice, items, client, org, totals, watermark }: InvoiceTemplateProps) {
+export default function BoldSplitPdf({ invoice, items, client, org, totals, watermark, showInvoyrBranding = true }: InvoiceTemplateProps) {
   const accent = org.accent_color ?? "#111827";
 
   return (
@@ -158,7 +158,7 @@ export default function BoldSplitPdf({ invoice, items, client, org, totals, wate
 
           <View style={styles.footer}>
             <Text style={styles.footerText}>{org.name}</Text>
-            <Text style={styles.footerText}>Powered by invoyr</Text>
+            {showInvoyrBranding ? <Text style={styles.footerText}>Powered by invoyr</Text> : null}
           </View>
         </View>
 

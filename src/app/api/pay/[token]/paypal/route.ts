@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
+import { getOrgPlan } from "@/lib/billing";
+import { canAccess } from "@/config/plans";
 import { createPayPalOrder } from "@/lib/paypal/client";
 
 export async function POST(
@@ -18,6 +20,10 @@ export async function POST(
   if (!invoice) return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
   if (invoice.status === "paid") return NextResponse.json({ error: "Invoice already paid" }, { status: 400 });
   if (invoice.status === "void") return NextResponse.json({ error: "Invoice is void" }, { status: 400 });
+
+  if (!canAccess(await getOrgPlan(invoice.org_id), "paypal_payments")) {
+    return NextResponse.json({ error: "PayPal payments require the Business plan." }, { status: 403 });
+  }
 
   const { data: org } = await supabase
     .from("organisations")

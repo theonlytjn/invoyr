@@ -51,9 +51,10 @@ interface Props {
   invoices: Invoice[];
   statementDate: string;
   currency: string;
+  showInvoyrBranding?: boolean;
 }
 
-export default function ClientStatementPdf({ org, client, invoices, statementDate, currency }: Props) {
+export default function ClientStatementPdf({ org, client, invoices, statementDate, currency, showInvoyrBranding = true }: Props) {
   const accent = org.accent_color ?? "#111827";
   const logoSrc = org.logoDataUrl ?? org.logo_url;
 
@@ -151,7 +152,7 @@ export default function ClientStatementPdf({ org, client, invoices, statementDat
           <Text style={styles.footerText}>
             Statement of account for {client.company_name ?? client.name}
           </Text>
-          <Text style={styles.footerText}>Powered by invoyr</Text>
+          {showInvoyrBranding ? <Text style={styles.footerText}>Powered by invoyr</Text> : null}
         </View>
       </Page>
     </Document>

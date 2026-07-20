@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
+import { orgHasFeature } from "@/lib/billing";
 
 const schema = z.object({ ids: z.array(z.string().uuid()).min(1).max(50) });
 
@@ -13,6 +14,9 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const org = await requireOrg();
+  if (!(await orgHasFeature(org.id, "bulk_invoice_actions"))) {
+    return NextResponse.json({ error: "Bulk actions require the Business plan." }, { status: 403 });
+  }
 
   const body = await req.json().catch(() => null);
   const parsed = schema.safeParse(body);

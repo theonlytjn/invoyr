@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
 import { createServiceClient } from "@/lib/supabase/server";
+import { getOrgPlan } from "@/lib/billing";
+import { canAccess } from "@/config/plans";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { computeTotals } from "@/lib/invoice-totals";
 import EstimateDecisionButtons from "./EstimateDecisionButtons";
@@ -19,6 +21,8 @@ export default async function PublicEstimatePage({ params }: Props) {
     .single();
 
   if (!estimate) notFound();
+
+  const showBranding = !canAccess(await getOrgPlan(estimate.org_id), "white_label");
 
   const { data: orgRow } = await supabase
     .from("organisations")
@@ -174,7 +178,7 @@ export default async function PublicEstimatePage({ params }: Props) {
               </a>
             </p>
           )}
-          {!orgRow?.hide_invoyr_branding && (
+          {showBranding && (
             <p className="text-xs text-gray-400">Powered by Invoyr</p>
           )}
         </div>

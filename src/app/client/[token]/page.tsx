@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createServiceClient } from "@/lib/supabase/server";
+import { getOrgPlan } from "@/lib/billing";
+import { canAccess } from "@/config/plans";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 interface Props {
@@ -50,6 +52,8 @@ export default async function ClientPortalPage({ params }: Props) {
     .single();
 
   if (!client) notFound();
+
+  const showBranding = !canAccess(await getOrgPlan(client.org_id), "white_label");
 
   const [{ data: org }, { data: invoices }, { data: estimates }] = await Promise.all([
     supabase
@@ -198,7 +202,7 @@ export default async function ClientPortalPage({ params }: Props) {
           </div>
         )}
 
-        <p className="text-center text-xs text-gray-400 pb-4">Powered by invoyr</p>
+        {showBranding && <p className="text-center text-xs text-gray-400 pb-4">Powered by invoyr</p>}
       </div>
     </div>
   );

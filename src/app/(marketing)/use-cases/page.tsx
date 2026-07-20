@@ -88,7 +88,7 @@ export default function UseCasesPage() {
 
       <section className="bg-gray-50 border-t border-gray-100 py-20 text-center">
         <h2 className="text-2xl font-bold text-gray-900 mb-3">See it in action</h2>
-        <p className="text-gray-500 mb-8">Start a free 14-day trial — no credit card needed.</p>
+        <p className="text-gray-500 mb-8">Start a free 7-day trial — no credit card needed.</p>
         <Link
           href="/signup"
           className="inline-block px-8 py-3.5 bg-gray-900 text-white font-medium rounded-xl hover:bg-gray-700 transition-colors"

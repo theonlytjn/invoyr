@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
+import { getOrgPlan } from "@/lib/billing";
+import { canAccess } from "@/config/plans";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import Topbar from "@/components/shell/Topbar";
 import InvoiceStatusBadge from "@/components/invoices/InvoiceStatusBadge";
@@ -18,6 +20,8 @@ export const metadata: Metadata = { title: "Client" };
 export default async function ClientDetailPage({ params }: Props) {
   const { id } = await params;
   const org = await requireOrg();
+  const plan = await getOrgPlan(org.id);
+  const canStatements = canAccess(plan, "client_statements");
   const supabase = await createClient();
 
   const [clientRes, invoicesRes] = await Promise.all([
@@ -42,14 +46,18 @@ export default async function ClientDetailPage({ params }: Props) {
             {client.portal_token && (
               <CopyPortalLinkButton portalToken={client.portal_token} />
             )}
-            <a
-              href={`/api/clients/${id}/statement`}
-              download
-              className="px-3.5 py-2 border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 text-sm font-medium rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
-            >
-              Download statement
-            </a>
-            <EmailStatementButton clientId={id} clientEmail={client.email} />
+            {canStatements && (
+              <>
+                <a
+                  href={`/api/clients/${id}/statement`}
+                  download
+                  className="px-3.5 py-2 border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 text-sm font-medium rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+                >
+                  Download statement
+                </a>
+                <EmailStatementButton clientId={id} clientEmail={client.email} />
+              </>
+            )}
             <Link
               href={`/clients/${id}/edit`}
               className="px-3.5 py-2 border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 text-sm font-medium rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"

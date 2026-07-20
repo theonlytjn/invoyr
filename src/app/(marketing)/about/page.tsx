@@ -33,7 +33,7 @@ export default function AboutPage() {
 
         <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6">
           {[
-            { stat: "14 days", label: "Free trial, no card required" },
+            { stat: "7 days", label: "Free trial, no card required" },
             { stat: "Direct", label: "Payments go straight to your Stripe" },
             { stat: "5 min", label: "Average time to first invoice sent" },
           ].map((item) => (

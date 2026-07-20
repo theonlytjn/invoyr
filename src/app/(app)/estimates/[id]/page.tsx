@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
+import { getOrgPlan } from "@/lib/billing";
+import { canAccess } from "@/config/plans";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { computeTotals } from "@/lib/invoice-totals";
 import Topbar from "@/components/shell/Topbar";
@@ -29,6 +31,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function EstimateDetailPage({ params }: Props) {
   const { id } = await params;
   const org = await requireOrg();
+  const showInvoyrBranding = !canAccess(await getOrgPlan(org.id), "white_label");
   const supabase = await createClient();
 
   const [{ data }, { data: auditLogs }] = await Promise.all([
@@ -128,6 +131,7 @@ export default async function EstimateDetailPage({ params }: Props) {
               org={org}
               totals={{ subtotal: totals.subtotal, vatAmount: totals.vat_amount, discount: totals.discount, total: totals.total }}
               documentType="estimate"
+              showInvoyrBranding={showInvoyrBranding}
             />
           </div>
         </div>

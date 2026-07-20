@@ -1,10 +1,19 @@
 import { NextResponse } from "next/server";
 import { requireOrg } from "@/lib/auth";
+import { getOrgPlan } from "@/lib/billing";
+import { canAccess } from "@/config/plans";
 import { buildAuthUrl } from "@/lib/truelayer/client";
 import { cookies } from "next/headers";
 
-export async function GET() {
+export async function GET(req: Request) {
   const org = await requireOrg();
+
+  const plan = await getOrgPlan(org.id);
+  if (!canAccess(plan, "open_banking")) {
+    return NextResponse.redirect(
+      new URL("/settings/banking?upgrade=open_banking", req.url)
+    );
+  }
 
   // Encode orgId + random nonce in state for CSRF protection
   const nonce = crypto.randomUUID();

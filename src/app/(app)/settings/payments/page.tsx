@@ -1,5 +1,8 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
+import { getOrgPlan } from "@/lib/billing";
+import { canAccess } from "@/config/plans";
 import { StripeConnectPanel } from "@/components/settings/StripeConnectPanel";
 import { PayPalSettingsPanel } from "@/components/settings/PayPalSettingsPanel";
 import { StripeLogo, PaypalLogo } from "@phosphor-icons/react/dist/ssr";
@@ -15,6 +18,9 @@ export default async function PaymentsSettingsPage({
   const org = await requireOrg();
   const supabase = await createClient();
   const { connect } = await searchParams;
+
+  const plan = await getOrgPlan(org.id);
+  const canPaypal = canAccess(plan, "paypal_payments");
 
   const { data: freshOrg } = await supabase
     .from("organisations")
@@ -68,7 +74,22 @@ export default async function PaymentsSettingsPage({
             </p>
           </div>
         </div>
-        <PayPalSettingsPanel orgId={org.id} initialEmail={paypalEmail} />
+        {canPaypal ? (
+          <PayPalSettingsPanel orgId={org.id} initialEmail={paypalEmail} />
+        ) : (
+          <div className="rounded-xl border border-dashed border-neutral-200 dark:border-neutral-800 p-5 text-center">
+            <p className="text-sm text-neutral-500 max-w-md mx-auto mb-4">
+              PayPal is a Business feature. Stripe card payments are included on every plan —
+              upgrade to Business to also accept PayPal.
+            </p>
+            <Link
+              href="/settings/billing"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-neutral-950 dark:bg-neutral-50 text-white dark:text-neutral-950 text-sm font-medium hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors"
+            >
+              Upgrade to Business
+            </Link>
+          </div>
+        )}
       </div>
 
       <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5 space-y-3">

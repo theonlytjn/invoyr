@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
+import { getOrgPlan } from "@/lib/billing";
+import { canAccess } from "@/config/plans";
 import { getValidToken, getTransactions } from "@/lib/truelayer/client";
 import type { BankConnection } from "@/lib/supabase/types";
 
@@ -10,6 +12,12 @@ export async function POST(
 ) {
   const { id } = await params;
   const org = await requireOrg();
+
+  const plan = await getOrgPlan(org.id);
+  if (!canAccess(plan, "open_banking")) {
+    return NextResponse.json({ error: "Open Banking requires the Pro plan." }, { status: 403 });
+  }
+
   const supabase = await createClient();
 
   // Fetch the connection — ensure it belongs to this org

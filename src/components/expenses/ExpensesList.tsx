@@ -57,9 +57,10 @@ interface Props {
   clients: Pick<Client, "id" | "name" | "company_name">[];
   orgId: string;
   orgCurrency: string;
+  canImportBank?: boolean;
 }
 
-export default function ExpensesList({ initialExpenses, clients, orgId, orgCurrency }: Props) {
+export default function ExpensesList({ initialExpenses, clients, orgId, orgCurrency, canImportBank = false }: Props) {
   const [expenses, setExpenses] = useState<ExpenseWithClient[]>(initialExpenses);
   const [period, setPeriod] = useState("this_month");
   const [category, setCategory] = useState("all");
@@ -156,7 +157,7 @@ export default function ExpensesList({ initialExpenses, clients, orgId, orgCurre
     <div className="space-y-5">
       {/* Header */}
       <div className="flex items-center justify-end gap-2">
-        <BankImportModal onImported={() => fetchExpenses()} />
+        {canImportBank && <BankImportModal onImported={() => fetchExpenses()} />}
         <button
           onClick={() => { setEditing(null); setModalOpen(true); }}
           className="hidden lg:inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-neutral-950 dark:bg-neutral-50 text-white dark:text-neutral-950 text-sm font-medium hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors"

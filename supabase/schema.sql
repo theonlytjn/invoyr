@@ -976,3 +976,18 @@ create policy "Org members can manage bank transactions"
     select 1 from public.org_members
     where org_id = bank_transactions.org_id and user_id = auth.uid()
   ));
+
+-- ----------------------------------------------------------------
+-- Complimentary / free access (founder, friends & family)
+-- Decoupled from Stripe so subscription webhooks can never revoke it.
+-- ----------------------------------------------------------------
+alter table public.organisations add column if not exists comp_plan       text;
+alter table public.organisations add column if not exists comp_reason     text;
+alter table public.organisations add column if not exists comp_expires_at timestamptz;
+
+comment on column public.organisations.comp_plan is
+  'If set (starter|business|pro), overrides subscription and grants that plan for free. Null = billed normally.';
+comment on column public.organisations.comp_reason is
+  'Why this org is comped, e.g. founder, friends_family, partner, beta.';
+comment on column public.organisations.comp_expires_at is
+  'When the comp lapses back to billed. Null = never expires.';

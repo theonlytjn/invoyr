@@ -111,6 +111,9 @@ export interface Organisation {
   portal_tagline: string | null;
   portal_support_email: string | null;
   hide_invoyr_branding: boolean;
+  comp_plan: string | null;
+  comp_reason: string | null;
+  comp_expires_at: string | null;
   created_at: string;
   updated_at: string;
 }

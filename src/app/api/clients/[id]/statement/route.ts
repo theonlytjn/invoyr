@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
+import { orgHasFeature } from "@/lib/billing";
 import { formatDate } from "@/lib/utils";
 import type { Organisation, Client, Invoice } from "@/lib/supabase/types";
 
@@ -29,6 +30,9 @@ export async function GET(
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const org = await requireOrg();
+  if (!(await orgHasFeature(org.id, "client_statements"))) {
+    return NextResponse.json({ error: "Client statements require the Business plan." }, { status: 403 });
+  }
 
   const [{ data: clientData }, { data: invoicesData }] = await Promise.all([
     supabase.from("clients").select("*").eq("id", id).eq("org_id", org.id).single(),
@@ -61,6 +65,7 @@ export async function GET(
     invoices,
     statementDate,
     currency: org.currency ?? "GBP",
+    showInvoyrBranding: !(await orgHasFeature(org.id, "white_label")),
   });
 
   const buffer = await renderToBuffer(element);

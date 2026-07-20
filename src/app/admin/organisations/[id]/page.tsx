@@ -16,10 +16,15 @@ interface OrgDetail {
   created_at: string;
   subscription: { plan: string | null; status: string } | null;
   memberCount: number;
+  comp_plan: string | null;
+  comp_reason: string | null;
+  comp_expires_at: string | null;
 }
 
 const PLANS = ["free", "starter", "pro", "business"];
 const STATUSES = ["active", "trialing", "past_due", "canceled", "incomplete"];
+const COMP_PLANS = ["", "starter", "business", "pro"];
+const COMP_REASONS = ["founder", "friends_family", "partner", "beta", "other"];
 
 export default function AdminOrgDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -33,6 +38,12 @@ export default function AdminOrgDetailPage() {
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
+  const [compPlan, setCompPlan] = useState("");
+  const [compReason, setCompReason] = useState("founder");
+  const [compExpires, setCompExpires] = useState("");
+  const [compSaved, setCompSaved] = useState(false);
+  const [compError, setCompError] = useState<string | null>(null);
+
   useEffect(() => {
     fetch(`/api/admin/organisations/${id}`)
       .then((r) => r.json())
@@ -40,6 +51,9 @@ export default function AdminOrgDetailPage() {
         setOrg(d.org);
         setPlan(d.org?.subscription?.plan ?? "free");
         setStatus(d.org?.subscription?.status ?? "active");
+        setCompPlan(d.org?.comp_plan ?? "");
+        setCompReason(d.org?.comp_reason ?? "founder");
+        setCompExpires(d.org?.comp_expires_at ? String(d.org.comp_expires_at).slice(0, 10) : "");
         setLoading(false);
       });
   }, [id]);
@@ -59,6 +73,38 @@ export default function AdminOrgDetailPage() {
       }
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
+    });
+  }
+
+  function handleSaveComp() {
+    setCompError(null);
+    startTransition(async () => {
+      const res = await fetch(`/api/admin/organisations/${id}/comp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          comp_plan: compPlan || null,
+          comp_reason: compPlan ? compReason : null,
+          comp_expires_at: compPlan && compExpires ? compExpires : null,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setCompError(json.error ?? "Save failed");
+        return;
+      }
+      setOrg((prev) =>
+        prev
+          ? {
+              ...prev,
+              comp_plan: compPlan || null,
+              comp_reason: compPlan ? compReason : null,
+              comp_expires_at: compPlan && compExpires ? compExpires : null,
+            }
+          : prev
+      );
+      setCompSaved(true);
+      setTimeout(() => setCompSaved(false), 2000);
     });
   }
 
@@ -123,6 +169,64 @@ export default function AdminOrgDetailPage() {
           {saved ? "Saved!" : isPending ? "Saving…" : "Save subscription"}
         </button>
         {saveError && <p className="mt-2 text-sm text-red-600">{saveError}</p>}
+      </div>
+
+      <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-6 mb-6">
+        <h2 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-1">Complimentary access</h2>
+        <p className="text-xs text-neutral-500 mb-4">
+          Grants a plan for free, independent of Stripe. Use for your own company and friends &amp; family.
+          Leave the plan as &ldquo;None&rdquo; to bill normally.
+          {org.comp_plan ? (
+            <span className="block mt-1 text-emerald-600 dark:text-emerald-400">
+              Currently comped: {org.comp_plan}
+              {org.comp_reason ? ` · ${org.comp_reason}` : ""}
+              {org.comp_expires_at
+                ? ` · expires ${new Date(org.comp_expires_at).toLocaleDateString("en-GB")}`
+                : " · never expires"}
+            </span>
+          ) : null}
+        </p>
+        <div className="grid grid-cols-3 gap-4 mb-4">
+          <div>
+            <label className="block text-xs text-neutral-400 mb-1.5 uppercase tracking-wider">Comp plan</label>
+            <select
+              value={compPlan}
+              onChange={(e) => setCompPlan(e.target.value)}
+              className="w-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg px-3 py-2 text-sm text-neutral-950 dark:text-neutral-50 focus:outline-none focus:border-neutral-400"
+            >
+              {COMP_PLANS.map((p) => <option key={p || "none"} value={p}>{p || "None"}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs text-neutral-400 mb-1.5 uppercase tracking-wider">Reason</label>
+            <select
+              value={compReason}
+              onChange={(e) => setCompReason(e.target.value)}
+              disabled={!compPlan}
+              className="w-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg px-3 py-2 text-sm text-neutral-950 dark:text-neutral-50 focus:outline-none focus:border-neutral-400 disabled:opacity-50"
+            >
+              {COMP_REASONS.map((r) => <option key={r} value={r}>{r}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs text-neutral-400 mb-1.5 uppercase tracking-wider">Expires</label>
+            <input
+              type="date"
+              value={compExpires}
+              onChange={(e) => setCompExpires(e.target.value)}
+              disabled={!compPlan}
+              className="w-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg px-3 py-2 text-sm text-neutral-950 dark:text-neutral-50 focus:outline-none focus:border-neutral-400 disabled:opacity-50"
+            />
+          </div>
+        </div>
+        <button
+          onClick={handleSaveComp}
+          disabled={isPending}
+          className="px-4 py-2 bg-neutral-950 dark:bg-neutral-50 text-white dark:text-neutral-950 text-sm font-medium rounded-lg hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors disabled:opacity-50"
+        >
+          {compSaved ? "Saved!" : isPending ? "Saving…" : compPlan ? "Save comp access" : "Remove comp access"}
+        </button>
+        {compError && <p className="mt-2 text-sm text-red-600">{compError}</p>}
       </div>
 
       <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-2xl p-6">

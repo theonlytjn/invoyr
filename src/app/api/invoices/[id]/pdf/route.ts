@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { getOrgPlan } from "@/lib/billing";
+import { canAccess } from "@/config/plans";
 import { computeTotals } from "@/lib/invoice-totals";
 import type { Invoice, InvoiceItem, Client, Organisation } from "@/lib/supabase/types";
 
@@ -59,6 +61,7 @@ export async function GET(
     .single();
 
   const watermark = subscription?.status === "trialing" ? "TRIAL" : undefined;
+  const showInvoyrBranding = !canAccess(await getOrgPlan(orgRawObj.id), "white_label");
 
   const logoRawUrl = orgRawObj.logo_url ? orgRawObj.logo_url.split("?")[0] : null;
   const logoDataUrl = logoRawUrl ? await fetchLogoAsDataUrl(logoRawUrl) : null;
@@ -112,6 +115,7 @@ export async function GET(
     org,
     totals: { subtotal: totals.subtotal, vatAmount: totals.vat_amount, discount: totals.discount, total: totals.total, lateFeeAmount: (invoice as Invoice & { late_fee_amount?: number }).late_fee_amount ?? 0 },
     watermark,
+    showInvoyrBranding,
   });
 
   const buffer = await renderToBuffer(element);

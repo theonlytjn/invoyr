@@ -16,4 +16,6 @@ export interface InvoiceTemplateProps {
   totals: ComputedTotals;
   documentType?: "invoice" | "estimate";
   watermark?: string;
+  /** Whether to render the "Powered by Invoyr" badge. Defaults to true; set false for Business+ (white_label). */
+  showInvoyrBranding?: boolean;
 }
