@@ -9,9 +9,9 @@ const NAV = [
 
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex flex-col bg-neutral-950 text-neutral-100">
+    <div className="dark min-h-screen flex flex-col bg-neutral-950 text-neutral-100">
       <header className="sticky top-0 z-30 border-b border-neutral-900/80 bg-neutral-950/70 backdrop-blur">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="max-w-[1440px] mx-auto px-6 lg:px-12 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center" aria-label="Invoyr home">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/main-logo-dark.svg" alt="Invoyr" className="h-6 w-auto" />
@@ -40,7 +40,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
       <main className="flex-1">{children}</main>
 
       <footer className="border-t border-neutral-900">
-        <div className="max-w-6xl mx-auto px-6 py-14 grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div className="max-w-[1440px] mx-auto px-6 lg:px-12 py-14 grid grid-cols-2 md:grid-cols-4 gap-8">
           <div className="col-span-2 md:col-span-1">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/main-logo-dark.svg" alt="Invoyr" className="h-6 w-auto" />
@@ -73,7 +73,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
           </div>
         </div>
         <div className="border-t border-neutral-900">
-          <div className="max-w-6xl mx-auto px-6 py-6 font-mono text-[11px] uppercase tracking-[0.14em] text-neutral-600">
+          <div className="max-w-[1440px] mx-auto px-6 lg:px-12 py-6 font-mono text-[11px] uppercase tracking-[0.14em] text-neutral-600">
             © {new Date().getFullYear()} Invoyr. All rights reserved.
           </div>
         </div>

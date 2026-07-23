@@ -66,7 +66,7 @@ export default function UseCasesPage() {
         </p>
       </section>
 
-      <div className="max-w-6xl mx-auto px-6 pb-8">
+      <div className="max-w-[1440px] mx-auto px-6 lg:px-12 pb-8">
         {USE_CASES.map((useCase, i) => (
           <div key={useCase.role} className="border-t border-neutral-900 py-14 grid md:grid-cols-2 gap-10 items-start">
             <div>

@@ -80,7 +80,7 @@ export default function FeaturesPage() {
         </div>
       </section>
 
-      <div className="max-w-6xl mx-auto px-6 pb-8">
+      <div className="max-w-[1440px] mx-auto px-6 lg:px-12 pb-8">
         {FEATURES.map((group) => (
           <section key={group.category} className="border-t border-neutral-900 py-16">
             <div className="grid md:grid-cols-[0.9fr,2.1fr] gap-x-10 gap-y-8">

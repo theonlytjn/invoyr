@@ -96,7 +96,7 @@ export default function HomePage() {
 
       {/* PROBLEM */}
       <section className="border-t border-neutral-900">
-        <div className="max-w-6xl mx-auto px-6 py-24">
+        <div className="max-w-[1440px] mx-auto px-6 lg:px-12 py-24">
           <div className="max-w-2xl">
             <h2 className="font-serif text-4xl md:text-5xl leading-[1.02] text-neutral-50">
               Chasing invoices is
@@ -118,7 +118,7 @@ export default function HomePage() {
 
       {/* BENEFITS */}
       <section className="border-t border-neutral-900">
-        <div className="max-w-6xl mx-auto px-6 py-24">
+        <div className="max-w-[1440px] mx-auto px-6 lg:px-12 py-24">
           <h2 className="font-serif text-4xl md:text-5xl leading-[1.02] text-neutral-50 max-w-2xl">
             Why businesses get
             <br />
@@ -140,7 +140,7 @@ export default function HomePage() {
 
       {/* FEATURE SPLIT */}
       <section className="border-t border-neutral-900">
-        <div className="max-w-6xl mx-auto px-6 py-24 grid lg:grid-cols-2 gap-14 items-center">
+        <div className="max-w-[1440px] mx-auto px-6 lg:px-12 py-24 grid lg:grid-cols-2 gap-14 items-center">
           <div>
             <h2 className="font-serif text-4xl md:text-5xl leading-[1.02] text-neutral-50">
               A calmer way to
@@ -180,7 +180,7 @@ export default function HomePage() {
 
       {/* INTEGRATIONS */}
       <section className="border-t border-neutral-900">
-        <div className="max-w-6xl mx-auto px-6 py-20">
+        <div className="max-w-[1440px] mx-auto px-6 lg:px-12 py-20">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <h2 className="font-serif text-3xl md:text-4xl text-neutral-50">Works with the tools you already use</h2>
             <p className="text-neutral-500">Get paid and keep the books in sync.</p>
@@ -214,7 +214,7 @@ export default function HomePage() {
 
       {/* PRICING */}
       <section className="border-t border-neutral-900">
-        <div className="max-w-6xl mx-auto px-6 py-24">
+        <div className="max-w-[1440px] mx-auto px-6 lg:px-12 py-24">
           <div className="max-w-2xl">
             <h2 className="font-serif text-4xl md:text-5xl leading-[1.05] text-neutral-50">
               One price a year.
