@@ -6,7 +6,6 @@ interface Props {
   token: string;
   currency: string;
   accentColor: string;
-  onSuccess: () => void;
 }
 
 declare global {
@@ -16,7 +15,7 @@ declare global {
   }
 }
 
-export default function PayPalButton({ token, currency, accentColor, onSuccess }: Props) {
+export default function PayPalButton({ token, currency, accentColor }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -66,7 +65,7 @@ export default function PayPalButton({ token, currency, accentColor, onSuccess }
               setError(result.error ?? "Payment capture failed.");
               return;
             }
-            onSuccess();
+            window.location.href = `/pay/${token}?paid=1`;
           },
           onError: () => {
             setError("PayPal encountered an error. Please try again.");
@@ -93,7 +92,7 @@ export default function PayPalButton({ token, currency, accentColor, onSuccess }
       setLoading(false);
     });
     document.body.appendChild(script);
-  }, [token, currency, onSuccess]);
+  }, [token, currency]);
 
   return (
     <div>

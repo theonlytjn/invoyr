@@ -158,7 +158,6 @@ export default async function PayPage({ params, searchParams }: Props) {
                     token={token}
                     currency={invoice.currency}
                     accentColor={accentColor}
-                    onSuccess={() => { window.location.href = `/pay/${token}?paid=1`; }}
                   />
                 </div>
               )}
