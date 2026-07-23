@@ -27,7 +27,7 @@ export default async function PayPage({ params, searchParams }: Props) {
 
   const { data: orgRow } = await supabase
     .from("organisations")
-    .select("name, logo_url, accent_color, email, bank_account_name, bank_name, bank_account_number, bank_sort_code, bank_iban, bank_bic, paypal_email, portal_tagline, portal_support_email, hide_invoyr_branding")
+    .select("name, logo_url, accent_color, email, stripe_account_id, bank_account_name, bank_name, bank_account_number, bank_sort_code, bank_iban, bank_bic, paypal_email, portal_tagline, portal_support_email, hide_invoyr_branding")
     .eq("id", invoice.org_id)
     .single();
 
@@ -147,7 +147,9 @@ export default async function PayPage({ params, searchParams }: Props) {
                 </div>
               </div>
 
-              <PayButton token={token} accentColor={accentColor} />
+              {orgRow?.stripe_account_id && amountDue > 0 && (
+                <PayButton token={token} accentColor={accentColor} />
+              )}
 
               {canPaypal && orgRow?.paypal_email && amountDue > 0 && (
                 <div className="border-t border-gray-100 pt-4">
