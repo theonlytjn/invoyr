@@ -30,9 +30,9 @@
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
 
-  /* Brand — Invoyr orange (from the logo) */
-  --brand: #f24e23;
-  --brand-foreground: #ffffff;
+  /* Marketing accent — green. (The Invoyr logo itself is orange: #f24e23.) */
+  --brand: #34d399;
+  --brand-foreground: #052e16;
 
   --border: var(--n-200);
   --input: var(--n-200);

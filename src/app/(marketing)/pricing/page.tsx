@@ -94,7 +94,7 @@ export default function PricingPage() {
 
   return (
     <div className="bg-neutral-950 text-neutral-100">
-      <div className="max-w-5xl mx-auto px-6 py-24 sm:py-32">
+      <div className="max-w-[1600px] mx-auto px-6 lg:px-12 py-24 sm:py-32">
         {/* Header */}
         <div className="max-w-2xl">
           <h1 className="font-serif text-4xl sm:text-5xl leading-[1.05] tracking-tight text-neutral-50">
@@ -147,7 +147,7 @@ export default function PricingPage() {
         <div className="mt-20">
           <h3 className="font-serif text-2xl text-neutral-50 mb-8">What each plan includes</h3>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px] text-sm border-separate border-spacing-0">
+            <table className="w-full min-w-[640px] text-base border-separate border-spacing-0">
               <thead>
                 <tr>
                   <th className="text-left font-normal text-neutral-500 pb-4 w-2/5">Feature</th>

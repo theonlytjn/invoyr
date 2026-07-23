@@ -10,7 +10,7 @@ const KICKER = "font-mono text-xs uppercase tracking-[0.14em] text-neutral-500";
 
 export default function ContactPage() {
   return (
-    <div className="max-w-2xl mx-auto px-6 pt-24 pb-24">
+    <div className="max-w-[1600px] mx-auto px-6 lg:px-12 pt-24 pb-24">
       <p className={`${KICKER} mb-8`}>Contact</p>
       <h1 className="font-serif text-[clamp(2.4rem,5.5vw,4rem)] leading-[0.98] tracking-tight text-neutral-50">
         Get in touch
