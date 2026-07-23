@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "Why we built Invoyr and what we believe about running a business.",
 };
 
-const KICKER = "font-mono text-[11px] uppercase tracking-[0.14em] text-neutral-500";
+const KICKER = "font-mono text-xs uppercase tracking-[0.14em] text-neutral-500";
 
 const STATS = [
   { stat: "7 days", label: "Free trial, no card required" },
@@ -31,7 +31,7 @@ export default function AboutPage() {
         we wished we had
       </h1>
 
-      <div className="mt-10 space-y-5 text-lg text-neutral-400 leading-relaxed">
+      <div className="mt-10 space-y-5 text-xl text-neutral-400 leading-relaxed">
         <p>
           Every freelancer and small agency has been there: sending a Word document invoice,
           waiting weeks to be paid, and manually chasing clients via email. It&apos;s slow,
@@ -53,7 +53,7 @@ export default function AboutPage() {
         {STATS.map((item) => (
           <div key={item.label} className="px-6 py-8">
             <p className="font-serif text-4xl text-neutral-50">{item.stat}</p>
-            <p className="mt-2 text-sm text-neutral-500">{item.label}</p>
+            <p className="mt-2 text-base text-neutral-500">{item.label}</p>
           </div>
         ))}
       </div>
@@ -63,8 +63,8 @@ export default function AboutPage() {
         <ul className="divide-y divide-neutral-900 border-t border-neutral-900">
           {BELIEFS.map((item) => (
             <li key={item.heading} className="py-6 flex gap-4">
-              <span className="mt-2.5 w-1.5 h-1.5 rounded-full bg-brand shrink-0" />
-              <div>
+              <span className="mt-3 w-1.5 h-1.5 rounded-full bg-brand shrink-0" />
+              <div className="text-lg">
                 <span className="text-neutral-100">{item.heading} — </span>
                 <span className="text-neutral-400">{item.body}</span>
               </div>

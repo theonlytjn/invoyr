@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "Everything you need to invoice clients, collect payments, and run your business.",
 };
 
-const KICKER = "font-mono text-[11px] uppercase tracking-[0.14em] text-neutral-500";
+const KICKER = "font-mono text-xs uppercase tracking-[0.14em] text-neutral-500";
 
 const FEATURES = [
   {
@@ -66,7 +66,7 @@ export default function FeaturesPage() {
         <h1 className="font-serif text-[clamp(2.6rem,6vw,5rem)] leading-[0.95] tracking-tight text-neutral-50">
           Built for the way you work
         </h1>
-        <p className="mt-6 mx-auto max-w-2xl text-lg text-neutral-400 leading-relaxed">
+        <p className="mt-6 mx-auto max-w-2xl text-xl text-neutral-400 leading-relaxed">
           Invoyr gives freelancers and service businesses everything they need to invoice professionally
           and get paid fast — without the bloat of enterprise accounting software.
         </p>
@@ -88,8 +88,8 @@ export default function FeaturesPage() {
               <div className="grid sm:grid-cols-2 gap-x-10 gap-y-8">
                 {group.items.map((item) => (
                   <div key={item.title} className="border-t border-neutral-800 pt-5">
-                    <h3 className="text-lg text-neutral-100">{item.title}</h3>
-                    <p className="mt-1.5 text-sm text-neutral-500 leading-relaxed">{item.desc}</p>
+                    <h3 className="text-xl text-neutral-100">{item.title}</h3>
+                    <p className="mt-1.5 text-base text-neutral-500 leading-relaxed">{item.desc}</p>
                   </div>
                 ))}
               </div>

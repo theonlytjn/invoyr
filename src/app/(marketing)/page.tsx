@@ -7,7 +7,8 @@ export const metadata: Metadata = {
     "Send professional invoices, take card payments with Stripe, and let reminders chase for you. Invoicing for freelancers, agencies and service businesses.",
 };
 
-const KICKER = "font-mono text-[11px] uppercase tracking-[0.14em] text-neutral-500";
+const KICKER = "font-mono text-xs uppercase tracking-[0.14em] text-neutral-500";
+const CONTAINER = "max-w-[1440px] mx-auto px-6 lg:px-12";
 
 const PROBLEMS = [
   { n: "01 — Late payments", body: "Invoices sit unpaid for weeks while your cash flow takes the hit." },
@@ -28,7 +29,12 @@ const FEATURES = [
   { title: "Reminders & reporting", body: "Auto-chases overdue invoices; ageing and exports keep the books tidy." },
 ];
 
-const INTEGRATIONS = ["Stripe", "PayPal", "QuickBooks", "Xero"];
+const INTEGRATIONS = [
+  { name: "Stripe", src: "/stripe.svg" },
+  { name: "PayPal", src: "/paypal.svg" },
+  { name: "QuickBooks", src: "/quickbooks.svg" },
+  { name: "Xero", src: "/xero.svg" },
+];
 
 const PLANS = [
   {
@@ -70,24 +76,24 @@ export default function HomePage() {
             <br />
             <span className="text-neutral-500">Invoicing that runs itself.</span>
           </h1>
-          <p className="reveal mt-8 mx-auto max-w-xl text-lg text-neutral-400 leading-relaxed">
+          <p className="reveal mt-8 mx-auto max-w-xl text-xl text-neutral-400 leading-relaxed">
             Send invoices that look the part, take card payments with Stripe, and let reminders chase for you — so you get paid without the admin.
           </p>
           <div className="reveal mt-10 flex flex-wrap justify-center gap-4">
-            <Link href="/signup" className="px-5 py-3 rounded-xl bg-neutral-50 text-neutral-950 font-medium hover:bg-white transition-colors">
+            <Link href="/signup" className="px-6 py-3.5 rounded-xl bg-neutral-50 text-neutral-950 font-medium text-base hover:bg-white transition-colors">
               Start free trial
             </Link>
-            <Link href="/pricing" className="px-5 py-3 rounded-xl border border-neutral-800 text-neutral-200 hover:bg-neutral-900 transition-colors">
+            <Link href="/pricing" className="px-6 py-3.5 rounded-xl border border-neutral-800 text-neutral-200 text-base hover:bg-neutral-900 transition-colors">
               View pricing
             </Link>
           </div>
-          <div className="reveal mt-6 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-neutral-500">
-            <span className="inline-flex items-center gap-2"><span className="w-1 h-1 rounded-full bg-brand" />No credit card needed</span>
-            <span className="inline-flex items-center gap-2"><span className="w-1 h-1 rounded-full bg-brand" />7-day free trial</span>
+          <div className="reveal mt-6 flex flex-wrap justify-center gap-x-6 gap-y-2 text-base text-neutral-500">
+            <span className="inline-flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-brand" />No credit card needed</span>
+            <span className="inline-flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-brand" />7-day free trial</span>
           </div>
           <div className="reveal mt-16">
             <p className={KICKER}>Trusted by freelancers, agencies &amp; service businesses</p>
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-10 gap-y-3 text-neutral-600 font-serif text-xl">
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-10 gap-y-3 text-neutral-600 font-serif text-2xl">
               <span>Northwind</span><span>Orbit&amp;Co</span><span>Kelu Studio</span><span>Fern</span><span>Maple Row</span><span>Vecta</span>
             </div>
           </div>
@@ -96,20 +102,20 @@ export default function HomePage() {
 
       {/* PROBLEM */}
       <section className="border-t border-neutral-900">
-        <div className="max-w-[1440px] mx-auto px-6 lg:px-12 py-24">
+        <div className={`${CONTAINER} py-24`}>
           <div className="max-w-2xl">
             <h2 className="font-serif text-4xl md:text-5xl leading-[1.02] text-neutral-50">
               Chasing invoices is
               <br />
               <span className="text-neutral-600">killing your cash flow.</span>
             </h2>
-            <p className="mt-5 text-neutral-400">Late payments, manual admin and awkward follow-ups. Invoyr takes all three off your plate.</p>
+            <p className="mt-5 text-lg text-neutral-400">Late payments, manual admin and awkward follow-ups. Invoyr takes all three off your plate.</p>
           </div>
           <div className="mt-14 grid md:grid-cols-3 gap-x-10 gap-y-10">
             {PROBLEMS.map((p) => (
               <div key={p.n} className="border-t border-neutral-800 pt-6">
                 <span className={KICKER}>{p.n}</span>
-                <p className="mt-3 text-neutral-400 leading-relaxed">{p.body}</p>
+                <p className="mt-3 text-lg text-neutral-400 leading-relaxed">{p.body}</p>
               </div>
             ))}
           </div>
@@ -118,7 +124,7 @@ export default function HomePage() {
 
       {/* BENEFITS */}
       <section className="border-t border-neutral-900">
-        <div className="max-w-[1440px] mx-auto px-6 lg:px-12 py-24">
+        <div className={`${CONTAINER} py-24`}>
           <h2 className="font-serif text-4xl md:text-5xl leading-[1.02] text-neutral-50 max-w-2xl">
             Why businesses get
             <br />
@@ -130,7 +136,7 @@ export default function HomePage() {
                 <span className="font-serif text-3xl text-neutral-600 leading-none pt-1">{b.n}</span>
                 <div>
                   <h3 className="font-serif text-2xl text-neutral-50">{b.title}</h3>
-                  <p className="mt-2 text-neutral-400 leading-relaxed">{b.body}</p>
+                  <p className="mt-2 text-lg text-neutral-400 leading-relaxed">{b.body}</p>
                 </div>
               </div>
             ))}
@@ -140,19 +146,19 @@ export default function HomePage() {
 
       {/* FEATURE SPLIT */}
       <section className="border-t border-neutral-900">
-        <div className="max-w-[1440px] mx-auto px-6 lg:px-12 py-24 grid lg:grid-cols-2 gap-14 items-center">
+        <div className={`${CONTAINER} py-24 grid lg:grid-cols-2 gap-14 items-center`}>
           <div>
             <h2 className="font-serif text-4xl md:text-5xl leading-[1.02] text-neutral-50">
               A calmer way to
               <br />
               run your money.
             </h2>
-            <p className="mt-5 text-neutral-400 max-w-md">Invoices, payments and reminders — all in one place, all working while you don’t.</p>
+            <p className="mt-5 text-lg text-neutral-400 max-w-md">Invoices, payments and reminders — all in one place, all working while you don’t.</p>
             <div className="mt-10 divide-y divide-neutral-900 border-t border-neutral-900">
               {FEATURES.map((f) => (
                 <div key={f.title} className="py-5">
-                  <h3 className="text-lg text-neutral-100">{f.title}</h3>
-                  <p className="mt-1 text-neutral-500">{f.body}</p>
+                  <h3 className="text-xl text-neutral-100">{f.title}</h3>
+                  <p className="mt-1.5 text-lg text-neutral-500">{f.body}</p>
                 </div>
               ))}
             </div>
@@ -169,7 +175,7 @@ export default function HomePage() {
               <div className="bg-neutral-950 p-4"><p className={KICKER}>Outstanding</p><p className="font-serif text-2xl text-neutral-50 mt-1">£3,600</p></div>
               <div className="bg-neutral-950 p-4"><p className={KICKER}>Overdue</p><p className="font-serif text-2xl text-red-400 mt-1">£420</p></div>
             </div>
-            <div className="px-6 pb-6 pt-4 space-y-2 text-sm">
+            <div className="px-6 pb-6 pt-4 space-y-2 text-base">
               <div className="flex items-center justify-between py-2 border-b border-neutral-900"><span className="text-neutral-300">INV-0042 · Northwind</span><span className="font-mono text-xs text-emerald-500">PAID</span></div>
               <div className="flex items-center justify-between py-2 border-b border-neutral-900"><span className="text-neutral-300">INV-0041 · Orbit &amp; Co</span><span className="font-mono text-xs text-emerald-500">PAID</span></div>
               <div className="flex items-center justify-between py-2"><span className="text-neutral-300">INV-0040 · Fern</span><span className="font-mono text-xs text-neutral-500">SENT</span></div>
@@ -180,16 +186,20 @@ export default function HomePage() {
 
       {/* INTEGRATIONS */}
       <section className="border-t border-neutral-900">
-        <div className="max-w-[1440px] mx-auto px-6 lg:px-12 py-20">
+        <div className={`${CONTAINER} py-20`}>
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <h2 className="font-serif text-3xl md:text-4xl text-neutral-50">Works with the tools you already use</h2>
-            <p className="text-neutral-500">Get paid and keep the books in sync.</p>
+            <p className="text-lg text-neutral-500">Get paid and keep the books in sync.</p>
           </div>
           <div className="mt-10 grid grid-cols-2 md:grid-cols-4 divide-x divide-neutral-900 border-y border-neutral-900">
-            {INTEGRATIONS.map((name, i) => (
-              <div key={name} className="px-6 py-8">
+            {INTEGRATIONS.map((it, i) => (
+              <div key={it.name} className="px-6 py-8">
                 <span className={KICKER}>/{String(i + 1).padStart(2, "0")}</span>
-                <p className="font-serif text-2xl text-neutral-100 mt-3">{name}</p>
+                <div className="mt-5 flex items-center gap-3">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={it.src} alt={it.name} className="h-8 w-8 object-contain" />
+                  <span className="font-serif text-2xl text-neutral-100">{it.name}</span>
+                </div>
               </div>
             ))}
           </div>
@@ -203,10 +213,10 @@ export default function HomePage() {
             “Invoyr paid for itself in the first week. Invoices go out in minutes and clients actually pay on time now.”
           </p>
           <div className="mt-8 flex items-center justify-center gap-3">
-            <span className="w-9 h-9 rounded-full bg-neutral-800" />
-            <div className="text-left text-sm">
+            <span className="w-10 h-10 rounded-full bg-neutral-800" />
+            <div className="text-left">
               <p className="text-neutral-200">Placeholder Name</p>
-              <p className="text-neutral-500">Founder, Placeholder Studio</p>
+              <p className="text-sm text-neutral-500">Founder, Placeholder Studio</p>
             </div>
           </div>
         </div>
@@ -214,35 +224,35 @@ export default function HomePage() {
 
       {/* PRICING */}
       <section className="border-t border-neutral-900">
-        <div className="max-w-[1440px] mx-auto px-6 lg:px-12 py-24">
+        <div className={`${CONTAINER} py-24`}>
           <div className="max-w-2xl">
             <h2 className="font-serif text-4xl md:text-5xl leading-[1.05] text-neutral-50">
               One price a year.
               <br />
               <span className="text-neutral-500">No per-invoice fees, ever.</span>
             </h2>
-            <p className="mt-5 text-neutral-400">Every plan is billed annually and includes a 7-day free trial — no card required.</p>
+            <p className="mt-5 text-lg text-neutral-400">Every plan is billed annually and includes a 7-day free trial — no card required.</p>
           </div>
           <div className="mt-14 grid md:grid-cols-3 gap-px bg-neutral-800/60 border border-neutral-800/60 rounded-2xl overflow-hidden">
             {PLANS.map((plan) => (
               <div key={plan.name} className={`p-8 flex flex-col ${plan.popular ? "bg-neutral-900" : "bg-neutral-950"}`}>
                 <div className="flex items-baseline justify-between">
                   <h3 className="font-serif text-2xl text-neutral-50">{plan.name}</h3>
-                  {plan.popular && <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-brand">Popular</span>}
+                  {plan.popular && <span className="font-mono text-xs uppercase tracking-[0.14em] text-brand">Popular</span>}
                 </div>
                 <div className="mt-5 flex items-baseline gap-1">
-                  <span className="font-serif text-4xl text-neutral-50">{plan.price}</span>
-                  <span className="text-sm text-neutral-500">/year</span>
+                  <span className="font-serif text-5xl text-neutral-50">{plan.price}</span>
+                  <span className="text-base text-neutral-500">/year</span>
                 </div>
-                <p className="mt-1 text-sm text-neutral-500">{plan.users}</p>
-                <ul className="mt-7 space-y-2.5 text-sm text-neutral-300 flex-1">
+                <p className="mt-1 text-base text-neutral-500">{plan.users}</p>
+                <ul className="mt-7 space-y-3 text-base text-neutral-300 flex-1">
                   {plan.features.map((f) => (
                     <li key={f} className="flex gap-2.5"><span className="text-brand" aria-hidden>✓</span>{f}</li>
                   ))}
                 </ul>
                 <Link
                   href="/signup"
-                  className={`mt-8 block text-center py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                  className={`mt-8 block text-center py-3 rounded-lg text-base font-medium transition-colors ${
                     plan.popular ? "bg-neutral-50 text-neutral-950 hover:bg-white" : "border border-neutral-700 text-neutral-100 hover:bg-neutral-900"
                   }`}
                 >
@@ -261,11 +271,11 @@ export default function HomePage() {
           <div className="mt-12 divide-y divide-neutral-900 border-y border-neutral-900">
             {FAQS.map((item) => (
               <details key={item.q} className="py-5 group">
-                <summary className="flex items-center justify-between cursor-pointer list-none text-neutral-100">
+                <summary className="flex items-center justify-between cursor-pointer list-none text-lg text-neutral-100">
                   <span>{item.q}</span>
                   <span className="text-neutral-600 transition-transform duration-200 group-open:rotate-45">+</span>
                 </summary>
-                <p className="mt-3 text-neutral-500">{item.a}</p>
+                <p className="mt-3 text-base text-neutral-500">{item.a}</p>
               </details>
             ))}
           </div>
@@ -280,7 +290,7 @@ export default function HomePage() {
             <br />
             faster today.
           </h2>
-          <Link href="/signup" className="mt-10 inline-block px-6 py-3.5 rounded-xl bg-neutral-50 text-neutral-950 font-medium hover:bg-white transition-colors">
+          <Link href="/signup" className="mt-10 inline-block px-6 py-3.5 rounded-xl bg-neutral-50 text-neutral-950 font-medium text-base hover:bg-white transition-colors">
             Start your free trial
           </Link>
           <p className={`mt-4 ${KICKER}`}>7-day free trial · no credit card required</p>

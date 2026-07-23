@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "How freelancers, agencies, and service businesses use Invoyr to get paid faster.",
 };
 
-const KICKER = "font-mono text-[11px] uppercase tracking-[0.14em] text-neutral-500";
+const KICKER = "font-mono text-xs uppercase tracking-[0.14em] text-neutral-500";
 
 const USE_CASES = [
   {
@@ -61,7 +61,7 @@ export default function UseCasesPage() {
           <br />
           invoices for a living
         </h1>
-        <p className="mt-6 mx-auto max-w-2xl text-lg text-neutral-400 leading-relaxed">
+        <p className="mt-6 mx-auto max-w-2xl text-xl text-neutral-400 leading-relaxed">
           Whether you&apos;re a solo freelancer or running a small agency, Invoyr adapts to how you work.
         </p>
       </section>
@@ -72,11 +72,11 @@ export default function UseCasesPage() {
             <div>
               <span className={KICKER}>{`0${i + 1}`}</span>
               <h2 className="mt-3 font-serif text-3xl text-neutral-50">{useCase.role}</h2>
-              <p className="mt-4 text-neutral-400 leading-relaxed max-w-md">{useCase.description}</p>
+              <p className="mt-4 text-lg text-neutral-400 leading-relaxed max-w-md">{useCase.description}</p>
             </div>
             <ul className="space-y-4 md:pt-10">
               {useCase.benefits.map((b) => (
-                <li key={b} className="flex items-start gap-3 text-neutral-300">
+                <li key={b} className="flex items-start gap-3 text-lg text-neutral-300">
                   <span className="text-brand mt-0.5" aria-hidden>✓</span>
                   <span>{b}</span>
                 </li>

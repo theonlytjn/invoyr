@@ -3,8 +3,8 @@
 import { useState } from "react";
 
 const inputCls =
-  "w-full rounded-lg bg-neutral-900 border border-neutral-800 px-3.5 py-2.5 text-sm text-neutral-100 placeholder:text-neutral-600 outline-none transition-colors focus:border-brand focus:ring-1 focus:ring-brand";
-const labelCls = "block text-sm text-neutral-300 mb-1.5";
+  "w-full rounded-lg bg-neutral-900 border border-neutral-800 px-3.5 py-3 text-base text-neutral-100 placeholder:text-neutral-600 outline-none transition-colors focus:border-brand focus:ring-1 focus:ring-brand";
+const labelCls = "block text-base text-neutral-300 mb-1.5";
 
 export default function ContactForm() {
   const [name, setName] = useState("");
@@ -37,8 +37,8 @@ export default function ContactForm() {
         <div className="w-11 h-11 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
           <span className="text-emerald-400 text-lg" aria-hidden>✓</span>
         </div>
-        <p className="text-neutral-100">Message sent</p>
-        <p className="text-sm text-neutral-500 mt-1">We&apos;ll reply within one business day.</p>
+        <p className="text-lg text-neutral-100">Message sent</p>
+        <p className="text-base text-neutral-500 mt-1">We&apos;ll reply within one business day.</p>
       </div>
     );
   }
@@ -60,12 +60,12 @@ export default function ContactForm() {
         <textarea id="message" rows={5} className={`${inputCls} resize-y`} value={message} onChange={(e) => setMessage(e.target.value)} required />
       </div>
       {status === "error" && (
-        <p className="text-sm text-red-400">Something went wrong. Please email us directly at hello@invoyr.io.</p>
+        <p className="text-base text-red-400">Something went wrong. Please email us directly at hello@invoyr.io.</p>
       )}
       <button
         type="submit"
         disabled={status === "sending"}
-        className="px-5 py-2.5 rounded-lg bg-neutral-50 text-neutral-950 text-sm font-medium hover:bg-white transition-colors disabled:opacity-60"
+        className="px-5 py-3 rounded-lg bg-neutral-50 text-neutral-950 text-base font-medium hover:bg-white transition-colors disabled:opacity-60"
       >
         {status === "sending" ? "Sending…" : "Send message"}
       </button>
