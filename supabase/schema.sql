@@ -290,7 +290,7 @@ create table if not exists public.estimates (
   total                 numeric(12,2) not null default 0,
   notes                 text,
   terms                 text,
-  public_token          text unique default encode(gen_random_bytes(24), 'base64url'),
+  public_token          text unique default translate(encode(gen_random_bytes(24), 'base64'), '+/=', '-_'),
   sent_at               timestamptz,
   approved_at           timestamptz,
   rejected_at           timestamptz,
@@ -669,7 +669,7 @@ alter table public.invoices add column if not exists discount  numeric(12,2) not
 alter table public.organisations add column if not exists next_estimate_number integer not null default 1;
 
 -- clients: portal token (backfills existing rows automatically)
-alter table public.clients add column if not exists portal_token text unique default encode(gen_random_bytes(24), 'base64url');
+alter table public.clients add column if not exists portal_token text unique default translate(encode(gen_random_bytes(24), 'base64'), '+/=', '-_');
 
 -- organisations: late fee defaults
 alter table public.organisations add column if not exists late_fee_type       text not null default 'none' check (late_fee_type in ('none','percentage','fixed'));
