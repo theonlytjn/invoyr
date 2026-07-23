@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 };
 
 const KICKER = "font-mono text-xs uppercase tracking-[0.14em] text-neutral-500";
-const CONTAINER = "max-w-[1440px] mx-auto px-6 lg:px-12";
+const CONTAINER = "max-w-[1600px] mx-auto px-6 lg:px-12";
 
 const PROBLEMS = [
   { n: "01 — Late payments", body: "Invoices sit unpaid for weeks while your cash flow takes the hit." },
@@ -193,13 +193,13 @@ export default function HomePage() {
           </div>
           <div className="mt-10 grid grid-cols-2 md:grid-cols-4 divide-x divide-neutral-900 border-y border-neutral-900">
             {INTEGRATIONS.map((it, i) => (
-              <div key={it.name} className="px-6 py-8">
-                <span className={KICKER}>/{String(i + 1).padStart(2, "0")}</span>
-                <div className="mt-5 flex items-center gap-3">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={it.src} alt={it.name} className="h-8 w-8 object-contain" />
-                  <span className="font-serif text-2xl text-neutral-100">{it.name}</span>
+              <div key={it.name} className="flex items-center justify-between gap-4 px-8 py-14">
+                <div>
+                  <span className={KICKER}>/{String(i + 1).padStart(2, "0")}</span>
+                  <p className="mt-3 font-serif text-2xl text-neutral-100">{it.name}</p>
                 </div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={it.src} alt={it.name} className="h-20 md:h-28 w-auto object-contain shrink-0" />
               </div>
             ))}
           </div>
