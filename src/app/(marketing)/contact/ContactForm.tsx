@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+
+const inputCls =
+  "w-full rounded-lg bg-neutral-900 border border-neutral-800 px-3.5 py-2.5 text-sm text-neutral-100 placeholder:text-neutral-600 outline-none transition-colors focus:border-brand focus:ring-1 focus:ring-brand";
+const labelCls = "block text-sm text-neutral-300 mb-1.5";
 
 export default function ContactForm() {
   const [name, setName] = useState("");
@@ -33,12 +33,12 @@ export default function ContactForm() {
 
   if (status === "sent") {
     return (
-      <div className="py-8 text-center">
-        <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-          <span className="text-green-600 text-lg">✓</span>
+      <div className="py-10 text-center">
+        <div className="w-11 h-11 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+          <span className="text-emerald-400 text-lg" aria-hidden>✓</span>
         </div>
-        <p className="font-semibold text-gray-900">Message sent</p>
-        <p className="text-sm text-gray-500 mt-1">We&apos;ll reply within one business day.</p>
+        <p className="text-neutral-100">Message sent</p>
+        <p className="text-sm text-neutral-500 mt-1">We&apos;ll reply within one business day.</p>
       </div>
     );
   }
@@ -46,42 +46,29 @@ export default function ContactForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="space-y-1.5">
-          <Label htmlFor="name">Your name</Label>
-          <Input
-            id="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
+        <div>
+          <label htmlFor="name" className={labelCls}>Your name</label>
+          <input id="name" className={inputCls} value={name} onChange={(e) => setName(e.target.value)} required />
         </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="email">Email address</Label>
-          <Input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+        <div>
+          <label htmlFor="email" className={labelCls}>Email address</label>
+          <input id="email" type="email" className={inputCls} value={email} onChange={(e) => setEmail(e.target.value)} required />
         </div>
       </div>
-      <div className="space-y-1.5">
-        <Label htmlFor="message">Message</Label>
-        <Textarea
-          id="message"
-          rows={5}
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          required
-        />
+      <div>
+        <label htmlFor="message" className={labelCls}>Message</label>
+        <textarea id="message" rows={5} className={`${inputCls} resize-y`} value={message} onChange={(e) => setMessage(e.target.value)} required />
       </div>
       {status === "error" && (
-        <p className="text-sm text-red-600">Something went wrong. Please email us directly at hello@invoyr.io.</p>
+        <p className="text-sm text-red-400">Something went wrong. Please email us directly at hello@invoyr.io.</p>
       )}
-      <Button type="submit" disabled={status === "sending"}>
+      <button
+        type="submit"
+        disabled={status === "sending"}
+        className="px-5 py-2.5 rounded-lg bg-neutral-50 text-neutral-950 text-sm font-medium hover:bg-white transition-colors disabled:opacity-60"
+      >
         {status === "sending" ? "Sending…" : "Send message"}
-      </Button>
+      </button>
     </form>
   );
 }

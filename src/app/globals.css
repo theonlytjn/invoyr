@@ -29,6 +29,11 @@
   --accent-foreground: var(--n-900);
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
+
+  /* Brand — Invoyr orange (from the logo) */
+  --brand: #f24e23;
+  --brand-foreground: #ffffff;
+
   --border: var(--n-200);
   --input: var(--n-200);
   --ring: var(--n-950);
@@ -60,6 +65,8 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -93,6 +100,16 @@
 
 * {
   border-color: var(--border);
+}
+
+/* Marketing entrance motion */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: none; }
+}
+.reveal { animation: rise 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { animation: none; }
 }
 
 body {

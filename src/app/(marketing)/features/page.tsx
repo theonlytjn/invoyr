@@ -6,6 +6,8 @@ export const metadata: Metadata = {
   description: "Everything you need to invoice clients, collect payments, and run your business.",
 };
 
+const KICKER = "font-mono text-[11px] uppercase tracking-[0.14em] text-neutral-500";
+
 const FEATURES = [
   {
     category: "Invoicing",
@@ -59,52 +61,47 @@ const FEATURES = [
 export default function FeaturesPage() {
   return (
     <div>
-      <section className="max-w-4xl mx-auto px-6 py-20 text-center">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
+      <section className="max-w-4xl mx-auto px-6 pt-24 pb-16 text-center">
+        <p className={`${KICKER} mb-8`}>Features</p>
+        <h1 className="font-serif text-[clamp(2.6rem,6vw,5rem)] leading-[0.95] tracking-tight text-neutral-50">
           Built for the way you work
         </h1>
-        <p className="text-lg text-gray-500 max-w-2xl mx-auto">
+        <p className="mt-6 mx-auto max-w-2xl text-lg text-neutral-400 leading-relaxed">
           Invoyr gives freelancers and service businesses everything they need to invoice professionally
           and get paid fast — without the bloat of enterprise accounting software.
         </p>
-        <div className="mt-8 flex items-center justify-center gap-4">
-          <Link
-            href="/signup"
-            className="px-6 py-3 bg-gray-900 text-white font-medium rounded-xl hover:bg-gray-700 transition-colors"
-          >
+        <div className="mt-9 flex items-center justify-center gap-4">
+          <Link href="/signup" className="px-5 py-3 rounded-xl bg-neutral-50 text-neutral-950 font-medium hover:bg-white transition-colors">
             Start free trial
           </Link>
-          <Link href="/pricing" className="text-sm text-gray-500 hover:text-gray-900">
+          <Link href="/pricing" className="text-sm text-neutral-400 hover:text-neutral-100 transition-colors">
             View pricing →
           </Link>
         </div>
       </section>
 
-      <div className="max-w-5xl mx-auto px-6 pb-24 space-y-14">
+      <div className="max-w-6xl mx-auto px-6 pb-8">
         {FEATURES.map((group) => (
-          <section key={group.category}>
-            <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-5">
-              {group.category}
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {group.items.map((item) => (
-                <div key={item.title} className="bg-white border border-gray-200 rounded-xl p-5">
-                  <h3 className="font-semibold text-gray-900 mb-1">{item.title}</h3>
-                  <p className="text-sm text-gray-500 leading-relaxed">{item.desc}</p>
-                </div>
-              ))}
+          <section key={group.category} className="border-t border-neutral-900 py-16">
+            <div className="grid md:grid-cols-[0.9fr,2.1fr] gap-x-10 gap-y-8">
+              <h2 className={`${KICKER} md:pt-1`}>{group.category}</h2>
+              <div className="grid sm:grid-cols-2 gap-x-10 gap-y-8">
+                {group.items.map((item) => (
+                  <div key={item.title} className="border-t border-neutral-800 pt-5">
+                    <h3 className="text-lg text-neutral-100">{item.title}</h3>
+                    <p className="mt-1.5 text-sm text-neutral-500 leading-relaxed">{item.desc}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </section>
         ))}
       </div>
 
-      <section className="bg-gray-50 border-t border-gray-100 py-20 text-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-3">Everything included from day one</h2>
-        <p className="text-gray-500 mb-8">7-day free trial. No credit card required.</p>
-        <Link
-          href="/signup"
-          className="inline-block px-8 py-3.5 bg-gray-900 text-white font-medium rounded-xl hover:bg-gray-700 transition-colors"
-        >
+      <section className="border-t border-neutral-900 py-24 text-center">
+        <h2 className="font-serif text-4xl md:text-5xl text-neutral-50">Everything included from day one</h2>
+        <p className="mt-4 text-neutral-400">7-day free trial. No credit card required.</p>
+        <Link href="/signup" className="mt-9 inline-block px-6 py-3.5 rounded-xl bg-neutral-50 text-neutral-950 font-medium hover:bg-white transition-colors">
           Get started free →
         </Link>
       </section>

@@ -1,44 +1,80 @@
 import Link from "next/link";
 
+const NAV = [
+  { href: "/features", label: "Features" },
+  { href: "/use-cases", label: "Use cases" },
+  { href: "/pricing", label: "Pricing" },
+  { href: "/about", label: "About" },
+];
+
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="border-b border-gray-100 bg-white sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-gray-900 rounded-lg flex items-center justify-center">
-              <span className="text-white text-[10px] font-bold">IV</span>
-            </div>
-            <span className="text-lg font-semibold text-gray-900">invoyr</span>
+    <div className="min-h-screen flex flex-col bg-neutral-950 text-neutral-100">
+      <header className="sticky top-0 z-30 border-b border-neutral-900/80 bg-neutral-950/70 backdrop-blur">
+        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center" aria-label="Invoyr home">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/main-logo-dark.svg" alt="Invoyr" className="h-6 w-auto" />
           </Link>
-          <nav className="hidden md:flex items-center gap-6 text-sm text-gray-600">
-            <Link href="/features" className="hover:text-gray-900 transition-colors">Features</Link>
-            <Link href="/use-cases" className="hover:text-gray-900 transition-colors">Use cases</Link>
-            <Link href="/pricing" className="hover:text-gray-900 transition-colors">Pricing</Link>
-            <Link href="/about" className="hover:text-gray-900 transition-colors">About</Link>
+          <nav className="hidden md:flex items-center gap-8 text-sm text-neutral-400">
+            {NAV.map((item) => (
+              <Link key={item.href} href={item.href} className="hover:text-neutral-100 transition-colors">
+                {item.label}
+              </Link>
+            ))}
           </nav>
-          <div className="flex items-center gap-3">
-            <Link href="/login" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+          <div className="flex items-center gap-5">
+            <Link href="/login" className="text-sm text-neutral-400 hover:text-neutral-100 transition-colors">
               Sign in
             </Link>
             <Link
               href="/signup"
-              className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors"
+              className="text-sm font-medium text-neutral-950 bg-neutral-50 hover:bg-white px-4 py-2 rounded-lg transition-colors"
             >
               Get started
             </Link>
           </div>
         </div>
       </header>
+
       <main className="flex-1">{children}</main>
-      <footer className="border-t border-gray-100 bg-white">
-        <div className="max-w-6xl mx-auto px-6 py-8 flex items-center justify-between text-sm text-gray-500">
-          <p>&copy; {new Date().getFullYear()} Invoyr</p>
-          <div className="flex gap-4">
-            <Link href="/contact" className="hover:text-gray-900">Contact</Link>
-            <Link href="/about" className="hover:text-gray-900">About</Link>
-            <Link href="/privacy" className="hover:text-gray-900">Privacy</Link>
-            <Link href="/terms" className="hover:text-gray-900">Terms</Link>
+
+      <footer className="border-t border-neutral-900">
+        <div className="max-w-6xl mx-auto px-6 py-14 grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="col-span-2 md:col-span-1">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/main-logo-dark.svg" alt="Invoyr" className="h-6 w-auto" />
+            <p className="mt-4 text-sm text-neutral-500 max-w-[15rem]">Invoicing that gets you paid.</p>
+          </div>
+          <div>
+            <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-neutral-500 mb-4">Navigation</p>
+            <ul className="space-y-2.5 text-sm text-neutral-400">
+              {NAV.map((item) => (
+                <li key={item.href}>
+                  <Link href={item.href} className="hover:text-neutral-100 transition-colors">{item.label}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-neutral-500 mb-4">Legal</p>
+            <ul className="space-y-2.5 text-sm text-neutral-400">
+              <li><Link href="/privacy" className="hover:text-neutral-100 transition-colors">Privacy Policy</Link></li>
+              <li><Link href="/terms" className="hover:text-neutral-100 transition-colors">Terms of Service</Link></li>
+              <li><Link href="/contact" className="hover:text-neutral-100 transition-colors">Contact</Link></li>
+            </ul>
+          </div>
+          <div>
+            <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-neutral-500 mb-4">Get started</p>
+            <ul className="space-y-2.5 text-sm text-neutral-400">
+              <li><Link href="/signup" className="hover:text-neutral-100 transition-colors">Start free trial</Link></li>
+              <li><Link href="/login" className="hover:text-neutral-100 transition-colors">Sign in</Link></li>
+            </ul>
+          </div>
+        </div>
+        <div className="border-t border-neutral-900">
+          <div className="max-w-6xl mx-auto px-6 py-6 font-mono text-[11px] uppercase tracking-[0.14em] text-neutral-600">
+            © {new Date().getFullYear()} Invoyr. All rights reserved.
           </div>
         </div>
       </footer>
