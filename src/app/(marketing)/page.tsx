@@ -10,12 +10,6 @@ export const metadata: Metadata = {
 const KICKER = "font-mono text-xs uppercase tracking-[0.14em] text-neutral-500";
 const CONTAINER = "max-w-[1600px] mx-auto px-6 lg:px-12";
 
-const PROBLEMS = [
-  { n: "01 — Late payments", body: "Invoices sit unpaid for weeks while your cash flow takes the hit." },
-  { n: "02 — Manual admin", body: "Rebuilding the same invoice, tracking who paid, reconciling by hand." },
-  { n: "03 — Awkward chasing", body: "Nobody likes the “just following up” email — so it never gets sent." },
-];
-
 const BENEFITS = [
   { n: "01", title: "Professional invoices", body: "Four templates, your logo and accent colour. Send as a PDF or a pay link." },
   { n: "02", title: "Payments everywhere", body: "Stripe card payments on every plan, plus PayPal and bank transfer." },
@@ -100,24 +94,74 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* PROBLEM */}
+      {/* SHOWCASE — reports + reminders */}
       <section className="border-t border-neutral-900">
         <div className={`${CONTAINER} py-24`}>
-          <div className="max-w-2xl">
-            <h2 className="font-serif text-4xl md:text-5xl leading-[1.02] text-neutral-50">
-              Chasing invoices is
-              <br />
-              <span className="text-neutral-600">killing your cash flow.</span>
-            </h2>
-            <p className="mt-5 text-lg text-neutral-400">Late payments, manual admin and awkward follow-ups. Invoyr takes all three off your plate.</p>
-          </div>
-          <div className="mt-14 grid md:grid-cols-3 gap-x-10 gap-y-10">
-            {PROBLEMS.map((p) => (
-              <div key={p.n} className="border-t border-neutral-800 pt-6">
-                <span className={KICKER}>{p.n}</span>
-                <p className="mt-3 text-lg text-neutral-400 leading-relaxed">{p.body}</p>
+          <p className={KICKER}>Reports &amp; reminders</p>
+          <h2 className="mt-6 max-w-4xl font-serif text-[clamp(2.5rem,5.5vw,5rem)] leading-[1.02] tracking-tight text-neutral-50">
+            See where you stand — then never chase again.
+          </h2>
+          <p className="mt-6 max-w-2xl text-lg text-neutral-400 leading-relaxed">
+            Invoyr shows you exactly what&apos;s paid, outstanding and overdue, then chases the late ones for you — so nothing slips and you never send another awkward “just following up”.
+          </p>
+
+          <div className="mt-16 grid lg:grid-cols-2 gap-8">
+            {/* Reports */}
+            <div>
+              <div className="flex h-96 items-center overflow-hidden rounded-2xl border border-neutral-900 bg-gradient-to-br from-emerald-800/25 via-neutral-900 to-neutral-950 p-6 sm:p-10">
+                <div className="w-full rounded-xl border border-white/10 bg-neutral-950 p-6 shadow-2xl shadow-black/50">
+                  <div className="flex items-center justify-between">
+                    <span className="font-serif text-xl text-neutral-50">Revenue</span>
+                    <span className="font-mono text-[11px] text-neutral-500">Last 6 months</span>
+                  </div>
+                  <div className="mt-6 flex items-end gap-2.5">
+                    {[52, 74, 62, 96, 82, 118].map((h, i) => (
+                      <div key={i} className="flex-1 rounded-t-sm" style={{ height: `${h}px`, backgroundColor: "rgba(52, 211, 153, 0.8)" }} />
+                    ))}
+                  </div>
+                  <div className="mt-6 grid grid-cols-3 gap-3 border-t border-neutral-900 pt-5 text-center">
+                    <div><p className="font-serif text-2xl text-neutral-50">£18.2k</p><p className="mt-1 font-mono text-[10px] uppercase tracking-wide text-neutral-500">Collected</p></div>
+                    <div><p className="font-serif text-2xl text-neutral-50">£3.6k</p><p className="mt-1 font-mono text-[10px] uppercase tracking-wide text-neutral-500">Outstanding</p></div>
+                    <div><p className="font-serif text-2xl text-red-400">£420</p><p className="mt-1 font-mono text-[10px] uppercase tracking-wide text-neutral-500">Overdue</p></div>
+                  </div>
+                </div>
               </div>
-            ))}
+              <div className="mt-7">
+                <h3 className="font-serif text-2xl text-neutral-50">Reports &amp; insights</h3>
+                <p className="mt-3 text-lg text-neutral-400 leading-relaxed">Revenue, outstanding and overdue at a glance — with ageing, top clients and CSV export whenever your accountant asks.</p>
+                <Link href="/features" className="group mt-4 inline-flex items-center gap-1.5 text-base text-neutral-100 transition-colors hover:text-emerald-400">
+                  See how it works <span className="transition-transform group-hover:translate-x-0.5">→</span>
+                </Link>
+              </div>
+            </div>
+
+            {/* Reminders */}
+            <div>
+              <div className="flex h-96 items-center overflow-hidden rounded-2xl border border-neutral-900 bg-gradient-to-br from-slate-600/30 via-neutral-900 to-neutral-950 p-6 sm:p-10">
+                <div className="w-full rounded-xl border border-white/10 bg-neutral-950 p-6 shadow-2xl shadow-black/50">
+                  <div className="flex items-center justify-between">
+                    <span className="font-serif text-xl text-neutral-50">INV-0042 · Northwind</span>
+                    <span className="rounded-full bg-red-500/15 px-2.5 py-1 font-mono text-[10px] text-red-400">7 DAYS OVERDUE</span>
+                  </div>
+                  <div className="mt-5 rounded-lg border border-neutral-800 bg-neutral-900/50 p-4">
+                    <p className="font-mono text-[10px] uppercase tracking-wide text-neutral-500">Auto-reminder · sent in your name</p>
+                    <p className="mt-2 text-sm leading-relaxed text-neutral-300">Hi Sarah — a friendly reminder that invoice INV-0042 for £6,000 is now 7 days overdue. You can pay securely below. Thank you!</p>
+                    <span className="mt-3 inline-block rounded-md bg-neutral-50 px-3 py-1.5 text-xs font-medium text-neutral-950">Pay now</span>
+                  </div>
+                  <div className="mt-5 flex items-center gap-2.5 border-t border-neutral-900 pt-5 font-mono text-[11px] text-neutral-500">
+                    <span className="inline-flex items-center gap-1.5 text-emerald-400"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />7 days</span>
+                    <span>→</span><span>14 days</span><span>→</span><span>30 days</span>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-7">
+                <h3 className="font-serif text-2xl text-neutral-50">Automated reminders</h3>
+                <p className="mt-3 text-lg text-neutral-400 leading-relaxed">Polite nudges at 7, 14 and 30 days overdue go out automatically in your name. You stop chasing; clients still pay on time.</p>
+                <Link href="/features" className="group mt-4 inline-flex items-center gap-1.5 text-base text-neutral-100 transition-colors hover:text-emerald-400">
+                  See how it works <span className="transition-transform group-hover:translate-x-0.5">→</span>
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>
