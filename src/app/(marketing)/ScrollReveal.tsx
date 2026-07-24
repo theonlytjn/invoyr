@@ -3,10 +3,12 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 
-// Lightweight AOS-style scroll reveal: one IntersectionObserver reveals each
-// section (and any [data-reveal] block) as it scrolls into view. Reveal styles
-// live in globals.css; this only toggles `.is-visible`. Re-runs on route change
-// since the marketing layout persists across client navigations.
+// Lightweight AOS-style scroll reveal. One IntersectionObserver reveals each
+// section (and any [data-reveal] block) as it enters view. Reveal styles live
+// in globals.css and only take effect once this effect adds `.reveal-ready`, so
+// with JS disabled or not yet hydrated the content is always fully visible —
+// there is no state in which content can get stuck hidden. Re-runs on route
+// change since the marketing layout persists across client navigations.
 export default function ScrollReveal() {
   const pathname = usePathname();
 
@@ -24,6 +26,10 @@ export default function ScrollReveal() {
       return;
     }
 
+    // Arm the reveal styles. Anything already in view is revealed in the same
+    // tick so it never flashes hidden; the rest fade in on scroll.
+    document.documentElement.classList.add("reveal-ready");
+
     const observer = new IntersectionObserver(
       (entries, obs) => {
         for (const entry of entries) {
@@ -36,7 +42,16 @@ export default function ScrollReveal() {
       { threshold: 0.1, rootMargin: "0px 0px -8% 0px" }
     );
 
-    targets.forEach((el) => observer.observe(el));
+    const vh = window.innerHeight;
+    for (const el of targets) {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < vh * 0.92 && rect.bottom > 0) {
+        el.classList.add("is-visible");
+      } else {
+        observer.observe(el);
+      }
+    }
+
     return () => observer.disconnect();
   }, [pathname]);
 

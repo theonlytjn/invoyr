@@ -12,13 +12,6 @@ const NAV = [
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="marketing dark min-h-screen flex flex-col bg-neutral-950 text-neutral-100">
-      {/* Add the reveal-ready flag before paint so scroll-reveal never flashes
-          (and stays off entirely when JS is disabled). */}
-      <script
-        dangerouslySetInnerHTML={{
-          __html: "document.documentElement.classList.add('reveal-ready')",
-        }}
-      />
       <ScrollReveal />
       <MarketingHeader />
 
