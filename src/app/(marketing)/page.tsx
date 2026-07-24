@@ -16,6 +16,12 @@ const FEATURES = [
   { title: "Reminders & reporting", body: "Auto-chases overdue invoices; ageing and exports keep the books tidy." },
 ];
 
+const FEATURE_ICONS = [
+  <svg key="doc" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M6 3h9l3 3v15H6z" /><path d="M9 9h6M9 13h6M9 17h4" /></svg>,
+  <svg key="card" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="6" width="18" height="12" rx="2" /><path d="M3 10h18" /></svg>,
+  <svg key="bell" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M18 16V11a6 6 0 1 0-12 0v5l-2 2h16z" /><path d="M10 20a2 2 0 0 0 4 0" /></svg>,
+];
+
 const INTEGRATIONS = [
   { name: "Stripe", src: "/stripe.svg" },
   { name: "PayPal", src: "/paypal.svg" },
@@ -263,41 +269,93 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* FEATURE SPLIT */}
-      <section className="border-t border-neutral-900">
-        <div className={`${CONTAINER} py-24 grid lg:grid-cols-2 gap-14 items-center`}>
-          <div>
-            <h2 className="font-serif text-4xl md:text-5xl leading-[1.02] text-neutral-50">
-              A calmer way to
-              <br />
-              run your money.
-            </h2>
-            <p className="mt-5 text-lg text-neutral-400 max-w-md">Invoices, payments and reminders — all in one place, all working while you don’t.</p>
-            <div className="mt-10 divide-y divide-neutral-900 border-t border-neutral-900">
-              {FEATURES.map((f) => (
-                <div key={f.title} className="py-5">
-                  <h3 className="text-xl text-neutral-100">{f.title}</h3>
-                  <p className="mt-1.5 text-lg text-neutral-500">{f.body}</p>
-                </div>
-              ))}
+      {/* FEATURE SPLIT — dashboard showcase */}
+      <section className="relative overflow-hidden border-t border-neutral-900">
+        <div className={`${CONTAINER} py-24`}>
+          <div className="grid items-center gap-12 lg:grid-cols-2">
+            <div>
+              <h2 className="font-serif text-4xl sm:text-5xl leading-[1.05] tracking-tight text-neutral-50">
+                A calmer way to
+                <br />
+                run your money.
+              </h2>
+              <p className="mt-5 max-w-md text-lg text-neutral-400">Invoices, payments and reminders — all in one place, all working while you don&apos;t.</p>
+              <div className="mt-12 space-y-8">
+                {FEATURES.map((f, i) => (
+                  <div key={f.title} className="grid gap-x-6 gap-y-1.5 sm:grid-cols-2">
+                    <div className="flex items-center gap-3">
+                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-neutral-800 bg-neutral-950 text-emerald-400">
+                        {FEATURE_ICONS[i]}
+                      </span>
+                      <h3 className="text-base text-neutral-100">{f.title}</h3>
+                    </div>
+                    <p className="text-neutral-500 sm:pt-2.5">{f.body}</p>
+                  </div>
+                ))}
+              </div>
             </div>
+            <div className="hidden lg:block" aria-hidden />
           </div>
+        </div>
 
-          {/* product panel */}
-          <div className="rounded-2xl border border-neutral-900 bg-neutral-950 overflow-hidden">
-            <div className="px-6 py-5 border-b border-neutral-900 flex items-center justify-between">
-              <span className="font-serif text-xl text-neutral-50">Overview</span>
-              <span className={KICKER}>Jul 2026</span>
+        {/* Dashboard — bleeds off the right edge */}
+        <div className="pointer-events-none absolute left-[50%] top-1/2 hidden w-[58rem] -translate-y-1/2 lg:block xl:left-[54%]" aria-hidden>
+          <div className="absolute -top-4 left-10 right-10 h-20 rounded-full opacity-50 blur-2xl" style={{ background: "radial-gradient(ellipse at center, rgba(52,211,153,0.4), transparent 70%)" }} />
+          <div className="relative flex overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-950 shadow-2xl shadow-black/70">
+            {/* sidebar */}
+            <div className="w-52 shrink-0 border-r border-neutral-900 p-4">
+              <span className="px-1 font-serif text-lg text-neutral-50">Invoyr</span>
+              <div className="mt-4 flex items-center gap-2 rounded-lg border border-neutral-800 p-2.5">
+                <span className="grid h-7 w-7 place-items-center rounded bg-neutral-800 text-xs text-neutral-200">T</span>
+                <div><p className="text-xs text-neutral-100">TJN Agency</p><p className="text-[10px] text-neutral-500">Pro Plan</p></div>
+              </div>
+              <div className="mt-3 rounded-lg bg-neutral-50 py-2 text-center text-xs font-medium text-neutral-950">+ New invoice</div>
+              <nav className="mt-4 space-y-0.5 text-xs">
+                {[["Overview", true], ["Invoices", false], ["Estimates", false], ["Clients", false], ["Payments", false], ["Expenses", false], ["Reports", false], ["Settings", false]].map(([label, active]) => (
+                  <div key={label as string} className={`rounded-md px-2.5 py-1.5 ${active ? "bg-neutral-900 text-neutral-100" : "text-neutral-500"}`}>{label}</div>
+                ))}
+              </nav>
             </div>
-            <div className="p-6 grid grid-cols-3 gap-px bg-neutral-900 border border-neutral-900 rounded-xl overflow-hidden">
-              <div className="bg-neutral-950 p-4"><p className={KICKER}>Collected</p><p className="font-serif text-2xl text-neutral-50 mt-1">£18,240</p></div>
-              <div className="bg-neutral-950 p-4"><p className={KICKER}>Outstanding</p><p className="font-serif text-2xl text-neutral-50 mt-1">£3,600</p></div>
-              <div className="bg-neutral-950 p-4"><p className={KICKER}>Overdue</p><p className="font-serif text-2xl text-red-400 mt-1">£420</p></div>
-            </div>
-            <div className="px-6 pb-6 pt-4 space-y-2 text-base">
-              <div className="flex items-center justify-between py-2 border-b border-neutral-900"><span className="text-neutral-300">INV-0042 · Northwind</span><span className="font-mono text-xs text-emerald-500">PAID</span></div>
-              <div className="flex items-center justify-between py-2 border-b border-neutral-900"><span className="text-neutral-300">INV-0041 · Orbit &amp; Co</span><span className="font-mono text-xs text-emerald-500">PAID</span></div>
-              <div className="flex items-center justify-between py-2"><span className="text-neutral-300">INV-0040 · Fern</span><span className="font-mono text-xs text-neutral-500">SENT</span></div>
+            {/* main */}
+            <div className="min-w-[38rem] flex-1 p-6">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-neutral-300">Dashboard</span>
+                <span className="rounded-lg bg-neutral-50 px-3 py-1.5 text-xs font-medium text-neutral-950">+ New invoice</span>
+              </div>
+              <p className="mt-5 font-serif text-2xl text-neutral-50">Welcome back, Tony</p>
+              <p className="text-xs text-neutral-500">Here&apos;s what&apos;s happening with TJN Agency.</p>
+              <div className="mt-5 grid grid-cols-4 gap-3">
+                {[
+                  ["Revenue this month", "£0.00", "£180.00 all time"],
+                  ["Outstanding", "£12.00", "1 awaiting payment"],
+                  ["Overdue", "£0.00", "None overdue"],
+                  ["Total invoices", "3", "1 paid"],
+                ].map(([label, value, sub]) => (
+                  <div key={label} className="rounded-xl border border-neutral-900 p-3">
+                    <p className="font-mono text-[9px] uppercase tracking-wide text-neutral-500">{label}</p>
+                    <p className="mt-1.5 font-serif text-xl text-neutral-50">{value}</p>
+                    <p className="mt-1 text-[10px] text-neutral-600">{sub}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 rounded-xl border border-neutral-900">
+                <div className="flex items-center justify-between border-b border-neutral-900 px-4 py-3">
+                  <span className="text-xs text-neutral-300">Latest invoices</span>
+                  <span className="text-[10px] text-neutral-500">View all →</span>
+                </div>
+                {[
+                  ["INV-0006", "Junior Tee", "Sent", "#60a5fa", "£12.00"],
+                  ["INV-0004", "Junior Tee", "Overdue", "#f87171", "£0.00"],
+                  ["INV-0003", "Junior Tee", "Paid", "#34d399", "£180.00"],
+                ].map(([num, client, status, color, amount]) => (
+                  <div key={num} className="flex items-center justify-between border-b border-neutral-900 px-4 py-3 text-xs last:border-b-0">
+                    <span className="w-24 text-neutral-100">{num}</span>
+                    <span className="flex-1 text-neutral-500">{client}</span>
+                    <span className="w-20 font-mono text-[10px]" style={{ color }}>{status}</span>
+                    <span className="w-20 text-right text-neutral-200">{amount}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
