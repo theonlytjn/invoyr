@@ -4,30 +4,48 @@ import { NextResponse, type NextRequest } from "next/server";
 const APP_DOMAIN = "app.invoyr.io";
 const MARKETING_DOMAINS = new Set(["invoyr.io", "www.invoyr.io"]);
 
+// Public marketing pages. These live on invoyr.io; everything else (the app,
+// auth, admin, etc.) lives on app.invoyr.io.
+const MARKETING_PATHS = [
+  "/features",
+  "/use-cases",
+  "/pricing",
+  "/about",
+  "/contact",
+  "/privacy",
+  "/terms",
+];
+
+function isMarketingPath(pathname: string): boolean {
+  if (pathname === "/") return true;
+  return MARKETING_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+}
+
 export async function middleware(request: NextRequest) {
   const hostname = request.headers.get("host") ?? "";
   const pathname = request.nextUrl.pathname;
 
   // ── Subdomain routing (production only) ──────────────────────────
   if (MARKETING_DOMAINS.has(hostname)) {
-    // Only / and /pricing belong on the marketing domain
-    const isMarketingPath = pathname === "/" || pathname.startsWith("/pricing");
-    if (!isMarketingPath) {
-      return NextResponse.redirect(
-        `https://${APP_DOMAIN}${pathname}${request.nextUrl.search}`
-      );
+    // Marketing pages stay on invoyr.io; everything else goes to the app.
+    if (isMarketingPath(pathname)) {
+      return NextResponse.next();
     }
-    return NextResponse.next();
+    return NextResponse.redirect(
+      `https://${APP_DOMAIN}${pathname}${request.nextUrl.search}`
+    );
   }
 
   if (hostname === APP_DOMAIN) {
-    // Root → dashboard (auth guard below will redirect to /login if not signed in)
+    // App root → dashboard (auth guard below redirects to /login if signed out)
     if (pathname === "/") {
       return NextResponse.redirect(`https://${APP_DOMAIN}/dashboard`);
     }
-    // /pricing belongs on marketing site
-    if (pathname.startsWith("/pricing")) {
-      return NextResponse.redirect(`https://invoyr.io${pathname}`);
+    // Marketing pages belong on the marketing domain.
+    if (isMarketingPath(pathname)) {
+      return NextResponse.redirect(
+        `https://invoyr.io${pathname}${request.nextUrl.search}`
+      );
     }
   }
 

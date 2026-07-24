@@ -201,32 +201,26 @@ export default function HomePage() {
 
             {/* Middle column */}
             <div className="flex flex-col gap-4">
-              {/* Full visibility */}
+              {/* Estimates & recurring */}
               <div className="flex flex-1 flex-col rounded-2xl border border-neutral-800 bg-gradient-to-br from-emerald-800/25 via-neutral-900 to-neutral-950 p-8">
-                <h3 className="font-serif text-2xl text-neutral-50">Full visibility</h3>
-                <p className="mt-3 text-neutral-400 leading-relaxed">Paid, outstanding and overdue at a glance.</p>
-                <div className="mt-6 flex items-baseline gap-2">
-                  <span className="font-serif text-4xl text-neutral-50">£18,240</span>
-                  <span className="font-mono text-xs text-emerald-400">▲ 22%</span>
-                </div>
-                <div className="mt-4 flex items-end gap-1.5">
-                  {[24, 34, 28, 44, 38, 52, 46, 62, 56, 74].map((h, i) => (
-                    <div key={i} className="flex-1 rounded-t-sm" style={{ height: `${h}px`, backgroundColor: "rgba(52, 211, 153, 0.8)" }} />
-                  ))}
+                <h3 className="font-serif text-2xl text-neutral-50">Estimates &amp; recurring</h3>
+                <p className="mt-3 text-neutral-400 leading-relaxed">Send quotes that convert to invoices in a click, and put retainers on autopilot.</p>
+                <div className="mt-6 flex items-center gap-3">
+                  <span className="rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 font-mono text-xs text-neutral-300">EST-0018</span>
+                  <span className="text-neutral-600">→</span>
+                  <span className="rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 font-mono text-xs text-neutral-300">INV-0043</span>
+                  <span className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-neutral-800 px-2.5 py-1 font-mono text-[11px] text-emerald-400"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />Monthly</span>
                 </div>
               </div>
-              {/* Automated reminders */}
+              {/* Multi-currency & VAT */}
               <div className="flex flex-1 flex-col rounded-2xl border border-neutral-800 bg-gradient-to-br from-emerald-800/25 via-neutral-900 to-neutral-950 p-8">
-                <h3 className="font-serif text-2xl text-neutral-50">Automated reminders</h3>
-                <p className="mt-3 text-neutral-400 leading-relaxed">Overdue invoices chased for you at 7, 14 and 30 days — in your name.</p>
+                <h3 className="font-serif text-2xl text-neutral-50">Multi-currency &amp; VAT</h3>
+                <p className="mt-3 text-neutral-400 leading-relaxed">Invoice in any currency with the right VAT, and export clean for your accountant.</p>
                 <div className="mt-6 flex items-center gap-2">
-                  {["7d", "14d", "30d"].map((d, i) => (
-                    <div key={d} className="flex items-center gap-2">
-                      <span className="grid h-11 w-11 place-items-center rounded-full border border-neutral-800 bg-neutral-950 font-mono text-xs text-emerald-400">{d}</span>
-                      {i < 2 && <span className="h-px w-6 bg-neutral-800" />}
-                    </div>
+                  {["£", "$", "€"].map((c) => (
+                    <span key={c} className="grid h-10 w-10 place-items-center rounded-full border border-neutral-800 bg-neutral-950 font-serif text-lg text-neutral-200">{c}</span>
                   ))}
-                  <span className="ml-auto font-mono text-[11px] text-neutral-500">auto</span>
+                  <span className="ml-auto rounded-full border border-neutral-800 px-3 py-1 font-mono text-[11px] text-emerald-400">VAT 20%</span>
                 </div>
               </div>
             </div>
