@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import AppShell from "@/components/shell/AppShell";
 import { ACTIVE_ORG_COOKIE } from "@/lib/auth";
+import { getOrgPlan } from "@/lib/billing";
 import type { Organisation } from "@/lib/supabase/types";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -27,15 +28,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const activeId = cookieStore.get(ACTIVE_ORG_COOKIE)?.value;
   const activeOrg = (activeId ? orgs.find((o) => o.id === activeId) : null) ?? orgs[0] ?? null;
 
-  let plan: string | null = null;
-  if (activeOrg?.id) {
-    const { data: sub } = await supabase
-      .from("subscriptions")
-      .select("plan, status")
-      .eq("org_id", activeOrg.id)
-      .single();
-    plan = sub?.plan ?? null;
-  }
+  // Comp-aware: complimentary grants win, and canceled/past_due rows don't count.
+  const plan = activeOrg?.id ? await getOrgPlan(activeOrg.id) : null;
 
   return (
     <AppShell org={activeOrg} orgs={orgs} userEmail={user.email ?? ""} plan={plan}>

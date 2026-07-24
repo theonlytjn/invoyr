@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createElement } from "react";
 import { createServiceClient } from "@/lib/supabase/server";
-import { isSubscriptionActive } from "@/lib/billing";
+import { getOrgIdsWithFeature } from "@/lib/billing";
 import { sendTransactionalEmail } from "@/lib/resend/send-transactional-email";
 import { PaymentReminderEmail } from "@/emails/transactional/PaymentReminderEmail";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -18,17 +18,8 @@ export async function GET(req: NextRequest) {
   const today = new Date();
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.invoyr.io";
 
-  // Only Pro orgs get pre-due reminders
-  const { data: proSubs } = await supabase
-    .from("subscriptions")
-    .select("org_id, status, plan")
-    .eq("plan", "pro");
-
-  const proOrgIds = new Set(
-    (proSubs ?? [])
-      .filter((s) => isSubscriptionActive(s.status))
-      .map((s) => s.org_id)
-  );
+  // Only orgs entitled to automated reminders get pre-due reminders (comp-aware, Pro feature)
+  const proOrgIds = await getOrgIdsWithFeature("reminder_automation");
 
   if (proOrgIds.size === 0) {
     return NextResponse.json({ reminders_sent: 0 });

@@ -69,3 +69,32 @@ export async function orgHasFeature(orgId: string, feature: Feature): Promise<bo
   const plan = await getOrgPlan(orgId);
   return canAccess(plan, feature);
 }
+
+/**
+ * Returns the set of org IDs currently entitled to `feature`, comp-aware.
+ * Unions complimentary grants (which win over Stripe) with active subscriptions,
+ * so batch jobs (e.g. reminder crons) don't have to read the subscriptions table
+ * directly and silently exclude comp-only orgs that have no subscription row.
+ */
+export async function getOrgIdsWithFeature(feature: Feature): Promise<Set<string>> {
+  const supabase = await createServiceClient();
+  const ids = new Set<string>();
+
+  const [{ data: comps }, { data: subs }] = await Promise.all([
+    supabase
+      .from("organisations")
+      .select("id, comp_plan, comp_expires_at")
+      .not("comp_plan", "is", null),
+    supabase.from("subscriptions").select("org_id, plan, status"),
+  ]);
+
+  for (const o of comps ?? []) {
+    const plan = getCompPlan(o);
+    if (plan && canAccess(plan, feature)) ids.add(o.id);
+  }
+  for (const s of subs ?? []) {
+    if (isSubscriptionActive(s.status) && canAccess(s.plan, feature)) ids.add(s.org_id);
+  }
+
+  return ids;
+}

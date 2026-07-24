@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createElement } from "react";
 import { createServiceClient } from "@/lib/supabase/server";
-import { isSubscriptionActive } from "@/lib/billing";
+import { getOrgIdsWithFeature } from "@/lib/billing";
 import { sendTransactionalEmail } from "@/lib/resend/send-transactional-email";
 import { OverdueReminderEmail } from "@/emails/transactional/OverdueReminderEmail";
 import { dispatchWebhook } from "@/lib/webhooks/dispatch";
@@ -119,16 +119,8 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  // Step 3: Fetch Pro orgs for reminder emails
-  const { data: proSubs } = await supabase
-    .from("subscriptions")
-    .select("org_id, status, plan")
-    .eq("plan", "pro");
-  const proOrgIds = new Set(
-    (proSubs ?? [])
-      .filter((s) => isSubscriptionActive(s.status))
-      .map((s) => s.org_id)
-  );
+  // Step 3: Fetch orgs entitled to automated reminders (comp-aware, Pro feature)
+  const proOrgIds = await getOrgIdsWithFeature("reminder_automation");
 
   if (proOrgIds.size === 0) {
     return NextResponse.json({ updated: newlyOverdue?.length ?? 0, reminders_sent: 0 });

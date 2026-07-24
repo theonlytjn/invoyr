@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
-import { isSubscriptionActive } from "@/lib/billing";
+import { isSubscriptionActive, getCompPlan } from "@/lib/billing";
 import { PLAN_MAP } from "@/config/plans";
 import Topbar from "@/components/shell/Topbar";
 import { BillingActions } from "./BillingActions";
@@ -14,6 +14,7 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   past_due: { label: "Payment overdue", color: "bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400" },
   canceled: { label: "Canceled", color: "bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-400" },
   incomplete: { label: "Incomplete", color: "bg-neutral-100 text-neutral-500 dark:bg-neutral-800" },
+  comp: { label: "Complimentary", color: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400" },
   none: { label: "No plan", color: "bg-neutral-100 text-neutral-500 dark:bg-neutral-800" },
 };
 
@@ -32,11 +33,13 @@ export default async function BillingPage({
     .eq("org_id", org.id)
     .single();
 
-  const status = subscription?.status ?? "none";
-  const plan = subscription?.plan ?? null;
+  // Complimentary access wins over the subscription row (mirrors getOrgPlan).
+  const comp = getCompPlan(org);
+  const status = comp ? "comp" : subscription?.status ?? "none";
+  const plan = comp ?? subscription?.plan ?? null;
   const planInfo = plan ? PLAN_MAP[plan as keyof typeof PLAN_MAP] ?? null : null;
   const statusMeta = STATUS_LABELS[status] ?? STATUS_LABELS.none;
-  const isActive = isSubscriptionActive(status);
+  const isActive = comp ? true : isSubscriptionActive(status);
 
   const trialEnd = subscription?.trial_ends_at
     ? new Date(subscription.trial_ends_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
@@ -94,6 +97,9 @@ export default async function BillingPage({
               {status === "active" && periodEnd && (
                 <p className="text-sm text-neutral-500">Renews {periodEnd}</p>
               )}
+              {status === "comp" && (
+                <p className="text-sm text-neutral-500">Complimentary access — no billing required.</p>
+              )}
               {subscription?.cancel_at_period_end && periodEnd && (
                 <p className="text-sm text-amber-600">Cancels on {periodEnd}</p>
               )}
@@ -107,16 +113,23 @@ export default async function BillingPage({
         </div>
 
         {/* Plan selection / upgrade */}
-        <div className="space-y-3">
-          <h2 className="text-lg font-serif text-neutral-950 dark:text-neutral-50">
-            {isActive && plan ? "Change plan" : "Choose a plan"}
-          </h2>
-          <BillingActions
-            currentPlan={plan}
-            status={status}
-            hasActiveSubscription={!!subscription?.stripe_subscription_id}
-          />
-        </div>
+        {comp ? (
+          <div className="rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-5 text-sm text-neutral-500 dark:text-neutral-400">
+            Your organisation has complimentary {planInfo?.name ?? "full"} access, so there&apos;s
+            nothing to pay. Get in touch if you need this changed.
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <h2 className="text-lg font-serif text-neutral-950 dark:text-neutral-50">
+              {isActive && plan ? "Change plan" : "Choose a plan"}
+            </h2>
+            <BillingActions
+              currentPlan={plan}
+              status={status}
+              hasActiveSubscription={!!subscription?.stripe_subscription_id}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
