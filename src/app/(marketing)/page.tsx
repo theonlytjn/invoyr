@@ -10,6 +10,15 @@ export const metadata: Metadata = {
 const KICKER = "font-mono text-xs uppercase tracking-[0.14em] text-neutral-500";
 const CONTAINER = "max-w-[1600px] mx-auto px-6 lg:px-12";
 
+const TRUST_LOGOS = [
+  "/scroll-logos/imgi_29_ZmlFdgHmuu7gfT6zg4q9mfz9pes.png",
+  "/scroll-logos/imgi_30_AVyrr7uVWe2GLaTTJezwa0k8UW0.png",
+  "/scroll-logos/imgi_31_114rWgMR70jq21kOoQqs1B03Ws.png",
+  "/scroll-logos/imgi_32_ge6mYzyMHQjA1jBP7XFP1BKOKgI.png",
+  "/scroll-logos/imgi_33_SdMXdJWeCzEzCDhNgnWwERY.png",
+  "/scroll-logos/imgi_34_OruCoiwuzQE8nrhoIt1Z11Ycg.png",
+];
+
 const FEATURES = [
   { title: "Invoices & estimates", body: "Send quotes, convert to invoices, set recurring bills for retainers." },
   { title: "Payments, built in", body: "A pay link with Stripe, PayPal and bank transfer. Marked paid automatically." },
@@ -85,9 +94,14 @@ export default function HomePage() {
             <span className="inline-flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-brand" />7-day free trial</span>
           </div>
           <div className="reveal mt-16">
-            <p className={KICKER}>Trusted by freelancers, agencies &amp; service businesses</p>
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-10 gap-y-3 text-neutral-600 font-serif text-2xl">
-              <span>Northwind</span><span>Orbit&amp;Co</span><span>Kelu Studio</span><span>Fern</span><span>Maple Row</span><span>Vecta</span>
+            <p className={`${KICKER} text-center`}>Trusted by freelancers, agencies &amp; service businesses</p>
+            <div className="relative mt-8 overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_12%,black_88%,transparent)]">
+              <div className="flex w-max animate-marquee items-center gap-14">
+                {[...TRUST_LOGOS, ...TRUST_LOGOS].map((src, i) => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img key={i} src={src} alt="" className="h-6 w-auto shrink-0 object-contain opacity-70" />
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -370,13 +384,13 @@ export default function HomePage() {
           </div>
           <div className="mt-10 grid grid-cols-2 md:grid-cols-4 divide-x divide-neutral-900 border-y border-neutral-900">
             {INTEGRATIONS.map((it, i) => (
-              <div key={it.name} className="flex items-center justify-between gap-4 px-8 py-14">
+              <div key={it.name} className="flex flex-col items-start gap-6 px-6 py-10 sm:px-8 md:flex-row md:items-center md:justify-between md:gap-4 md:py-14">
                 <div>
                   <span className={KICKER}>/{String(i + 1).padStart(2, "0")}</span>
                   <p className="mt-3 font-serif text-2xl text-neutral-100">{it.name}</p>
                 </div>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={it.src} alt={it.name} className="h-20 md:h-28 w-auto object-contain shrink-0" />
+                <img src={it.src} alt={it.name} className="h-16 w-auto object-contain shrink-0 md:h-28" />
               </div>
             ))}
           </div>
@@ -443,9 +457,9 @@ export default function HomePage() {
 
       {/* FAQ */}
       <section className="border-t border-neutral-900">
-        <div className="max-w-3xl mx-auto px-6 py-24">
-          <h2 className="font-serif text-4xl md:text-5xl text-neutral-50 text-center">Frequently asked questions</h2>
-          <div className="mt-12 divide-y divide-neutral-900 border-y border-neutral-900">
+        <div className={`${CONTAINER} py-24 grid gap-10 lg:grid-cols-3 lg:gap-16`}>
+          <h2 className="font-serif text-4xl md:text-5xl leading-tight text-neutral-50">Frequently asked questions</h2>
+          <div className="lg:col-span-2 divide-y divide-neutral-900 border-y border-neutral-900">
             {FAQS.map((item) => (
               <details key={item.q} className="py-5 group">
                 <summary className="flex items-center justify-between cursor-pointer list-none text-lg text-neutral-100">
