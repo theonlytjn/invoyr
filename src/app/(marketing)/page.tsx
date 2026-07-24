@@ -7,7 +7,7 @@ export const metadata: Metadata = {
     "Send professional invoices, take card payments with Stripe, and let reminders chase for you. Invoicing for freelancers, agencies and service businesses.",
 };
 
-const KICKER = "font-mono text-xs uppercase tracking-[0.14em] text-neutral-500";
+const KICKER = "font-mono text-xs uppercase tracking-[0.14em] text-neutral-400";
 const CONTAINER = "max-w-[1600px] mx-auto px-6 lg:px-12";
 
 const TRUST_LOGOS = [
@@ -76,9 +76,9 @@ export default function HomePage() {
           <h1 className="reveal font-serif text-[clamp(3rem,8vw,6.5rem)] leading-[0.9] tracking-tight text-neutral-50">
             Get paid faster.
             <br />
-            <span className="text-neutral-500">Invoicing that runs itself.</span>
+            <span className="text-neutral-400">Invoicing that runs itself.</span>
           </h1>
-          <p className="reveal mt-8 mx-auto max-w-xl text-xl text-neutral-400 leading-relaxed">
+          <p className="reveal mt-8 mx-auto max-w-xl text-xl text-neutral-200 leading-relaxed">
             Send invoices that look the part, take card payments with Stripe, and let reminders chase for you — so you get paid without the admin.
           </p>
           <div className="reveal mt-10 flex flex-wrap justify-center gap-4">
@@ -89,7 +89,7 @@ export default function HomePage() {
               View pricing
             </Link>
           </div>
-          <div className="reveal mt-6 flex flex-wrap justify-center gap-x-6 gap-y-2 text-base text-neutral-500">
+          <div className="reveal mt-6 flex flex-wrap justify-center gap-x-6 gap-y-2 text-base text-neutral-400">
             <span className="inline-flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-brand" />No credit card needed</span>
             <span className="inline-flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-brand" />7-day free trial</span>
           </div>
@@ -114,7 +114,7 @@ export default function HomePage() {
           <h2 className="mt-6 max-w-4xl font-serif text-4xl sm:text-5xl lg:text-6xl leading-[1.05] tracking-tight text-neutral-50">
             See where you stand — then never chase again.
           </h2>
-          <p className="mt-6 max-w-2xl text-lg text-neutral-400 leading-relaxed">
+          <p className="mt-6 max-w-2xl text-lg text-neutral-200 leading-relaxed">
             Invoyr shows you exactly what&apos;s paid, outstanding and overdue, then chases the late ones for you — so nothing slips and you never send another awkward “just following up”.
           </p>
 
@@ -125,7 +125,7 @@ export default function HomePage() {
                 <div className="w-full rounded-xl border border-white/10 bg-neutral-950 p-6 shadow-2xl shadow-black/50">
                   <div className="flex items-center justify-between">
                     <span className="font-serif text-xl text-neutral-50">Revenue</span>
-                    <span className="font-mono text-[11px] text-neutral-500">Last 6 months</span>
+                    <span className="font-mono text-[11px] text-neutral-400">Last 6 months</span>
                   </div>
                   <div className="mt-6 flex items-end gap-2.5">
                     {[52, 74, 62, 96, 82, 118].map((h, i) => (
@@ -133,15 +133,15 @@ export default function HomePage() {
                     ))}
                   </div>
                   <div className="mt-6 grid grid-cols-3 gap-3 border-t border-neutral-900 pt-5 text-center">
-                    <div><p className="font-serif text-2xl text-neutral-50">£18.2k</p><p className="mt-1 font-mono text-[10px] uppercase tracking-wide text-neutral-500">Collected</p></div>
-                    <div><p className="font-serif text-2xl text-neutral-50">£3.6k</p><p className="mt-1 font-mono text-[10px] uppercase tracking-wide text-neutral-500">Outstanding</p></div>
-                    <div><p className="font-serif text-2xl text-red-400">£420</p><p className="mt-1 font-mono text-[10px] uppercase tracking-wide text-neutral-500">Overdue</p></div>
+                    <div><p className="font-serif text-2xl text-neutral-50">£18.2k</p><p className="mt-1 font-mono text-[10px] uppercase tracking-wide text-neutral-400">Collected</p></div>
+                    <div><p className="font-serif text-2xl text-neutral-50">£3.6k</p><p className="mt-1 font-mono text-[10px] uppercase tracking-wide text-neutral-400">Outstanding</p></div>
+                    <div><p className="font-serif text-2xl text-red-400">£420</p><p className="mt-1 font-mono text-[10px] uppercase tracking-wide text-neutral-400">Overdue</p></div>
                   </div>
                 </div>
               </div>
               <div className="mt-7">
                 <h3 className="font-serif text-2xl text-neutral-50">Reports &amp; insights</h3>
-                <p className="mt-3 text-lg text-neutral-400 leading-relaxed">Revenue, outstanding and overdue at a glance — with ageing, top clients and CSV export whenever your accountant asks.</p>
+                <p className="mt-3 text-lg text-neutral-200 leading-relaxed">Revenue, outstanding and overdue at a glance — with ageing, top clients and CSV export whenever your accountant asks.</p>
                 <Link href="/features" className="group mt-4 inline-flex items-center gap-1.5 text-base text-neutral-100 transition-colors hover:text-emerald-400">
                   See how it works <span className="transition-transform group-hover:translate-x-0.5">→</span>
                 </Link>
@@ -157,11 +157,11 @@ export default function HomePage() {
                     <span className="rounded-full bg-red-500/15 px-2.5 py-1 font-mono text-[10px] text-red-400">7 DAYS OVERDUE</span>
                   </div>
                   <div className="mt-5 rounded-lg border border-neutral-800 bg-neutral-900/50 p-4">
-                    <p className="font-mono text-[10px] uppercase tracking-wide text-neutral-500">Auto-reminder · sent in your name</p>
+                    <p className="font-mono text-[10px] uppercase tracking-wide text-neutral-400">Auto-reminder · sent in your name</p>
                     <p className="mt-2 text-sm leading-relaxed text-neutral-300">Hi Sarah — a friendly reminder that invoice INV-0042 for £6,000 is now 7 days overdue. You can pay securely below. Thank you!</p>
                     <span className="mt-3 inline-block rounded-md bg-neutral-50 px-3 py-1.5 text-xs font-medium text-neutral-950">Pay now</span>
                   </div>
-                  <div className="mt-5 flex items-center gap-2.5 border-t border-neutral-900 pt-5 font-mono text-[11px] text-neutral-500">
+                  <div className="mt-5 flex items-center gap-2.5 border-t border-neutral-900 pt-5 font-mono text-[11px] text-neutral-400">
                     <span className="inline-flex items-center gap-1.5 text-emerald-400"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />7 days</span>
                     <span>→</span><span>14 days</span><span>→</span><span>30 days</span>
                   </div>
@@ -169,7 +169,7 @@ export default function HomePage() {
               </div>
               <div className="mt-7">
                 <h3 className="font-serif text-2xl text-neutral-50">Automated reminders</h3>
-                <p className="mt-3 text-lg text-neutral-400 leading-relaxed">Polite nudges at 7, 14 and 30 days overdue go out automatically in your name. You stop chasing; clients still pay on time.</p>
+                <p className="mt-3 text-lg text-neutral-200 leading-relaxed">Polite nudges at 7, 14 and 30 days overdue go out automatically in your name. You stop chasing; clients still pay on time.</p>
                 <Link href="/features" className="group mt-4 inline-flex items-center gap-1.5 text-base text-neutral-100 transition-colors hover:text-emerald-400">
                   See how it works <span className="transition-transform group-hover:translate-x-0.5">→</span>
                 </Link>
@@ -191,28 +191,28 @@ export default function HomePage() {
             {/* Payments — tall, phone */}
             <div className="relative flex flex-col overflow-hidden rounded-2xl border border-neutral-800 bg-gradient-to-br from-emerald-800/25 via-neutral-900 to-neutral-950 p-8">
               <h3 className="font-serif text-2xl text-neutral-50">Payments everywhere</h3>
-              <p className="mt-3 text-neutral-400 leading-relaxed">Card, PayPal or bank transfer — your client taps the link and pays from their phone, so you get paid on the go.</p>
+              <p className="mt-3 text-neutral-200 leading-relaxed">Card, PayPal or bank transfer — your client taps the link and pays from their phone, so you get paid on the go.</p>
               <div className="h-80" aria-hidden />
               <div className="absolute inset-x-0 top-44 flex justify-center">
                 <div className="w-72 rounded-t-3xl border-8 border-b-0 border-neutral-800 bg-neutral-950 shadow-2xl shadow-black/60">
-                  <div className="flex items-center justify-between px-5 pb-1 pt-3 font-mono text-[10px] text-neutral-400">
+                  <div className="flex items-center justify-between px-5 pb-1 pt-3 font-mono text-[10px] text-neutral-200">
                     <span>9:41</span><span>5G ▬▬▬</span>
                   </div>
                   <div className="px-5 pb-8 pt-2">
                     <div className="rounded-lg bg-neutral-900 px-4 py-3">
                       <p className="font-serif text-base text-neutral-50">TJN Agency</p>
-                      <p className="font-mono text-[10px] text-neutral-500">#INV-0042</p>
+                      <p className="font-mono text-[10px] text-neutral-400">#INV-0042</p>
                     </div>
                     <div className="mt-4 flex items-baseline justify-between">
-                      <span className="text-xs text-neutral-500">Amount due</span>
+                      <span className="text-xs text-neutral-400">Amount due</span>
                       <span className="font-serif text-2xl text-neutral-50">£6,000</span>
                     </div>
                     <div className="mt-4 rounded-lg bg-neutral-50 py-2.5 text-center text-xs font-medium text-neutral-950">Pay now</div>
                     <div className="mt-2 rounded-lg border border-neutral-800 py-2.5 text-center text-xs text-neutral-300">Pay with PayPal</div>
-                    <p className="mt-4 text-center font-mono text-[9px] uppercase tracking-[0.12em] text-neutral-600">Or pay by bank transfer</p>
+                    <p className="mt-4 text-center font-mono text-[9px] uppercase tracking-[0.12em] text-neutral-400">Or pay by bank transfer</p>
                     <div className="mt-3 grid grid-cols-2 gap-2 text-[10px]">
-                      <div><p className="text-neutral-500">Account</p><p className="text-neutral-200">TJN Agency</p></div>
-                      <div><p className="text-neutral-500">Sort code</p><p className="text-neutral-200">04-00-35</p></div>
+                      <div><p className="text-neutral-400">Account</p><p className="text-neutral-200">TJN Agency</p></div>
+                      <div><p className="text-neutral-400">Sort code</p><p className="text-neutral-200">04-00-35</p></div>
                     </div>
                   </div>
                 </div>
@@ -224,10 +224,10 @@ export default function HomePage() {
               {/* Estimates & recurring */}
               <div className="flex flex-1 flex-col rounded-2xl border border-neutral-800 bg-gradient-to-br from-emerald-800/25 via-neutral-900 to-neutral-950 p-8">
                 <h3 className="font-serif text-2xl text-neutral-50">Estimates &amp; recurring</h3>
-                <p className="mt-3 text-neutral-400 leading-relaxed">Send quotes that convert to invoices in a click, and put retainers on autopilot.</p>
+                <p className="mt-3 text-neutral-200 leading-relaxed">Send quotes that convert to invoices in a click, and put retainers on autopilot.</p>
                 <div className="mt-6 flex items-center gap-3">
                   <span className="rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 font-mono text-xs text-neutral-300">EST-0018</span>
-                  <span className="text-neutral-600">→</span>
+                  <span className="text-neutral-400">→</span>
                   <span className="rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 font-mono text-xs text-neutral-300">INV-0043</span>
                   <span className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-neutral-800 px-2.5 py-1 font-mono text-[11px] text-emerald-400"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />Monthly</span>
                 </div>
@@ -235,7 +235,7 @@ export default function HomePage() {
               {/* Multi-currency & VAT */}
               <div className="flex flex-1 flex-col rounded-2xl border border-neutral-800 bg-gradient-to-br from-emerald-800/25 via-neutral-900 to-neutral-950 p-8">
                 <h3 className="font-serif text-2xl text-neutral-50">Multi-currency &amp; VAT</h3>
-                <p className="mt-3 text-neutral-400 leading-relaxed">Invoice in any currency with the right VAT, and export clean for your accountant.</p>
+                <p className="mt-3 text-neutral-200 leading-relaxed">Invoice in any currency with the right VAT, and export clean for your accountant.</p>
                 <div className="mt-6 flex items-center gap-2">
                   {["£", "$", "€"].map((c) => (
                     <span key={c} className="grid h-10 w-10 place-items-center rounded-full border border-neutral-800 bg-neutral-950 font-serif text-lg text-neutral-200">{c}</span>
@@ -248,32 +248,32 @@ export default function HomePage() {
             {/* Professional invoices — tall, invoice */}
             <div className="relative flex flex-col overflow-hidden rounded-2xl border border-neutral-800 bg-gradient-to-br from-emerald-800/25 via-neutral-900 to-neutral-950 p-8">
               <h3 className="font-serif text-2xl text-neutral-50">Professional invoices</h3>
-              <p className="mt-3 text-neutral-400 leading-relaxed">Four templates, your logo and accent colour — sent as a polished PDF or a pay link.</p>
+              <p className="mt-3 text-neutral-200 leading-relaxed">Four templates, your logo and accent colour — sent as a polished PDF or a pay link.</p>
               <div className="h-80" aria-hidden />
               <div className="absolute inset-x-8 top-44">
                 <div className="rounded-t-xl border border-b-0 border-white/10 bg-neutral-950 p-6 shadow-2xl shadow-black/60">
                   <div className="flex items-start justify-between">
                     <div>
                       <p className="font-serif text-lg text-neutral-50">TJN Agency</p>
-                      <p className="mt-0.5 font-mono text-[10px] text-neutral-500">Invoice · INV-0042</p>
+                      <p className="mt-0.5 font-mono text-[10px] text-neutral-400">Invoice · INV-0042</p>
                     </div>
                     <span className="h-8 w-8 rounded" style={{ backgroundColor: "rgba(52, 211, 153, 0.9)" }} />
                   </div>
                   <div className="mt-5 flex justify-between border-t border-neutral-900 pt-4 text-[11px]">
-                    <div><p className="text-neutral-500">Billed to</p><p className="mt-0.5 text-neutral-200">Northwind Studio</p></div>
-                    <div className="text-right"><p className="text-neutral-500">Due</p><p className="mt-0.5 text-neutral-200">07 Jul 2026</p></div>
+                    <div><p className="text-neutral-400">Billed to</p><p className="mt-0.5 text-neutral-200">Northwind Studio</p></div>
+                    <div className="text-right"><p className="text-neutral-400">Due</p><p className="mt-0.5 text-neutral-200">07 Jul 2026</p></div>
                   </div>
                   <div className="mt-5 space-y-3 border-t border-neutral-900 pt-4 text-xs">
-                    <div className="flex justify-between text-neutral-400"><span>Brand identity — phase 2</span><span className="text-neutral-200">£4,200.00</span></div>
-                    <div className="flex justify-between text-neutral-400"><span>Web design retainer</span><span className="text-neutral-200">£1,800.00</span></div>
-                    <div className="flex justify-between text-neutral-400"><span>Consultation — 6 hrs</span><span className="text-neutral-200">£600.00</span></div>
+                    <div className="flex justify-between text-neutral-200"><span>Brand identity — phase 2</span><span className="text-neutral-200">£4,200.00</span></div>
+                    <div className="flex justify-between text-neutral-200"><span>Web design retainer</span><span className="text-neutral-200">£1,800.00</span></div>
+                    <div className="flex justify-between text-neutral-200"><span>Consultation — 6 hrs</span><span className="text-neutral-200">£600.00</span></div>
                   </div>
                   <div className="mt-4 space-y-2 border-t border-neutral-900 pt-4 text-xs">
-                    <div className="flex justify-between text-neutral-500"><span>Subtotal</span><span>£6,600.00</span></div>
-                    <div className="flex justify-between text-neutral-500"><span>VAT · 20%</span><span>£1,320.00</span></div>
+                    <div className="flex justify-between text-neutral-400"><span>Subtotal</span><span>£6,600.00</span></div>
+                    <div className="flex justify-between text-neutral-400"><span>VAT · 20%</span><span>£1,320.00</span></div>
                   </div>
                   <div className="mt-4 flex items-baseline justify-between border-t border-neutral-900 pt-4">
-                    <span className="text-xs text-neutral-500">Total due</span>
+                    <span className="text-xs text-neutral-400">Total due</span>
                     <span className="font-serif text-2xl text-neutral-50">£7,920.00</span>
                   </div>
                 </div>
@@ -293,7 +293,7 @@ export default function HomePage() {
                 <br />
                 run your money.
               </h2>
-              <p className="mt-5 max-w-md text-lg text-neutral-400">Invoices, payments and reminders — all in one place, all working while you don&apos;t.</p>
+              <p className="mt-5 max-w-md text-lg text-neutral-200">Invoices, payments and reminders — all in one place, all working while you don&apos;t.</p>
               <div className="mt-12 space-y-8">
                 {FEATURES.map((f, i) => (
                   <div key={f.title} className="grid gap-x-6 gap-y-1.5 sm:grid-cols-2">
@@ -303,7 +303,7 @@ export default function HomePage() {
                       </span>
                       <h3 className="text-base text-neutral-100">{f.title}</h3>
                     </div>
-                    <p className="text-neutral-500 sm:pt-2.5">{f.body}</p>
+                    <p className="text-neutral-400 sm:pt-2.5">{f.body}</p>
                   </div>
                 ))}
               </div>
@@ -321,12 +321,12 @@ export default function HomePage() {
               <span className="px-1 font-serif text-lg text-neutral-50">Invoyr</span>
               <div className="mt-4 flex items-center gap-2 rounded-lg border border-neutral-800 p-2.5">
                 <span className="grid h-7 w-7 place-items-center rounded bg-neutral-800 text-xs text-neutral-200">T</span>
-                <div><p className="text-xs text-neutral-100">TJN Agency</p><p className="text-[10px] text-neutral-500">Pro Plan</p></div>
+                <div><p className="text-xs text-neutral-100">TJN Agency</p><p className="text-[10px] text-neutral-400">Pro Plan</p></div>
               </div>
               <div className="mt-3 rounded-lg bg-neutral-50 py-2 text-center text-xs font-medium text-neutral-950">+ New invoice</div>
               <nav className="mt-4 space-y-0.5 text-xs">
                 {[["Overview", true], ["Invoices", false], ["Estimates", false], ["Clients", false], ["Payments", false], ["Expenses", false], ["Reports", false], ["Settings", false]].map(([label, active]) => (
-                  <div key={label as string} className={`rounded-md px-2.5 py-1.5 ${active ? "bg-neutral-900 text-neutral-100" : "text-neutral-500"}`}>{label}</div>
+                  <div key={label as string} className={`rounded-md px-2.5 py-1.5 ${active ? "bg-neutral-900 text-neutral-100" : "text-neutral-400"}`}>{label}</div>
                 ))}
               </nav>
             </div>
@@ -337,7 +337,7 @@ export default function HomePage() {
                 <span className="rounded-lg bg-neutral-50 px-3 py-1.5 text-xs font-medium text-neutral-950">+ New invoice</span>
               </div>
               <p className="mt-5 font-serif text-2xl text-neutral-50">Welcome back, Tony</p>
-              <p className="text-xs text-neutral-500">Here&apos;s what&apos;s happening with TJN Agency.</p>
+              <p className="text-xs text-neutral-400">Here&apos;s what&apos;s happening with TJN Agency.</p>
               <div className="mt-5 grid grid-cols-4 gap-3">
                 {[
                   ["Revenue this month", "£0.00", "£180.00 all time"],
@@ -346,16 +346,16 @@ export default function HomePage() {
                   ["Total invoices", "3", "1 paid"],
                 ].map(([label, value, sub]) => (
                   <div key={label} className="rounded-xl border border-neutral-900 p-3">
-                    <p className="font-mono text-[9px] uppercase tracking-wide text-neutral-500">{label}</p>
+                    <p className="font-mono text-[9px] uppercase tracking-wide text-neutral-400">{label}</p>
                     <p className="mt-1.5 font-serif text-xl text-neutral-50">{value}</p>
-                    <p className="mt-1 text-[10px] text-neutral-600">{sub}</p>
+                    <p className="mt-1 text-[10px] text-neutral-400">{sub}</p>
                   </div>
                 ))}
               </div>
               <div className="mt-4 rounded-xl border border-neutral-900">
                 <div className="flex items-center justify-between border-b border-neutral-900 px-4 py-3">
                   <span className="text-xs text-neutral-300">Latest invoices</span>
-                  <span className="text-[10px] text-neutral-500">View all →</span>
+                  <span className="text-[10px] text-neutral-400">View all →</span>
                 </div>
                 {[
                   ["INV-0006", "Junior Tee", "Sent", "#60a5fa", "£12.00"],
@@ -364,7 +364,7 @@ export default function HomePage() {
                 ].map(([num, client, status, color, amount]) => (
                   <div key={num} className="flex items-center justify-between border-b border-neutral-900 px-4 py-3 text-xs last:border-b-0">
                     <span className="w-24 text-neutral-100">{num}</span>
-                    <span className="flex-1 text-neutral-500">{client}</span>
+                    <span className="flex-1 text-neutral-400">{client}</span>
                     <span className="w-20 font-mono text-[10px]" style={{ color }}>{status}</span>
                     <span className="w-20 text-right text-neutral-200">{amount}</span>
                   </div>
@@ -380,7 +380,7 @@ export default function HomePage() {
         <div className={`${CONTAINER} py-20`}>
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <h2 className="font-serif text-3xl md:text-4xl text-neutral-50">Works with the tools you already use</h2>
-            <p className="text-lg text-neutral-500">Get paid and keep the books in sync.</p>
+            <p className="text-lg text-neutral-400">Get paid and keep the books in sync.</p>
           </div>
           <div className="mt-10 grid grid-cols-2 md:grid-cols-4 divide-x divide-neutral-900 border-y border-neutral-900">
             {INTEGRATIONS.map((it, i) => (
@@ -408,7 +408,7 @@ export default function HomePage() {
             <img src="/adam-testimonial.jpeg" alt="Adam Joy" className="h-11 w-11 rounded-full object-cover" />
             <div className="text-left">
               <p className="text-neutral-200">Adam Joy</p>
-              <p className="text-sm text-neutral-500">Nokha</p>
+              <p className="text-sm text-neutral-400">Nokha</p>
             </div>
           </div>
         </div>
@@ -421,9 +421,9 @@ export default function HomePage() {
             <h2 className="font-serif text-4xl md:text-5xl leading-[1.05] text-neutral-50">
               One price a year.
               <br />
-              <span className="text-neutral-500">No per-invoice fees, ever.</span>
+              <span className="text-neutral-400">No per-invoice fees, ever.</span>
             </h2>
-            <p className="mt-5 text-lg text-neutral-400">Every plan is billed annually and includes a 7-day free trial — no card required.</p>
+            <p className="mt-5 text-lg text-neutral-200">Every plan is billed annually and includes a 7-day free trial — no card required.</p>
           </div>
           <div className="mt-14 grid md:grid-cols-3 gap-px bg-neutral-800/60 border border-neutral-800/60 rounded-2xl overflow-hidden">
             {PLANS.map((plan) => (
@@ -434,9 +434,9 @@ export default function HomePage() {
                 </div>
                 <div className="mt-5 flex items-baseline gap-1">
                   <span className="font-serif text-5xl text-neutral-50">{plan.price}</span>
-                  <span className="text-base text-neutral-500">/year</span>
+                  <span className="text-base text-neutral-400">/year</span>
                 </div>
-                <p className="mt-1 text-base text-neutral-500">{plan.users}</p>
+                <p className="mt-1 text-base text-neutral-400">{plan.users}</p>
                 <ul className="mt-7 space-y-3 text-base text-neutral-300 flex-1">
                   {plan.features.map((f) => (
                     <li key={f} className="flex gap-2.5"><span className="text-brand" aria-hidden>✓</span>{f}</li>
@@ -465,9 +465,9 @@ export default function HomePage() {
               <details key={item.q} className="py-5 group">
                 <summary className="flex items-center justify-between cursor-pointer list-none text-lg text-neutral-100">
                   <span>{item.q}</span>
-                  <span className="text-neutral-600 transition-transform duration-200 group-open:rotate-45">+</span>
+                  <span className="text-neutral-400 transition-transform duration-200 group-open:rotate-45">+</span>
                 </summary>
-                <p className="mt-3 text-base text-neutral-500">{item.a}</p>
+                <p className="mt-3 text-base text-neutral-400">{item.a}</p>
               </details>
             ))}
           </div>

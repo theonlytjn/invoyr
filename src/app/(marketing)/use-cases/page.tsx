@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "How freelancers, agencies, and service businesses use Invoyr to get paid faster.",
 };
 
-const KICKER = "font-mono text-xs uppercase tracking-[0.14em] text-neutral-500";
+const KICKER = "font-mono text-xs uppercase tracking-[0.14em] text-neutral-400";
 
 const USE_CASES = [
   {
@@ -61,7 +61,7 @@ export default function UseCasesPage() {
           <br />
           invoices for a living
         </h1>
-        <p className="mt-6 mx-auto max-w-2xl text-xl text-neutral-400 leading-relaxed">
+        <p className="mt-6 mx-auto max-w-2xl text-xl text-neutral-200 leading-relaxed">
           Whether you&apos;re a solo freelancer or running a small agency, Invoyr adapts to how you work.
         </p>
       </section>
@@ -72,7 +72,7 @@ export default function UseCasesPage() {
             <div>
               <span className={KICKER}>{`0${i + 1}`}</span>
               <h2 className="mt-3 font-serif text-3xl text-neutral-50">{useCase.role}</h2>
-              <p className="mt-4 text-lg text-neutral-400 leading-relaxed max-w-md">{useCase.description}</p>
+              <p className="mt-4 text-lg text-neutral-200 leading-relaxed max-w-md">{useCase.description}</p>
             </div>
             <ul className="space-y-4 md:pt-10">
               {useCase.benefits.map((b) => (
@@ -88,7 +88,7 @@ export default function UseCasesPage() {
 
       <section className="border-t border-neutral-900 py-24 text-center">
         <h2 className="font-serif text-4xl md:text-5xl text-neutral-50">See it in action</h2>
-        <p className="mt-4 text-neutral-400">Start a free 7-day trial — no credit card needed.</p>
+        <p className="mt-4 text-neutral-200">Start a free 7-day trial — no credit card needed.</p>
         <Link href="/signup" className="mt-9 inline-block px-6 py-3.5 rounded-xl bg-neutral-50 text-neutral-950 font-medium hover:bg-white transition-colors">
           Start free trial →
         </Link>

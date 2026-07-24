@@ -23,9 +23,13 @@ export default function MarketingHeader() {
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-8 text-base text-neutral-400">
+        <nav className="hidden md:flex items-center gap-8 text-base text-neutral-200">
           {NAV.map((item) => (
-            <Link key={item.href} href={item.href} className="hover:text-neutral-100 transition-colors">
+            <Link
+              key={item.href}
+              href={item.href}
+              className="rounded px-1 py-2 hover:text-neutral-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
+            >
               {item.label}
             </Link>
           ))}
@@ -33,12 +37,15 @@ export default function MarketingHeader() {
 
         {/* Desktop CTAs */}
         <div className="hidden md:flex items-center gap-5">
-          <Link href="/login" className="text-base text-neutral-400 hover:text-neutral-100 transition-colors">
+          <Link
+            href="/login"
+            className="rounded px-1 py-2 text-base text-neutral-200 hover:text-neutral-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
+          >
             Sign in
           </Link>
           <Link
             href="/signup"
-            className="text-base font-medium text-neutral-950 bg-neutral-50 hover:bg-white px-4 py-2 rounded-lg transition-colors"
+            className="text-base font-medium text-neutral-950 bg-neutral-50 hover:bg-white px-4 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
           >
             Get started
           </Link>
@@ -47,7 +54,7 @@ export default function MarketingHeader() {
         {/* Mobile hamburger */}
         <button
           type="button"
-          className="md:hidden -mr-2 inline-flex h-10 w-10 items-center justify-center text-neutral-200"
+          className="md:hidden -mr-1 inline-flex h-11 w-11 items-center justify-center rounded-lg text-neutral-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
           aria-label={open ? "Close menu" : "Open menu"}
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
@@ -69,19 +76,19 @@ export default function MarketingHeader() {
         <div className="md:hidden border-t border-neutral-900 bg-neutral-950 px-6 py-6">
           <nav className="flex flex-col text-lg">
             {NAV.map((item) => (
-              <Link key={item.href} href={item.href} onClick={close} className="py-2.5 text-neutral-300 hover:text-neutral-100 transition-colors">
+              <Link key={item.href} href={item.href} onClick={close} className="rounded py-3 text-neutral-200 hover:text-neutral-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950">
                 {item.label}
               </Link>
             ))}
           </nav>
           <div className="mt-4 flex flex-col gap-3 border-t border-neutral-900 pt-5">
-            <Link href="/login" onClick={close} className="py-1 text-base text-neutral-300 hover:text-neutral-100 transition-colors">
+            <Link href="/login" onClick={close} className="rounded py-2.5 text-base text-neutral-200 hover:text-neutral-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950">
               Sign in
             </Link>
             <Link
               href="/signup"
               onClick={close}
-              className="rounded-lg bg-neutral-50 py-3 text-center text-base font-medium text-neutral-950 hover:bg-white transition-colors"
+              className="rounded-lg bg-neutral-50 py-3 text-center text-base font-medium text-neutral-950 hover:bg-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
             >
               Get started
             </Link>

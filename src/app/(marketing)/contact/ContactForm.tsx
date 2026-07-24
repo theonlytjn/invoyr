@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 const inputCls =
-  "w-full rounded-lg bg-neutral-900 border border-neutral-800 px-3.5 py-3 text-base text-neutral-100 placeholder:text-neutral-600 outline-none transition-colors focus:border-brand focus:ring-1 focus:ring-brand";
+  "w-full rounded-lg bg-neutral-900 border border-neutral-800 px-3.5 py-3 text-base text-neutral-100 placeholder:text-neutral-400 outline-none transition-colors focus:border-brand focus:ring-1 focus:ring-brand";
 const labelCls = "block text-base text-neutral-300 mb-1.5";
 
 export default function ContactForm() {
@@ -38,7 +38,7 @@ export default function ContactForm() {
           <span className="text-emerald-400 text-lg" aria-hidden>✓</span>
         </div>
         <p className="text-lg text-neutral-100">Message sent</p>
-        <p className="text-base text-neutral-500 mt-1">We&apos;ll reply within one business day.</p>
+        <p className="text-base text-neutral-400 mt-1">We&apos;ll reply within one business day.</p>
       </div>
     );
   }

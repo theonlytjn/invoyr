@@ -100,9 +100,9 @@ export default function PricingPage() {
           <h1 className="font-serif text-4xl sm:text-5xl leading-[1.05] tracking-tight text-neutral-50">
             One price a year.
             <br />
-            <span className="text-neutral-500">No per-invoice fees, ever.</span>
+            <span className="text-neutral-400">No per-invoice fees, ever.</span>
           </h1>
-          <p className="mt-6 text-lg text-neutral-400">
+          <p className="mt-6 text-lg text-neutral-200">
             Every plan is billed annually and includes a 7-day free trial — no card required.
             Start on Starter, move up when your business does.
           </p>
@@ -125,9 +125,9 @@ export default function PricingPage() {
                 </div>
                 <div className="mt-5 flex items-baseline gap-1">
                   <span className="font-serif text-4xl text-neutral-50">{plan.price}</span>
-                  <span className="text-sm text-neutral-500">{plan.period}</span>
+                  <span className="text-sm text-neutral-400">{plan.period}</span>
                 </div>
-                <p className="mt-1 text-sm text-neutral-500">{plan.users}</p>
+                <p className="mt-1 text-sm text-neutral-400">{plan.users}</p>
                 <Link
                   href="/signup"
                   className={`mt-8 block text-center py-2.5 rounded-lg text-sm font-medium transition-colors ${
@@ -150,7 +150,7 @@ export default function PricingPage() {
             <table className="w-full min-w-[640px] text-base border-separate border-spacing-0">
               <thead>
                 <tr>
-                  <th className="text-left font-normal text-neutral-500 pb-4 w-2/5">Feature</th>
+                  <th className="text-left font-normal text-neutral-400 pb-4 w-2/5">Feature</th>
                   {plans.map((p) => (
                     <th
                       key={p.id}
@@ -167,7 +167,7 @@ export default function PricingPage() {
                     <tr>
                       <td
                         colSpan={4}
-                        className="pt-8 pb-3 text-[11px] uppercase tracking-widest text-neutral-600 border-b border-neutral-800/60"
+                        className="pt-8 pb-3 text-[11px] uppercase tracking-widest text-neutral-400 border-b border-neutral-800/60"
                       >
                         {group.title}
                       </td>
@@ -195,7 +195,7 @@ export default function PricingPage() {
 
         {/* Close */}
         <div className="mt-20 border-t border-neutral-800/60 pt-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <p className="text-neutral-400">
+          <p className="text-neutral-200">
             Not sure which plan? Start on the 7-day trial — you can change tier any time.
           </p>
           <Link
