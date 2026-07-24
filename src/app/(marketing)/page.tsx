@@ -169,25 +169,32 @@ export default function HomePage() {
 
           <div className="mt-16 grid gap-4 lg:grid-cols-3">
             {/* Payments — tall, phone */}
-            <div className="flex flex-col overflow-hidden rounded-2xl border border-neutral-800 bg-gradient-to-br from-emerald-800/25 via-neutral-900 to-neutral-950 p-8">
+            <div className="relative flex flex-col overflow-hidden rounded-2xl border border-neutral-800 bg-gradient-to-br from-emerald-800/25 via-neutral-900 to-neutral-950 p-8">
               <h3 className="font-serif text-2xl text-neutral-50">Payments everywhere</h3>
               <p className="mt-3 text-neutral-400 leading-relaxed">Card, PayPal or bank transfer — your client taps the link and pays from their phone, so you get paid on the go.</p>
-              <div className="relative mx-auto mt-8 w-56 overflow-hidden rounded-3xl border-8 border-neutral-800 bg-neutral-950 shadow-2xl shadow-black/60">
-                <div className="flex items-center justify-between px-4 pb-1 pt-3 font-mono text-[9px] text-neutral-400">
-                  <span>9:41</span><span>5G ▬▬▬</span>
-                </div>
-                <div className="p-4 pb-6">
-                  <div className="rounded-lg bg-neutral-900 px-3 py-2.5">
-                    <p className="font-serif text-sm text-neutral-50">TJN Agency</p>
-                    <p className="font-mono text-[9px] text-neutral-500">#INV-0042</p>
+              <div className="h-80" aria-hidden />
+              <div className="absolute inset-x-0 top-44 flex justify-center">
+                <div className="w-72 rounded-t-3xl border-8 border-b-0 border-neutral-800 bg-neutral-950 shadow-2xl shadow-black/60">
+                  <div className="flex items-center justify-between px-5 pb-1 pt-3 font-mono text-[10px] text-neutral-400">
+                    <span>9:41</span><span>5G ▬▬▬</span>
                   </div>
-                  <div className="mt-3 flex items-baseline justify-between">
-                    <span className="text-[11px] text-neutral-500">Amount due</span>
-                    <span className="font-serif text-xl text-neutral-50">£6,000</span>
+                  <div className="px-5 pb-8 pt-2">
+                    <div className="rounded-lg bg-neutral-900 px-4 py-3">
+                      <p className="font-serif text-base text-neutral-50">TJN Agency</p>
+                      <p className="font-mono text-[10px] text-neutral-500">#INV-0042</p>
+                    </div>
+                    <div className="mt-4 flex items-baseline justify-between">
+                      <span className="text-xs text-neutral-500">Amount due</span>
+                      <span className="font-serif text-2xl text-neutral-50">£6,000</span>
+                    </div>
+                    <div className="mt-4 rounded-lg bg-neutral-50 py-2.5 text-center text-xs font-medium text-neutral-950">Pay now</div>
+                    <div className="mt-2 rounded-lg border border-neutral-800 py-2.5 text-center text-xs text-neutral-300">Pay with PayPal</div>
+                    <p className="mt-4 text-center font-mono text-[9px] uppercase tracking-[0.12em] text-neutral-600">Or pay by bank transfer</p>
+                    <div className="mt-3 grid grid-cols-2 gap-2 text-[10px]">
+                      <div><p className="text-neutral-500">Account</p><p className="text-neutral-200">TJN Agency</p></div>
+                      <div><p className="text-neutral-500">Sort code</p><p className="text-neutral-200">04-00-35</p></div>
+                    </div>
                   </div>
-                  <div className="mt-3 rounded-lg bg-neutral-50 py-2 text-center text-[11px] font-medium text-neutral-950">Pay now</div>
-                  <div className="mt-2 rounded-lg border border-neutral-800 py-2 text-center text-[11px] text-neutral-300">Pay with PayPal</div>
-                  <p className="mt-3 text-center font-mono text-[8px] uppercase tracking-[0.12em] text-neutral-600">Or pay by bank transfer</p>
                 </div>
               </div>
             </div>
