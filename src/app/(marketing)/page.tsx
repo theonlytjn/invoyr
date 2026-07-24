@@ -10,13 +10,6 @@ export const metadata: Metadata = {
 const KICKER = "font-mono text-xs uppercase tracking-[0.14em] text-neutral-500";
 const CONTAINER = "max-w-[1600px] mx-auto px-6 lg:px-12";
 
-const BENEFITS = [
-  { n: "01", title: "Professional invoices", body: "Four templates, your logo and accent colour. Send as a PDF or a pay link." },
-  { n: "02", title: "Payments everywhere", body: "Stripe card payments on every plan, plus PayPal and bank transfer." },
-  { n: "03", title: "Automated reminders", body: "Polite nudges at 7, 14 and 30 days overdue — sent automatically, in your name." },
-  { n: "04", title: "Full visibility", body: "Paid, outstanding and overdue at a glance — with estimates, expenses and reports." },
-];
-
 const FEATURES = [
   { title: "Invoices & estimates", body: "Send quotes, convert to invoices, set recurring bills for retainers." },
   { title: "Payments, built in", body: "A pay link with Stripe, PayPal and bank transfer. Marked paid automatically." },
@@ -98,7 +91,7 @@ export default function HomePage() {
       <section className="border-t border-neutral-900">
         <div className={`${CONTAINER} py-24`}>
           <p className={KICKER}>Reports &amp; reminders</p>
-          <h2 className="mt-6 max-w-4xl font-serif text-[clamp(2.5rem,5.5vw,5rem)] leading-[1.02] tracking-tight text-neutral-50">
+          <h2 className="mt-6 max-w-4xl font-serif text-4xl sm:text-5xl lg:text-6xl leading-[1.05] tracking-tight text-neutral-50">
             See where you stand — then never chase again.
           </h2>
           <p className="mt-6 max-w-2xl text-lg text-neutral-400 leading-relaxed">
@@ -166,24 +159,93 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* BENEFITS */}
+      {/* BENEFITS — bento grid */}
       <section className="border-t border-neutral-900">
         <div className={`${CONTAINER} py-24`}>
-          <h2 className="font-serif text-4xl md:text-5xl leading-[1.02] text-neutral-50 max-w-2xl">
-            Why businesses get
-            <br />
-            paid faster with Invoyr
+          <p className={`${KICKER} text-center`}>Everything you need</p>
+          <h2 className="mx-auto mt-6 max-w-3xl text-center font-serif text-4xl sm:text-5xl lg:text-6xl leading-[1.05] tracking-tight text-neutral-50">
+            Why businesses get paid faster with Invoyr
           </h2>
-          <div className="mt-14 grid sm:grid-cols-2 gap-x-12 gap-y-12">
-            {BENEFITS.map((b) => (
-              <div key={b.n} className="flex gap-5">
-                <span className="font-serif text-3xl text-neutral-600 leading-none pt-1">{b.n}</span>
-                <div>
-                  <h3 className="font-serif text-2xl text-neutral-50">{b.title}</h3>
-                  <p className="mt-2 text-lg text-neutral-400 leading-relaxed">{b.body}</p>
+
+          <div className="mt-16 grid gap-4 lg:grid-cols-3">
+            {/* Payments — tall, phone */}
+            <div className="flex flex-col overflow-hidden rounded-2xl border border-neutral-800 bg-gradient-to-br from-emerald-800/25 via-neutral-900 to-neutral-950 p-8">
+              <h3 className="font-serif text-2xl text-neutral-50">Payments everywhere</h3>
+              <p className="mt-3 text-neutral-400 leading-relaxed">Card, PayPal or bank transfer — your client taps the link and pays from their phone, so you get paid on the go.</p>
+              <div className="relative mx-auto mt-8 w-56 overflow-hidden rounded-3xl border-8 border-neutral-800 bg-neutral-950 shadow-2xl shadow-black/60">
+                <div className="flex items-center justify-between px-4 pb-1 pt-3 font-mono text-[9px] text-neutral-400">
+                  <span>9:41</span><span>5G ▬▬▬</span>
+                </div>
+                <div className="p-4 pb-6">
+                  <div className="rounded-lg bg-neutral-900 px-3 py-2.5">
+                    <p className="font-serif text-sm text-neutral-50">TJN Agency</p>
+                    <p className="font-mono text-[9px] text-neutral-500">#INV-0042</p>
+                  </div>
+                  <div className="mt-3 flex items-baseline justify-between">
+                    <span className="text-[11px] text-neutral-500">Amount due</span>
+                    <span className="font-serif text-xl text-neutral-50">£6,000</span>
+                  </div>
+                  <div className="mt-3 rounded-lg bg-neutral-50 py-2 text-center text-[11px] font-medium text-neutral-950">Pay now</div>
+                  <div className="mt-2 rounded-lg border border-neutral-800 py-2 text-center text-[11px] text-neutral-300">Pay with PayPal</div>
+                  <p className="mt-3 text-center font-mono text-[8px] uppercase tracking-[0.12em] text-neutral-600">Or pay by bank transfer</p>
                 </div>
               </div>
-            ))}
+            </div>
+
+            {/* Middle column */}
+            <div className="flex flex-col gap-4">
+              {/* Full visibility */}
+              <div className="flex flex-1 flex-col rounded-2xl border border-neutral-800 bg-gradient-to-br from-emerald-800/25 via-neutral-900 to-neutral-950 p-8">
+                <h3 className="font-serif text-2xl text-neutral-50">Full visibility</h3>
+                <p className="mt-3 text-neutral-400 leading-relaxed">Paid, outstanding and overdue at a glance.</p>
+                <div className="mt-6 flex items-baseline gap-2">
+                  <span className="font-serif text-4xl text-neutral-50">£18,240</span>
+                  <span className="font-mono text-xs text-emerald-400">▲ 22%</span>
+                </div>
+                <div className="mt-4 flex items-end gap-1.5">
+                  {[24, 34, 28, 44, 38, 52, 46, 62, 56, 74].map((h, i) => (
+                    <div key={i} className="flex-1 rounded-t-sm" style={{ height: `${h}px`, backgroundColor: "rgba(52, 211, 153, 0.8)" }} />
+                  ))}
+                </div>
+              </div>
+              {/* Automated reminders */}
+              <div className="flex flex-1 flex-col rounded-2xl border border-neutral-800 bg-gradient-to-br from-emerald-800/25 via-neutral-900 to-neutral-950 p-8">
+                <h3 className="font-serif text-2xl text-neutral-50">Automated reminders</h3>
+                <p className="mt-3 text-neutral-400 leading-relaxed">Overdue invoices chased for you at 7, 14 and 30 days — in your name.</p>
+                <div className="mt-6 flex items-center gap-2">
+                  {["7d", "14d", "30d"].map((d, i) => (
+                    <div key={d} className="flex items-center gap-2">
+                      <span className="grid h-11 w-11 place-items-center rounded-full border border-neutral-800 bg-neutral-950 font-mono text-xs text-emerald-400">{d}</span>
+                      {i < 2 && <span className="h-px w-6 bg-neutral-800" />}
+                    </div>
+                  ))}
+                  <span className="ml-auto font-mono text-[11px] text-neutral-500">auto</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Professional invoices — tall, invoice */}
+            <div className="flex flex-col overflow-hidden rounded-2xl border border-neutral-800 bg-gradient-to-br from-emerald-800/25 via-neutral-900 to-neutral-950 p-8">
+              <h3 className="font-serif text-2xl text-neutral-50">Professional invoices</h3>
+              <p className="mt-3 text-neutral-400 leading-relaxed">Four templates, your logo and accent colour — sent as a polished PDF or a pay link.</p>
+              <div className="mx-auto mt-8 w-full max-w-xs rounded-t-xl border border-b-0 border-white/10 bg-neutral-950 p-5 shadow-2xl shadow-black/60">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="font-serif text-base text-neutral-50">TJN Agency</p>
+                    <p className="mt-0.5 font-mono text-[9px] text-neutral-500">Invoice · INV-0042</p>
+                  </div>
+                  <span className="h-6 w-6 rounded bg-emerald-500/80" />
+                </div>
+                <div className="mt-5 space-y-2 border-t border-neutral-900 pt-4 text-[11px]">
+                  <div className="flex justify-between text-neutral-400"><span>Brand identity — phase 2</span><span className="text-neutral-200">£4,200</span></div>
+                  <div className="flex justify-between text-neutral-400"><span>Web design retainer</span><span className="text-neutral-200">£1,800</span></div>
+                </div>
+                <div className="mt-4 flex items-baseline justify-between border-t border-neutral-900 pt-4">
+                  <span className="text-[11px] text-neutral-500">Total</span>
+                  <span className="font-serif text-xl text-neutral-50">£6,000.00</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
