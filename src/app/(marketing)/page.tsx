@@ -399,8 +399,8 @@ export default function HomePage() {
 
       {/* TESTIMONIAL */}
       <section className="border-t border-neutral-900">
-        <div className="max-w-3xl mx-auto px-6 py-24 text-center">
-          <p className="font-serif text-3xl md:text-4xl leading-snug text-neutral-100">
+        <div className={`${CONTAINER} py-24 text-center`}>
+          <p className="mx-auto max-w-5xl font-serif text-3xl md:text-4xl leading-snug text-neutral-100">
             “Since switching to Invoyr, invoicing has become effortless. No unnecessary complexity, no wasted time, and no endless chasing for payments. We get invoices out faster, clients pay quicker, and cash flow has never been better.”
           </p>
           <div className="mt-8 flex items-center justify-center gap-3">

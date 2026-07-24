@@ -1,4 +1,5 @@
 import Link from "next/link";
+import MarketingHeader from "./MarketingHeader";
 
 const NAV = [
   { href: "/features", label: "Features" },
@@ -10,32 +11,7 @@ const NAV = [
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="dark min-h-screen flex flex-col bg-neutral-950 text-neutral-100">
-      <header className="sticky top-0 z-30 border-b border-neutral-900/80 bg-neutral-950/70 backdrop-blur">
-        <div className="max-w-[1600px] mx-auto px-6 lg:px-12 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center" aria-label="Invoyr home">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/main-logo-flat-white.svg" alt="Invoyr" className="h-12 w-auto" />
-          </Link>
-          <nav className="hidden md:flex items-center gap-8 text-base text-neutral-400">
-            {NAV.map((item) => (
-              <Link key={item.href} href={item.href} className="hover:text-neutral-100 transition-colors">
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-          <div className="flex items-center gap-5">
-            <Link href="/login" className="text-base text-neutral-400 hover:text-neutral-100 transition-colors">
-              Sign in
-            </Link>
-            <Link
-              href="/signup"
-              className="text-base font-medium text-neutral-950 bg-neutral-50 hover:bg-white px-4 py-2 rounded-lg transition-colors"
-            >
-              Get started
-            </Link>
-          </div>
-        </div>
-      </header>
+      <MarketingHeader />
 
       <main className="flex-1">{children}</main>
 
