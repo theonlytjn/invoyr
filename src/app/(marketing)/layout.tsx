@@ -14,7 +14,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
         <div className="max-w-[1600px] mx-auto px-6 lg:px-12 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center" aria-label="Invoyr home">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/main-logo-dark.svg" alt="Invoyr" className="h-12 w-auto" />
+            <img src="/main-logo-flat-white.svg" alt="Invoyr" className="h-12 w-auto" />
           </Link>
           <nav className="hidden md:flex items-center gap-8 text-base text-neutral-400">
             {NAV.map((item) => (
@@ -43,7 +43,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
         <div className="max-w-[1600px] mx-auto px-6 lg:px-12 py-14 grid grid-cols-2 md:grid-cols-4 gap-8">
           <div className="col-span-2 md:col-span-1">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/main-logo-dark.svg" alt="Invoyr" className="h-12 w-auto" />
+            <img src="/main-logo-flat-white.svg" alt="Invoyr" className="h-12 w-auto" />
             <p className="mt-4 text-base text-neutral-500 max-w-[15rem]">Invoicing that gets you paid.</p>
           </div>
           <div>
