@@ -401,13 +401,14 @@ export default function HomePage() {
       <section className="border-t border-neutral-900">
         <div className="max-w-3xl mx-auto px-6 py-24 text-center">
           <p className="font-serif text-3xl md:text-4xl leading-snug text-neutral-100">
-            “Invoyr paid for itself in the first week. Invoices go out in minutes and clients actually pay on time now.”
+            “Since switching to Invoyr, invoicing has become effortless. No unnecessary complexity, no wasted time, and no endless chasing for payments. We get invoices out faster, clients pay quicker, and cash flow has never been better.”
           </p>
           <div className="mt-8 flex items-center justify-center gap-3">
-            <span className="w-10 h-10 rounded-full bg-neutral-800" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/adam-testimonial.jpeg" alt="Adam Joy" className="h-11 w-11 rounded-full object-cover" />
             <div className="text-left">
-              <p className="text-neutral-200">Placeholder Name</p>
-              <p className="text-sm text-neutral-500">Founder, Placeholder Studio</p>
+              <p className="text-neutral-200">Adam Joy</p>
+              <p className="text-sm text-neutral-500">Nokha</p>
             </div>
           </div>
         </div>
