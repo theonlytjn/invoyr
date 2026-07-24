@@ -16,14 +16,14 @@ export default function MarketingHeader() {
 
   return (
     <header className="sticky top-0 z-30 border-b border-neutral-900/80 bg-neutral-950/70 backdrop-blur">
-      <div className="max-w-[1600px] mx-auto px-6 lg:px-12 h-16 flex items-center justify-between">
+      <div className="max-w-[1600px] mx-auto px-6 lg:px-12 py-[25px] flex items-center justify-between">
         <Link href="/" className="flex items-center" aria-label="Invoyr home" onClick={close}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/main-logo-flat-white.svg" alt="Invoyr" className="h-12 w-auto" />
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-8 text-base text-neutral-200">
+        <nav className="hidden md:flex items-center gap-8 text-[1.15rem] text-neutral-200">
           {NAV.map((item) => (
             <Link
               key={item.href}
@@ -39,13 +39,13 @@ export default function MarketingHeader() {
         <div className="hidden md:flex items-center gap-5">
           <Link
             href="/login"
-            className="rounded px-1 py-2 text-base text-neutral-200 hover:text-neutral-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
+            className="rounded px-1 py-2 text-[1.15rem] text-neutral-200 hover:text-neutral-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
           >
             Sign in
           </Link>
           <Link
             href="/signup"
-            className="text-base font-medium text-neutral-950 bg-neutral-50 hover:bg-white px-4 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
+            className="text-[1.15rem] font-medium text-neutral-950 bg-neutral-50 hover:bg-white px-4 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
           >
             Get started
           </Link>

@@ -71,7 +71,7 @@ export default function HomePage() {
     <div>
       {/* HERO */}
       <section className="relative" style={glow}>
-        <div className="mx-auto flex min-h-[calc(100svh-4rem)] max-w-4xl flex-col px-6 pt-16 pb-12 text-center">
+        <div className="mx-auto flex min-h-[calc(100svh-98px)] max-w-4xl flex-col px-6 pt-16 pb-12 text-center">
           {/* Primary hero content — centred, nudged slightly above centre */}
           <div className="flex flex-1 flex-col justify-center pb-16 sm:pb-24">
             <p className={`reveal ${KICKER} mb-8`}>Invoicing for service businesses</p>
