@@ -182,7 +182,7 @@ export default function FeaturesPage() {
           </p>
         </div>
 
-        <div className="relative mx-auto mt-14 max-w-5xl px-6">
+        <div className="relative mx-auto mt-14 max-w-[1600px] px-6 lg:px-12">
           <div className="absolute -top-6 left-1/4 right-1/4 h-24 rounded-full opacity-50 blur-2xl" style={{ background: "radial-gradient(ellipse at center, rgba(52,211,153,0.4), transparent 70%)" }} />
           <div className="relative overflow-hidden rounded-t-2xl border border-b-0 border-neutral-800 bg-neutral-950 shadow-2xl shadow-black/70">
             <div className="flex">
