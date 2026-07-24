@@ -83,16 +83,17 @@ export default function FeaturesPage() {
       <div className="max-w-[1600px] mx-auto px-6 lg:px-12 pb-8">
         {FEATURES.map((group) => (
           <section key={group.category} className="border-t border-neutral-900 py-16">
-            <div className="grid md:grid-cols-[0.9fr,2.1fr] gap-x-10 gap-y-8">
-              <h2 className={`${KICKER} md:pt-1`}>{group.category}</h2>
-              <div className="grid sm:grid-cols-2 gap-x-10 gap-y-8">
-                {group.items.map((item) => (
-                  <div key={item.title} className="border-t border-neutral-800 pt-5">
-                    <h3 className="text-xl text-neutral-100">{item.title}</h3>
-                    <p className="mt-1.5 text-base text-neutral-500 leading-relaxed">{item.desc}</p>
-                  </div>
-                ))}
-              </div>
+            <h2 className="font-serif text-3xl md:text-4xl text-neutral-50">{group.category}</h2>
+            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {group.items.map((item, idx) => (
+                <div
+                  key={item.title}
+                  className={`rounded-2xl border border-neutral-800 bg-gradient-to-br from-emerald-800/20 via-neutral-900 to-neutral-950 p-7 ${idx === 0 ? "sm:col-span-2" : ""}`}
+                >
+                  <h3 className="font-serif text-xl text-neutral-50">{item.title}</h3>
+                  <p className="mt-2 text-base text-neutral-400 leading-relaxed">{item.desc}</p>
+                </div>
+              ))}
             </div>
           </section>
         ))}
