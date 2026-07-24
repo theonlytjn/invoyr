@@ -5,6 +5,8 @@ import { PLANS, type PlanId } from "@/config/plans";
 
 export const metadata: Metadata = { title: "Pricing" };
 
+const KICKER = "font-mono text-[0.8125rem] uppercase tracking-[0.14em] text-neutral-400";
+
 // Marketing-facing comparison. Kept in step with PLAN_FEATURES in config/plans.ts.
 // `true` = included; a string = the value shown for that plan (e.g. user count).
 type Cell = boolean | string;
@@ -96,13 +98,14 @@ export default function PricingPage() {
     <div className="bg-neutral-950 text-neutral-100">
       <div className="max-w-[1600px] mx-auto px-6 lg:px-12 py-24 sm:py-32">
         {/* Header */}
-        <div className="max-w-2xl">
-          <h1 className="font-serif text-4xl sm:text-5xl leading-[1.05] tracking-tight text-neutral-50">
+        <div className="max-w-4xl mx-auto text-center">
+          <p className={`${KICKER} mb-8`}>Pricing</p>
+          <h1 className="font-serif text-[clamp(2.6rem,6vw,5rem)] leading-[0.95] tracking-tight text-neutral-50">
             One price a year.
             <br />
             <span className="text-neutral-400">No per-invoice fees, ever.</span>
           </h1>
-          <p className="mt-6 text-lg text-neutral-200">
+          <p className="mt-6 mx-auto max-w-2xl text-xl text-neutral-200 leading-relaxed">
             Every plan is billed annually and includes a 7-day free trial — no card required.
             Start on Starter, move up when your business does.
           </p>
