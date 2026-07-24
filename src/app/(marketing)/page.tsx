@@ -463,9 +463,9 @@ export default function HomePage() {
           <div className="lg:col-span-2 divide-y divide-neutral-900 border-y border-neutral-900">
             {FAQS.map((item) => (
               <details key={item.q} className="py-5 group">
-                <summary className="flex items-center justify-between cursor-pointer list-none text-lg text-neutral-100">
+                <summary className="flex items-center justify-between cursor-pointer list-none rounded text-lg text-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-100 focus-visible:ring-offset-4 focus-visible:ring-offset-neutral-950">
                   <span>{item.q}</span>
-                  <span className="text-neutral-400 transition-transform duration-200 group-open:rotate-45">+</span>
+                  <span className="text-neutral-200 transition-transform duration-200 group-open:rotate-45">+</span>
                 </summary>
                 <p className="mt-3 text-base text-neutral-400">{item.a}</p>
               </details>
