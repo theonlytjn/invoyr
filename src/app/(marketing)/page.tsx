@@ -7,7 +7,7 @@ export const metadata: Metadata = {
     "Send professional invoices, take card payments with Stripe, and let reminders chase for you. Invoicing for freelancers, agencies and service businesses.",
 };
 
-const KICKER = "font-mono text-xs uppercase tracking-[0.14em] text-neutral-400";
+const KICKER = "font-mono text-[0.8125rem] uppercase tracking-[0.14em] text-neutral-400";
 const CONTAINER = "max-w-[1600px] mx-auto px-6 lg:px-12";
 
 const TRUST_LOGOS = [
@@ -121,7 +121,7 @@ export default function HomePage() {
           <div className="mt-16 grid lg:grid-cols-2 gap-8">
             {/* Reports */}
             <div>
-              <div className="flex h-96 items-center overflow-hidden rounded-2xl border border-neutral-900 bg-gradient-to-br from-emerald-800/25 via-neutral-900 to-neutral-950 p-6 sm:p-10">
+              <div aria-hidden="true" className="flex h-96 items-center overflow-hidden rounded-2xl border border-neutral-900 bg-gradient-to-br from-emerald-800/25 via-neutral-900 to-neutral-950 p-6 sm:p-10">
                 <div className="w-full rounded-xl border border-white/10 bg-neutral-950 p-6 shadow-2xl shadow-black/50">
                   <div className="flex items-center justify-between">
                     <span className="font-serif text-xl text-neutral-50">Revenue</span>
@@ -150,7 +150,7 @@ export default function HomePage() {
 
             {/* Reminders */}
             <div>
-              <div className="flex h-96 items-center overflow-hidden rounded-2xl border border-neutral-900 bg-gradient-to-br from-slate-600/30 via-neutral-900 to-neutral-950 p-6 sm:p-10">
+              <div aria-hidden="true" className="flex h-96 items-center overflow-hidden rounded-2xl border border-neutral-900 bg-gradient-to-br from-slate-600/30 via-neutral-900 to-neutral-950 p-6 sm:p-10">
                 <div className="w-full rounded-xl border border-white/10 bg-neutral-950 p-6 shadow-2xl shadow-black/50">
                   <div className="flex items-center justify-between">
                     <span className="font-serif text-xl text-neutral-50">INV-0042 · Northwind</span>
@@ -193,7 +193,7 @@ export default function HomePage() {
               <h3 className="font-serif text-2xl text-neutral-50">Payments everywhere</h3>
               <p className="mt-3 text-neutral-200 leading-relaxed">Card, PayPal or bank transfer — your client taps the link and pays from their phone, so you get paid on the go.</p>
               <div className="h-80" aria-hidden />
-              <div className="absolute inset-x-0 top-44 flex justify-center">
+              <div aria-hidden="true" className="absolute inset-x-0 top-44 flex justify-center">
                 <div className="w-72 rounded-t-3xl border-8 border-b-0 border-neutral-800 bg-neutral-950 shadow-2xl shadow-black/60">
                   <div className="flex items-center justify-between px-5 pb-1 pt-3 font-mono text-[10px] text-neutral-200">
                     <span>9:41</span><span>5G ▬▬▬</span>
@@ -225,7 +225,7 @@ export default function HomePage() {
               <div className="flex flex-1 flex-col rounded-2xl border border-neutral-800 bg-gradient-to-br from-emerald-800/25 via-neutral-900 to-neutral-950 p-8">
                 <h3 className="font-serif text-2xl text-neutral-50">Estimates &amp; recurring</h3>
                 <p className="mt-3 text-neutral-200 leading-relaxed">Send quotes that convert to invoices in a click, and put retainers on autopilot.</p>
-                <div className="mt-6 flex items-center gap-3">
+                <div aria-hidden="true" className="mt-6 flex items-center gap-3">
                   <span className="rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 font-mono text-xs text-neutral-300">EST-0018</span>
                   <span className="text-neutral-400">→</span>
                   <span className="rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 font-mono text-xs text-neutral-300">INV-0043</span>
@@ -236,7 +236,7 @@ export default function HomePage() {
               <div className="flex flex-1 flex-col rounded-2xl border border-neutral-800 bg-gradient-to-br from-emerald-800/25 via-neutral-900 to-neutral-950 p-8">
                 <h3 className="font-serif text-2xl text-neutral-50">Multi-currency &amp; VAT</h3>
                 <p className="mt-3 text-neutral-200 leading-relaxed">Invoice in any currency with the right VAT, and export clean for your accountant.</p>
-                <div className="mt-6 flex items-center gap-2">
+                <div aria-hidden="true" className="mt-6 flex items-center gap-2">
                   {["£", "$", "€"].map((c) => (
                     <span key={c} className="grid h-10 w-10 place-items-center rounded-full border border-neutral-800 bg-neutral-950 font-serif text-lg text-neutral-200">{c}</span>
                   ))}
@@ -250,7 +250,7 @@ export default function HomePage() {
               <h3 className="font-serif text-2xl text-neutral-50">Professional invoices</h3>
               <p className="mt-3 text-neutral-200 leading-relaxed">Four templates, your logo and accent colour — sent as a polished PDF or a pay link.</p>
               <div className="h-80" aria-hidden />
-              <div className="absolute inset-x-8 top-44">
+              <div aria-hidden="true" className="absolute inset-x-8 top-44">
                 <div className="rounded-t-xl border border-b-0 border-white/10 bg-neutral-950 p-6 shadow-2xl shadow-black/60">
                   <div className="flex items-start justify-between">
                     <div>

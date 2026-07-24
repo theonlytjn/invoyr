@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "Why we built Invoyr and what we believe about running a business.",
 };
 
-const KICKER = "font-mono text-xs uppercase tracking-[0.14em] text-neutral-400";
+const KICKER = "font-mono text-[0.8125rem] uppercase tracking-[0.14em] text-neutral-400";
 const CONTAINER = "max-w-[1600px] mx-auto px-6 lg:px-12";
 const CARD = "rounded-2xl border border-neutral-800 bg-gradient-to-br from-emerald-800/20 via-neutral-900 to-neutral-950";
 
@@ -40,7 +40,7 @@ export default function AboutPage() {
       {/* STORY + product panel */}
       <section className="border-t border-neutral-900">
         <div className={`${CONTAINER} py-20 grid items-center gap-12 lg:grid-cols-2`}>
-          <div className="space-y-5 text-lg text-neutral-200 leading-relaxed">
+          <div className="max-w-[65ch] space-y-5 text-lg text-neutral-200 leading-relaxed">
             <p>
               Every freelancer and small agency has been there: sending a Word-document invoice,
               waiting weeks to be paid, and manually chasing clients over email. It&apos;s slow,
@@ -57,7 +57,7 @@ export default function AboutPage() {
             </p>
           </div>
 
-          <div className={`${CARD} overflow-hidden p-8 sm:p-10`}>
+          <div className={`${CARD} overflow-hidden p-8 sm:p-10`} aria-hidden="true">
             <div className="rounded-xl border border-white/10 bg-neutral-950 p-6 shadow-2xl shadow-black/50">
               <div className="flex items-start justify-between">
                 <div><p className="font-serif text-lg text-neutral-50">TJN Agency</p><p className="mt-0.5 font-mono text-[10px] text-neutral-400">Invoice · INV-0042</p></div>

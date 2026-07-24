@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "How freelancers, agencies, and service businesses use Invoyr to get paid faster.",
 };
 
-const KICKER = "font-mono text-xs uppercase tracking-[0.14em] text-neutral-400";
+const KICKER = "font-mono text-[0.8125rem] uppercase tracking-[0.14em] text-neutral-400";
 
 const USE_CASES = [
   {

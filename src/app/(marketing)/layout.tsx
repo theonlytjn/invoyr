@@ -10,7 +10,7 @@ const NAV = [
 
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="dark min-h-screen flex flex-col bg-neutral-950 text-neutral-100">
+    <div className="marketing dark min-h-screen flex flex-col bg-neutral-950 text-neutral-100">
       <MarketingHeader />
 
       <main className="flex-1">{children}</main>
@@ -23,7 +23,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
             <p className="mt-4 text-base text-neutral-400 max-w-[15rem]">Invoicing that gets you paid.</p>
           </div>
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.14em] text-neutral-400 mb-4">Navigation</p>
+            <p className="font-mono text-[0.8125rem] uppercase tracking-[0.14em] text-neutral-400 mb-4">Navigation</p>
             <ul className="space-y-2.5 text-base text-neutral-200">
               {NAV.map((item) => (
                 <li key={item.href}>
@@ -33,7 +33,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
             </ul>
           </div>
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.14em] text-neutral-400 mb-4">Legal</p>
+            <p className="font-mono text-[0.8125rem] uppercase tracking-[0.14em] text-neutral-400 mb-4">Legal</p>
             <ul className="space-y-2.5 text-base text-neutral-200">
               <li><Link href="/privacy" className="hover:text-neutral-100 transition-colors">Privacy Policy</Link></li>
               <li><Link href="/terms" className="hover:text-neutral-100 transition-colors">Terms of Service</Link></li>
@@ -41,7 +41,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
             </ul>
           </div>
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.14em] text-neutral-400 mb-4">Get started</p>
+            <p className="font-mono text-[0.8125rem] uppercase tracking-[0.14em] text-neutral-400 mb-4">Get started</p>
             <ul className="space-y-2.5 text-base text-neutral-200">
               <li><Link href="/signup" className="hover:text-neutral-100 transition-colors">Start free trial</Link></li>
               <li><Link href="/login" className="hover:text-neutral-100 transition-colors">Sign in</Link></li>
@@ -49,7 +49,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
           </div>
         </div>
         <div className="border-t border-neutral-900">
-          <div className="max-w-[1600px] mx-auto px-6 lg:px-12 py-6 font-mono text-xs uppercase tracking-[0.14em] text-neutral-400">
+          <div className="max-w-[1600px] mx-auto px-6 lg:px-12 py-6 font-mono text-[0.8125rem] uppercase tracking-[0.14em] text-neutral-400">
             © {new Date().getFullYear()} Invoyr. All rights reserved.
           </div>
         </div>

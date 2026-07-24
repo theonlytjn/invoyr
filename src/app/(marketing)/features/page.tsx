@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "Everything you need to invoice clients, collect payments, and run your business.",
 };
 
-const KICKER = "font-mono text-xs uppercase tracking-[0.14em] text-neutral-400";
+const KICKER = "font-mono text-[0.8125rem] uppercase tracking-[0.14em] text-neutral-400";
 const CONTAINER = "max-w-[1600px] mx-auto px-6 lg:px-12";
 const CARD = "rounded-2xl border border-neutral-800 bg-gradient-to-br from-emerald-800/20 via-neutral-900 to-neutral-950";
 
@@ -49,7 +49,7 @@ export default function FeaturesPage() {
               <h3 className="font-serif text-2xl text-neutral-50">Get paid on the go</h3>
               <p className="mt-3 text-neutral-200 leading-relaxed">Your client taps the link and pays from their phone — card, PayPal or bank transfer.</p>
               <div className="h-80" aria-hidden />
-              <div className="absolute inset-x-0 top-44 flex justify-center">
+              <div aria-hidden="true" className="absolute inset-x-0 top-44 flex justify-center">
                 <div className="w-72 rounded-t-3xl border-8 border-b-0 border-neutral-800 bg-neutral-950 shadow-2xl shadow-black/60">
                   <div className="flex items-center justify-between px-5 pb-1 pt-3 font-mono text-[10px] text-neutral-200"><span>9:41</span><span>5G ▬▬▬</span></div>
                   <div className="px-5 pb-8 pt-2">
@@ -93,7 +93,7 @@ export default function FeaturesPage() {
               <h3 className="font-serif text-2xl text-neutral-50">Invoices that look considered</h3>
               <p className="mt-3 text-neutral-200 leading-relaxed">Four templates, your logo and accent colour — sent as a polished PDF or a pay link.</p>
               <div className="h-80" aria-hidden />
-              <div className="absolute inset-x-8 top-44">
+              <div aria-hidden="true" className="absolute inset-x-8 top-44">
                 <div className="rounded-t-xl border border-b-0 border-white/10 bg-neutral-950 p-6 shadow-2xl shadow-black/60">
                   <div className="flex items-start justify-between">
                     <div><p className="font-serif text-lg text-neutral-50">TJN Agency</p><p className="mt-0.5 font-mono text-[10px] text-neutral-400">Invoice · INV-0042</p></div>
@@ -182,7 +182,7 @@ export default function FeaturesPage() {
           </p>
         </div>
 
-        <div className="relative mx-auto mt-14 max-w-[1600px] px-6 lg:px-12">
+        <div aria-hidden="true" className="relative mx-auto mt-14 max-w-[1600px] px-6 lg:px-12">
           <div className="absolute -top-6 left-1/4 right-1/4 h-24 rounded-full opacity-50 blur-2xl" style={{ background: "radial-gradient(ellipse at center, rgba(52,211,153,0.4), transparent 70%)" }} />
           <div className="relative overflow-hidden rounded-t-2xl border border-b-0 border-neutral-800 bg-neutral-950 shadow-2xl shadow-black/70">
             <div className="flex">
