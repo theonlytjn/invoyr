@@ -17,12 +17,27 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://invoyr.io"),
   title: {
     default: "Invoyr — Invoicing for service businesses",
     template: "%s | Invoyr",
   },
   description:
     "Professional invoicing platform for freelancers, agencies, and service businesses. Create, send, and get paid faster.",
+  openGraph: {
+    type: "website",
+    siteName: "Invoyr",
+    url: "https://invoyr.io",
+    title: "Invoyr — Get paid faster",
+    description:
+      "Send professional invoices, take card payments with Stripe, and let reminders chase for you. Invoicing for freelancers, agencies and service businesses.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Invoyr — Get paid faster",
+    description:
+      "Send professional invoices, take card payments with Stripe, and let reminders chase for you. Invoicing for freelancers, agencies and service businesses.",
+  },
   appleWebApp: {
     capable: true,
     title: "Invoyr",
