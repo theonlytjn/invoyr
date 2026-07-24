@@ -71,29 +71,33 @@ export default function HomePage() {
     <div>
       {/* HERO */}
       <section className="relative" style={glow}>
-        <div className="max-w-4xl mx-auto px-6 pt-28 pb-20 text-center">
-          <p className={`reveal ${KICKER} mb-8`}>Invoicing for service businesses</p>
-          <h1 className="reveal font-serif text-[clamp(3rem,8vw,6.5rem)] leading-[0.9] tracking-tight text-neutral-50">
-            Get paid faster.
-            <br />
-            <span className="text-neutral-400">Invoicing that runs itself.</span>
-          </h1>
-          <p className="reveal mt-8 mx-auto max-w-xl text-xl text-neutral-200 leading-relaxed">
-            Send invoices that look the part, take card payments with Stripe, and let reminders chase for you — so you get paid without the admin.
-          </p>
-          <div className="reveal mt-10 flex flex-wrap justify-center gap-4">
-            <Link href="/signup" className="px-6 py-3.5 rounded-xl bg-neutral-50 text-neutral-950 font-medium text-base hover:bg-white transition-colors">
-              Start free trial
-            </Link>
-            <Link href="/pricing" className="px-6 py-3.5 rounded-xl border border-neutral-800 text-neutral-200 text-base hover:bg-neutral-900 transition-colors">
-              View pricing
-            </Link>
+        <div className="mx-auto flex min-h-[calc(100svh-4rem)] max-w-4xl flex-col px-6 pt-16 pb-12 text-center">
+          {/* Primary hero content — vertically centred in the viewport */}
+          <div className="flex flex-1 flex-col justify-center">
+            <p className={`reveal ${KICKER} mb-8`}>Invoicing for service businesses</p>
+            <h1 className="reveal font-serif text-[clamp(3rem,8vw,6.5rem)] leading-[0.9] tracking-tight text-neutral-50">
+              Get paid faster.
+              <br />
+              <span className="text-neutral-400">Invoicing that runs itself.</span>
+            </h1>
+            <p className="reveal mt-8 mx-auto max-w-xl text-xl text-neutral-200 leading-relaxed">
+              Send invoices that look the part, take card payments with Stripe, and let reminders chase for you — so you get paid without the admin.
+            </p>
+            <div className="reveal mt-10 flex flex-wrap justify-center gap-4">
+              <Link href="/signup" className="px-6 py-3.5 rounded-xl bg-neutral-50 text-neutral-950 font-medium text-base hover:bg-white transition-colors">
+                Start free trial
+              </Link>
+              <Link href="/pricing" className="px-6 py-3.5 rounded-xl border border-neutral-800 text-neutral-200 text-base hover:bg-neutral-900 transition-colors">
+                View pricing
+              </Link>
+            </div>
+            <div className="reveal mt-6 flex flex-wrap justify-center gap-x-6 gap-y-2 text-base text-neutral-400">
+              <span className="inline-flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-brand" />No credit card needed</span>
+              <span className="inline-flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-brand" />7-day free trial</span>
+            </div>
           </div>
-          <div className="reveal mt-6 flex flex-wrap justify-center gap-x-6 gap-y-2 text-base text-neutral-400">
-            <span className="inline-flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-brand" />No credit card needed</span>
-            <span className="inline-flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-brand" />7-day free trial</span>
-          </div>
-          <div className="reveal mt-16">
+          {/* Trust marquee — anchored toward the bottom of the viewport */}
+          <div className="reveal pt-12">
             <p className={`${KICKER} text-center`}>Trusted by freelancers, agencies &amp; service businesses</p>
             <div className="relative mt-8 overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_12%,black_88%,transparent)]">
               <div className="flex w-max animate-marquee items-center gap-14">
