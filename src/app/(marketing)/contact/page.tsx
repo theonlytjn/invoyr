@@ -19,7 +19,7 @@ export default function ContactPage() {
         Questions about Invoyr, pricing, or your account? We reply within one business day.
       </p>
 
-      <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-neutral-900 border-y border-neutral-900">
+      <div data-reveal className="mt-12 grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-neutral-900 border-y border-neutral-900">
         <div className="py-6 sm:pr-8">
           <h2 className={KICKER}>General enquiries</h2>
           <p className="mt-2 text-base text-neutral-400">For questions about features, plans, or how Invoyr works.</p>
@@ -36,7 +36,7 @@ export default function ContactPage() {
         </div>
       </div>
 
-      <div className="mt-12">
+      <div data-reveal className="mt-12">
         <h2 className="font-serif text-2xl text-neutral-50 mb-6">Send a message</h2>
         <ContactForm />
       </div>

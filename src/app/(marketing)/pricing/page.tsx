@@ -109,7 +109,7 @@ export default function PricingPage() {
         </div>
 
         {/* Plan headers */}
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-px bg-neutral-800/60 border border-neutral-800/60 rounded-2xl overflow-hidden">
+        <div data-reveal className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-px bg-neutral-800/60 border border-neutral-800/60 rounded-2xl overflow-hidden">
           {plans.map((plan) => {
             const popular = plan.popular;
             return (
@@ -144,7 +144,7 @@ export default function PricingPage() {
         </div>
 
         {/* Comparison matrix */}
-        <div className="mt-20">
+        <div data-reveal className="mt-20">
           <h3 className="font-serif text-2xl text-neutral-50 mb-8">What each plan includes</h3>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[640px] text-base border-separate border-spacing-0">
@@ -194,7 +194,7 @@ export default function PricingPage() {
         </div>
 
         {/* Close */}
-        <div className="mt-20 border-t border-neutral-800/60 pt-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div data-reveal className="mt-20 border-t border-neutral-800/60 pt-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <p className="text-neutral-200">
             Not sure which plan? Start on the 7-day trial — you can change tier any time.
           </p>

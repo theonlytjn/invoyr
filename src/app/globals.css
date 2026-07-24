@@ -102,6 +102,30 @@
   border-color: var(--border);
 }
 
+/* Consistent, clean interaction timing (200–300ms) across the marketing site.
+   Overrides Tailwind's 150ms default on any `transition*` utility. */
+.marketing [class*="transition"] {
+  transition-duration: 250ms;
+  transition-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* Scroll reveal (AOS-style). Elements are only hidden once JS adds
+   `.reveal-ready` AND the viewer hasn't requested reduced motion — so with JS
+   disabled or reduced motion on, all content stays fully visible. */
+@media (prefers-reduced-motion: no-preference) {
+  .reveal-ready .marketing main > section:not(:first-child),
+  .reveal-ready .marketing [data-reveal] {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 280ms ease-out, transform 280ms ease-out;
+  }
+  .reveal-ready .marketing main > section.is-visible,
+  .reveal-ready .marketing [data-reveal].is-visible {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 /* Marketing: visible keyboard focus for any interactive element that doesn't
    set its own focus-visible ring (links, buttons, summary). */
 .marketing a:focus-visible,
