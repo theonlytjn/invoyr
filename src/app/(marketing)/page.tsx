@@ -232,24 +232,36 @@ export default function HomePage() {
             </div>
 
             {/* Professional invoices — tall, invoice */}
-            <div className="flex flex-col overflow-hidden rounded-2xl border border-neutral-800 bg-gradient-to-br from-emerald-800/25 via-neutral-900 to-neutral-950 p-8">
+            <div className="relative flex flex-col overflow-hidden rounded-2xl border border-neutral-800 bg-gradient-to-br from-emerald-800/25 via-neutral-900 to-neutral-950 p-8">
               <h3 className="font-serif text-2xl text-neutral-50">Professional invoices</h3>
               <p className="mt-3 text-neutral-400 leading-relaxed">Four templates, your logo and accent colour — sent as a polished PDF or a pay link.</p>
-              <div className="mx-auto mt-8 w-full max-w-xs rounded-t-xl border border-b-0 border-white/10 bg-neutral-950 p-5 shadow-2xl shadow-black/60">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="font-serif text-base text-neutral-50">TJN Agency</p>
-                    <p className="mt-0.5 font-mono text-[9px] text-neutral-500">Invoice · INV-0042</p>
+              <div className="h-80" aria-hidden />
+              <div className="absolute inset-x-8 top-44">
+                <div className="rounded-t-xl border border-b-0 border-white/10 bg-neutral-950 p-6 shadow-2xl shadow-black/60">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="font-serif text-lg text-neutral-50">TJN Agency</p>
+                      <p className="mt-0.5 font-mono text-[10px] text-neutral-500">Invoice · INV-0042</p>
+                    </div>
+                    <span className="h-8 w-8 rounded" style={{ backgroundColor: "rgba(52, 211, 153, 0.9)" }} />
                   </div>
-                  <span className="h-6 w-6 rounded bg-emerald-500/80" />
-                </div>
-                <div className="mt-5 space-y-2 border-t border-neutral-900 pt-4 text-[11px]">
-                  <div className="flex justify-between text-neutral-400"><span>Brand identity — phase 2</span><span className="text-neutral-200">£4,200</span></div>
-                  <div className="flex justify-between text-neutral-400"><span>Web design retainer</span><span className="text-neutral-200">£1,800</span></div>
-                </div>
-                <div className="mt-4 flex items-baseline justify-between border-t border-neutral-900 pt-4">
-                  <span className="text-[11px] text-neutral-500">Total</span>
-                  <span className="font-serif text-xl text-neutral-50">£6,000.00</span>
+                  <div className="mt-5 flex justify-between border-t border-neutral-900 pt-4 text-[11px]">
+                    <div><p className="text-neutral-500">Billed to</p><p className="mt-0.5 text-neutral-200">Northwind Studio</p></div>
+                    <div className="text-right"><p className="text-neutral-500">Due</p><p className="mt-0.5 text-neutral-200">07 Jul 2026</p></div>
+                  </div>
+                  <div className="mt-5 space-y-3 border-t border-neutral-900 pt-4 text-xs">
+                    <div className="flex justify-between text-neutral-400"><span>Brand identity — phase 2</span><span className="text-neutral-200">£4,200.00</span></div>
+                    <div className="flex justify-between text-neutral-400"><span>Web design retainer</span><span className="text-neutral-200">£1,800.00</span></div>
+                    <div className="flex justify-between text-neutral-400"><span>Consultation — 6 hrs</span><span className="text-neutral-200">£600.00</span></div>
+                  </div>
+                  <div className="mt-4 space-y-2 border-t border-neutral-900 pt-4 text-xs">
+                    <div className="flex justify-between text-neutral-500"><span>Subtotal</span><span>£6,600.00</span></div>
+                    <div className="flex justify-between text-neutral-500"><span>VAT · 20%</span><span>£1,320.00</span></div>
+                  </div>
+                  <div className="mt-4 flex items-baseline justify-between border-t border-neutral-900 pt-4">
+                    <span className="text-xs text-neutral-500">Total due</span>
+                    <span className="font-serif text-2xl text-neutral-50">£7,920.00</span>
+                  </div>
                 </div>
               </div>
             </div>
