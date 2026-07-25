@@ -10,7 +10,7 @@ import { usePathname } from "next/navigation";
 // Absolutely-positioned decorative elements are skipped so their layout
 // transforms aren't clobbered. Styles live in globals.css; this only toggles
 // classes. Re-runs on route change since the marketing layout persists.
-const STEP = 70; // ms between staggered elements
+const STEP = 90; // ms between staggered elements
 
 function isEl(node: Node): node is HTMLElement {
   return node instanceof HTMLElement;
