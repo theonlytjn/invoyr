@@ -22,8 +22,10 @@ export default function ScrollReveal() {
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
+    // Page components render inside a wrapping <div>, so sections are
+    // `main > div > section` — use a descendant selector, not a direct child.
     const sections = Array.from(
-      document.querySelectorAll<HTMLElement>(".marketing main > section")
+      document.querySelectorAll<HTMLElement>(".marketing main section")
     ).slice(1); // keep the hero (first section) — it has its own load motion
     const optIns = Array.from(
       document.querySelectorAll<HTMLElement>(".marketing [data-reveal]")
