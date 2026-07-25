@@ -14,6 +14,7 @@ const MARKETING_PATHS = [
   "/contact",
   "/privacy",
   "/terms",
+  "/light", // light-theme homepage preview
 ];
 
 function isMarketingPath(pathname: string): boolean {
