@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import AppShell from "@/components/shell/AppShell";
 import { ACTIVE_ORG_COOKIE } from "@/lib/auth";
 import { getOrgPlan } from "@/lib/billing";
+import { ADMIN_EMAIL } from "@/lib/admin";
 import type { Organisation } from "@/lib/supabase/types";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -31,8 +32,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   // Comp-aware: complimentary grants win, and canceled/past_due rows don't count.
   const plan = activeOrg?.id ? await getOrgPlan(activeOrg.id) : null;
 
+  const isAdmin = user.email === ADMIN_EMAIL;
+
   return (
-    <AppShell org={activeOrg} orgs={orgs} userEmail={user.email ?? ""} plan={plan}>
+    <AppShell org={activeOrg} orgs={orgs} userEmail={user.email ?? ""} plan={plan} isAdmin={isAdmin}>
       {children}
     </AppShell>
   );

@@ -39,9 +39,10 @@ interface Props {
   orgs: Organisation[];
   userEmail: string;
   plan?: string | null;
+  isAdmin?: boolean;
 }
 
-export default function Sidebar({ org, orgs, userEmail, plan }: Props) {
+export default function Sidebar({ org, orgs, userEmail, plan, isAdmin }: Props) {
   const pathname = usePathname();
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
@@ -140,6 +141,23 @@ export default function Sidebar({ org, orgs, userEmail, plan }: Props) {
           })}
         </ul>
       </nav>
+
+      {/* Admin panel (admin only) */}
+      {isAdmin && (
+        <div className={cn("border-t border-neutral-200 dark:border-neutral-800", collapsed ? "px-3 py-3" : "px-5 py-3")}>
+          <Link
+            href="/admin"
+            title={collapsed ? "Admin panel" : undefined}
+            className={cn(
+              "flex items-center rounded-lg text-sm font-medium border border-transparent text-neutral-500 dark:text-neutral-400 transition-all duration-200 ease-in-out hover:text-neutral-950 dark:hover:text-neutral-50",
+              collapsed ? "justify-center px-0 py-2.5" : "px-3 py-2.5",
+            )}
+          >
+            <LockIcon size={20} className={cn("shrink-0", !collapsed && "mr-3")} />
+            {!collapsed && <span className="flex-1">Admin panel</span>}
+          </Link>
+        </div>
+      )}
 
       {/* User footer */}
       <div className={cn("border-t border-neutral-200 dark:border-neutral-800", collapsed ? "py-5 px-3" : "py-6 px-5")}>

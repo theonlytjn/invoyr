@@ -113,6 +113,15 @@ export default function AdminSidebar() {
 
       {/* Footer */}
       <div className="px-3 py-4 border-t border-neutral-200 dark:border-neutral-800 space-y-2">
+        <Link
+          href="/dashboard"
+          className="flex items-center gap-2.5 px-3 py-2 text-sm text-neutral-500 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-50 transition-colors rounded-lg hover:bg-white/60 dark:hover:bg-neutral-800/60 w-full border border-transparent"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
+          </svg>
+          Back to app
+        </Link>
         <div className="px-2">
           <ThemeToggle />
         </div>
