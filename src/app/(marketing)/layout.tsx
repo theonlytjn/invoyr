@@ -2,6 +2,7 @@ import Link from "next/link";
 import MarketingHeader from "./MarketingHeader";
 import ScrollReveal from "./ScrollReveal";
 import ScrollToTop from "@/components/ScrollToTop";
+import MarketingTheme from "./MarketingTheme";
 
 const NAV = [
   { href: "/features", label: "Features" },
@@ -13,13 +14,16 @@ const NAV = [
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="marketing min-h-screen flex flex-col bg-white dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100">
-      {/* No-flash theme: user override wins, else default by local time (dark 7pm–7am). */}
+      {/* No-flash theme. Only the homepage is dual-theme for now; other marketing
+          pages stay dark. On the homepage: user override wins, else default by
+          local clock (dark 7pm–7am). Theme is the `dark` class on <html>. */}
       <script
         dangerouslySetInnerHTML={{
           __html:
-            "(function(){try{var t=localStorage.getItem('invoyr-theme');var d;if(t==='dark'){d=true}else if(t==='light'){d=false}else{var h=new Date().getHours();d=(h>=19||h<7)}document.documentElement.classList.toggle('dark',d)}catch(e){}})();",
+            "(function(){try{var d;if(location.pathname==='/'){var t=localStorage.getItem('invoyr-theme');if(t==='dark'){d=true}else if(t==='light'){d=false}else{var h=new Date().getHours();d=(h>=19||h<7)}}else{d=true}document.documentElement.classList.toggle('dark',d)}catch(e){}})();",
         }}
       />
+      <MarketingTheme />
       <ScrollReveal />
       <ScrollToTop />
       <MarketingHeader />

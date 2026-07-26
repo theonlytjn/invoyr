@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import ThemeToggle from "@/components/marketing/ThemeToggle";
 
@@ -14,6 +15,8 @@ const NAV = [
 export default function MarketingHeader() {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
+  // Only the homepage is dual-theme for now, so only show the toggle there.
+  const showToggle = usePathname() === "/";
 
   return (
     <header className="sticky top-0 z-30 border-b border-neutral-200 dark:border-neutral-900/80 bg-white dark:bg-neutral-950/70 backdrop-blur">
@@ -40,7 +43,7 @@ export default function MarketingHeader() {
 
         {/* Desktop CTAs */}
         <div className="hidden md:flex items-center gap-4">
-          <ThemeToggle className="-mr-1" />
+          {showToggle && <ThemeToggle className="-mr-1" />}
           <Link
             href="/login"
             className="rounded px-1 py-2 text-[1.15rem] text-neutral-600 dark:text-neutral-200 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-950"
@@ -57,7 +60,7 @@ export default function MarketingHeader() {
 
         {/* Mobile: theme toggle + hamburger */}
         <div className="flex items-center gap-1 md:hidden -mr-1">
-          <ThemeToggle />
+          {showToggle && <ThemeToggle />}
         <button
           type="button"
           className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-neutral-600 dark:text-neutral-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-950"
