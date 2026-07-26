@@ -20,7 +20,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
       <script
         dangerouslySetInnerHTML={{
           __html:
-            "(function(){try{var d;if(location.pathname==='/'){var t=localStorage.getItem('invoyr-theme');if(t==='dark'){d=true}else if(t==='light'){d=false}else{var h=new Date().getHours();d=(h>=19||h<7)}}else{d=true}document.documentElement.classList.toggle('dark',d)}catch(e){}})();",
+            "(function(){try{var d,t=localStorage.getItem('invoyr-theme');if(t==='dark'){d=true}else if(t==='light'){d=false}else{var h=new Date().getHours();d=(h>=19||h<7)}document.documentElement.classList.toggle('dark',d)}catch(e){}})();",
         }}
       />
       <MarketingTheme />

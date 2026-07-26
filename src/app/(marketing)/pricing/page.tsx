@@ -5,7 +5,7 @@ import { PLANS, type PlanId } from "@/config/plans";
 
 export const metadata: Metadata = { title: "Pricing" };
 
-const KICKER = "font-mono text-[0.8125rem] uppercase tracking-[0.14em] text-neutral-400";
+const KICKER = "font-mono text-[0.8125rem] uppercase tracking-[0.14em] text-neutral-500 dark:text-neutral-400";
 
 // Marketing-facing comparison. Kept in step with PLAN_FEATURES in config/plans.ts.
 // `true` = included; a string = the value shown for that plan (e.g. user count).
@@ -78,16 +78,16 @@ const MATRIX: Group[] = [
 
 function Cell({ value, emphasis }: { value: Cell; emphasis?: boolean }) {
   if (typeof value === "string") {
-    return <span className={emphasis ? "text-neutral-50" : "text-neutral-300"}>{value}</span>;
+    return <span className={emphasis ? "text-neutral-900 dark:text-neutral-50" : "text-neutral-700 dark:text-neutral-300"}>{value}</span>;
   }
   if (value) {
     return (
-      <svg viewBox="0 0 16 16" className={`w-4 h-4 ${emphasis ? "text-emerald-400" : "text-emerald-500/80"}`} aria-label="Included">
+      <svg viewBox="0 0 16 16" className={`w-4 h-4 ${emphasis ? "text-emerald-600 dark:text-emerald-400" : "text-emerald-600 dark:text-emerald-500/80"}`} aria-label="Included">
         <path fill="currentColor" d="M6.2 11.3 3.4 8.5l1.1-1.1 1.7 1.7 4.2-4.2 1.1 1.1z" />
       </svg>
     );
   }
-  return <span className="text-neutral-700" aria-label="Not included">—</span>;
+  return <span className="text-neutral-700 dark:text-neutral-300" aria-label="Not included">—</span>;
 }
 
 export default function PricingPage() {
@@ -95,48 +95,48 @@ export default function PricingPage() {
   const plans = planOrder.map((id) => PLANS.find((p) => p.id === id)!);
 
   return (
-    <div className="bg-neutral-950 text-neutral-100">
+    <div className="bg-white dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100">
       <div className="max-w-[1600px] mx-auto px-6 lg:px-12 py-24 sm:py-32">
         {/* Header */}
         <div className="max-w-4xl mx-auto text-center">
           <p className={`${KICKER} mb-8`}>Pricing</p>
-          <h1 className="font-serif text-[clamp(2.6rem,6vw,5rem)] leading-[0.95] tracking-tight text-neutral-50">
+          <h1 className="font-serif text-[clamp(2.6rem,6vw,5rem)] leading-[0.95] tracking-tight text-neutral-900 dark:text-neutral-50">
             One price a year.
             <br />
-            <span className="text-neutral-400">No per-invoice fees, ever.</span>
+            <span className="text-neutral-500 dark:text-neutral-400">No per-invoice fees, ever.</span>
           </h1>
-          <p className="mt-6 mx-auto max-w-2xl text-xl text-neutral-200 leading-relaxed">
+          <p className="mt-6 mx-auto max-w-2xl text-xl text-neutral-600 dark:text-neutral-200 leading-relaxed">
             Every plan is billed annually and includes a 7-day free trial — no card required.
             Start on Starter, move up when your business does.
           </p>
         </div>
 
         {/* Plan headers */}
-        <div data-reveal className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-px bg-neutral-800/60 border border-neutral-800/60 rounded-2xl overflow-hidden">
+        <div data-reveal className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-px bg-neutral-200 dark:bg-neutral-800/60 border border-neutral-200 dark:border-neutral-800/60 rounded-2xl overflow-hidden">
           {plans.map((plan) => {
             const popular = plan.popular;
             return (
               <div
                 key={plan.id}
-                className={`p-8 flex flex-col ${popular ? "bg-neutral-900" : "bg-neutral-950"}`}
+                className={`p-8 flex flex-col ${popular ? "bg-neutral-100 dark:bg-neutral-900" : "bg-white dark:bg-neutral-950"}`}
               >
                 <div className="flex items-baseline justify-between">
-                  <h2 className="font-serif text-2xl text-neutral-50">{plan.name}</h2>
+                  <h2 className="font-serif text-2xl text-neutral-900 dark:text-neutral-50">{plan.name}</h2>
                   {popular && (
-                    <span className="text-[11px] uppercase tracking-widest text-emerald-400">Popular</span>
+                    <span className="text-[11px] uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Popular</span>
                   )}
                 </div>
                 <div className="mt-5 flex items-baseline gap-1">
-                  <span className="font-serif text-4xl text-neutral-50">{plan.price}</span>
-                  <span className="text-sm text-neutral-400">{plan.period}</span>
+                  <span className="font-serif text-4xl text-neutral-900 dark:text-neutral-50">{plan.price}</span>
+                  <span className="text-sm text-neutral-500 dark:text-neutral-400">{plan.period}</span>
                 </div>
-                <p className="mt-1 text-sm text-neutral-400">{plan.users}</p>
+                <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">{plan.users}</p>
                 <Link
                   href="/signup"
                   className={`mt-8 block text-center py-2.5 rounded-lg text-sm font-medium transition-colors ${
                     popular
-                      ? "bg-neutral-50 text-neutral-950 hover:bg-white"
-                      : "border border-neutral-700 text-neutral-100 hover:bg-neutral-900"
+                      ? "bg-neutral-950 dark:bg-neutral-50 text-white dark:text-neutral-950 hover:bg-neutral-800 dark:hover:bg-white"
+                      : "border border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-900"
                   }`}
                 >
                   Start free trial
@@ -148,16 +148,16 @@ export default function PricingPage() {
 
         {/* Comparison matrix */}
         <div data-reveal className="mt-20">
-          <h3 className="font-serif text-2xl text-neutral-50 mb-8">What each plan includes</h3>
+          <h3 className="font-serif text-2xl text-neutral-900 dark:text-neutral-50 mb-8">What each plan includes</h3>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[640px] text-base border-separate border-spacing-0">
               <thead>
                 <tr>
-                  <th className="text-left font-normal text-neutral-400 pb-4 w-2/5">Feature</th>
+                  <th className="text-left font-normal text-neutral-500 dark:text-neutral-400 pb-4 w-2/5">Feature</th>
                   {plans.map((p) => (
                     <th
                       key={p.id}
-                      className={`text-center pb-4 font-medium ${p.popular ? "text-neutral-50" : "text-neutral-300"}`}
+                      className={`text-center pb-4 font-medium ${p.popular ? "text-neutral-900 dark:text-neutral-50" : "text-neutral-700 dark:text-neutral-300"}`}
                     >
                       {p.name}
                     </th>
@@ -170,21 +170,21 @@ export default function PricingPage() {
                     <tr>
                       <td
                         colSpan={4}
-                        className="pt-8 pb-3 text-[11px] uppercase tracking-widest text-neutral-400 border-b border-neutral-800/60"
+                        className="pt-8 pb-3 text-[11px] uppercase tracking-widest text-neutral-500 dark:text-neutral-400 border-b border-neutral-200 dark:border-neutral-800/60"
                       >
                         {group.title}
                       </td>
                     </tr>
                     {group.rows.map((row) => (
                       <tr key={row.label} className="group">
-                        <td className="py-3 pr-4 text-neutral-300 border-b border-neutral-900">{row.label}</td>
-                        <td className="py-3 text-center border-b border-neutral-900">
+                        <td className="py-3 pr-4 text-neutral-700 dark:text-neutral-300 border-b border-neutral-200 dark:border-neutral-900">{row.label}</td>
+                        <td className="py-3 text-center border-b border-neutral-200 dark:border-neutral-900">
                           <span className="inline-flex justify-center w-full"><Cell value={row.starter} /></span>
                         </td>
-                        <td className="py-3 text-center border-b border-neutral-900 bg-neutral-900/40">
+                        <td className="py-3 text-center border-b border-neutral-200 dark:border-neutral-900 bg-neutral-100 dark:bg-neutral-900/40">
                           <span className="inline-flex justify-center w-full"><Cell value={row.business} emphasis /></span>
                         </td>
-                        <td className="py-3 text-center border-b border-neutral-900">
+                        <td className="py-3 text-center border-b border-neutral-200 dark:border-neutral-900">
                           <span className="inline-flex justify-center w-full"><Cell value={row.pro} /></span>
                         </td>
                       </tr>
@@ -197,13 +197,13 @@ export default function PricingPage() {
         </div>
 
         {/* Close */}
-        <div data-reveal className="mt-20 border-t border-neutral-800/60 pt-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <p className="text-neutral-200">
+        <div data-reveal className="mt-20 border-t border-neutral-200 dark:border-neutral-800/60 pt-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <p className="text-neutral-600 dark:text-neutral-200">
             Not sure which plan? Start on the 7-day trial — you can change tier any time.
           </p>
           <Link
             href="/signup"
-            className="inline-flex justify-center px-5 py-2.5 rounded-lg bg-neutral-50 text-neutral-950 text-sm font-medium hover:bg-white transition-colors"
+            className="inline-flex justify-center px-5 py-2.5 rounded-lg bg-neutral-950 dark:bg-neutral-50 text-white dark:text-neutral-950 text-sm font-medium hover:bg-neutral-800 dark:hover:bg-white transition-colors"
           >
             Start free trial
           </Link>
