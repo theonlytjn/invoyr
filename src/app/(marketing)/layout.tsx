@@ -1,6 +1,7 @@
 import Link from "next/link";
 import MarketingHeader from "./MarketingHeader";
 import ScrollReveal from "./ScrollReveal";
+import ScrollToTop from "@/components/ScrollToTop";
 
 const NAV = [
   { href: "/features", label: "Features" },
@@ -13,6 +14,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
   return (
     <div className="marketing dark min-h-screen flex flex-col bg-neutral-950 text-neutral-100">
       <ScrollReveal />
+      <ScrollToTop />
       <MarketingHeader />
 
       <main className="flex-1">{children}</main>

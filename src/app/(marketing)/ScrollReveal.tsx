@@ -96,11 +96,20 @@ export default function ScrollReveal() {
 
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
+    window.addEventListener("load", onScroll);
     reveal(); // reveal whatever is already in view on load
+
+    // Re-check after late layout shifts (fonts/images) — important on mobile,
+    // where the initial in-view measurement can be off.
+    const t1 = window.setTimeout(reveal, 300);
+    const t2 = window.setTimeout(reveal, 900);
 
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
+      window.removeEventListener("load", onScroll);
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
     };
   }, [pathname]);
 

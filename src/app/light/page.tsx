@@ -1,5 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import ScrollReveal from "@/app/(marketing)/ScrollReveal";
+import ScrollToTop from "@/components/ScrollToTop";
 
 export const metadata: Metadata = {
   title: "Invoyr — Light preview",
@@ -47,7 +49,9 @@ const FAQS = [
 
 export default function LightHomePage() {
   return (
-    <div className="min-h-screen bg-white text-neutral-900">
+    <div className="marketing min-h-screen bg-white text-neutral-900">
+      <ScrollReveal />
+      <ScrollToTop className="bg-neutral-950 text-white hover:bg-neutral-800 focus-visible:ring-neutral-300 focus-visible:ring-offset-white" />
       {/* Preview strip */}
       <div className="bg-emerald-50 text-emerald-800 text-center text-xs py-2 px-4">
         Light-theme preview ·{" "}
@@ -81,6 +85,7 @@ export default function LightHomePage() {
         </div>
       </header>
 
+      <main>
       {/* HERO */}
       <section
         className="relative"
@@ -454,6 +459,8 @@ export default function LightHomePage() {
           </Link>
         </div>
       </section>
+
+      </main>
 
       {/* Footer */}
       <footer className="border-t border-neutral-200 bg-neutral-50">
