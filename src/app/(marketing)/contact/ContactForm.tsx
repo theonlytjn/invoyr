@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import TurnstileWidget, { turnstileConfigured } from "@/components/TurnstileWidget";
 
 const inputCls =
   "w-full rounded-lg bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 px-3.5 py-3 text-base text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 outline-none transition-colors focus:border-brand focus:ring-1 focus:ring-brand";
@@ -10,6 +11,7 @@ export default function ContactForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const [captchaToken, setCaptchaToken] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
 
   async function handleSubmit(e: React.FormEvent) {
@@ -19,7 +21,7 @@ export default function ContactForm() {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, message }),
+        body: JSON.stringify({ name, email, message, captchaToken }),
       });
       if (res.ok) {
         setStatus("sent");
@@ -59,12 +61,13 @@ export default function ContactForm() {
         <label htmlFor="message" className={labelCls}>Message</label>
         <textarea id="message" rows={5} className={`${inputCls} resize-y`} value={message} onChange={(e) => setMessage(e.target.value)} required />
       </div>
+      <TurnstileWidget onVerify={setCaptchaToken} />
       {status === "error" && (
         <p className="text-base text-red-600 dark:text-red-400">Something went wrong. Please email us directly at hello@invoyr.io.</p>
       )}
       <button
         type="submit"
-        disabled={status === "sending"}
+        disabled={status === "sending" || (turnstileConfigured && !captchaToken)}
         className="px-5 py-3 rounded-lg bg-neutral-950 dark:bg-neutral-50 text-white dark:text-neutral-950 text-base font-medium hover:bg-neutral-800 dark:hover:bg-white transition-colors disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-950"
       >
         {status === "sending" ? "Sending…" : "Send message"}

@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { friendlyAuthError } from "@/lib/auth/friendly-error";
+import TurnstileWidget, { turnstileConfigured } from "@/components/TurnstileWidget";
 import { EyeIcon, EyeSlashIcon } from "@phosphor-icons/react";
 
 export default function SignupPage() {
@@ -15,6 +16,7 @@ export default function SignupPage() {
   const [success, setSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
+  const [captchaToken, setCaptchaToken] = useState("");
 
   async function handleGoogle() {
     const supabase = createClient();
@@ -37,6 +39,7 @@ export default function SignupPage() {
       options: {
         data: { full_name: form.get("name") as string },
         emailRedirectTo: `${window.location.origin}/auth/callback`,
+        ...(captchaToken ? { captchaToken } : {}),
       },
     });
 
@@ -171,11 +174,13 @@ export default function SignupPage() {
                 </div>
               </div>
 
+              <TurnstileWidget onVerify={setCaptchaToken} />
+
               {error && <p className="text-sm text-red-600">{error}</p>}
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || (turnstileConfigured && !captchaToken)}
                 className="w-full rounded-lg bg-neutral-950 px-4 py-2.5 text-sm font-medium text-white hover:bg-neutral-800 transition-colors disabled:opacity-50"
               >
                 {loading ? "Creating account…" : "Create account"}

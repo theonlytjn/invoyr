@@ -10,6 +10,7 @@ import { InvoicePaidOwnerEmail } from "@/emails/transactional/InvoicePaidOwnerEm
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { z } from "zod";
 import { apiError } from "@/lib/api/errors";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 
 const bodySchema = z.object({ orderId: z.string().min(1).max(200) });
 
@@ -17,6 +18,9 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ token: string }> }
 ) {
+  const { success } = await rateLimit("pay-paypal-capture", clientIp(req), 15, 60);
+  if (!success) return NextResponse.json({ error: "Too many requests. Please try again shortly." }, { status: 429 });
+
   const { token } = await params;
   const parsed = bodySchema.safeParse(await req.json().catch(() => ({})));
   if (!parsed.success) return apiError("Invalid input", 400);

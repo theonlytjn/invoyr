@@ -6,6 +6,7 @@ interface Props {
   data: OnboardingData;
   onBack: () => void;
   onComplete: () => void;
+  onConsentChange: (value: boolean) => void;
   saving: boolean;
 }
 
@@ -46,7 +47,7 @@ const FEATURES = [
   },
 ];
 
-export default function StepFirstInvoice({ data, onBack, onComplete, saving }: Props) {
+export default function StepFirstInvoice({ data, onBack, onComplete, onConsentChange, saving }: Props) {
   return (
     <div className="space-y-6">
       <div>
@@ -78,6 +79,18 @@ export default function StepFirstInvoice({ data, onBack, onComplete, saving }: P
           <span className="font-medium text-neutral-950 capitalize">{data.plan} · 14-day trial</span>
         </div>
       </div>
+
+      <label className="flex items-start gap-3 rounded-xl border border-neutral-200 bg-white p-4 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={data.marketingConsent}
+          onChange={(e) => onConsentChange(e.target.checked)}
+          className="mt-0.5 h-4 w-4 shrink-0 rounded border-neutral-300 accent-neutral-950"
+        />
+        <span className="text-xs text-neutral-500">
+          Send me occasional product tips and updates by email. You can unsubscribe at any time. We&apos;ll never share your email.
+        </span>
+      </label>
 
       <div className="flex gap-3">
         <button

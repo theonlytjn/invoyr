@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { getStripe } from "@/lib/stripe/client";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 
 export async function POST(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ token: string }> }
 ) {
+  const { success } = await rateLimit("pay-checkout", clientIp(req), 10, 60);
+  if (!success) return NextResponse.json({ error: "Too many requests. Please try again shortly." }, { status: 429 });
+
   const { token } = await params;
   const supabase = await createServiceClient();
 

@@ -2,19 +2,30 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getResend } from "@/lib/resend/client";
 import { apiError, serverError } from "@/lib/api/errors";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
+import { verifyTurnstile } from "@/lib/turnstile";
 
 const bodySchema = z.object({
   name: z.string().min(1).max(100),
   email: z.string().email(),
   message: z.string().min(1).max(2000),
+  captchaToken: z.string().optional(),
 });
 
 export async function POST(req: NextRequest) {
+  const ip = clientIp(req);
+  const { success } = await rateLimit("contact", ip, 5, 60);
+  if (!success) return apiError("Too many requests. Please try again shortly.", 429);
+
   const body = await req.json().catch(() => null);
   const parsed = bodySchema.safeParse(body);
 
   if (!parsed.success) {
     return apiError("Invalid input", 400);
+  }
+
+  if (!(await verifyTurnstile(parsed.data.captchaToken, ip))) {
+    return apiError("Captcha verification failed. Please try again.", 400);
   }
 
   const { name, email, message } = parsed.data;

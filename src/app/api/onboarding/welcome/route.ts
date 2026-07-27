@@ -10,6 +10,8 @@ import { apiError } from "@/lib/api/errors";
 const bodySchema = z.object({
   orgId: z.string().uuid().optional(),
   plan: z.enum(["starter", "business", "pro"]).default("starter"),
+  // GDPR: marketing email requires explicit opt-in; default to no consent.
+  marketingConsent: z.boolean().default(false),
 });
 
 export async function POST(req: NextRequest) {
@@ -21,6 +23,7 @@ export async function POST(req: NextRequest) {
   if (!parsed.success) return apiError("Invalid input", 400);
   const orgId = parsed.data.orgId;
   const plan = parsed.data.plan;
+  const marketingConsent = parsed.data.marketingConsent;
 
   // Authorization: only act on an org the caller actually belongs to. Without
   // this, an authenticated user could write audit_logs / trigger email against
@@ -60,17 +63,21 @@ export async function POST(req: NextRequest) {
   await serviceClient.from("email_preferences").upsert(
     {
       user_id: user.id,
-      marketing_consent: true,
+      marketing_consent: marketingConsent,
+      ...(marketingConsent ? {} : { unsubscribed_at: new Date().toISOString() }),
     },
     { onConflict: "user_id" }
   );
 
-  await syncContactToAudience({
-    email: user.email!,
-    firstName,
-    userId: user.id,
-    subscribe: true,
-  });
+  // Only add the contact to the marketing audience when they've opted in.
+  if (marketingConsent) {
+    await syncContactToAudience({
+      email: user.email!,
+      firstName,
+      userId: user.id,
+      subscribe: true,
+    });
+  }
 
   if (orgId) {
     await sendTransactionalEmail({

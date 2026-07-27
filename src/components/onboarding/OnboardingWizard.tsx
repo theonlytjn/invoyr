@@ -28,6 +28,7 @@ export type OnboardingData = {
   logoUrl: string;
   accentColor: string;
   plan: string;
+  marketingConsent: boolean;
 };
 
 const STEPS = [
@@ -53,6 +54,7 @@ export default function OnboardingWizard({ userId, userName }: Props) {
     logoUrl: "",
     accentColor: "#111827",
     plan: "starter",
+    marketingConsent: false,
   });
 
   function update(patch: Partial<OnboardingData>) {
@@ -114,7 +116,7 @@ export default function OnboardingWizard({ userId, userName }: Props) {
     await fetch("/api/onboarding/welcome", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ orgId, plan: data.plan }),
+      body: JSON.stringify({ orgId, plan: data.plan, marketingConsent: data.marketingConsent }),
     }).catch(() => {});
 
     window.location.href = "/dashboard";
@@ -188,7 +190,7 @@ export default function OnboardingWizard({ userId, userName }: Props) {
             {step === 1 && <StepOrgSetup data={data} update={update} onNext={() => setStep(2)} />}
             {step === 2 && <StepBranding data={data} update={update} onBack={() => setStep(1)} onNext={() => setStep(3)} />}
             {step === 3 && <StepPlanSelection data={data} update={update} onBack={() => setStep(2)} onNext={() => setStep(4)} />}
-            {step === 4 && <StepFirstInvoice data={data} onBack={() => setStep(3)} onComplete={complete} saving={saving} />}
+            {step === 4 && <StepFirstInvoice data={data} onBack={() => setStep(3)} onComplete={complete} onConsentChange={(v) => update({ marketingConsent: v })} saving={saving} />}
           </div>
         </div>
       </div>
