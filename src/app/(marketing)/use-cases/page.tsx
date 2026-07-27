@@ -96,8 +96,8 @@ export default function UseCasesPage() {
               <div className="w-52 shrink-0 border-r border-neutral-200 dark:border-neutral-900 p-4">
                 <span className="px-1 font-serif text-lg text-neutral-900 dark:text-neutral-50">Invoyr</span>
                 <div className="mt-4 flex items-center gap-2 rounded-lg border border-neutral-200 dark:border-neutral-800 p-2.5">
-                  <span className="grid h-7 w-7 place-items-center rounded bg-neutral-200 dark:bg-neutral-800 text-xs text-neutral-600 dark:text-neutral-200">T</span>
-                  <div><p className="text-xs text-neutral-900 dark:text-neutral-100">TJN Agency</p><p className="text-[10px] text-neutral-500 dark:text-neutral-400">Pro Plan</p></div>
+                  <span className="grid h-7 w-7 place-items-center rounded bg-neutral-200 dark:bg-neutral-800 text-xs text-neutral-600 dark:text-neutral-200">N</span>
+                  <div><p className="text-xs text-neutral-900 dark:text-neutral-100">Northbridge Creative Ltd</p><p className="text-[10px] text-neutral-500 dark:text-neutral-400">Pro Plan</p></div>
                 </div>
                 <div className="mt-3 rounded-lg bg-neutral-950 dark:bg-neutral-50 py-2 text-center text-xs font-medium text-white dark:text-neutral-950">+ New invoice</div>
                 <nav className="mt-4 space-y-0.5 text-xs">
@@ -111,8 +111,8 @@ export default function UseCasesPage() {
                   <span className="text-sm text-neutral-700 dark:text-neutral-300">Dashboard</span>
                   <span className="rounded-lg bg-neutral-950 dark:bg-neutral-50 px-3 py-1.5 text-xs font-medium text-white dark:text-neutral-950">+ New invoice</span>
                 </div>
-                <p className="mt-5 font-serif text-2xl text-neutral-900 dark:text-neutral-50">Welcome back, Tony</p>
-                <p className="text-xs text-neutral-500 dark:text-neutral-400">Here&apos;s what&apos;s happening with TJN Agency.</p>
+                <p className="mt-5 font-serif text-2xl text-neutral-900 dark:text-neutral-50">Welcome back, Adam</p>
+                <p className="text-xs text-neutral-500 dark:text-neutral-400">Here&apos;s what&apos;s happening with Northbridge Creative Ltd.</p>
                 <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
                   {[
                     ["Revenue this month", "£4.2k", "£61.8k all time"],
@@ -130,9 +130,9 @@ export default function UseCasesPage() {
                 <div className="mt-4 rounded-xl border border-neutral-200 dark:border-neutral-900">
                   <div className="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-900 px-4 py-3"><span className="text-xs text-neutral-700 dark:text-neutral-300">Latest invoices</span><span className="text-[10px] text-neutral-500 dark:text-neutral-400">View all →</span></div>
                   {[
-                    ["INV-0042", "Northwind Studio", "Sent", "#60a5fa", "£6,000.00"],
-                    ["INV-0039", "Bright & Co", "Overdue", "#f87171", "£420.00"],
-                    ["INV-0037", "Harbor Films", "Paid", "#34d399", "£2,150.00"],
+                    ["INV-0042", "Atlas Digital Studio Ltd", "Sent", "#60a5fa", "£6,000.00"],
+                    ["INV-0039", "Oakstone Developments Ltd", "Overdue", "#f87171", "£420.00"],
+                    ["INV-0037", "Elevate Tech Solutions Ltd", "Paid", "#34d399", "£2,150.00"],
                   ].map(([num, client, status, color, amount]) => (
                     <div key={num} className="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-900 px-4 py-3 text-xs last:border-b-0">
                       <span className="w-24 text-neutral-900 dark:text-neutral-100">{num}</span>

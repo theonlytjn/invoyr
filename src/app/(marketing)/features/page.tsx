@@ -53,7 +53,7 @@ export default function FeaturesPage() {
                 <div className="w-72 rounded-t-3xl border-8 border-b-0 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 shadow-2xl shadow-neutral-900/10 dark:shadow-black/60">
                   <div className="flex items-center justify-between px-5 pb-1 pt-3 font-mono text-[10px] text-neutral-600 dark:text-neutral-200"><span>9:41</span><span>5G ▬▬▬</span></div>
                   <div className="px-5 pb-8 pt-2">
-                    <div className="rounded-lg bg-neutral-100 dark:bg-neutral-900 px-4 py-3"><p className="font-serif text-base text-neutral-900 dark:text-neutral-50">TJN Agency</p><p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400">#INV-0042</p></div>
+                    <div className="rounded-lg bg-neutral-100 dark:bg-neutral-900 px-4 py-3"><p className="font-serif text-base text-neutral-900 dark:text-neutral-50">Northbridge Creative Ltd</p><p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400">#INV-0042</p></div>
                     <div className="mt-4 flex items-baseline justify-between"><span className="text-xs text-neutral-500 dark:text-neutral-400">Amount due</span><span className="font-serif text-2xl text-neutral-900 dark:text-neutral-50">£6,000</span></div>
                     <div className="mt-4 rounded-lg bg-neutral-950 dark:bg-neutral-50 py-2.5 text-center text-xs font-medium text-white dark:text-neutral-950">Pay now</div>
                     <div className="mt-2 rounded-lg border border-neutral-200 dark:border-neutral-800 py-2.5 text-center text-xs text-neutral-700 dark:text-neutral-300">Pay with PayPal</div>
@@ -96,11 +96,11 @@ export default function FeaturesPage() {
               <div aria-hidden="true" className="absolute inset-x-8 top-44">
                 <div className="rounded-t-xl border border-b-0 border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-950 p-6 shadow-2xl shadow-neutral-900/10 dark:shadow-black/60">
                   <div className="flex items-start justify-between">
-                    <div><p className="font-serif text-lg text-neutral-900 dark:text-neutral-50">TJN Agency</p><p className="mt-0.5 font-mono text-[10px] text-neutral-500 dark:text-neutral-400">Invoice · INV-0042</p></div>
+                    <div><p className="font-serif text-lg text-neutral-900 dark:text-neutral-50">Northbridge Creative Ltd</p><p className="mt-0.5 font-mono text-[10px] text-neutral-500 dark:text-neutral-400">Invoice · INV-0042</p></div>
                     <span className="h-8 w-8 rounded" style={{ backgroundColor: "rgba(52, 211, 153, 0.9)" }} />
                   </div>
                   <div className="mt-5 flex justify-between border-t border-neutral-200 dark:border-neutral-900 pt-4 text-[11px]">
-                    <div><p className="text-neutral-500 dark:text-neutral-400">Billed to</p><p className="mt-0.5 text-neutral-600 dark:text-neutral-200">Northwind Studio</p></div>
+                    <div><p className="text-neutral-500 dark:text-neutral-400">Billed to</p><p className="mt-0.5 text-neutral-600 dark:text-neutral-200">Atlas Digital Studio Ltd</p></div>
                     <div className="text-right"><p className="text-neutral-500 dark:text-neutral-400">Due</p><p className="mt-0.5 text-neutral-600 dark:text-neutral-200">07 Jul 2026</p></div>
                   </div>
                   <div className="mt-5 space-y-3 border-t border-neutral-200 dark:border-neutral-900 pt-4 text-xs">
@@ -189,8 +189,8 @@ export default function FeaturesPage() {
               <div className="w-52 shrink-0 border-r border-neutral-200 dark:border-neutral-900 p-4">
                 <span className="px-1 font-serif text-lg text-neutral-900 dark:text-neutral-50">Invoyr</span>
                 <div className="mt-4 flex items-center gap-2 rounded-lg border border-neutral-200 dark:border-neutral-800 p-2.5">
-                  <span className="grid h-7 w-7 place-items-center rounded bg-neutral-200 dark:bg-neutral-800 text-xs text-neutral-600 dark:text-neutral-200">T</span>
-                  <div><p className="text-xs text-neutral-900 dark:text-neutral-100">TJN Agency</p><p className="text-[10px] text-neutral-500 dark:text-neutral-400">Pro Plan</p></div>
+                  <span className="grid h-7 w-7 place-items-center rounded bg-neutral-200 dark:bg-neutral-800 text-xs text-neutral-600 dark:text-neutral-200">N</span>
+                  <div><p className="text-xs text-neutral-900 dark:text-neutral-100">Northbridge Creative Ltd</p><p className="text-[10px] text-neutral-500 dark:text-neutral-400">Pro Plan</p></div>
                 </div>
                 <div className="mt-3 rounded-lg bg-neutral-950 dark:bg-neutral-50 py-2 text-center text-xs font-medium text-white dark:text-neutral-950">+ New invoice</div>
                 <nav className="mt-4 space-y-0.5 text-xs">
@@ -204,14 +204,14 @@ export default function FeaturesPage() {
                   <span className="text-sm text-neutral-700 dark:text-neutral-300">Dashboard</span>
                   <span className="rounded-lg bg-neutral-950 dark:bg-neutral-50 px-3 py-1.5 text-xs font-medium text-white dark:text-neutral-950">+ New invoice</span>
                 </div>
-                <p className="mt-5 font-serif text-2xl text-neutral-900 dark:text-neutral-50">Welcome back, Tony</p>
-                <p className="text-xs text-neutral-500 dark:text-neutral-400">Here&apos;s what&apos;s happening with TJN Agency.</p>
+                <p className="mt-5 font-serif text-2xl text-neutral-900 dark:text-neutral-50">Welcome back, Adam</p>
+                <p className="text-xs text-neutral-500 dark:text-neutral-400">Here&apos;s what&apos;s happening with Northbridge Creative Ltd.</p>
                 <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
                   {[
-                    ["Revenue this month", "£0.00", "£180.00 all time"],
-                    ["Outstanding", "£12.00", "1 awaiting payment"],
+                    ["Revenue this month", "£2,520.00", "£2,700.00 all time"],
+                    ["Outstanding", "£5,040.00", "1 awaiting payment"],
                     ["Overdue", "£0.00", "None overdue"],
-                    ["Total invoices", "3", "1 paid"],
+                    ["Total invoices", "3", "2 paid"],
                   ].map(([label, value, sub]) => (
                     <div key={label} className="rounded-xl border border-neutral-200 dark:border-neutral-900 p-3">
                       <p className="font-mono text-[9px] uppercase tracking-wide text-neutral-500 dark:text-neutral-400">{label}</p>
@@ -223,9 +223,9 @@ export default function FeaturesPage() {
                 <div className="mt-4 rounded-xl border border-neutral-200 dark:border-neutral-900">
                   <div className="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-900 px-4 py-3"><span className="text-xs text-neutral-700 dark:text-neutral-300">Latest invoices</span><span className="text-[10px] text-neutral-500 dark:text-neutral-400">View all →</span></div>
                   {[
-                    ["INV-0006", "Junior Tee", "Sent", "#60a5fa", "£12.00"],
-                    ["INV-0004", "Junior Tee", "Overdue", "#f87171", "£0.00"],
-                    ["INV-0003", "Junior Tee", "Paid", "#34d399", "£180.00"],
+                    ["INV-0006", "Atlas Digital Studio Ltd", "Issued", "#eab308", "£5,040.00"],
+                    ["INV-0004", "Oakstone Developments Ltd", "Paid", "#34d399", "£2,520.00"],
+                    ["INV-0003", "Elevate Tech Solutions Ltd", "Paid", "#34d399", "£180.00"],
                   ].map(([num, client, status, color, amount]) => (
                     <div key={num} className="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-900 px-4 py-3 text-xs last:border-b-0">
                       <span className="w-24 text-neutral-900 dark:text-neutral-100">{num}</span>
