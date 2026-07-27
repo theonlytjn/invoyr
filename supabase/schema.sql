@@ -34,6 +34,11 @@ create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
 
+-- handle_new_user is only ever invoked by the trigger above (as the auth system),
+-- so it must not be callable through the PostgREST RPC endpoint by API roles.
+-- Revoke PUBLIC too: anon/authenticated inherit EXECUTE via the PUBLIC grant.
+revoke execute on function public.handle_new_user() from public, anon, authenticated;
+
 -- ----------------------------------------------------------------
 -- 1. ORGANISATIONS
 -- ----------------------------------------------------------------
@@ -438,7 +443,7 @@ create table if not exists public.marketing_contacts (
 -- TRIGGERS — updated_at
 -- ----------------------------------------------------------------
 create or replace function public.touch_updated_at()
-returns trigger language plpgsql as $$
+returns trigger language plpgsql set search_path = public as $$
 begin new.updated_at = now(); return new; end;
 $$;
 
@@ -496,7 +501,9 @@ create policy profiles_update on public.profiles for update to authenticated usi
 drop policy if exists orgs_select on public.organisations;
 create policy orgs_select on public.organisations for select to authenticated using (is_org_member(id));
 drop policy if exists orgs_insert on public.organisations;
-create policy orgs_insert on public.organisations for insert to authenticated with check (true);
+-- No authenticated INSERT policy: orgs are created server-side via the service
+-- client (src/app/api/org/create). A blanket with-check(true) previously let any
+-- signed-in user insert arbitrary organisation rows.
 drop policy if exists orgs_update on public.organisations;
 create policy orgs_update on public.organisations for update to authenticated using (is_org_owner(id)) with check (is_org_owner(id));
 drop policy if exists orgs_delete on public.organisations;
@@ -536,7 +543,9 @@ create policy invoices_update on public.invoices for update to authenticated usi
 drop policy if exists invoices_delete on public.invoices;
 create policy invoices_delete on public.invoices for delete to authenticated using (is_org_member(org_id));
 drop policy if exists invoices_public_token on public.invoices;
-create policy invoices_public_token on public.invoices for select to anon using (public_token is not null);
+-- No anon SELECT policy: public invoice access (pay page + client portal) is
+-- served server-side via the service client. A blanket "public_token is not
+-- null" would let the anon key read every tokened invoice across all orgs.
 
 -- INVOICE_ITEMS
 drop policy if exists items_select on public.invoice_items;
@@ -552,8 +561,7 @@ drop policy if exists items_delete on public.invoice_items;
 create policy items_delete on public.invoice_items for delete to authenticated
   using (exists (select 1 from public.invoices i where i.id = invoice_id and is_org_member(i.org_id)));
 drop policy if exists items_public_token on public.invoice_items;
-create policy items_public_token on public.invoice_items for select to anon
-  using (exists (select 1 from public.invoices i where i.id = invoice_id and i.public_token is not null));
+-- No anon SELECT policy (see invoices_public_token above).
 
 -- ESTIMATES
 drop policy if exists estimates_select on public.estimates;
@@ -565,7 +573,7 @@ create policy estimates_update on public.estimates for update to authenticated u
 drop policy if exists estimates_delete on public.estimates;
 create policy estimates_delete on public.estimates for delete to authenticated using (is_org_member(org_id));
 drop policy if exists estimates_public_token on public.estimates;
-create policy estimates_public_token on public.estimates for select to anon using (public_token is not null);
+-- No anon SELECT policy (see invoices_public_token above).
 
 -- ESTIMATE_ITEMS
 drop policy if exists est_items_select on public.estimate_items;
@@ -581,8 +589,7 @@ drop policy if exists est_items_delete on public.estimate_items;
 create policy est_items_delete on public.estimate_items for delete to authenticated
   using (exists (select 1 from public.estimates e where e.id = estimate_id and is_org_member(e.org_id)));
 drop policy if exists est_items_public_token on public.estimate_items;
-create policy est_items_public_token on public.estimate_items for select to anon
-  using (exists (select 1 from public.estimates e where e.id = estimate_id and e.public_token is not null));
+-- No anon SELECT policy (see invoices_public_token above).
 
 -- RECURRING_INVOICES
 drop policy if exists recurring_select on public.recurring_invoices;
