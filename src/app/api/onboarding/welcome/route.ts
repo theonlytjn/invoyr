@@ -1,22 +1,39 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createElement } from "react";
+import { z } from "zod";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { sendTransactionalEmail } from "@/lib/resend/send-transactional-email";
 import { syncContactToAudience } from "@/lib/resend/sync-audience";
 import { WelcomeEmail } from "@/emails/transactional/WelcomeEmail";
+import { apiError } from "@/lib/api/errors";
+
+const bodySchema = z.object({
+  orgId: z.string().uuid().optional(),
+  plan: z.enum(["starter", "business", "pro"]).default("starter"),
+});
+
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  let orgId: string | undefined;
-  let plan: string | undefined;
-  try {
-    const body = await req.json();
-    orgId = typeof body.orgId === "string" ? body.orgId : undefined;
-    plan = typeof body.plan === "string" ? body.plan : "starter";
-  } catch {
-    // orgId/plan optional
+  const parsed = bodySchema.safeParse(await req.json().catch(() => ({})));
+  if (!parsed.success) return apiError("Invalid input", 400);
+  const orgId = parsed.data.orgId;
+  const plan = parsed.data.plan;
+
+  // Authorization: only act on an org the caller actually belongs to. Without
+  // this, an authenticated user could write audit_logs / trigger email against
+  // an arbitrary org id via the service client below. Membership is checked
+  // through the RLS-bound user client (org_members is org-scoped).
+  if (orgId) {
+    const { data: membership } = await supabase
+      .from("org_members")
+      .select("org_id")
+      .eq("org_id", orgId)
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (!membership) return apiError("Forbidden", 403);
   }
 
   const { data: profile } = await supabase

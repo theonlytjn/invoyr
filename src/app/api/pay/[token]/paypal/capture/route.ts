@@ -8,14 +8,19 @@ import { sendTransactionalEmail } from "@/lib/resend/send-transactional-email";
 import { PaymentReceivedEmail } from "@/emails/transactional/PaymentReceivedEmail";
 import { InvoicePaidOwnerEmail } from "@/emails/transactional/InvoicePaidOwnerEmail";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { z } from "zod";
+import { apiError } from "@/lib/api/errors";
+
+const bodySchema = z.object({ orderId: z.string().min(1).max(200) });
 
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ token: string }> }
 ) {
   const { token } = await params;
-  const { orderId } = await req.json();
-  if (!orderId) return NextResponse.json({ error: "Missing orderId" }, { status: 400 });
+  const parsed = bodySchema.safeParse(await req.json().catch(() => ({})));
+  if (!parsed.success) return apiError("Invalid input", 400);
+  const { orderId } = parsed.data;
 
   const supabase = await createServiceClient();
 

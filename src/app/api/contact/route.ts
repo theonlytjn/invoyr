@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getResend } from "@/lib/resend/client";
+import { apiError, serverError } from "@/lib/api/errors";
 
 const bodySchema = z.object({
   name: z.string().min(1).max(100),
@@ -13,7 +14,7 @@ export async function POST(req: NextRequest) {
   const parsed = bodySchema.safeParse(body);
 
   if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid input" }, { status: 400 });
+    return apiError("Invalid input", 400);
   }
 
   const { name, email, message } = parsed.data;
@@ -30,7 +31,7 @@ export async function POST(req: NextRequest) {
   });
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return serverError("contact: resend send", error, "Could not send your message. Please try again.");
   }
 
   return NextResponse.json({ ok: true });

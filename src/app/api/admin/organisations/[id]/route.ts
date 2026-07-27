@@ -18,9 +18,16 @@ export async function GET(
   const { data: sub } = await supabase.from("subscriptions").select("plan, status").eq("org_id", id).maybeSingle();
   const { count: memberCount } = await supabase.from("org_members").select("id", { count: "exact", head: true }).eq("org_id", id);
 
+  // Never ship org secrets/credentials to the admin browser, even though this
+  // route is admin-gated — they're not needed by the dashboard.
+  const safeOrg: Record<string, unknown> = { ...(org as Record<string, unknown>) };
+  for (const key of ["smtp_password", "bank_account_number", "bank_iban", "bank_bic"]) {
+    delete safeOrg[key];
+  }
+
   return NextResponse.json({
     org: {
-      ...org,
+      ...safeOrg,
       subscription: sub ?? null,
       memberCount: memberCount ?? 0,
     },

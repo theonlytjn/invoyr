@@ -1,13 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { getStripe } from "@/lib/stripe/client";
+import { apiError } from "@/lib/api/errors";
+
+const bodySchema = z.object({ invoiceId: z.string().uuid() });
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { invoiceId } = await req.json();
+  const parsed = bodySchema.safeParse(await req.json().catch(() => ({})));
+  if (!parsed.success) return apiError("Invalid input", 400);
+  const { invoiceId } = parsed.data;
 
   const { data: invoice } = await supabase
     .from("invoices")

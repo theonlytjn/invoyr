@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { validateApiKey } from "@/lib/api-key-auth";
+import { serverError } from "@/lib/api/errors";
 
 export async function GET(req: NextRequest) {
   const auth = await validateApiKey(req.headers.get("authorization"));
@@ -18,6 +19,6 @@ export async function GET(req: NextRequest) {
     .order("paid_at", { ascending: false })
     .range(offset, offset + limit - 1);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return serverError("v1/payments: list", error);
   return NextResponse.json({ data, total: count ?? 0, limit, offset });
 }
