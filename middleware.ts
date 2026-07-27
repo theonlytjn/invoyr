@@ -21,13 +21,55 @@ function isMarketingPath(pathname: string): boolean {
   return MARKETING_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
 
+// Content-Security-Policy. Enforced value is set on the REQUEST header (Next.js
+// reads it to add the per-request nonce to its own scripts); the RESPONSE gets
+// it as Report-Only for now, so violations are reported but nothing is blocked
+// while we validate against the live flows (PayPal SDK, Turnstile, Supabase,
+// HugeIcons CSS). Flip to enforcing (`Content-Security-Policy`) once the report
+// is clean.
+function buildCsp(nonce: string): string {
+  return [
+    "default-src 'self'",
+    `script-src 'self' 'nonce-${nonce}' https://www.paypal.com https://www.paypalobjects.com https://challenges.cloudflare.com`,
+    "style-src 'self' 'unsafe-inline' https://cdn.hugeicons.com",
+    "img-src 'self' data: blob: https:",
+    "font-src 'self' data: https://cdn.hugeicons.com",
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com https://www.paypal.com https://api.paypal.com https://api-m.paypal.com https://api.sandbox.paypal.com https://api-m.sandbox.paypal.com",
+    "frame-src 'self' https://challenges.cloudflare.com https://www.paypal.com https://*.paypal.com",
+    "worker-src 'self' blob:",
+    "manifest-src 'self'",
+    "base-uri 'self'",
+    "form-action 'self' https://www.paypal.com",
+    "frame-ancestors 'self'",
+    "object-src 'none'",
+  ].join("; ");
+}
+
 export async function middleware(request: NextRequest) {
   const hostname = request.headers.get("host") ?? "";
   const pathname = request.nextUrl.pathname;
 
+  // Per-request nonce + CSP. The enforced CSP goes on the request headers so
+  // Next.js nonces its own inline scripts; responses get it Report-Only.
+  const nonce = btoa(crypto.randomUUID());
+  const csp = buildCsp(nonce);
+  const applyCsp = (res: NextResponse) => {
+    res.headers.set("Content-Security-Policy-Report-Only", csp);
+    return res;
+  };
+  const nextWithNonce = () => {
+    const headers = new Headers(request.headers);
+    headers.set("x-nonce", nonce);
+    headers.set("Content-Security-Policy", csp);
+    return NextResponse.next({ request: { headers } });
+  };
+
   // ── Subdomain routing (production only) ──────────────────────────
   if (MARKETING_DOMAINS.has(hostname)) {
     // Marketing pages stay on invoyr.io; everything else goes to the app.
+    // Kept static (no per-request nonce) so the marketing site stays cacheable;
+    // it carries the static partial CSP from next.config. The nonce-based CSP is
+    // scoped to the app responses below (already dynamic, and the real XSS target).
     if (isMarketingPath(pathname)) {
       return NextResponse.next();
     }
@@ -50,7 +92,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // ── Auth guards (app.invoyr.io and localhost) ─────────────────────
-  let supabaseResponse = NextResponse.next({ request });
+  let supabaseResponse = nextWithNonce();
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -65,7 +107,9 @@ export async function middleware(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           );
-          supabaseResponse = NextResponse.next({ request });
+          // Rebuild via nextWithNonce so the refreshed cookies AND the nonce
+          // header propagate to the render.
+          supabaseResponse = nextWithNonce();
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
           );
@@ -105,7 +149,7 @@ export async function middleware(request: NextRequest) {
     if (user.email !== ADMIN_EMAIL) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
-    return supabaseResponse;
+    return applyCsp(supabaseResponse);
   }
 
   if (!user && isAppRoute) {
@@ -157,7 +201,7 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  return supabaseResponse;
+  return applyCsp(supabaseResponse);
 }
 
 export const config = {
