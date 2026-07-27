@@ -6,18 +6,18 @@ export const metadata: Metadata = {
   description: "How Invoyr collects, uses, and protects your personal data.",
 };
 
-// NOTE: Starter policy — the bracketed [ ] items (legal entity, registered
-// address, ICO/registration details) must be completed and the whole document
-// reviewed by legal counsel before launch.
+// NOTE: Starter policy with Invoyr Ltd's real entity/address filled in. Still
+// should be reviewed by legal counsel before launch (and add an ICO
+// registration reference if/when registered).
 export default function PrivacyPage() {
   return (
     <LegalDoc title="Privacy Policy" lastUpdated="27 July 2026">
       <p>
-        This Privacy Policy explains how <strong>[Invoyr Ltd]</strong> (&ldquo;Invoyr&rdquo;,
+        This Privacy Policy explains how <strong>Invoyr Ltd</strong> (&ldquo;Invoyr&rdquo;,
         &ldquo;we&rdquo;, &ldquo;us&rdquo;) collects, uses, and protects your personal data when you
         use Invoyr and its related services (the &ldquo;Service&rdquo;). We are the data controller for
         the personal data described here. If you have any questions, contact us at{" "}
-        <a href="mailto:privacy@invoyr.io">privacy@invoyr.io</a>.
+        <a href="mailto:support@invoyr.io">support@invoyr.io</a>.
       </p>
 
       <h2>1. Data we collect</h2>
@@ -76,7 +76,7 @@ export default function PrivacyPage() {
         port your data, to object to certain processing, and to withdraw consent. California residents
         (CCPA/CPRA) have rights to know, delete, correct, and opt out of &ldquo;sale&rdquo;/&ldquo;sharing&rdquo;
         of personal information — we do not sell or share personal information in that sense. To exercise
-        any right, email <a href="mailto:privacy@invoyr.io">privacy@invoyr.io</a>. You may also lodge a
+        any right, email <a href="mailto:support@invoyr.io">support@invoyr.io</a>. You may also lodge a
         complaint with your local data-protection authority (in the UK, the ICO).
       </p>
 
@@ -104,8 +104,8 @@ export default function PrivacyPage() {
 
       <h2>12. Contact</h2>
       <p>
-        <strong>[Invoyr Ltd]</strong>, <strong>[registered address]</strong>. Email:{" "}
-        <a href="mailto:privacy@invoyr.io">privacy@invoyr.io</a>.
+        <strong>Invoyr Ltd</strong>, 128 City Road, London, United Kingdom, EC1V 2NX. Email:{" "}
+        <a href="mailto:support@invoyr.io">support@invoyr.io</a>.
       </p>
     </LegalDoc>
   );

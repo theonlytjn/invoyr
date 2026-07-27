@@ -6,14 +6,14 @@ export const metadata: Metadata = {
   description: "The terms that govern your use of Invoyr.",
 };
 
-// NOTE: Starter terms — the bracketed [ ] items (legal entity, governing law)
-// must be completed and the whole document reviewed by legal counsel before launch.
+// NOTE: Starter terms with Invoyr Ltd's real entity + governing law filled in.
+// Still should be reviewed by legal counsel before launch.
 export default function TermsPage() {
   return (
     <LegalDoc title="Terms of Service" lastUpdated="27 July 2026">
       <p>
         These Terms of Service (&ldquo;Terms&rdquo;) govern your access to and use of Invoyr, provided by{" "}
-        <strong>[Invoyr Ltd]</strong> (&ldquo;Invoyr&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;). By
+        <strong>Invoyr Ltd</strong> (&ldquo;Invoyr&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;). By
         creating an account or using the Service you agree to these Terms. If you do not agree, do not
         use the Service.
       </p>
@@ -89,8 +89,8 @@ export default function TermsPage() {
 
       <h2>12. Governing law &amp; contact</h2>
       <p>
-        These Terms are governed by the laws of <strong>[England and Wales]</strong>. Questions? Email{" "}
-        <a href="mailto:hello@invoyr.io">hello@invoyr.io</a>.
+        These Terms are governed by the laws of <strong>England and Wales</strong>. Questions? Email{" "}
+        <a href="mailto:support@invoyr.io">support@invoyr.io</a>.
       </p>
     </LegalDoc>
   );

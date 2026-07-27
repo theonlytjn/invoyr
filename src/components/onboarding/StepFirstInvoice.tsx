@@ -76,7 +76,7 @@ export default function StepFirstInvoice({ data, onBack, onComplete, onConsentCh
         </div>
         <div className="mt-2 flex items-center justify-between">
           <span className="text-neutral-500">Plan</span>
-          <span className="font-medium text-neutral-950 capitalize">{data.plan} · 14-day trial</span>
+          <span className="font-medium text-neutral-950 capitalize">{data.plan} · 7-day trial</span>
         </div>
       </div>
 
