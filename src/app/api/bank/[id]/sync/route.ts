@@ -4,6 +4,7 @@ import { requireOrg } from "@/lib/auth";
 import { getOrgPlan } from "@/lib/billing";
 import { canAccess } from "@/config/plans";
 import { getValidToken, getTransactions } from "@/lib/truelayer/client";
+import { encryptToken, decryptToken } from "@/lib/crypto/tokens";
 import type { BankConnection } from "@/lib/supabase/types";
 
 export async function POST(
@@ -32,15 +33,22 @@ export async function POST(
     return NextResponse.json({ error: "Connection not found" }, { status: 404 });
   }
 
+  // Decrypt the stored tokens before use; re-encrypt any refreshed tokens.
+  const decryptedConnection = {
+    ...connection,
+    access_token: decryptToken(connection.access_token),
+    refresh_token: decryptToken(connection.refresh_token),
+  } as BankConnection;
+
   // Get a valid access token, refreshing if needed
   const accessToken = await getValidToken(
-    connection as BankConnection,
+    decryptedConnection,
     async (tokens) => {
       await supabase
         .from("bank_connections")
         .update({
-          access_token: tokens.access_token,
-          refresh_token: tokens.refresh_token,
+          access_token: encryptToken(tokens.access_token),
+          refresh_token: encryptToken(tokens.refresh_token),
           token_expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
         })
         .eq("id", id);

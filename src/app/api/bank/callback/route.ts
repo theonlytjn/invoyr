@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { exchangeCode, getAccounts } from "@/lib/truelayer/client";
 import { createClient } from "@/lib/supabase/server";
+import { encryptToken } from "@/lib/crypto/tokens";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -65,8 +66,8 @@ export async function GET(req: NextRequest) {
           account_name: account.display_name,
           account_type: account.account_type,
           currency: account.currency,
-          access_token: tokens.access_token,
-          refresh_token: tokens.refresh_token,
+          access_token: encryptToken(tokens.access_token),
+          refresh_token: encryptToken(tokens.refresh_token),
           token_expires_at: expiresAt,
         },
         { onConflict: "org_id,account_id" },

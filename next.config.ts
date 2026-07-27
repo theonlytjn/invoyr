@@ -17,6 +17,10 @@ const securityHeaders = [
   // Lock down powerful features the app doesn't use.
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), browsing-topics=()" },
   { key: "X-DNS-Prefetch-Control", value: "off" },
+  // Partial CSP: the directives that are safe without a script-src nonce.
+  // Blocks <base>/<object>/<embed> injection and clickjacking. A full
+  // script-src/connect-src policy needs a nonce-based rollout (follow-up).
+  { key: "Content-Security-Policy", value: "base-uri 'self'; object-src 'none'; frame-ancestors 'self'" },
 ];
 
 const nextConfig: NextConfig = {
