@@ -10,13 +10,21 @@ const BASE_DATA =
     ? "https://api.truelayer.com"
     : "https://api.truelayer-sandbox.com";
 
+// Live shows the real UK banks; sandbox has none of those, so it also needs
+// the fictitious Mock Bank (uk-cs-mock) or the auth dialog has nothing to
+// select. See https://docs.truelayer.com/docs/quickstart-retrieve-bank-data
+const PROVIDERS =
+  process.env.TRUELAYER_ENV === "live"
+    ? "uk-ob-all uk-oauth-all"
+    : "uk-cs-mock uk-ob-all uk-oauth-all";
+
 export function buildAuthUrl(state: string): string {
   const params = new URLSearchParams({
     response_type: "code",
     client_id: process.env.TRUELAYER_CLIENT_ID!,
     scope: "info accounts balance transactions offline_access",
     redirect_uri: process.env.TRUELAYER_REDIRECT_URI!,
-    providers: "uk-ob-all uk-oauth-all",
+    providers: PROVIDERS,
     state,
   });
   return `${BASE_AUTH}/?${params}`;
