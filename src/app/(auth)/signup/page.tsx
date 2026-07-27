@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
+import { friendlyAuthError } from "@/lib/auth/friendly-error";
 import { EyeIcon, EyeSlashIcon } from "@phosphor-icons/react";
 
 export default function SignupPage() {
@@ -40,7 +41,7 @@ export default function SignupPage() {
     });
 
     if (error) {
-      setError(error.message);
+      setError(friendlyAuthError(error.message));
       setLoading(false);
       return;
     }

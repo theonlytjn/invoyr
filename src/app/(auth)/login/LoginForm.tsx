@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
+import { friendlyAuthError } from "@/lib/auth/friendly-error";
 import { EyeIcon, EyeSlashIcon } from "@phosphor-icons/react";
 
 type LoginMode = "password" | "magic-link" | "magic-sent";
@@ -14,7 +15,13 @@ export default function LoginForm() {
   const searchParams = useSearchParams();
   const next = searchParams.get("next") ?? "/dashboard";
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // Surface a friendly message if we were bounced here from a failed/expired
+  // auth callback (e.g. a reused verification or magic link).
+  const [error, setError] = useState<string | null>(
+    searchParams.get("error")
+      ? "That sign-in link is invalid or has expired. Please try again."
+      : null,
+  );
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [mode, setMode] = useState<LoginMode>("password");
@@ -33,7 +40,7 @@ export default function LoginForm() {
     });
 
     if (error) {
-      setError(error.message);
+      setError(friendlyAuthError(error.message));
       setLoading(false);
       return;
     }
@@ -55,7 +62,7 @@ export default function LoginForm() {
 
     setLoading(false);
     if (error) {
-      setError(error.message);
+      setError(friendlyAuthError(error.message));
       return;
     }
     setMode("magic-sent");

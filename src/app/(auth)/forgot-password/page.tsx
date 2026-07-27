@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
+import { friendlyAuthError } from "@/lib/auth/friendly-error";
 
 export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false);
@@ -23,7 +24,7 @@ export default function ForgotPasswordPage() {
     );
 
     if (error) {
-      setError(error.message);
+      setError(friendlyAuthError(error.message));
       setLoading(false);
       return;
     }

@@ -31,15 +31,33 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(`${appUrl}/expenses?bank_error=invalid_state`);
   }
 
+  // Authorization: require an authenticated member of the org named in `state`.
+  // The upsert below runs under this user's RLS session, but check explicitly so
+  // the connection is never written (and errors aren't swallowed) for a caller
+  // who isn't signed in or isn't a member of that org.
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.redirect(`${appUrl}/login?next=/settings/banking`);
+  }
+  const { data: membership } = await supabase
+    .from("org_members")
+    .select("org_id")
+    .eq("org_id", orgId)
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (!membership) {
+    return NextResponse.redirect(`${appUrl}/expenses?bank_error=invalid_state`);
+  }
+
   try {
     const tokens = await exchangeCode(code);
     const accounts = await getAccounts(tokens.access_token);
 
     const expiresAt = new Date(Date.now() + tokens.expires_in * 1000).toISOString();
-    const supabase = await createClient();
 
     for (const account of accounts) {
-      await supabase.from("bank_connections").upsert(
+      const { error: upsertError } = await supabase.from("bank_connections").upsert(
         {
           org_id: orgId,
           provider: "truelayer",
@@ -53,6 +71,10 @@ export async function GET(req: NextRequest) {
         },
         { onConflict: "org_id,account_id" },
       );
+      if (upsertError) {
+        console.error("[api] bank callback: connection upsert failed:", upsertError);
+        return NextResponse.redirect(`${appUrl}/expenses?bank_error=connect_failed`);
+      }
     }
 
     return NextResponse.redirect(`${appUrl}/expenses?bank_connected=1`);

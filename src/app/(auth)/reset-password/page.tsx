@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
+import { friendlyAuthError } from "@/lib/auth/friendly-error";
 import { EyeIcon, EyeSlashIcon } from "@phosphor-icons/react";
 
 export default function ResetPasswordPage() {
@@ -34,7 +35,7 @@ export default function ResetPasswordPage() {
     const { error: updateError } = await supabase.auth.updateUser({ password });
 
     if (updateError) {
-      setError(updateError.message);
+      setError(friendlyAuthError(updateError.message));
       setLoading(false);
       return;
     }
