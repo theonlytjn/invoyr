@@ -31,12 +31,14 @@ export const metadata: Metadata = {
     title: "Invoyr — Get paid faster",
     description:
       "Send professional invoices, take card payments with Stripe, and let reminders chase for you. Invoicing for freelancers, agencies and service businesses.",
+    images: [{ url: "/social.png", width: 1200, height: 630, alt: "Invoyr — Get paid faster" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Invoyr — Get paid faster",
     description:
       "Send professional invoices, take card payments with Stripe, and let reminders chase for you. Invoicing for freelancers, agencies and service businesses.",
+    images: ["/social.png"],
   },
   appleWebApp: {
     capable: true,

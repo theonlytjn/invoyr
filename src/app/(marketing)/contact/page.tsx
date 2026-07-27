@@ -23,8 +23,8 @@ export default function ContactPage() {
         <div className="py-6 sm:pr-8">
           <h2 className={KICKER}>General enquiries</h2>
           <p className="mt-2 text-base text-neutral-500 dark:text-neutral-400">For questions about features, plans, or how Invoyr works.</p>
-          <a href="mailto:hello@invoyr.io" className="mt-2 inline-block text-base text-neutral-900 dark:text-neutral-100 hover:text-brand transition-colors">
-            hello@invoyr.io
+          <a href="mailto:support@invoyr.io" className="mt-2 inline-block text-base text-neutral-900 dark:text-neutral-100 hover:text-brand transition-colors">
+            support@invoyr.io
           </a>
         </div>
         <div className="py-6 sm:pl-8">

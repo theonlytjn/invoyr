@@ -63,7 +63,7 @@ export default function ContactForm() {
       </div>
       <TurnstileWidget onVerify={setCaptchaToken} />
       {status === "error" && (
-        <p className="text-base text-red-600 dark:text-red-400">Something went wrong. Please email us directly at hello@invoyr.io.</p>
+        <p className="text-base text-red-600 dark:text-red-400">Something went wrong. Please email us directly at support@invoyr.io.</p>
       )}
       <button
         type="submit"
