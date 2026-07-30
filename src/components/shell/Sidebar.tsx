@@ -61,7 +61,7 @@ export default function Sidebar({ org, orgs, userEmail, plan, isAdmin }: Props) 
       )}
     >
       {/* Brand */}
-      <div className={cn("flex items-center gap-3 px-5 py-6", collapsed ? "justify-center" : "justify-between")}>
+      <div className={cn("flex items-center gap-3 px-5 py-4", collapsed ? "justify-center" : "justify-between")}>
         {collapsed ? (
           <button
             onClick={() => setCollapsed(false)}
@@ -108,8 +108,8 @@ export default function Sidebar({ org, orgs, userEmail, plan, isAdmin }: Props) 
       )}
 
       {/* Nav */}
-      <nav className={cn("flex-1 py-4 overflow-y-auto", collapsed ? "px-3" : "px-5")}>
-        <ul className="space-y-1.5">
+      <nav className={cn("flex-1 py-3 overflow-y-auto", collapsed ? "px-3" : "px-5")}>
+        <ul className="space-y-1">
           {NAV_ITEMS.map(({ href, label, icon: Icon, requires }) => {
             const locked = requires ? !canAccess(plan, requires) : false;
             const active = !locked && (pathname === href || (href !== "/dashboard" && pathname.startsWith(href)));
@@ -119,8 +119,8 @@ export default function Sidebar({ org, orgs, userEmail, plan, isAdmin }: Props) 
                   href={href}
                   title={collapsed ? (locked ? `${label} — upgrade required` : label) : undefined}
                   className={cn(
-                    "flex items-center rounded-lg text-sm font-medium border transition-all duration-200 ease-in-out",
-                    collapsed ? "justify-center px-0 py-2.5" : "px-3 py-2.5",
+                    "flex items-center rounded-lg text-[16px] font-medium border transition-all duration-200 ease-in-out",
+                    collapsed ? "justify-center px-0 py-2" : "px-3 py-2",
                     active
                       ? "bg-white dark:bg-neutral-800 text-neutral-950 dark:text-neutral-50 border-neutral-200 dark:border-neutral-700 shadow-[0_0_0_2px_#ffffff,0_0_0_4px_#0a0a0a] dark:shadow-[0_0_0_2px_#171717,0_0_0_4px_#fafafa]"
                       : locked
@@ -128,7 +128,7 @@ export default function Sidebar({ org, orgs, userEmail, plan, isAdmin }: Props) 
                       : "border-transparent text-neutral-500 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-50",
                   )}
                 >
-                  <Icon size={20} className={cn("shrink-0", !collapsed && "mr-3")} />
+                  <Icon size={18} className={cn("shrink-0", !collapsed && "mr-2.5")} />
                   {!collapsed && (
                     <>
                       <span className="flex-1">{label}</span>
@@ -149,11 +149,11 @@ export default function Sidebar({ org, orgs, userEmail, plan, isAdmin }: Props) 
             href="/admin"
             title={collapsed ? "Admin panel" : undefined}
             className={cn(
-              "flex items-center rounded-lg text-sm font-medium border border-transparent text-neutral-500 dark:text-neutral-400 transition-all duration-200 ease-in-out hover:text-neutral-950 dark:hover:text-neutral-50",
-              collapsed ? "justify-center px-0 py-2.5" : "px-3 py-2.5",
+              "flex items-center rounded-lg text-[16px] font-medium border border-transparent text-neutral-500 dark:text-neutral-400 transition-all duration-200 ease-in-out hover:text-neutral-950 dark:hover:text-neutral-50",
+              collapsed ? "justify-center px-0 py-2" : "px-3 py-2",
             )}
           >
-            <LockIcon size={20} className={cn("shrink-0", !collapsed && "mr-3")} />
+            <LockIcon size={18} className={cn("shrink-0", !collapsed && "mr-2.5")} />
             {!collapsed && <span className="flex-1">Admin panel</span>}
           </Link>
         </div>
