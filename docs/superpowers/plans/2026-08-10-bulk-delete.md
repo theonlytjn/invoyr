@@ -15,7 +15,12 @@
 - Spec: `docs/superpowers/specs/2026-07-31-bulk-delete-design.md`. Read it before starting.
 - Every route validates input with Zod. Every query is scoped `.eq("org_id", org.id)`.
 - Eligibility is decided **server-side only**. The client never re-implements a rule.
-- No plan gate on delete: no `orgHasFeature` call in any of the four new routes.
+- No plan gate on delete: no `orgHasFeature` call in any of the four delete routes.
+- Part 2 gating, decided before execution: **bulk reminders and bulk PDF download are gated** on the
+  existing `bulk_invoice_actions` feature, because both scale real cost with use (emails sent,
+  PDFs rendered). **Bulk mark-as-paid and bulk duplicate are ungated**, like delete. The gate check is
+  `if (!(await orgHasFeature(org.id, "bulk_invoice_actions"))) return 403`, copied from
+  `src/app/api/invoices/bulk/void/route.ts`.
 - Hard delete. No `deleted_at` column, no trash view, no undo, no schema migration.
 - Every deleted record writes an `audit_logs` row with `meta.bulk = true`.
 - Batch cap is 50 ids per request, matching `src/app/api/invoices/bulk/void/route.ts`.
@@ -2326,6 +2331,7 @@ import { requireOrg } from "@/lib/auth";
 import { sendTransactionalEmail } from "@/lib/resend/send-transactional-email";
 import { OverdueReminderEmail } from "@/emails/transactional/OverdueReminderEmail";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { orgHasFeature } from "@/lib/billing";
 import { partitionRemind, summarise, type RemindRow } from "@/lib/bulk-actions";
 
 const schema = z.object({
@@ -2339,6 +2345,11 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const org = await requireOrg();
+
+  // Gated: each call sends real email. Same gate as bulk send and void.
+  if (!(await orgHasFeature(org.id, "bulk_invoice_actions"))) {
+    return NextResponse.json({ error: "Bulk actions require the Business plan." }, { status: 403 });
+  }
 
   const body = await req.json().catch(() => null);
   const parsed = schema.safeParse(body);
@@ -2652,6 +2663,7 @@ import { z } from "zod";
 import JSZip from "jszip";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
+import { orgHasFeature } from "@/lib/billing";
 import { renderInvoicePdf } from "@/lib/invoice-pdf";
 
 const schema = z.object({ ids: z.array(z.string().uuid()).min(1).max(50) });
@@ -2662,6 +2674,11 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const org = await requireOrg();
+
+  // Gated: rendering up to 50 PDFs is real compute. Same gate as bulk send and void.
+  if (!(await orgHasFeature(org.id, "bulk_invoice_actions"))) {
+    return NextResponse.json({ error: "Bulk actions require the Business plan." }, { status: 403 });
+  }
 
   const body = await req.json().catch(() => null);
   const parsed = schema.safeParse(body);
@@ -2761,7 +2778,8 @@ const [action, setAction] = useState<BulkAction | null>(null);
 - [ ] **Step 3: Restructure the bar**
 
 Inline: **Send** (Business only), **Mark as paid**, **Delete**. In a `More` dropdown: Export CSV,
-Download PDFs, Duplicate, Send reminders, Void (Business only). Use the existing
+Duplicate, plus **Download PDFs**, **Send reminders** and **Void** — those three Business only, so
+they render behind the same `canBulk` guard the Send and Void buttons already use. Use the existing
 `DropdownMenu`, `DropdownMenuTrigger`, `DropdownMenuContent` and `DropdownMenuItem` imports from
 `@/components/ui/dropdown-menu`, styled to sit on the dark bar. Match the button classes already used
 in the bar rather than inventing new ones.
