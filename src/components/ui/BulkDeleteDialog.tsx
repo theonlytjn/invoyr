@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -48,40 +48,63 @@ export function BulkDeleteDialog({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Identifies the current open/selection "session". A fresh object is created every
+  // time the effect below runs (dialog opened, closed, or given a new selection) and
+  // its cleanup marks the outgoing session cancelled. `handleConfirm` captures the
+  // session active at click time so that if the dialog moves on — closed, reopened,
+  // or the selection changed — before the confirm request resolves, that stale
+  // response can't overwrite state for a session it no longer belongs to.
+  const sessionRef = useRef({ cancelled: false });
+
   // Ask the server what would happen. The rules live there, not here.
   useEffect(() => {
+    const session = { cancelled: false };
+    sessionRef.current = session;
+    // A new session means any confirm in flight for the old one is now superseded
+    // and will no-op on resolution (see handleConfirm) — so `busy` must not be left
+    // stuck on from that old session either.
+    setBusy(false);
+
     if (!open) {
       setPreview(null);
       setError(null);
       return;
     }
 
-    let cancelled = false;
+    setPreview(null);
     setError(null);
 
     post(endpoint, ids, true)
       .then((result) => {
-        if (!cancelled) setPreview(result);
+        if (!session.cancelled) setPreview(result);
       })
       .catch((err: Error) => {
-        if (!cancelled) setError(err.message);
+        if (!session.cancelled) setError(err.message);
       });
 
     return () => {
-      cancelled = true;
+      session.cancelled = true;
     };
-  }, [open, endpoint, ids]);
+    // `ids` is recomputed inline by callers on every render, so its array identity
+    // changes even when the actual selection hasn't. Depending on `ids.join(",")`
+    // instead is the stable identity that reflects the real selection, and avoids
+    // restarting the dry run (and flashing the previous preview) on every
+    // unrelated parent re-render while the dialog is open.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, endpoint, ids.join(",")]);
 
   async function handleConfirm() {
+    const session = sessionRef.current;
     setBusy(true);
     setError(null);
     try {
       const result = await post(endpoint, ids, false);
+      if (session.cancelled) return; // superseded — dialog has moved on to a different session
       onDeleted(result);
     } catch (err) {
-      setError((err as Error).message);
+      if (!session.cancelled) setError((err as Error).message);
     } finally {
-      setBusy(false);
+      if (!session.cancelled) setBusy(false);
     }
   }
 
@@ -89,7 +112,15 @@ export function BulkDeleteDialog({
   const target = deletable === 1 ? noun : nounPlural;
 
   return (
-    <Dialog open={open} onOpenChange={(next) => !next && onCancel()}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        // Ignore every dismiss path — Escape, overlay click, the dialog's own close
+        // button — while a delete is in flight, not just the Cancel button.
+        if (busy) return;
+        if (!next) onCancel();
+      }}
+    >
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>
