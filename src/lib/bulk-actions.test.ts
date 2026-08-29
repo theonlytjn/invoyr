@@ -60,6 +60,16 @@ describe("partitionInvoices", () => {
       { count: 1, reason: "1 invoice has been sent — void it instead" },
     ]);
   });
+
+  it("uses plural wording for multiple voided invoices with financial records attached", () => {
+    const rows = [
+      { id: "a", invoice_number: "INV-1", status: "void", hasFinancialRecords: true },
+      { id: "b", invoice_number: "INV-2", status: "void", hasFinancialRecords: true },
+    ];
+    expect(partitionInvoices(rows).skips).toEqual([
+      { count: 2, reason: "2 invoices have payments or credit notes attached" },
+    ]);
+  });
 });
 
 describe("partitionEstimates", () => {
@@ -84,6 +94,16 @@ describe("partitionEstimates", () => {
       { count: 1, reason: "1 estimate has been converted to an invoice" },
     ]);
   });
+
+  it("uses plural wording for multiple converted estimates", () => {
+    const rows = [
+      { id: "a", estimate_number: "EST-1", converted_invoice_id: "inv-1" },
+      { id: "b", estimate_number: "EST-2", converted_invoice_id: "inv-2" },
+    ];
+    expect(partitionEstimates(rows).skips).toEqual([
+      { count: 2, reason: "2 estimates have been converted to invoices" },
+    ]);
+  });
 });
 
 describe("partitionExpenses", () => {
@@ -101,6 +121,18 @@ describe("partitionExpenses", () => {
     expect(result.deletable.map((r) => r.id)).toEqual(["a"]);
     expect(result.skips).toEqual([
       { count: 1, reason: "1 expense has been billed to an invoice" },
+    ]);
+  });
+
+  it("uses plural wording for multiple billed expenses", () => {
+    const rows = [
+      { id: "a", title: "Train", amount: 40, invoice_id: "inv-1" },
+      { id: "b", title: "Hotel", amount: 120, invoice_id: "inv-2" },
+    ];
+    // Deliberate copy quirk carried over from the brief: "an invoice" stays
+    // singular even when multiple expenses are being reported on.
+    expect(partitionExpenses(rows).skips).toEqual([
+      { count: 2, reason: "2 expenses have been billed to an invoice" },
     ]);
   });
 });
@@ -121,6 +153,13 @@ describe("partitionClients", () => {
     expect(result.deletable.map((r) => r.id)).toEqual(["a"]);
     expect(result.skips).toEqual([
       { count: 2, reason: "2 clients have invoices or expenses — archive them instead" },
+    ]);
+  });
+
+  it("uses singular wording for one client with linked records", () => {
+    const rows = [{ id: "a", name: "Acme", hasLinkedRecords: true }];
+    expect(partitionClients(rows).skips).toEqual([
+      { count: 1, reason: "1 client has invoices or expenses — archive it instead" },
     ]);
   });
 });
@@ -145,5 +184,11 @@ describe("summarise", () => {
     expect(result.deleted).toBe(1);
     expect(result.skipped).toBe(2);
     expect(result.reasons).toHaveLength(2);
+  });
+
+  it("uses singular wording for a single missing id", () => {
+    const partition = { deletable: [{ id: "a" }], skips: [] };
+    const result = summarise(partition, ["a", "b"]);
+    expect(result.reasons).toEqual([{ count: 1, reason: "1 record could not be found" }]);
   });
 });
