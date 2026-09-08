@@ -7,7 +7,10 @@ import { partitionMarkPaid, summarise } from "@/lib/bulk-actions";
 const schema = z.object({
   ids: z.array(z.string().uuid()).min(1).max(50),
   dryRun: z.boolean().optional().default(false),
-  method: z.enum(["bank_transfer", "card", "cash", "other"]).optional().default("bank_transfer"),
+  // "stripe" is a valid db value but is deliberately not offered here: Stripe payments
+  // arrive via webhook, which is the source of truth for them, and letting someone
+  // manually assert a Stripe payment in bulk would undermine that.
+  method: z.enum(["bank_transfer", "cash", "cheque", "other"]).optional().default("bank_transfer"),
   paidAt: z.string().datetime().optional(),
 });
 
