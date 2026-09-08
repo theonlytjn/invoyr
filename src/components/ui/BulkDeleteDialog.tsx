@@ -61,14 +61,21 @@ async function post(
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
-  let res: Response;
   try {
-    res = await fetch(endpoint, {
+    const res = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ids, dryRun }),
       signal: controller.signal,
     });
+
+    // The body is read inside the timeout too, not after it. Headers can arrive
+    // promptly and the body still stall; clearing the timer on headers alone
+    // would narrow the unclosable-modal trap rather than close it. Aborting the
+    // signal tears down the body stream as well, so this rejects.
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error ?? "Something went wrong. Please try again.");
+    return json as BulkActionResult;
   } catch (err) {
     if (controller.signal.aborted) {
       throw new Error(
@@ -81,10 +88,6 @@ async function post(
   } finally {
     clearTimeout(timer);
   }
-
-  const json = await res.json();
-  if (!res.ok) throw new Error(json.error ?? "Something went wrong. Please try again.");
-  return json as BulkActionResult;
 }
 
 export function BulkDeleteDialog({
