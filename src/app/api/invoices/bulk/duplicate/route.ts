@@ -71,6 +71,11 @@ export async function POST(req: NextRequest) {
           due_date: null,
           notes: source.notes,
           terms: source.terms,
+          po_number: source.po_number,
+          // `discount` is an operand of the stored total. Copying subtotal/vat/total
+          // without it left a discounted duplicate whose stored total disagreed with
+          // the one the PDF recomputes from the items and the (missing) discount.
+          discount: source.discount,
           subtotal: source.subtotal,
           vat_amount: source.vat_amount,
           total: source.total,

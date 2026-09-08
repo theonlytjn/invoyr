@@ -42,12 +42,46 @@ interface Props {
   onDeleted: (result: BulkActionResult) => void;
 }
 
-async function post(endpoint: string, ids: string[], dryRun: boolean): Promise<BulkActionResult> {
-  const res = await fetch(endpoint, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ids, dryRun }),
-  });
+/**
+ * Request timeouts. Dismissal is blocked while a confirm is in flight — a delete
+ * must not be abandoned half-way — so without a bound a request that never
+ * settles would leave the user in a modal they cannot close. The confirm gets
+ * longer than the dry run because it does the real work (up to 50 records, and
+ * for reminders that means sending email).
+ */
+const DRY_RUN_TIMEOUT_MS = 20_000;
+const CONFIRM_TIMEOUT_MS = 60_000;
+
+async function post(
+  endpoint: string,
+  ids: string[],
+  dryRun: boolean,
+  timeoutMs: number
+): Promise<BulkActionResult> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  let res: Response;
+  try {
+    res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids, dryRun }),
+      signal: controller.signal,
+    });
+  } catch (err) {
+    if (controller.signal.aborted) {
+      throw new Error(
+        dryRun
+          ? "This is taking too long. Close this and try again."
+          : "This is taking too long. Close this and check the list before retrying — some records may already have been processed."
+      );
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+
   const json = await res.json();
   if (!res.ok) throw new Error(json.error ?? "Something went wrong. Please try again.");
   return json as BulkActionResult;
@@ -100,7 +134,7 @@ export function BulkDeleteDialog({
     setPreview(null);
     setError(null);
 
-    post(endpoint, ids, true)
+    post(endpoint, ids, true, DRY_RUN_TIMEOUT_MS)
       .then((result) => {
         if (!session.cancelled) setPreview(result);
       })
@@ -124,7 +158,7 @@ export function BulkDeleteDialog({
     setBusy(true);
     setError(null);
     try {
-      const result = await post(endpoint, ids, false);
+      const result = await post(endpoint, ids, false, CONFIRM_TIMEOUT_MS);
       if (session.cancelled) return; // superseded — dialog has moved on to a different session
       onDeleted(result);
     } catch (err) {
@@ -151,7 +185,12 @@ export function BulkDeleteDialog({
       }}
     >
       <DialogContent className="max-w-md">
-        <DialogHeader>
+        {/*
+          The title and description change from "Checking…" to the outcome once
+          the dry run resolves. Announce that: without aria-live a screen-reader
+          user hears the loading copy read on open and nothing afterwards.
+        */}
+        <DialogHeader aria-live="polite">
           <DialogTitle>
             {preview === null
               ? "Checking…"

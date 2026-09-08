@@ -279,7 +279,9 @@ export default function InvoicesTable({ invoices, canBulk = false }: Props) {
                 <DropdownMenuItem onClick={handleDownloadPdfs} disabled={bulkState !== "idle"}>
                   {bulkState === "downloading" ? "Downloading…" : "Download PDFs"}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setAction("remind")}>Send reminders</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setAction("remind")} disabled={bulkState !== "idle"}>
+                  Send reminders
+                </DropdownMenuItem>
                 {canVoid && (
                   <DropdownMenuItem
                     onClick={handleBulkVoid}
