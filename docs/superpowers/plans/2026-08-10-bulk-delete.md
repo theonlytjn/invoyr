@@ -34,6 +34,12 @@
     console.error("[bulk] audit log write failed", { action: "invoice.deleted", ids: deleteIds, error: auditError.message });
   }
   ```
+- **Secondary lookup queries must fail closed** (ruled during execution): the queries that establish
+  whether a record is encumbered — the invoice route's payments/refunds/credit_notes check and the
+  client route's invoices/estimates/expenses check — must have their `.error` captured and must abort
+  the request with a 500 if any of them fails. Treating a failed query's null `data` as "no linked
+  records" would let a referenced client or a paid invoice be permanently deleted on a transient
+  error. A retry is a cheap failure; unrecoverable deletion is not.
 - **Known accepted limitation** (ruled during execution): routes that perform two writes — the
   invoice route's expense cleanup followed by the delete — are not wrapped in a transaction. A
   transient failure between them leaves expenses unbilled while their invoice still exists; a retry
