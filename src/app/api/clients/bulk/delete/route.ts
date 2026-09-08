@@ -41,6 +41,16 @@ export async function POST(req: NextRequest) {
       supabase.from("estimates").select("client_id").in("client_id", candidateIds),
       supabase.from("expenses").select("client_id").in("client_id", candidateIds),
     ]);
+
+    // Fail closed: a failed query here must never be read as "no linked records".
+    // `.data` would come back null alongside a populated `.error`, and `set ?? []`
+    // would silently treat that as zero links — marking a linked client deletable
+    // and permanently detaching its history. Abort instead; a transient error
+    // should cost the user a retry, never an irreversible deletion.
+    for (const { error } of [invoices, estimates, expenses]) {
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
     for (const set of [invoices.data, estimates.data, expenses.data]) {
       for (const row of set ?? []) {
         if (row.client_id) linked.add(row.client_id as string);

@@ -42,6 +42,16 @@ export async function POST(req: NextRequest) {
       supabase.from("refunds").select("invoice_id").in("invoice_id", candidateIds),
       supabase.from("credit_notes").select("invoice_id").in("invoice_id", candidateIds),
     ]);
+
+    // Fail closed: a failed query here must never be read as "no financial records".
+    // `.data` would come back null alongside a populated `.error`, and `set ?? []`
+    // would silently treat that as zero attachments — marking an encumbered invoice
+    // deletable and permanently destroying its payment history. Abort instead; a
+    // transient error should cost the user a retry, never an irreversible deletion.
+    for (const { error } of [payments, refunds, creditNotes]) {
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
     for (const set of [payments.data, refunds.data, creditNotes.data]) {
       for (const row of set ?? []) encumbered.add(row.invoice_id as string);
     }
