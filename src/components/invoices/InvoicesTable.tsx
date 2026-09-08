@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import InvoiceStatusBadge from "./InvoiceStatusBadge";
 import { Input } from "@/components/ui/input";
+import { useRowSelection } from "@/hooks/useRowSelection";
+import { BulkActionBar, BulkDeleteDialog, RowCheckbox } from "@/components/ui";
 import type { InvoiceWithClient } from "@/lib/supabase/types";
 
 interface Props {
@@ -40,7 +42,8 @@ function buildCsv(rows: InvoiceWithClient[]): string {
 export default function InvoicesTable({ invoices, canBulk = false }: Props) {
   const router = useRouter();
   const [query, setQuery] = useState("");
-  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const selection = useRowSelection();
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const [bulkState, setBulkState] = useState<"idle" | "sending" | "voiding">("idle");
   const [toast, setToast] = useState<string | null>(null);
 
@@ -57,31 +60,8 @@ export default function InvoicesTable({ invoices, canBulk = false }: Props) {
     : invoices;
 
   const allFilteredIds = filtered.map((i) => i.id);
-  const allSelected = allFilteredIds.length > 0 && allFilteredIds.every((id) => selected.has(id));
-  const someSelected = selected.size > 0;
-
-  const toggleAll = useCallback(() => {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (allSelected) {
-        allFilteredIds.forEach((id) => next.delete(id));
-      } else {
-        allFilteredIds.forEach((id) => next.add(id));
-      }
-      return next;
-    });
-  }, [allSelected, allFilteredIds]);
-
-  const toggleOne = useCallback((id: string) => {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }, []);
-
-  const selectedInvoices = invoices.filter((i) => selected.has(i.id));
+  const selectedInvoices = invoices.filter((i) => selection.isSelected(i.id));
+  const selectedIds = selectedInvoices.map((i) => i.id);
   const canSend = selectedInvoices.some((i) => SENDABLE.has(i.status));
   const canVoid = selectedInvoices.some((i) => VOIDABLE.has(i.status));
 
@@ -91,7 +71,7 @@ export default function InvoicesTable({ invoices, canBulk = false }: Props) {
     const res = await fetch("/api/invoices/bulk/send", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ids }) });
     const json = await res.json();
     setBulkState("idle");
-    setSelected(new Set());
+    selection.clear();
     showToast(`Sent ${json.sent} invoice${json.sent !== 1 ? "s" : ""}${json.skipped > 0 ? `, ${json.skipped} skipped` : ""}.`);
     router.refresh();
   }
@@ -103,7 +83,7 @@ export default function InvoicesTable({ invoices, canBulk = false }: Props) {
     const res = await fetch("/api/invoices/bulk/void", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ids }) });
     const json = await res.json();
     setBulkState("idle");
-    setSelected(new Set());
+    selection.clear();
     showToast(`Voided ${json.voided} invoice${json.voided !== 1 ? "s" : ""}${json.skipped > 0 ? `, ${json.skipped} skipped` : ""}.`);
     router.refresh();
   }
@@ -130,41 +110,39 @@ export default function InvoicesTable({ invoices, canBulk = false }: Props) {
       />
 
       {/* Bulk action bar */}
-      {canBulk && someSelected && (
-        <div className="flex items-center gap-3 px-4 py-3 bg-neutral-950 dark:bg-neutral-800 text-white rounded-xl text-sm">
-          <span className="font-medium mr-1">{selected.size} selected</span>
-          {canSend && (
-            <button
-              onClick={handleBulkSend}
-              disabled={bulkState !== "idle"}
-              className="px-3 py-1.5 bg-white text-neutral-950 font-medium rounded-lg hover:bg-neutral-100 disabled:opacity-50 transition-colors"
-            >
-              {bulkState === "sending" ? "Sending…" : "Send"}
-            </button>
-          )}
+      <BulkActionBar count={selection.count} onClear={selection.clear}>
+        {canBulk && canSend && (
           <button
-            onClick={handleBulkExport}
-            className="px-3 py-1.5 bg-neutral-800 dark:bg-neutral-700 text-white font-medium rounded-lg hover:bg-neutral-700 dark:hover:bg-neutral-600 transition-colors"
+            onClick={handleBulkSend}
+            disabled={bulkState !== "idle"}
+            className="px-3 py-1.5 bg-white text-neutral-950 font-medium rounded-lg hover:bg-neutral-100 disabled:opacity-50 transition-colors"
           >
-            Export CSV
+            {bulkState === "sending" ? "Sending…" : "Send"}
           </button>
-          {canVoid && (
-            <button
-              onClick={handleBulkVoid}
-              disabled={bulkState !== "idle"}
-              className="px-3 py-1.5 bg-neutral-800 dark:bg-neutral-700 text-white font-medium rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
-            >
-              {bulkState === "voiding" ? "Voiding…" : "Void"}
-            </button>
-          )}
+        )}
+        <button
+          onClick={handleBulkExport}
+          className="px-3 py-1.5 bg-neutral-800 dark:bg-neutral-700 text-white font-medium rounded-lg hover:bg-neutral-700 dark:hover:bg-neutral-600 transition-colors"
+        >
+          Export CSV
+        </button>
+        {canBulk && canVoid && (
           <button
-            onClick={() => setSelected(new Set())}
-            className="ml-auto text-neutral-400 hover:text-white transition-colors text-xs"
+            onClick={handleBulkVoid}
+            disabled={bulkState !== "idle"}
+            className="px-3 py-1.5 bg-neutral-800 dark:bg-neutral-700 text-white font-medium rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
           >
-            Clear
+            {bulkState === "voiding" ? "Voiding…" : "Void"}
           </button>
-        </div>
-      )}
+        )}
+        <button
+          onClick={() => setDeleteOpen(true)}
+          disabled={bulkState !== "idle"}
+          className="px-3 py-1.5 bg-neutral-800 dark:bg-neutral-700 text-white font-medium rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
+        >
+          Delete
+        </button>
+      </BulkActionBar>
 
       <div className="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 overflow-x-auto">
         {filtered.length === 0 ? (
@@ -184,17 +162,13 @@ export default function InvoicesTable({ invoices, canBulk = false }: Props) {
           <table className="w-full text-sm">
             <thead className="border-b border-neutral-100 dark:border-neutral-800">
               <tr>
-                {canBulk && (
-                  <th className="py-3 pl-4 pr-2 w-8">
-                    <input
-                      type="checkbox"
-                      checked={allSelected}
-                      onChange={toggleAll}
-                      className="rounded border-neutral-300 dark:border-neutral-600 accent-neutral-950"
-                      aria-label="Select all"
-                    />
-                  </th>
-                )}
+                <th className="py-3 pl-4 pr-2 w-8">
+                  <RowCheckbox
+                    checked={selection.allSelected(allFilteredIds)}
+                    onChange={() => selection.toggleAll(allFilteredIds)}
+                    label="Select all"
+                  />
+                </th>
                 <th className="text-left py-3 px-3 text-xs font-medium text-neutral-500 uppercase tracking-wide">Invoice</th>
                 <th className="text-left py-3 px-4 text-xs font-medium text-neutral-500 uppercase tracking-wide">Client</th>
                 <th className="text-left py-3 px-4 text-xs font-medium text-neutral-500 uppercase tracking-wide">Status</th>
@@ -205,23 +179,19 @@ export default function InvoicesTable({ invoices, canBulk = false }: Props) {
             </thead>
             <tbody>
               {filtered.map((invoice) => {
-                const isSelected = selected.has(invoice.id);
+                const isSelected = selection.isSelected(invoice.id);
                 return (
                   <tr
                     key={invoice.id}
                     className={`border-b border-neutral-100 dark:border-neutral-800 transition-colors ${isSelected ? "bg-neutral-50 dark:bg-neutral-800/60" : "hover:bg-neutral-50 dark:hover:bg-neutral-800"}`}
                   >
-                    {canBulk && (
-                      <td className="py-3 pl-4 pr-2">
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => toggleOne(invoice.id)}
-                          className="rounded border-neutral-300 dark:border-neutral-600 accent-neutral-950"
-                          aria-label={`Select ${invoice.invoice_number}`}
-                        />
-                      </td>
-                    )}
+                    <td className="py-3 pl-4 pr-2">
+                      <RowCheckbox
+                        checked={isSelected}
+                        onChange={() => selection.toggleOne(invoice.id)}
+                        label={`Select ${invoice.invoice_number}`}
+                      />
+                    </td>
                     <td className="py-3 px-3">
                       <Link href={`/invoices/${invoice.id}`} className="font-medium text-neutral-950 dark:text-neutral-50 hover:underline">
                         {invoice.invoice_number}
@@ -254,6 +224,25 @@ export default function InvoicesTable({ invoices, canBulk = false }: Props) {
           {toast}
         </div>
       )}
+
+      <BulkDeleteDialog
+        open={deleteOpen}
+        endpoint="/api/invoices/bulk/delete"
+        ids={selectedIds}
+        noun="invoice"
+        nounPlural="invoices"
+        onCancel={() => setDeleteOpen(false)}
+        onDeleted={(result) => {
+          setDeleteOpen(false);
+          selection.clear();
+          showToast(
+            `Deleted ${result.deleted} invoice${result.deleted !== 1 ? "s" : ""}` +
+              (result.skipped > 0 ? `, ${result.skipped} skipped` : "") +
+              "."
+          );
+          router.refresh();
+        }}
+      />
     </div>
   );
 }
