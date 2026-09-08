@@ -24,11 +24,14 @@ export async function POST(req: NextRequest) {
   const parsed = schema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "Invalid request" }, { status: 400 });
 
+  // Dedupe: a repeated id must not be rendered twice or produce a duplicate zip entry.
+  const ids = Array.from(new Set(parsed.data.ids));
+
   // Scope to the org before rendering anything.
   const { data: invoices } = await supabase
     .from("invoices")
     .select("id")
-    .in("id", parsed.data.ids)
+    .in("id", ids)
     .eq("org_id", org.id);
 
   if (!invoices?.length) {
@@ -36,11 +39,26 @@ export async function POST(req: NextRequest) {
   }
 
   const zip = new JSZip();
+  let succeeded = 0;
 
   // Sequential: rendering many PDFs concurrently is memory-hungry on a serverless function.
+  // Each render is isolated in its own try/catch so one bad invoice (e.g. a malformed row
+  // that crashes the PDF renderer) doesn't take down the whole batch with a 500 — we skip
+  // it and keep going, same failure shape as bulk reminders/duplicate.
   for (const { id } of invoices) {
-    const rendered = await renderInvoicePdf(id);
-    if (rendered) zip.file(`invoice-${rendered.invoiceNumber}.pdf`, rendered.buffer);
+    try {
+      const rendered = await renderInvoicePdf(id);
+      if (rendered) {
+        zip.file(`invoice-${rendered.invoiceNumber}.pdf`, rendered.buffer);
+        succeeded++;
+      }
+    } catch (err) {
+      console.error(`bulk pdf: failed to render invoice ${id}`, err);
+    }
+  }
+
+  if (succeeded === 0) {
+    return NextResponse.json({ error: "Failed to render any invoices" }, { status: 500 });
   }
 
   const archive = await zip.generateAsync({ type: "uint8array" });
