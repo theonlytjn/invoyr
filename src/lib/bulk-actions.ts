@@ -26,6 +26,31 @@ export const MAX_BULK_IDS = 50;
  */
 export const MAX_BULK_PDF_IDS = 15;
 
+/**
+ * Which of `visibleIds` a "select all" click may add, and whether it had to leave
+ * some out.
+ *
+ * Slicing the visible ids to `max` is not enough. `useRowSelection.toggleAll`
+ * unions rather than replaces, and a selection deliberately survives a change of
+ * search — so selecting all under one search and then all under another would
+ * union to `2 x max` ids and hit the very "Invalid request" the cap exists to
+ * prevent. Capacity is therefore measured against the *whole* selection, not the
+ * visible slice.
+ *
+ * Pure and defined here so the arithmetic has one home and one set of tests
+ * instead of a copy per list.
+ */
+export function selectAllAddition(
+  visibleIds: string[],
+  isSelected: (id: string) => boolean,
+  selectedCount: number,
+  max: number
+): { add: string[]; capped: boolean } {
+  const unselected = visibleIds.filter((id) => !isSelected(id));
+  const add = unselected.slice(0, Math.max(0, max - selectedCount));
+  return { add, capped: add.length < unselected.length };
+}
+
 export type SkipReason = { count: number; reason: string };
 
 export type Partition<T> = {

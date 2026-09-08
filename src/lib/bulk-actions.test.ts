@@ -8,7 +8,52 @@ import {
   partitionMarkPaid,
   partitionRemind,
   outstandingBalance,
+  selectAllAddition,
+  MAX_BULK_IDS,
 } from "./bulk-actions";
+
+describe("selectAllAddition", () => {
+  const none = () => false;
+  const ids = (n: number, prefix = "a") => Array.from({ length: n }, (_, i) => `${prefix}${i}`);
+
+  it("takes everything when the list fits inside the cap", () => {
+    const { add, capped } = selectAllAddition(["a", "b", "c"], none, 0, MAX_BULK_IDS);
+    expect(add).toEqual(["a", "b", "c"]);
+    expect(capped).toBe(false);
+  });
+
+  it("takes only the first `max` of a longer list, and reports it capped", () => {
+    const { add, capped } = selectAllAddition(ids(200), none, 0, MAX_BULK_IDS);
+    expect(add).toHaveLength(MAX_BULK_IDS);
+    expect(add[0]).toBe("a0");
+    expect(capped).toBe(true);
+  });
+
+  it("counts ids already selected under another search against the cap", () => {
+    // 30 already selected elsewhere, 60 visible now: only 20 may be added.
+    const { add, capped } = selectAllAddition(ids(60, "b"), none, 30, MAX_BULK_IDS);
+    expect(add).toHaveLength(20);
+    expect(capped).toBe(true);
+  });
+
+  it("adds nothing once the cap is already reached", () => {
+    // The regression: select all under search A (50), then select all under B.
+    const { add, capped } = selectAllAddition(ids(50, "b"), none, MAX_BULK_IDS, MAX_BULK_IDS);
+    expect(add).toEqual([]);
+    expect(capped).toBe(true);
+  });
+
+  it("never counts an already-selected visible id towards the addition", () => {
+    const selected = new Set(["a", "b"]);
+    const { add, capped } = selectAllAddition(["a", "b", "c"], (id) => selected.has(id), 2, 3);
+    expect(add).toEqual(["c"]);
+    expect(capped).toBe(false);
+  });
+
+  it("is a no-op, and not capped, for an empty list", () => {
+    expect(selectAllAddition([], none, 0, MAX_BULK_IDS)).toEqual({ add: [], capped: false });
+  });
+});
 
 describe("partitionInvoices", () => {
   it("deletes drafts and voided invoices", () => {

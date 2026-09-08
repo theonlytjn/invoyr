@@ -7,7 +7,7 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import InvoiceStatusBadge from "./InvoiceStatusBadge";
 import { Input } from "@/components/ui/input";
 import { useRowSelection } from "@/hooks/useRowSelection";
-import { MAX_BULK_IDS, MAX_BULK_PDF_IDS } from "@/lib/bulk-actions";
+import { MAX_BULK_IDS, MAX_BULK_PDF_IDS, selectAllAddition } from "@/lib/bulk-actions";
 import { BulkActionBar, BulkDeleteDialog, RowCheckbox } from "@/components/ui";
 import {
   DropdownMenu,
@@ -125,15 +125,30 @@ export default function InvoicesTable({ invoices, canBulk = false }: Props) {
 
   // "Select all" is bounded by the same cap the bulk routes enforce. None of these
   // lists paginate, so on a large org an uncapped select-all would build a request
-  // the server rejects with a bare "Invalid request" and no explanation.
+  // the server rejects with a bare "Invalid request" and no explanation. The cap
+  // is measured against the whole selection, not just the visible rows: toggleAll
+  // unions, and a selection survives a change of search, so selecting all under
+  // one search and then all under another would otherwise reach twice the cap.
   const [selectAllCapped, setSelectAllCapped] = useState(false);
   const selectableIds = allFilteredIds.slice(0, MAX_BULK_IDS);
   const selectionNote =
-    selectAllCapped && selection.count >= MAX_BULK_IDS ? `First ${MAX_BULK_IDS} selected` : undefined;
+    selectAllCapped && selection.count >= MAX_BULK_IDS ? `Maximum ${MAX_BULK_IDS} per action` : undefined;
 
   function handleSelectAll() {
-    setSelectAllCapped(!selection.allSelected(selectableIds) && allFilteredIds.length > MAX_BULK_IDS);
-    selection.toggleAll(selectableIds);
+    if (selection.allSelected(selectableIds)) {
+      setSelectAllCapped(false);
+      selection.toggleAll(selectableIds);
+      return;
+    }
+
+    const { add, capped } = selectAllAddition(
+      allFilteredIds,
+      selection.isSelected,
+      selection.count,
+      MAX_BULK_IDS
+    );
+    setSelectAllCapped(capped);
+    selection.toggleAll(add);
   }
 
   function clearSelection() {
