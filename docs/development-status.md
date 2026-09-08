@@ -53,6 +53,8 @@ Shipped across commits `5a94452`, `ea8cba0`, `70c1f10`, `337cc50`, `3dc4b48`, `4
 ### Bulk actions
 - **Multi-select delete** shipped on all four record lists — invoices, estimates, expenses, clients — via a shared selection UI (`useRowSelection`, `BulkActionBar`, `RowCheckbox`, `BulkDeleteDialog`) and four `POST .../bulk/delete` routes. **Ungated on every plan**, with per-resource server-side eligibility rules in `src/lib/bulk-actions.ts` (unit tested).
 - **Invoice quick actions** added to the same bulk bar: mark as paid and duplicate are also **ungated**; send reminders and download PDFs are **gated** on `bulk_invoice_actions` (Business+), same as the existing bulk Send/Void.
+- **Single-record delete follows the same rules.** `DELETE /api/expenses/[id]` and `DELETE /api/estimates/[id]` run the record through the same partition functions and answer 409 with the reason, so the row's trash icon can no longer delete a billed expense or a converted estimate that the bulk bar refuses.
+- **One batch cap.** `MAX_BULK_IDS` (50) is shared by every bulk route's Zod schema and by each list's "select all"; the PDF route caps lower (`MAX_BULK_PDF_IDS`, 15) because renders are sequential.
 - Full detail — eligibility rules, the fail-closed/no-transaction/batch-resilience decisions, and the known `RecordPaymentModal` frontend-payment-write violation left unfixed — is recorded in the `docs/INV-001-current-state-audit.md` addendum (§11).
 
 ### Docs

@@ -158,28 +158,31 @@ All four list views — invoices, estimates, expenses, clients — now support m
 
 Eligibility is decided server-side only, in pure functions in `src/lib/bulk-actions.ts` (unit tested):
 
-- **Invoices** — deletable only when `status` is `draft` or `void`, and only when the invoice has no payments, refunds or credit notes attached. Sent invoices are skipped with "void them instead".
+- **Invoices** — deletable only when `status` is `draft` or `void`, only when the invoice has no payments, refunds or credit notes attached, and only when no estimate points at it via `converted_invoice_id`. Sent invoices are skipped with "void them instead". The estimate rule exists because conversion produces a *draft* invoice and the FK is `ON DELETE SET NULL`: deleting it would null the link, leave the estimate's status at `converted`, and silently make the estimate deletable too.
 - **Estimates** — deletable unless `converted_invoice_id` is set.
 - **Expenses** — deletable unless already billed onto an invoice (`invoice_id` set).
 - **Clients** — deletable only with zero invoices, estimates and expenses; the rest are skipped with "archive them instead".
+
+The same partition functions are applied by the single-record `DELETE /api/expenses/[id]` and `DELETE /api/estimates/[id]` handlers, which answer 409 with the skip reason — the row's own trash action cannot delete something the bulk bar refuses to touch.
 
 On the invoices list specifically, the row checkboxes themselves are ungated for everyone. The pre-existing `canBulk` gate (the Business-plan `bulk_invoice_actions` feature) is unchanged: it gates Send, Void, Download PDFs and Send reminders. Delete, Export CSV, Mark as paid and Duplicate are available on every plan.
 
 ### Invoice quick actions
 
-The invoices bulk bar was later extended with four more actions. Each is its own server route following the same pattern as bulk delete — Zod input validation, org-scoped queries, server-side eligibility, audit logging, a `{ deleted, skipped, reasons }` response:
+The invoices bulk bar was later extended with four more actions. Each is its own server route following the same pattern as bulk delete — Zod input validation, org-scoped queries, server-side eligibility, audit logging, a `{ deleted, succeeded, skipped, reasons }` response (`succeeded` is the honest name; `deleted` is kept as its alias for the shared dialog):
 
-- `POST /api/invoices/bulk/mark-paid` — **ungated**. Records a real payment for each invoice's outstanding balance and recomputes status server-side. Accepted methods are `bank_transfer`, `cash`, `cheque` and `other`; `stripe` is deliberately excluded because the Stripe webhook remains the source of truth for card payments.
+- `POST /api/invoices/bulk/mark-paid` — **ungated**. Records a real payment for each invoice's outstanding balance — `total + late_fee_amount − amount_paid − credit_applied`, the codebase's canonical formula, exported as `outstandingBalance()` from `src/lib/bulk-actions.ts` — and recomputes status server-side. Accepted methods are `bank_transfer`, `cash`, `cheque` and `other`; `stripe` is deliberately excluded because the Stripe webhook remains the source of truth for card payments.
 - `POST /api/invoices/bulk/duplicate` — **ungated**. Creates a draft copy of each invoice, generating invoice numbers strictly sequentially to avoid colliding with the `unique (org_id, invoice_number)` constraint.
 - `POST /api/invoices/bulk/remind` — **gated** on `bulk_invoice_actions`, because each call sends real email.
-- `POST /api/invoices/bulk/pdf` — **gated**, because it renders up to 50 PDFs. It returns a zip rather than JSON, so it bypasses the usual confirmation dialog.
+- `POST /api/invoices/bulk/pdf` — **gated**, because rendering is real compute. Its id cap is `MAX_BULK_PDF_IDS` (15) rather than the usual `MAX_BULK_IDS` (50), and it sets `maxDuration = 60`, because renders are sequential. It returns a zip rather than JSON, so it bypasses the usual confirmation dialog, and reports how many invoices actually rendered in an `X-Rendered-Count` header.
 
-PDF rendering was extracted out of the single-invoice route into `src/lib/invoice-pdf.ts` so both the single and bulk routes share it.
+PDF rendering was extracted out of the single-invoice route into `src/lib/invoice-pdf.ts` so both the single and bulk routes share it. `renderInvoicePdf(invoiceId, ctx)` takes a request-scoped context built once by `buildInvoicePdfContext(supabase, org)`, carrying the org (resolved by `requireOrg()`, so the active-org cookie decides the branding), the trial watermark, the `white_label` branding flag and the pre-fetched logo.
 
 ### Decisions worth recording
 
 - **Audit-write failures are logged, not fatal.** Every bulk route captures the `audit_logs` insert error and `console.error`s it, but still returns 200 — the records are already changed by that point, so a 500 would misreport what happened. This deliberately diverges from the older `src/app/api/invoices/bulk/void/route.ts`, which discards the error entirely.
 - **Secondary lookup queries fail closed.** The invoice route's payments/refunds/credit-notes check and the client route's invoices/estimates/expenses check abort with a 500 if any lookup errors, rather than treating a null result as "nothing linked" — a false negative there would have permanently deleted a referenced client or a paid invoice.
 - **Accepted limitation: no transactions.** Routes that perform two writes — notably the invoice bulk delete route, which clears billed expenses (`invoice_id` and `invoiced_at` set to null) before deleting the invoice — are not wrapped in a database transaction. A transient failure between the two writes leaves the affected expenses unbilled while their invoice still exists; retrying the delete heals it. This was accepted deliberately rather than introducing a Postgres function, and the same trade-off applies to any future bulk route that performs more than one write.
+- **One batch cap, one dedupe.** `MAX_BULK_IDS` (50) lives in `src/lib/bulk-actions.ts` and is used by both halves: every bulk route's Zod schema via `bulkIdsSchema()` in `src/lib/bulk-request.ts`, and each list's "select all", which takes at most that many and says "First 50 selected" when it capped. `bulkIdsSchema` also dedupes, so a repeated id is not mis-reported by `summarise` as a record that could not be found.
 - **Batch resilience.** The remind, duplicate and PDF routes survive a per-item failure: they continue the batch, report accurate success and failure counts, and never 500 mid-loop.
 - **Known pre-existing violation, not fixed here.** `src/components/invoices/RecordPaymentModal.tsx` still writes payment and status from the browser, contrary to the `CLAUDE.md` rule that invoices must not be marked paid from the frontend. The new bulk mark-as-paid route is compliant — it computes and writes status server-side — but this pre-existing component was explicitly left out of scope for this work. It remains open as a follow-up.
