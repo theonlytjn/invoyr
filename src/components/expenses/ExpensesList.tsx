@@ -117,6 +117,12 @@ export default function ExpensesList({ initialExpenses, clients, orgId, orgCurre
     const res = await fetch(`/api/expenses?${params}`);
     const body = await res.json();
     setExpenses(body.expenses ?? []);
+    // The selection refers to the rows it was made against. This list replaces its
+    // rows wholesale on every filter change, so a surviving selection would leave
+    // the bar counting ids that are no longer on screen — and `selectedIds`, which
+    // is derived from the visible rows, could then be empty while the bar still
+    // said "3 selected", making Delete POST `{ ids: [] }`.
+    clearSelection();
     setLoading(false);
   }
 
