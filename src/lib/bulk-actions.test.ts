@@ -7,6 +7,7 @@ import {
   summarise,
   partitionMarkPaid,
   partitionRemind,
+  outstandingBalance,
 } from "./bulk-actions";
 
 describe("partitionInvoices", () => {
@@ -195,6 +196,59 @@ describe("summarise", () => {
   });
 });
 
+describe("outstandingBalance", () => {
+  it("is total minus what has been paid when there is no fee or credit", () => {
+    expect(outstandingBalance({ total: 1000, amount_paid: 200 })).toBe(800);
+  });
+
+  it("adds the late fee to what is owed", () => {
+    expect(
+      outstandingBalance({ total: 1000, amount_paid: 0, late_fee_amount: 50 })
+    ).toBe(1050);
+  });
+
+  it("subtracts credit already applied", () => {
+    expect(
+      outstandingBalance({ total: 1000, amount_paid: 0, credit_applied: 200 })
+    ).toBe(800);
+  });
+
+  it("combines fee, payment and credit", () => {
+    expect(
+      outstandingBalance({
+        total: 1000,
+        amount_paid: 300,
+        late_fee_amount: 50,
+        credit_applied: 200,
+      })
+    ).toBe(550);
+  });
+
+  it("treats null and missing columns as zero", () => {
+    expect(
+      outstandingBalance({
+        total: 100,
+        amount_paid: 0,
+        late_fee_amount: null,
+        credit_applied: null,
+      })
+    ).toBe(100);
+    expect(outstandingBalance({ total: 100, amount_paid: 0 })).toBe(100);
+  });
+
+  it("coerces the numeric strings Postgres can hand back", () => {
+    // Without Number() the `+` would concatenate: "1000" + "50" === "100050".
+    expect(
+      outstandingBalance({
+        total: "1000",
+        amount_paid: "300",
+        late_fee_amount: "50",
+        credit_applied: "200",
+      })
+    ).toBe(550);
+  });
+});
+
 describe("partitionMarkPaid", () => {
   it("accepts invoices that are awaiting payment", () => {
     const rows = [
@@ -246,6 +300,57 @@ describe("partitionMarkPaid", () => {
     const rows = [{ id: "a", invoice_number: "INV-1", status: "paid", total: 100, amount_paid: 100 }];
     expect(partitionMarkPaid(rows).skips).toEqual([
       { count: 1, reason: "1 invoice is already paid or voided" },
+    ]);
+  });
+
+  it("accepts an invoice whose only outstanding amount is a late fee", () => {
+    const rows = [
+      {
+        id: "a",
+        invoice_number: "INV-1",
+        status: "overdue",
+        total: 1000,
+        amount_paid: 1000,
+        late_fee_amount: 25,
+        credit_applied: 0,
+      },
+    ];
+    expect(partitionMarkPaid(rows).deletable.map((r) => r.id)).toEqual(["a"]);
+  });
+
+  it("accepts an invoice partly covered by a credit note", () => {
+    const rows = [
+      {
+        id: "a",
+        invoice_number: "INV-1",
+        status: "sent",
+        total: 1000,
+        amount_paid: 0,
+        late_fee_amount: 0,
+        credit_applied: 200,
+      },
+    ];
+    // £800 is still owed, so it is eligible — but only £800, not £1,000.
+    expect(partitionMarkPaid(rows).deletable.map((r) => r.id)).toEqual(["a"]);
+    expect(outstandingBalance(rows[0])).toBe(800);
+  });
+
+  it("skips an invoice fully covered by credit notes", () => {
+    const rows = [
+      {
+        id: "a",
+        invoice_number: "INV-1",
+        status: "sent",
+        total: 1000,
+        amount_paid: 0,
+        late_fee_amount: 0,
+        credit_applied: 1000,
+      },
+    ];
+    const result = partitionMarkPaid(rows);
+    expect(result.deletable).toEqual([]);
+    expect(result.skips).toEqual([
+      { count: 1, reason: "1 invoice has nothing outstanding" },
     ]);
   });
 

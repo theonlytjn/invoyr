@@ -156,7 +156,40 @@ export type MarkPaidRow = {
   status: string;
   total: number;
   amount_paid: number;
+  late_fee_amount?: number | null;
+  credit_applied?: number | null;
 };
+
+/**
+ * The canonical outstanding balance of an invoice: what the client still owes.
+ *
+ *     total + late fee − amount already paid − credit already applied
+ *
+ * This is the same formula used by the invoice detail page, `InvoiceActions`,
+ * the credit-note route and the refund route. Getting it wrong in either
+ * direction falsifies a financial record: dropping the credit records a payment
+ * for money that was never owed and never received; dropping the late fee
+ * records one that is short, leaving a "Paid" invoice showing a balance.
+ *
+ * Every operand is coerced with `Number(...)` on purpose — these are Postgres
+ * `numeric` columns, which the Supabase client can hand back as strings, and
+ * `"1000" - 200` would silently become string concatenation on the `+` operand.
+ * `?? 0` covers both `null` (column default absent from an older row) and
+ * `undefined` (column not selected).
+ */
+export function outstandingBalance(row: {
+  total: number | string;
+  amount_paid: number | string;
+  late_fee_amount?: number | string | null;
+  credit_applied?: number | string | null;
+}): number {
+  return (
+    Number(row.total) +
+    Number(row.late_fee_amount ?? 0) -
+    Number(row.amount_paid) -
+    Number(row.credit_applied ?? 0)
+  );
+}
 
 export type RemindRow = {
   id: string;
@@ -179,7 +212,7 @@ export function partitionMarkPaid(rows: MarkPaidRow[]): Partition<MarkPaidRow> {
       drafts++;
     } else if (!PAYABLE_STATUSES.has(row.status)) {
       settled++;
-    } else if (Number(row.total) - Number(row.amount_paid) <= 0) {
+    } else if (outstandingBalance(row) <= 0) {
       nothingOutstanding++;
     } else {
       deletable.push(row);

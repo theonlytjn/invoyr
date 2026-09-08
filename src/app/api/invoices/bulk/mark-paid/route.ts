@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
-import { partitionMarkPaid, summarise } from "@/lib/bulk-actions";
+import { outstandingBalance, partitionMarkPaid, summarise } from "@/lib/bulk-actions";
 
 const schema = z.object({
   ids: z.array(z.string().uuid()).min(1).max(50),
@@ -30,7 +30,9 @@ export async function POST(req: NextRequest) {
 
   const { data: invoices, error: fetchError } = await supabase
     .from("invoices")
-    .select("id, invoice_number, status, total, amount_paid, currency")
+    // late_fee_amount and credit_applied are operands of the outstanding-balance
+    // formula, so they must be selected or every balance would be computed wrong.
+    .select("id, invoice_number, status, total, amount_paid, late_fee_amount, credit_applied, currency")
     .in("id", ids)
     .eq("org_id", org.id);
 
@@ -46,11 +48,14 @@ export async function POST(req: NextRequest) {
   const rows = invoices ?? [];
   const currencyOf = new Map(rows.map((i) => [i.id, i.currency as string]));
 
-  // Outstanding balance matches RecordPaymentModal: total minus what has been paid.
+  // Computed once per invoice and reused for the payment row, the invoice update and
+  // the audit meta, so the three can never disagree about how much was settled.
+  const balanceOf = new Map(partition.deletable.map((inv) => [inv.id, outstandingBalance(inv)]));
+
   const paymentRows = partition.deletable.map((inv) => ({
     org_id: org.id,
     invoice_id: inv.id,
-    amount: Number(inv.total) - Number(inv.amount_paid),
+    amount: balanceOf.get(inv.id) ?? 0,
     currency: currencyOf.get(inv.id) ?? "GBP",
     method,
     reference: null,
@@ -61,10 +66,17 @@ export async function POST(req: NextRequest) {
   if (payError) return NextResponse.json({ error: payError.message }, { status: 500 });
 
   // Status is computed here, on the server, from the invoice's own totals.
+  // amount_paid accumulates the payment just recorded — it is not set to `total`,
+  // which would double-count an existing part payment and swallow late fees and
+  // credits. This matches RecordPaymentModal's `amount_paid + payment`.
   for (const inv of partition.deletable) {
     const { error: updateError } = await supabase
       .from("invoices")
-      .update({ amount_paid: Number(inv.total), status: "paid", paid_at: paidAt })
+      .update({
+        amount_paid: Number(inv.amount_paid) + (balanceOf.get(inv.id) ?? 0),
+        status: "paid",
+        paid_at: paidAt,
+      })
       .eq("id", inv.id)
       .eq("org_id", org.id);
 
@@ -80,7 +92,7 @@ export async function POST(req: NextRequest) {
       entity_id: inv.id,
       meta: {
         invoice_number: inv.invoice_number,
-        amount: Number(inv.total) - Number(inv.amount_paid),
+        amount: balanceOf.get(inv.id) ?? 0,
         method,
         bulk: true,
       },
