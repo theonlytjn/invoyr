@@ -162,9 +162,19 @@ export default function ExpensesList({ initialExpenses, clients, orgId, orgCurre
   async function handleDelete(id: string) {
     if (!confirm("Delete this expense?")) return;
     setDeletingId(id);
-    await fetch(`/api/expenses/${id}`, { method: "DELETE" });
-    setExpenses((prev) => prev.filter((e) => e.id !== id));
+    const res = await fetch(`/api/expenses/${id}`, { method: "DELETE" });
     setDeletingId(null);
+
+    // The route applies the same eligibility rule as bulk delete and answers 409
+    // with the reason (e.g. a billed expense). Say so rather than dropping the row
+    // from the list as though it had been deleted.
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      showToast(body?.error ?? "Could not delete this expense.");
+      return;
+    }
+
+    setExpenses((prev) => prev.filter((e) => e.id !== id));
   }
 
   const total = expenses.reduce((s, e) => s + Number(e.amount), 0);

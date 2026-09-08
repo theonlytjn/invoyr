@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
+import { partitionExpenses } from "@/lib/bulk-actions";
 
 const updateSchema = z.object({
   title: z.string().trim().min(1).max(255).optional(),
@@ -49,6 +50,27 @@ export async function DELETE(
   const org = await requireOrg();
   const supabase = await createClient();
 
+  // The same rule bulk delete enforces, applied through the same pure function
+  // rather than restated here — otherwise the trash icon on a row would delete a
+  // billed expense that the bulk bar refuses to touch.
+  const { data: expense, error: fetchError } = await supabase
+    .from("expenses")
+    .select("id, title, amount, invoice_id")
+    .eq("id", id)
+    .eq("org_id", org.id)
+    .maybeSingle();
+
+  if (fetchError) return NextResponse.json({ error: fetchError.message }, { status: 500 });
+  if (!expense) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  const partition = partitionExpenses([expense]);
+  if (partition.deletable.length === 0) {
+    return NextResponse.json(
+      { error: partition.skips.map((s) => s.reason).join(". ") },
+      { status: 409 }
+    );
+  }
+
   const { error } = await supabase
     .from("expenses")
     .delete()
@@ -56,5 +78,27 @@ export async function DELETE(
     .eq("org_id", org.id);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // Capture and log, but do not fail: the expense is already gone, so a 500 here
+  // would tell the caller the delete failed when it succeeded.
+  const { error: auditError } = await supabase.from("audit_logs").insert({
+    org_id: org.id,
+    user_id: user?.id ?? null,
+    action: "expense.deleted",
+    entity_type: "expense",
+    entity_id: id,
+    meta: { title: expense.title, amount: expense.amount },
+  });
+
+  if (auditError) {
+    console.error("audit log write failed", {
+      action: "expense.deleted",
+      ids: [id],
+      error: auditError.message,
+    });
+  }
+
   return NextResponse.json({ ok: true });
 }
