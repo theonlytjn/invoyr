@@ -95,7 +95,7 @@ export default function ClientsTable({ clients, showArchived }: Props) {
                     label="Select all"
                   />
                 </th>
-                <th className="text-left py-3 px-5 text-xs font-medium text-neutral-500 uppercase tracking-wide">Name</th>
+                <th className="text-left py-3 px-4 text-xs font-medium text-neutral-500 uppercase tracking-wide">Name</th>
                 <th className="hidden sm:table-cell text-left py-3 px-4 text-xs font-medium text-neutral-500 uppercase tracking-wide">Company</th>
                 <th className="text-left py-3 px-4 text-xs font-medium text-neutral-500 uppercase tracking-wide">Email</th>
                 <th className="hidden md:table-cell text-left py-3 px-4 text-xs font-medium text-neutral-500 uppercase tracking-wide">VAT</th>
@@ -103,7 +103,14 @@ export default function ClientsTable({ clients, showArchived }: Props) {
             </thead>
             <tbody>
               {filtered.map((client) => (
-                <tr key={client.id} className="border-b border-neutral-100 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
+                <tr
+                  key={client.id}
+                  className={`border-b border-neutral-100 dark:border-neutral-800 transition-colors ${
+                    selection.isSelected(client.id)
+                      ? "bg-neutral-50 dark:bg-neutral-800/60"
+                      : "hover:bg-neutral-50 dark:hover:bg-neutral-800"
+                  }`}
+                >
                   <td className="py-3 pl-5 pr-2">
                     <RowCheckbox
                       checked={selection.isSelected(client.id)}
