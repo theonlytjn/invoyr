@@ -3,7 +3,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
 import { generateInvoiceNumber } from "@/lib/invoice-number";
-import { summarise } from "@/lib/bulk-actions";
+import { summarise, type SkipReason } from "@/lib/bulk-actions";
 
 const schema = z.object({
   ids: z.array(z.string().uuid()).min(1).max(50),
@@ -42,76 +42,131 @@ export async function POST(req: NextRequest) {
 
   const today = new Date().toISOString().slice(0, 10);
 
+  // A retry with the same id list is not idempotent here — unlike a delete, re-running
+  // duplicate on an id that already succeeded creates a second copy. So one failure must
+  // never abort the batch or leave the caller unsure which ids actually got duplicated:
+  // track outcomes per source and report them honestly instead of 500ing mid-loop.
+  const duplicatedIds: string[] = [];
+  let failed = 0;
+
   // Sequential by design — do not parallelise (Promise.all, .map + await, etc).
   // generateInvoiceNumber reads current state to pick the next number, and
   // invoices has a unique (org_id, invoice_number) constraint; concurrent calls
   // would race and collide.
   for (const source of partition.deletable) {
-    const newNumber = await generateInvoiceNumber(org.id);
+    try {
+      const newNumber = await generateInvoiceNumber(org.id);
 
-    const { data: created, error: insertError } = await supabase
-      .from("invoices")
-      .insert({
+      const { data: created, error: insertError } = await supabase
+        .from("invoices")
+        .insert({
+          org_id: org.id,
+          client_id: source.client_id,
+          invoice_number: newNumber,
+          template: source.template,
+          status: "draft",
+          currency: source.currency,
+          issue_date: today,
+          due_date: null,
+          notes: source.notes,
+          terms: source.terms,
+          subtotal: source.subtotal,
+          vat_amount: source.vat_amount,
+          total: source.total,
+          amount_paid: 0,
+        })
+        .select()
+        .single();
+
+      if (insertError || !created) {
+        failed++;
+        console.error("[bulk] invoice duplicate failed", {
+          sourceInvoiceId: source.id,
+          error: insertError?.message ?? "insert returned no row",
+        });
+        continue;
+      }
+
+      const items = (source.invoice_items ?? []) as Array<{
+        description: string;
+        quantity: number;
+        unit_price: number;
+        vat_rate: number;
+        sort_order: number;
+      }>;
+
+      if (items.length > 0) {
+        const { error: itemsError } = await supabase.from("invoice_items").insert(
+          items.map((item, idx) => ({
+            invoice_id: created.id,
+            description: item.description,
+            quantity: item.quantity,
+            unit_price: item.unit_price,
+            vat_rate: item.vat_rate,
+            sort_order: item.sort_order ?? idx,
+          }))
+        );
+
+        if (itemsError) {
+          // The invoice row exists but carries none of the source's line items, so it is
+          // not a usable duplicate — count it as a failure. It is deliberately left in
+          // place rather than deleted: a compensating delete here would be its own new
+          // failure mode (and this route already establishes that retries are not safe
+          // to lean on for cleanup).
+          failed++;
+          console.error("[bulk] invoice duplicate item copy failed — duplicate left without items", {
+            invoiceId: created.id,
+            sourceInvoiceId: source.id,
+            error: itemsError.message,
+          });
+          continue;
+        }
+      }
+
+      duplicatedIds.push(created.id);
+
+      const { error: auditError } = await supabase.from("audit_logs").insert({
         org_id: org.id,
-        client_id: source.client_id,
-        invoice_number: newNumber,
-        template: source.template,
-        status: "draft",
-        currency: source.currency,
-        issue_date: today,
-        due_date: null,
-        notes: source.notes,
-        terms: source.terms,
-        subtotal: source.subtotal,
-        vat_amount: source.vat_amount,
-        total: source.total,
-        amount_paid: 0,
-      })
-      .select()
-      .single();
-
-    if (insertError || !created) {
-      return NextResponse.json({ error: insertError?.message ?? "Failed to duplicate" }, { status: 500 });
-    }
-
-    const items = (source.invoice_items ?? []) as Array<{
-      description: string;
-      quantity: number;
-      unit_price: number;
-      vat_rate: number;
-      sort_order: number;
-    }>;
-
-    if (items.length > 0) {
-      await supabase.from("invoice_items").insert(
-        items.map((item, idx) => ({
-          invoice_id: created.id,
-          description: item.description,
-          quantity: item.quantity,
-          unit_price: item.unit_price,
-          vat_rate: item.vat_rate,
-          sort_order: item.sort_order ?? idx,
-        }))
-      );
-    }
-
-    const { error: auditError } = await supabase.from("audit_logs").insert({
-      org_id: org.id,
-      user_id: user.id,
-      action: "invoice.duplicated",
-      entity_type: "invoice",
-      entity_id: created.id,
-      meta: { source_invoice_id: source.id, invoice_number: newNumber, bulk: true },
-    });
-
-    if (auditError) {
-      console.error("[bulk] audit log write failed", {
+        user_id: user.id,
         action: "invoice.duplicated",
-        ids: [created.id],
-        error: auditError.message,
+        entity_type: "invoice",
+        entity_id: created.id,
+        meta: { source_invoice_id: source.id, invoice_number: newNumber, bulk: true },
+      });
+
+      if (auditError) {
+        console.error("[bulk] audit log write failed", {
+          action: "invoice.duplicated",
+          ids: [created.id],
+          error: auditError.message,
+        });
+      }
+    } catch (err) {
+      failed++;
+      console.error("[bulk] invoice duplicate threw", {
+        sourceInvoiceId: source.id,
+        error: err instanceof Error ? err.message : String(err),
       });
     }
   }
 
-  return NextResponse.json(result);
+  // `result` (from `summarise`) describes eligibility, computed before any duplication was
+  // attempted. Rewrite it to describe outcome: successes are duplicates that actually got
+  // created with their items, and any failure moves from "deleted" to "skipped" with its
+  // own reason, so `deleted` + every reason's count still sums to the number of ids requested.
+  const failureReasons: SkipReason[] =
+    failed > 0
+      ? [
+          {
+            count: failed,
+            reason: failed === 1 ? "1 invoice could not be duplicated" : `${failed} invoices could not be duplicated`,
+          },
+        ]
+      : [];
+
+  return NextResponse.json({
+    deleted: duplicatedIds.length,
+    skipped: result.skipped + failed,
+    reasons: [...result.reasons, ...failureReasons],
+  });
 }
