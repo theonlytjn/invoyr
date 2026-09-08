@@ -8,7 +8,7 @@ import { sendTransactionalEmail } from "@/lib/resend/send-transactional-email";
 import { OverdueReminderEmail } from "@/emails/transactional/OverdueReminderEmail";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { orgHasFeature } from "@/lib/billing";
-import { partitionRemind, summarise, type RemindRow, type SkipReason } from "@/lib/bulk-actions";
+import { outstandingBalance, partitionRemind, summarise, type RemindRow, type SkipReason } from "@/lib/bulk-actions";
 
 const schema = z.object({
   ids: bulkIdsSchema(),
@@ -106,10 +106,9 @@ export async function POST(req: NextRequest) {
           accentColor: orgRow?.accent_color ?? "#111827",
           invoiceNumber: invoice.invoice_number,
           dueDate: invoice.due_date ? formatDate(invoice.due_date) : "—",
-          balanceDue: formatCurrency(
-            invoice.total + (invoice.late_fee_amount ?? 0) - invoice.amount_paid,
-            invoice.currency
-          ),
+          // Credit already applied has to come off, or a client holding a credit
+          // note is emailed a demand for money they no longer owe.
+          balanceDue: formatCurrency(outstandingBalance(invoice), invoice.currency),
           payUrl,
         }),
       });

@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { sendTransactionalEmail } from "@/lib/resend/send-transactional-email";
 import { OverdueReminderEmail } from "@/emails/transactional/OverdueReminderEmail";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { outstandingBalance } from "@/lib/bulk-actions";
 
 export async function POST(
   _req: NextRequest,
@@ -57,7 +58,9 @@ export async function POST(
       accentColor: org?.accent_color ?? "#111827",
       invoiceNumber: invoice.invoice_number,
       dueDate: invoice.due_date ? formatDate(invoice.due_date) : "—",
-      balanceDue: formatCurrency(invoice.total + (invoice.late_fee_amount ?? 0) - invoice.amount_paid, invoice.currency),
+      // Credit already applied has to come off, or a client holding a credit note
+      // is emailed a demand for money they no longer owe.
+      balanceDue: formatCurrency(outstandingBalance(invoice), invoice.currency),
       payUrl,
     }),
   });
