@@ -36,11 +36,18 @@ export async function POST(req: NextRequest) {
   // A voided invoice can still carry payment history. Deleting it would cascade
   // through payments, refunds and credit_notes and destroy those records.
   const encumbered = new Set<string>();
+  // Estimates converted into one of these invoices. Conversion produces a *draft*
+  // invoice, which the status rule accepts, and estimates.converted_invoice_id is
+  // ON DELETE SET NULL — so deleting the invoice would quietly strip the estimate's
+  // own delete protection while leaving its status at 'converted'.
+  const fromEstimate = new Set<string>();
+
   if (candidateIds.length > 0) {
-    const [payments, refunds, creditNotes] = await Promise.all([
+    const [payments, refunds, creditNotes, estimates] = await Promise.all([
       supabase.from("payments").select("invoice_id").in("invoice_id", candidateIds),
       supabase.from("refunds").select("invoice_id").in("invoice_id", candidateIds),
       supabase.from("credit_notes").select("invoice_id").in("invoice_id", candidateIds),
+      supabase.from("estimates").select("converted_invoice_id").in("converted_invoice_id", candidateIds),
     ]);
 
     // Fail closed: a failed query here must never be read as "no financial records".
@@ -48,12 +55,16 @@ export async function POST(req: NextRequest) {
     // would silently treat that as zero attachments — marking an encumbered invoice
     // deletable and permanently destroying its payment history. Abort instead; a
     // transient error should cost the user a retry, never an irreversible deletion.
-    for (const { error } of [payments, refunds, creditNotes]) {
+    for (const { error } of [payments, refunds, creditNotes, estimates]) {
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     for (const set of [payments.data, refunds.data, creditNotes.data]) {
       for (const row of set ?? []) encumbered.add(row.invoice_id as string);
+    }
+
+    for (const row of estimates.data ?? []) {
+      if (row.converted_invoice_id) fromEstimate.add(row.converted_invoice_id as string);
     }
   }
 
@@ -62,6 +73,7 @@ export async function POST(req: NextRequest) {
     invoice_number: i.invoice_number,
     status: i.status,
     hasFinancialRecords: encumbered.has(i.id),
+    hasSourceEstimate: fromEstimate.has(i.id),
   }));
 
   const partition = partitionInvoices(rows);

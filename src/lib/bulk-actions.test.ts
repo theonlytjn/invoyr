@@ -13,8 +13,8 @@ import {
 describe("partitionInvoices", () => {
   it("deletes drafts and voided invoices", () => {
     const rows = [
-      { id: "a", invoice_number: "INV-1", status: "draft", hasFinancialRecords: false },
-      { id: "b", invoice_number: "INV-2", status: "void", hasFinancialRecords: false },
+      { id: "a", invoice_number: "INV-1", status: "draft", hasFinancialRecords: false, hasSourceEstimate: false },
+      { id: "b", invoice_number: "INV-2", status: "void", hasFinancialRecords: false, hasSourceEstimate: false },
     ];
     const result = partitionInvoices(rows);
     expect(result.deletable.map((r) => r.id)).toEqual(["a", "b"]);
@@ -23,10 +23,10 @@ describe("partitionInvoices", () => {
 
   it("skips issued, sent and paid invoices with a void-instead reason", () => {
     const rows = [
-      { id: "a", invoice_number: "INV-1", status: "draft", hasFinancialRecords: false },
-      { id: "b", invoice_number: "INV-2", status: "issued", hasFinancialRecords: false },
-      { id: "c", invoice_number: "INV-3", status: "sent", hasFinancialRecords: false },
-      { id: "d", invoice_number: "INV-4", status: "paid", hasFinancialRecords: false },
+      { id: "a", invoice_number: "INV-1", status: "draft", hasFinancialRecords: false, hasSourceEstimate: false },
+      { id: "b", invoice_number: "INV-2", status: "issued", hasFinancialRecords: false, hasSourceEstimate: false },
+      { id: "c", invoice_number: "INV-3", status: "sent", hasFinancialRecords: false, hasSourceEstimate: false },
+      { id: "d", invoice_number: "INV-4", status: "paid", hasFinancialRecords: false, hasSourceEstimate: false },
     ];
     const result = partitionInvoices(rows);
     expect(result.deletable.map((r) => r.id)).toEqual(["a"]);
@@ -37,8 +37,8 @@ describe("partitionInvoices", () => {
 
   it("skips a voided invoice that still has payments or credit notes attached", () => {
     const rows = [
-      { id: "a", invoice_number: "INV-1", status: "void", hasFinancialRecords: true },
-      { id: "b", invoice_number: "INV-2", status: "draft", hasFinancialRecords: false },
+      { id: "a", invoice_number: "INV-1", status: "void", hasFinancialRecords: true, hasSourceEstimate: false },
+      { id: "b", invoice_number: "INV-2", status: "draft", hasFinancialRecords: false, hasSourceEstimate: false },
     ];
     const result = partitionInvoices(rows);
     expect(result.deletable.map((r) => r.id)).toEqual(["b"]);
@@ -49,8 +49,8 @@ describe("partitionInvoices", () => {
 
   it("reports both skip reasons separately", () => {
     const rows = [
-      { id: "a", invoice_number: "INV-1", status: "sent", hasFinancialRecords: false },
-      { id: "b", invoice_number: "INV-2", status: "void", hasFinancialRecords: true },
+      { id: "a", invoice_number: "INV-1", status: "sent", hasFinancialRecords: false, hasSourceEstimate: false },
+      { id: "b", invoice_number: "INV-2", status: "void", hasFinancialRecords: true, hasSourceEstimate: false },
     ];
     const result = partitionInvoices(rows);
     expect(result.deletable).toEqual([]);
@@ -58,7 +58,7 @@ describe("partitionInvoices", () => {
   });
 
   it("uses singular wording for one skipped invoice", () => {
-    const rows = [{ id: "a", invoice_number: "INV-1", status: "sent", hasFinancialRecords: false }];
+    const rows = [{ id: "a", invoice_number: "INV-1", status: "sent", hasFinancialRecords: false, hasSourceEstimate: false }];
     expect(partitionInvoices(rows).skips).toEqual([
       { count: 1, reason: "1 invoice has been sent — void it instead" },
     ]);
@@ -66,11 +66,35 @@ describe("partitionInvoices", () => {
 
   it("uses plural wording for multiple voided invoices with financial records attached", () => {
     const rows = [
-      { id: "a", invoice_number: "INV-1", status: "void", hasFinancialRecords: true },
-      { id: "b", invoice_number: "INV-2", status: "void", hasFinancialRecords: true },
+      { id: "a", invoice_number: "INV-1", status: "void", hasFinancialRecords: true, hasSourceEstimate: false },
+      { id: "b", invoice_number: "INV-2", status: "void", hasFinancialRecords: true, hasSourceEstimate: false },
     ];
     expect(partitionInvoices(rows).skips).toEqual([
       { count: 2, reason: "2 invoices have payments or credit notes attached" },
+    ]);
+  });
+
+  it("skips a draft invoice that an estimate was converted into", () => {
+    // Deleting it would null estimates.converted_invoice_id (ON DELETE SET NULL)
+    // and hand the estimate back its own deletability.
+    const rows = [
+      { id: "a", invoice_number: "INV-9", status: "draft", hasFinancialRecords: false, hasSourceEstimate: true },
+      { id: "b", invoice_number: "INV-2", status: "draft", hasFinancialRecords: false, hasSourceEstimate: false },
+    ];
+    const result = partitionInvoices(rows);
+    expect(result.deletable.map((r) => r.id)).toEqual(["b"]);
+    expect(result.skips).toEqual([
+      { count: 1, reason: "1 invoice was converted from an estimate" },
+    ]);
+  });
+
+  it("uses plural wording for multiple invoices converted from estimates", () => {
+    const rows = [
+      { id: "a", invoice_number: "INV-9", status: "draft", hasFinancialRecords: false, hasSourceEstimate: true },
+      { id: "b", invoice_number: "INV-8", status: "void", hasFinancialRecords: false, hasSourceEstimate: true },
+    ];
+    expect(partitionInvoices(rows).skips).toEqual([
+      { count: 2, reason: "2 invoices were converted from estimates" },
     ]);
   });
 });

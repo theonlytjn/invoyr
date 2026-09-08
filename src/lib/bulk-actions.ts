@@ -19,6 +19,17 @@ export type InvoiceRow = {
   status: string;
   /** True when the invoice has payments, refunds or credit notes attached. */
   hasFinancialRecords: boolean;
+  /**
+   * True when some estimate points at this invoice via `converted_invoice_id`.
+   *
+   * Converting an estimate produces a *draft* invoice, which these rules would
+   * otherwise happily delete — and `estimates.converted_invoice_id` is
+   * ON DELETE SET NULL, so the delete nulls the link while the estimate's
+   * status stays 'converted'. The estimate would then pass `partitionEstimates`
+   * and become bulk-deletable itself: the protection would evaporate silently.
+   * Treat the invoice as encumbered instead.
+   */
+  hasSourceEstimate: boolean;
 };
 
 export type EstimateRow = {
@@ -52,12 +63,15 @@ export function partitionInvoices(rows: InvoiceRow[]): Partition<InvoiceRow> {
   const deletable: InvoiceRow[] = [];
   let wrongStatus = 0;
   let encumbered = 0;
+  let fromEstimate = 0;
 
   for (const row of rows) {
     if (!DELETABLE_INVOICE_STATUSES.has(row.status)) {
       wrongStatus++;
     } else if (row.hasFinancialRecords) {
       encumbered++;
+    } else if (row.hasSourceEstimate) {
+      fromEstimate++;
     } else {
       deletable.push(row);
     }
@@ -75,6 +89,11 @@ export function partitionInvoices(rows: InvoiceRow[]): Partition<InvoiceRow> {
         encumbered,
         "invoice has payments or credit notes attached",
         "invoices have payments or credit notes attached"
+      ),
+      ...skip(
+        fromEstimate,
+        "invoice was converted from an estimate",
+        "invoices were converted from estimates"
       ),
     ],
   };
