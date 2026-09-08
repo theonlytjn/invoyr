@@ -27,11 +27,52 @@ const VOIDABLE = new Set(["draft", "issued", "sent"]);
 
 type BulkAction = "delete" | "mark-paid" | "remind" | "duplicate";
 
-const ACTIONS: Record<BulkAction, { endpoint: string; verb: string; destructive: boolean; past: string }> = {
-  "delete":    { endpoint: "/api/invoices/bulk/delete",    verb: "Delete",         destructive: true,  past: "Deleted" },
-  "mark-paid": { endpoint: "/api/invoices/bulk/mark-paid", verb: "Mark as paid",   destructive: false, past: "Marked paid" },
-  "remind":    { endpoint: "/api/invoices/bulk/remind",    verb: "Send reminders", destructive: false, past: "Reminded" },
-  "duplicate": { endpoint: "/api/invoices/bulk/duplicate", verb: "Duplicate",      destructive: false, past: "Duplicated" },
+// A single "verb + count + noun" template can't serve every action's grammar
+// ("Send reminders for 3 invoices?" vs "Delete 3 invoices?"), so each action
+// spells out its own title, button label and toast — the way `past` already
+// had to be hand-written per action rather than derived from `verb`.
+const ACTIONS: Record<
+  BulkAction,
+  {
+    endpoint: string;
+    destructive: boolean;
+    titleFor: (n: number) => string;
+    confirmLabel: string;
+    toastFor: (deleted: number, skipped: number) => string;
+  }
+> = {
+  "delete": {
+    endpoint: "/api/invoices/bulk/delete",
+    destructive: true,
+    titleFor: (n) => `Delete ${n} ${n === 1 ? "invoice" : "invoices"}?`,
+    confirmLabel: "Delete",
+    toastFor: (deleted, skipped) =>
+      `Deleted ${deleted} invoice${deleted !== 1 ? "s" : ""}` + (skipped > 0 ? `, ${skipped} skipped` : "") + ".",
+  },
+  "mark-paid": {
+    endpoint: "/api/invoices/bulk/mark-paid",
+    destructive: false,
+    titleFor: (n) => `Mark ${n} ${n === 1 ? "invoice" : "invoices"} as paid?`,
+    confirmLabel: "Mark as paid",
+    toastFor: (deleted, skipped) =>
+      `Marked ${deleted} invoice${deleted !== 1 ? "s" : ""} as paid` + (skipped > 0 ? `, ${skipped} skipped` : "") + ".",
+  },
+  "remind": {
+    endpoint: "/api/invoices/bulk/remind",
+    destructive: false,
+    titleFor: (n) => `Send reminders for ${n} ${n === 1 ? "invoice" : "invoices"}?`,
+    confirmLabel: "Send reminders",
+    toastFor: (deleted, skipped) =>
+      `Sent reminders for ${deleted} invoice${deleted !== 1 ? "s" : ""}` + (skipped > 0 ? `, ${skipped} skipped` : "") + ".",
+  },
+  "duplicate": {
+    endpoint: "/api/invoices/bulk/duplicate",
+    destructive: false,
+    titleFor: (n) => `Duplicate ${n} ${n === 1 ? "invoice" : "invoices"}?`,
+    confirmLabel: "Duplicate",
+    toastFor: (deleted, skipped) =>
+      `Duplicated ${deleted} invoice${deleted !== 1 ? "s" : ""}` + (skipped > 0 ? `, ${skipped} skipped` : "") + ".",
+  },
 };
 
 function buildCsv(rows: InvoiceWithClient[]): string {
@@ -187,8 +228,12 @@ export default function InvoicesTable({ invoices, canBulk = false }: Props) {
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={handleBulkExport}>Export CSV</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setAction("duplicate")}>Duplicate</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleBulkExport} disabled={bulkState !== "idle"}>
+              Export CSV
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setAction("duplicate")} disabled={bulkState !== "idle"}>
+              Duplicate
+            </DropdownMenuItem>
             {canBulk && (
               <>
                 <DropdownMenuItem onClick={handleDownloadPdfs} disabled={bulkState !== "idle"}>
@@ -295,21 +340,18 @@ export default function InvoicesTable({ invoices, canBulk = false }: Props) {
         <BulkDeleteDialog
           open
           endpoint={ACTIONS[action].endpoint}
-          verb={ACTIONS[action].verb}
+          titleFor={ACTIONS[action].titleFor}
+          confirmLabel={ACTIONS[action].confirmLabel}
           destructive={ACTIONS[action].destructive}
           ids={selectedIds}
           noun="invoice"
           nounPlural="invoices"
           onCancel={() => setAction(null)}
           onDeleted={(result) => {
-            const past = ACTIONS[action].past;
+            const toastFor = ACTIONS[action].toastFor;
             setAction(null);
             selection.clear();
-            showToast(
-              `${past} ${result.deleted} invoice${result.deleted !== 1 ? "s" : ""}` +
-                (result.skipped > 0 ? `, ${result.skipped} skipped` : "") +
-                "."
-            );
+            showToast(toastFor(result.deleted, result.skipped));
             router.refresh();
           }}
         />

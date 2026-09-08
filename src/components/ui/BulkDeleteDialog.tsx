@@ -20,8 +20,22 @@ interface Props {
   /** Singular noun for the record type, e.g. "invoice". */
   noun: string;
   nounPlural: string;
-  /** Verb shown in the title and button, e.g. "Mark as paid". Defaults to "Delete". */
-  verb?: string;
+  /**
+   * Builds the confirm title from the eligible count learned from the dry
+   * run, e.g. `(n) => `Mark ${n} invoices as paid?``. A single
+   * `verb + count + noun` template can't serve every action's grammar
+   * ("Send reminders for 3 invoices?" vs "Delete 3 invoices?"), so each
+   * action supplies its own. Defaults to the delete phrasing, so callers
+   * that don't pass this keep today's exact wording.
+   */
+  titleFor?: (count: number) => string;
+  /**
+   * Label for the confirm button, e.g. "Mark as paid". The eligible count is
+   * intentionally not appended when this is given — it already appears in
+   * the title, and "Mark as paid 3" reads worse than "Mark as paid". Defaults
+   * to "Delete N", matching today's behaviour.
+   */
+  confirmLabel?: string;
   /** Set false for non-destructive actions to drop the "cannot be undone" line. */
   destructive?: boolean;
   onCancel: () => void;
@@ -45,13 +59,17 @@ export function BulkDeleteDialog({
   ids,
   noun,
   nounPlural,
-  verb,
+  titleFor,
+  confirmLabel,
   destructive,
   onCancel,
   onDeleted,
 }: Props) {
-  const resolvedVerb = verb ?? "Delete";
   const isDestructive = destructive !== false;
+  // Whether a caller has opted into custom copy at all. Callers that pass
+  // neither prop (clients, estimates, expenses) get today's exact delete
+  // wording throughout, including the "checking"/"nothing eligible" states.
+  const isCustom = titleFor !== undefined || confirmLabel !== undefined;
   const [preview, setPreview] = useState<BulkActionResult | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -116,12 +134,10 @@ export function BulkDeleteDialog({
     }
   }
 
-  const deletable = preview?.deleted ?? 0;
-  const target = deletable === 1 ? noun : nounPlural;
-  // The original copy ("Nothing can be deleted", "Deleting…", …) only reads correctly
-  // for the delete verb, so it's preserved verbatim for the default case and a
-  // generic verb-agnostic phrasing is used for every other action.
-  const isDefaultDelete = resolvedVerb === "Delete";
+  // Named `eligible`, not `deletable` — this dialog now also gates mark-paid,
+  // duplicate and reminders, where "deletable" is a non-sequitur.
+  const eligible = preview?.deleted ?? 0;
+  const resolvedTitleFor = titleFor ?? ((n: number) => `Delete ${n} ${n === 1 ? noun : nounPlural}?`);
 
   return (
     <Dialog
@@ -138,21 +154,21 @@ export function BulkDeleteDialog({
           <DialogTitle>
             {preview === null
               ? "Checking…"
-              : deletable === 0
-                ? isDefaultDelete
-                  ? "Nothing can be deleted"
-                  : `Nothing to ${resolvedVerb.toLowerCase()}`
-                : `${resolvedVerb} ${deletable} ${target}?`}
+              : eligible === 0
+                ? isCustom
+                  ? "Nothing eligible"
+                  : "Nothing can be deleted"
+                : resolvedTitleFor(eligible)}
           </DialogTitle>
           <DialogDescription>
             {preview === null
-              ? isDefaultDelete
-                ? "Working out what can be deleted."
-                : "Working out what's eligible."
-              : deletable === 0
-                ? isDefaultDelete
-                  ? "None of what you selected can be deleted."
-                  : "None of what you selected is eligible."
+              ? isCustom
+                ? "Working out what's eligible."
+                : "Working out what can be deleted."
+              : eligible === 0
+                ? isCustom
+                  ? "None of what you selected is eligible."
+                  : "None of what you selected can be deleted."
                 : isDestructive
                   ? "This cannot be undone."
                   : undefined}
@@ -180,13 +196,13 @@ export function BulkDeleteDialog({
           <Button
             variant={isDestructive ? "destructive" : "default"}
             onClick={handleConfirm}
-            disabled={busy || preview === null || deletable === 0}
+            disabled={busy || preview === null || eligible === 0}
           >
             {busy
-              ? isDefaultDelete
-                ? "Deleting…"
-                : `${resolvedVerb}…`
-              : `${resolvedVerb} ${deletable > 0 ? deletable : ""}`.trim()}
+              ? confirmLabel
+                ? `${confirmLabel}…`
+                : "Deleting…"
+              : confirmLabel ?? `Delete ${eligible > 0 ? eligible : ""}`.trim()}
           </Button>
         </DialogFooter>
       </DialogContent>
