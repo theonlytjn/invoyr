@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
 
   if (deleteError) return NextResponse.json({ error: deleteError.message }, { status: 500 });
 
-  await supabase.from("audit_logs").insert(
+  const { error: auditError } = await supabase.from("audit_logs").insert(
     partition.deletable.map((inv) => ({
       org_id: org.id,
       user_id: user.id,
@@ -91,6 +91,14 @@ export async function POST(req: NextRequest) {
       meta: { invoice_number: inv.invoice_number, status: inv.status, bulk: true },
     }))
   );
+
+  if (auditError) {
+    console.error("[bulk] audit log write failed", {
+      action: "invoice.deleted",
+      ids: deleteIds,
+      error: auditError.message,
+    });
+  }
 
   return NextResponse.json(result);
 }
