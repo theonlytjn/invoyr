@@ -3,7 +3,7 @@ title: INV-001 Current State Audit
 version: 1.0
 status: Foundation
 owner: Product / Engineering
-last_updated: 2026-09-08
+last_updated: 2026-06-19
 ---
 
 # INV-001 — Current State Audit
@@ -163,7 +163,7 @@ Eligibility is decided server-side only, in pure functions in `src/lib/bulk-acti
 - **Expenses** — deletable unless already billed onto an invoice (`invoice_id` set).
 - **Clients** — deletable only with zero invoices, estimates and expenses; the rest are skipped with "archive them instead".
 
-On the invoices list specifically, the row checkboxes themselves are ungated for everyone. The pre-existing `canBulk` gate (the Business-plan `bulk_invoice_actions` feature) is unchanged and continues to gate only Send and Void.
+On the invoices list specifically, the row checkboxes themselves are ungated for everyone. The pre-existing `canBulk` gate (the Business-plan `bulk_invoice_actions` feature) is unchanged: it gates Send, Void, Download PDFs and Send reminders. Delete, Export CSV, Mark as paid and Duplicate are available on every plan.
 
 ### Invoice quick actions
 
