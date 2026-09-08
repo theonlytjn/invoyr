@@ -2,7 +2,10 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
+import { BulkActionBar, BulkDeleteDialog, RowCheckbox } from "@/components/ui";
+import { useRowSelection } from "@/hooks/useRowSelection";
 import type { Client } from "@/lib/supabase/types";
 
 interface Props {
@@ -12,6 +15,15 @@ interface Props {
 
 export default function ClientsTable({ clients, showArchived }: Props) {
   const [query, setQuery] = useState("");
+  const router = useRouter();
+  const selection = useRowSelection();
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 4000);
+  };
 
   const filtered = query.trim()
     ? clients.filter((c) => {
@@ -23,6 +35,9 @@ export default function ClientsTable({ clients, showArchived }: Props) {
         );
       })
     : clients;
+
+  const filteredIds = filtered.map((c) => c.id);
+  const selectedIds = clients.filter((c) => selection.isSelected(c.id)).map((c) => c.id);
 
   return (
     <div className="space-y-4">
@@ -41,6 +56,15 @@ export default function ClientsTable({ clients, showArchived }: Props) {
           {showArchived ? "Hide archived" : "Show archived"}
         </Link>
       </div>
+
+      <BulkActionBar count={selection.count} onClear={selection.clear}>
+        <button
+          onClick={() => setDeleteOpen(true)}
+          className="px-3 py-1.5 bg-neutral-800 dark:bg-neutral-700 text-white font-medium rounded-lg hover:bg-red-700 transition-colors"
+        >
+          Delete
+        </button>
+      </BulkActionBar>
 
       <div className="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 overflow-x-auto">
         {!filtered.length ? (
@@ -64,6 +88,13 @@ export default function ClientsTable({ clients, showArchived }: Props) {
           <table className="w-full text-sm">
             <thead className="border-b border-neutral-100 dark:border-neutral-800">
               <tr>
+                <th className="py-3 pl-5 pr-2 w-8">
+                  <RowCheckbox
+                    checked={selection.allSelected(filteredIds)}
+                    onChange={() => selection.toggleAll(filteredIds)}
+                    label="Select all"
+                  />
+                </th>
                 <th className="text-left py-3 px-5 text-xs font-medium text-neutral-500 uppercase tracking-wide">Name</th>
                 <th className="hidden sm:table-cell text-left py-3 px-4 text-xs font-medium text-neutral-500 uppercase tracking-wide">Company</th>
                 <th className="text-left py-3 px-4 text-xs font-medium text-neutral-500 uppercase tracking-wide">Email</th>
@@ -73,7 +104,14 @@ export default function ClientsTable({ clients, showArchived }: Props) {
             <tbody>
               {filtered.map((client) => (
                 <tr key={client.id} className="border-b border-neutral-100 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
-                  <td className="py-3 px-5">
+                  <td className="py-3 pl-5 pr-2">
+                    <RowCheckbox
+                      checked={selection.isSelected(client.id)}
+                      onChange={() => selection.toggleOne(client.id)}
+                      label={`Select ${client.name}`}
+                    />
+                  </td>
+                  <td className="py-3 px-4">
                     <Link href={`/clients/${client.id}`} className="font-medium text-neutral-950 dark:text-neutral-50 hover:underline">
                       {client.name}
                     </Link>
@@ -90,6 +128,31 @@ export default function ClientsTable({ clients, showArchived }: Props) {
           </table>
         )}
       </div>
+
+      <BulkDeleteDialog
+        open={deleteOpen}
+        endpoint="/api/clients/bulk/delete"
+        ids={selectedIds}
+        noun="client"
+        nounPlural="clients"
+        onCancel={() => setDeleteOpen(false)}
+        onDeleted={(result) => {
+          setDeleteOpen(false);
+          selection.clear();
+          showToast(
+            `Deleted ${result.deleted} client${result.deleted !== 1 ? "s" : ""}` +
+              (result.skipped > 0 ? `, ${result.skipped} skipped` : "") +
+              "."
+          );
+          router.refresh();
+        }}
+      />
+
+      {toast && (
+        <div className="fixed bottom-24 lg:bottom-6 left-1/2 -translate-x-1/2 px-4 py-2.5 bg-neutral-950 text-white text-sm font-medium rounded-xl shadow-lg z-50 pointer-events-none">
+          {toast}
+        </div>
+      )}
     </div>
   );
 }
