@@ -5,6 +5,8 @@ import {
   partitionExpenses,
   partitionClients,
   summarise,
+  partitionMarkPaid,
+  partitionRemind,
 } from "./bulk-actions";
 
 describe("partitionInvoices", () => {
@@ -190,5 +192,76 @@ describe("summarise", () => {
     const partition = { deletable: [{ id: "a" }], skips: [] };
     const result = summarise(partition, ["a", "b"]);
     expect(result.reasons).toEqual([{ count: 1, reason: "1 record could not be found" }]);
+  });
+});
+
+describe("partitionMarkPaid", () => {
+  it("accepts invoices that are awaiting payment", () => {
+    const rows = [
+      { id: "a", invoice_number: "INV-1", status: "sent", total: 100, amount_paid: 0 },
+      { id: "b", invoice_number: "INV-2", status: "overdue", total: 100, amount_paid: 0 },
+      { id: "c", invoice_number: "INV-3", status: "partial", total: 100, amount_paid: 40 },
+      { id: "d", invoice_number: "INV-4", status: "issued", total: 100, amount_paid: 0 },
+    ];
+    expect(partitionMarkPaid(rows).deletable.map((r) => r.id)).toEqual(["a", "b", "c", "d"]);
+  });
+
+  it("skips drafts, which have not been issued to anyone", () => {
+    const rows = [{ id: "a", invoice_number: "INV-1", status: "draft", total: 100, amount_paid: 0 }];
+    expect(partitionMarkPaid(rows).skips).toEqual([
+      { count: 1, reason: "1 invoice is still a draft — issue it first" },
+    ]);
+  });
+
+  it("skips invoices that are already paid or voided", () => {
+    const rows = [
+      { id: "a", invoice_number: "INV-1", status: "paid", total: 100, amount_paid: 100 },
+      { id: "b", invoice_number: "INV-2", status: "void", total: 100, amount_paid: 0 },
+    ];
+    const result = partitionMarkPaid(rows);
+    expect(result.deletable).toEqual([]);
+    expect(result.skips).toEqual([
+      { count: 2, reason: "2 invoices are already paid or voided" },
+    ]);
+  });
+
+  it("skips an invoice with nothing left outstanding", () => {
+    const rows = [{ id: "a", invoice_number: "INV-1", status: "sent", total: 100, amount_paid: 100 }];
+    expect(partitionMarkPaid(rows).skips).toEqual([
+      { count: 1, reason: "1 invoice has nothing outstanding" },
+    ]);
+  });
+});
+
+describe("partitionRemind", () => {
+  it("accepts active invoices whose client has an email address", () => {
+    const rows = [
+      { id: "a", invoice_number: "INV-1", status: "overdue", clientEmail: "a@example.com" },
+      { id: "b", invoice_number: "INV-2", status: "sent", clientEmail: "b@example.com" },
+      { id: "c", invoice_number: "INV-3", status: "issued", clientEmail: "c@example.com" },
+    ];
+    expect(partitionRemind(rows).deletable).toHaveLength(3);
+  });
+
+  it("skips invoices that are not awaiting payment", () => {
+    const rows = [
+      { id: "a", invoice_number: "INV-1", status: "draft", clientEmail: "a@example.com" },
+      { id: "b", invoice_number: "INV-2", status: "paid", clientEmail: "b@example.com" },
+    ];
+    expect(partitionRemind(rows).skips).toEqual([
+      { count: 2, reason: "2 invoices are not awaiting payment" },
+    ]);
+  });
+
+  it("skips invoices whose client has no email address", () => {
+    const rows = [
+      { id: "a", invoice_number: "INV-1", status: "sent", clientEmail: null },
+      { id: "b", invoice_number: "INV-2", status: "sent", clientEmail: "b@example.com" },
+    ];
+    const result = partitionRemind(rows);
+    expect(result.deletable.map((r) => r.id)).toEqual(["b"]);
+    expect(result.skips).toEqual([
+      { count: 1, reason: "1 invoice has a client with no email address" },
+    ]);
   });
 });

@@ -149,3 +149,69 @@ export function summarise<T extends { id: string }>(
     ],
   };
 }
+
+export type MarkPaidRow = {
+  id: string;
+  invoice_number: string;
+  status: string;
+  total: number;
+  amount_paid: number;
+};
+
+export type RemindRow = {
+  id: string;
+  invoice_number: string;
+  status: string;
+  clientEmail: string | null;
+};
+
+const PAYABLE_STATUSES = new Set(["issued", "sent", "overdue", "partial"]);
+const REMINDABLE_STATUSES = new Set(["issued", "sent", "overdue"]);
+
+export function partitionMarkPaid(rows: MarkPaidRow[]): Partition<MarkPaidRow> {
+  const deletable: MarkPaidRow[] = [];
+  let drafts = 0;
+  let settled = 0;
+  let nothingOutstanding = 0;
+
+  for (const row of rows) {
+    if (row.status === "draft") {
+      drafts++;
+    } else if (!PAYABLE_STATUSES.has(row.status)) {
+      settled++;
+    } else if (Number(row.total) - Number(row.amount_paid) <= 0) {
+      nothingOutstanding++;
+    } else {
+      deletable.push(row);
+    }
+  }
+
+  return {
+    deletable,
+    skips: [
+      ...skip(drafts, "invoice is still a draft — issue it first", "invoices are still drafts — issue them first"),
+      ...skip(settled, "invoice is already paid or voided", "invoices are already paid or voided"),
+      ...skip(nothingOutstanding, "invoice has nothing outstanding", "invoices have nothing outstanding"),
+    ],
+  };
+}
+
+export function partitionRemind(rows: RemindRow[]): Partition<RemindRow> {
+  const deletable: RemindRow[] = [];
+  let wrongStatus = 0;
+  let noEmail = 0;
+
+  for (const row of rows) {
+    if (!REMINDABLE_STATUSES.has(row.status)) wrongStatus++;
+    else if (!row.clientEmail) noEmail++;
+    else deletable.push(row);
+  }
+
+  return {
+    deletable,
+    skips: [
+      ...skip(wrongStatus, "invoice is not awaiting payment", "invoices are not awaiting payment"),
+      ...skip(noEmail, "invoice has a client with no email address", "invoices have clients with no email address"),
+    ],
+  };
+}
