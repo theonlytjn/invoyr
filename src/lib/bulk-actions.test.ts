@@ -231,6 +231,33 @@ describe("partitionMarkPaid", () => {
       { count: 1, reason: "1 invoice has nothing outstanding" },
     ]);
   });
+
+  it("uses plural wording for multiple drafts", () => {
+    const rows = [
+      { id: "a", invoice_number: "INV-1", status: "draft", total: 100, amount_paid: 0 },
+      { id: "b", invoice_number: "INV-2", status: "draft", total: 100, amount_paid: 0 },
+    ];
+    expect(partitionMarkPaid(rows).skips).toEqual([
+      { count: 2, reason: "2 invoices are still drafts — issue them first" },
+    ]);
+  });
+
+  it("uses singular wording for one settled invoice", () => {
+    const rows = [{ id: "a", invoice_number: "INV-1", status: "paid", total: 100, amount_paid: 100 }];
+    expect(partitionMarkPaid(rows).skips).toEqual([
+      { count: 1, reason: "1 invoice is already paid or voided" },
+    ]);
+  });
+
+  it("uses plural wording for multiple invoices with nothing outstanding", () => {
+    const rows = [
+      { id: "a", invoice_number: "INV-1", status: "sent", total: 100, amount_paid: 100 },
+      { id: "b", invoice_number: "INV-2", status: "issued", total: 50, amount_paid: 50 },
+    ];
+    expect(partitionMarkPaid(rows).skips).toEqual([
+      { count: 2, reason: "2 invoices have nothing outstanding" },
+    ]);
+  });
 });
 
 describe("partitionRemind", () => {
@@ -262,6 +289,23 @@ describe("partitionRemind", () => {
     expect(result.deletable.map((r) => r.id)).toEqual(["b"]);
     expect(result.skips).toEqual([
       { count: 1, reason: "1 invoice has a client with no email address" },
+    ]);
+  });
+
+  it("uses singular wording for one invoice not awaiting payment", () => {
+    const rows = [{ id: "a", invoice_number: "INV-1", status: "draft", clientEmail: "a@example.com" }];
+    expect(partitionRemind(rows).skips).toEqual([
+      { count: 1, reason: "1 invoice is not awaiting payment" },
+    ]);
+  });
+
+  it("uses plural wording for multiple invoices with clients without email addresses", () => {
+    const rows = [
+      { id: "a", invoice_number: "INV-1", status: "sent", clientEmail: null },
+      { id: "b", invoice_number: "INV-2", status: "overdue", clientEmail: null },
+    ];
+    expect(partitionRemind(rows).skips).toEqual([
+      { count: 2, reason: "2 invoices have clients with no email address" },
     ]);
   });
 });
