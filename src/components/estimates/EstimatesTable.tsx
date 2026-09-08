@@ -131,8 +131,9 @@ export default function EstimatesTable({ estimates }: Props) {
         onDeleted={(result) => {
           setDeleteOpen(false);
           clearSelection();
+          const succeeded = result.succeeded ?? result.deleted;
           showToast(
-            `Deleted ${result.deleted} estimate${result.deleted !== 1 ? "s" : ""}` +
+            `Deleted ${succeeded} estimate${succeeded !== 1 ? "s" : ""}` +
               (result.skipped > 0 ? `, ${result.skipped} skipped` : "") +
               "."
           );

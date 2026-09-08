@@ -391,7 +391,7 @@ export default function InvoicesTable({ invoices, canBulk = false }: Props) {
             const toastFor = ACTIONS[action].toastFor;
             setAction(null);
             clearSelection();
-            showToast(toastFor(result.deleted, result.skipped));
+            showToast(toastFor(result.succeeded ?? result.deleted, result.skipped));
             router.refresh();
           }}
         />

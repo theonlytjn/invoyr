@@ -162,7 +162,20 @@ export function partitionClients(rows: ClientRow[]): Partition<ClientRow> {
 }
 
 export type BulkActionResult = {
+  /**
+   * How many records the action succeeded on. Named `deleted` because delete was
+   * the first action to use this shape; for mark-paid, remind and duplicate it
+   * means "how many were marked / sent / duplicated". Kept for compatibility —
+   * prefer `succeeded`, which says what it means.
+   */
   deleted: number;
+  /**
+   * Same number as `deleted`, under a name that is true of every action.
+   * Optional because it is a response field: the older `bulk/send` and
+   * `bulk/void` routes have their own shape and do not send it, so consumers
+   * should read `succeeded ?? deleted`.
+   */
+  succeeded?: number;
   skipped: number;
   reasons: SkipReason[];
 };
@@ -181,6 +194,7 @@ export function summarise<T extends { id: string }>(
 
   return {
     deleted: partition.deletable.length,
+    succeeded: partition.deletable.length,
     skipped: requestedIds.length - partition.deletable.length,
     reasons: [
       ...partition.skips,

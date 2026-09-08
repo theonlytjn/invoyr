@@ -135,8 +135,9 @@ export function BulkDeleteDialog({
   }
 
   // Named `eligible`, not `deletable` — this dialog now also gates mark-paid,
-  // duplicate and reminders, where "deletable" is a non-sequitur.
-  const eligible = preview?.deleted ?? 0;
+  // duplicate and reminders, where "deletable" is a non-sequitur. `succeeded` is
+  // the field that says what it means; `deleted` is its compatibility alias.
+  const eligible = preview?.succeeded ?? preview?.deleted ?? 0;
   const resolvedTitleFor = titleFor ?? ((n: number) => `Delete ${n} ${n === 1 ? noun : nounPlural}?`);
 
   return (

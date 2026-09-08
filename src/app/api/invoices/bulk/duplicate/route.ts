@@ -167,6 +167,7 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({
     deleted: duplicatedIds.length,
+    succeeded: duplicatedIds.length,
     skipped: result.skipped + failed,
     reasons: [...result.reasons, ...failureReasons],
   });

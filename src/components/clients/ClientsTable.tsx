@@ -165,8 +165,9 @@ export default function ClientsTable({ clients, showArchived }: Props) {
         onDeleted={(result) => {
           setDeleteOpen(false);
           clearSelection();
+          const succeeded = result.succeeded ?? result.deleted;
           showToast(
-            `Deleted ${result.deleted} client${result.deleted !== 1 ? "s" : ""}` +
+            `Deleted ${succeeded} client${succeeded !== 1 ? "s" : ""}` +
               (result.skipped > 0 ? `, ${result.skipped} skipped` : "") +
               "."
           );

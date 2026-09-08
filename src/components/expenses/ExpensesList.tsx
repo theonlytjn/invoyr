@@ -526,8 +526,9 @@ export default function ExpensesList({ initialExpenses, clients, orgId, orgCurre
           // Every parameter of fetchExpenses defaults to the current filter state,
           // so calling it with no arguments preserves the active period and category.
           await fetchExpenses();
+          const succeeded = result.succeeded ?? result.deleted;
           showToast(
-            `Deleted ${result.deleted} expense${result.deleted !== 1 ? "s" : ""}` +
+            `Deleted ${succeeded} expense${succeeded !== 1 ? "s" : ""}` +
               (result.skipped > 0 ? `, ${result.skipped} skipped` : "") +
               "."
           );
