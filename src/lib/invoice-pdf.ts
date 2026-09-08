@@ -4,6 +4,8 @@ import { canAccess } from "@/config/plans";
 import { computeTotals } from "@/lib/invoice-totals";
 import type { Invoice, InvoiceItem, Client, Organisation } from "@/lib/supabase/types";
 
+type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
+
 async function fetchLogoAsDataUrl(url: string): Promise<string | null> {
   try {
     const res = await fetch(url, { cache: "no-store" });
@@ -17,63 +19,75 @@ async function fetchLogoAsDataUrl(url: string): Promise<string | null> {
 }
 
 /**
+ * Everything a render needs that does not vary between invoices of the same org:
+ * the client, the org (already resolved by the caller), the trial watermark, the
+ * branding flag and the logo, fetched over the network once.
+ */
+export type InvoicePdfContext = {
+  supabase: SupabaseServerClient;
+  /** The org whose branding the PDF carries. Also scopes the invoice lookup. */
+  org: Organisation & { logoDataUrl?: string | null };
+  watermark?: string;
+  showInvoyrBranding: boolean;
+};
+
+/**
+ * Builds the context above. Call once per request, never once per invoice: the
+ * subscription lookup, the plan lookup and the outbound fetch of the logo are
+ * identical for every invoice in a batch, and repeating them up to N times before
+ * any rendering starts is pure latency.
+ *
+ * The org must be supplied by the caller — resolved by `requireOrg()`, which
+ * honours the active-org cookie. Deriving it here from `org_members ... .single()`
+ * threw for any user belonging to two orgs, which made every render return null.
+ */
+export async function buildInvoicePdfContext(
+  supabase: SupabaseServerClient,
+  org: Organisation
+): Promise<InvoicePdfContext> {
+  const { data: subscription } = await supabase
+    .from("subscriptions")
+    .select("status")
+    .eq("org_id", org.id)
+    .single();
+
+  const watermark = subscription?.status === "trialing" ? "TRIAL" : undefined;
+  const showInvoyrBranding = !canAccess(await getOrgPlan(org.id), "white_label");
+
+  const logoRawUrl = org.logo_url ? org.logo_url.split("?")[0] : null;
+  const logoDataUrl = logoRawUrl ? await fetchLogoAsDataUrl(logoRawUrl) : null;
+
+  return {
+    supabase,
+    org: { ...org, logo_url: logoRawUrl, logoDataUrl },
+    watermark,
+    showInvoyrBranding,
+  };
+}
+
+/**
  * Renders an invoice's PDF bytes and invoice number. Returns `null` if the
- * invoice does not exist. Auth is intentionally NOT checked here — callers
- * (the single-invoice route and the bulk-download route) check it differently,
- * so it belongs in the routes, not this library function.
+ * invoice does not exist in the context's org. Auth is intentionally NOT checked
+ * here — callers (the single-invoice route and the bulk-download route) check it
+ * differently, so it belongs in the routes, not this library function.
  */
 export async function renderInvoicePdf(
-  invoiceId: string
+  invoiceId: string,
+  ctx: InvoicePdfContext
 ): Promise<{ buffer: Uint8Array; invoiceNumber: string } | null> {
-  const supabase = await createClient();
+  const { supabase, org, watermark, showInvoyrBranding } = ctx;
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: invoiceRaw } = await supabase
     .from("invoices")
     .select("*, clients(*), invoice_items(*)")
     .eq("id", invoiceId)
-    .single();
+    .eq("org_id", org.id)
+    .maybeSingle();
 
   if (!invoiceRaw) return null;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const invoice = invoiceRaw as any;
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: orgRaw } = await supabase
-    .from("org_members")
-    .select("organisations(*)")
-    .eq("user_id", user.id)
-    .single();
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const orgData = orgRaw as any;
-  const orgRawObj: Organisation | null = Array.isArray(orgData?.organisations)
-    ? (orgData.organisations[0] ?? null)
-    : (orgData?.organisations ?? null);
-
-  if (!orgRawObj) return null;
-
-  const { data: subscription } = await supabase
-    .from("subscriptions")
-    .select("status")
-    .eq("org_id", orgRawObj.id)
-    .single();
-
-  const watermark = subscription?.status === "trialing" ? "TRIAL" : undefined;
-  const showInvoyrBranding = !canAccess(await getOrgPlan(orgRawObj.id), "white_label");
-
-  const logoRawUrl = orgRawObj.logo_url ? orgRawObj.logo_url.split("?")[0] : null;
-  const logoDataUrl = logoRawUrl ? await fetchLogoAsDataUrl(logoRawUrl) : null;
-
-  const org: Organisation & { logoDataUrl?: string | null } = {
-    ...orgRawObj,
-    logo_url: logoRawUrl,
-    logoDataUrl,
-  };
 
   const items: InvoiceItem[] = Array.isArray(invoice.invoice_items) ? invoice.invoice_items : [];
   const client: Client | null = Array.isArray(invoice.clients)

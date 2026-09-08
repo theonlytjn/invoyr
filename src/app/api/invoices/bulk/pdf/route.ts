@@ -5,9 +5,15 @@ import JSZip from "jszip";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
 import { orgHasFeature } from "@/lib/billing";
-import { renderInvoicePdf } from "@/lib/invoice-pdf";
+import { buildInvoicePdfContext, renderInvoicePdf } from "@/lib/invoice-pdf";
+import { MAX_BULK_PDF_IDS } from "@/lib/bulk-actions";
 
-const schema = z.object({ ids: bulkIdsSchema() });
+const schema = z.object({ ids: bulkIdsSchema(MAX_BULK_PDF_IDS) });
+
+// Rendering is sequential and each PDF takes real time, so this route needs more
+// than the platform default. The id cap is MAX_BULK_PDF_IDS rather than
+// MAX_BULK_IDS for the same reason: 50 renders will not finish inside it.
+export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
@@ -43,13 +49,19 @@ export async function POST(req: NextRequest) {
   const zip = new JSZip();
   let succeeded = 0;
 
+  // Built once for the whole batch. These lookups (subscription, plan, and an
+  // outbound fetch of the org logo) are identical for every invoice, so doing them
+  // per render was pure repeated latency. The org comes from requireOrg() above,
+  // which honours the active-org cookie.
+  const ctx = await buildInvoicePdfContext(supabase, org);
+
   // Sequential: rendering many PDFs concurrently is memory-hungry on a serverless function.
   // Each render is isolated in its own try/catch so one bad invoice (e.g. a malformed row
   // that crashes the PDF renderer) doesn't take down the whole batch with a 500 — we skip
   // it and keep going, same failure shape as bulk reminders/duplicate.
   for (const { id } of invoices) {
     try {
-      const rendered = await renderInvoicePdf(id);
+      const rendered = await renderInvoicePdf(id, ctx);
       if (rendered) {
         zip.file(`invoice-${rendered.invoiceNumber}.pdf`, rendered.buffer);
         succeeded++;
@@ -70,6 +82,10 @@ export async function POST(req: NextRequest) {
     headers: {
       "Content-Type": "application/zip",
       "Content-Disposition": `attachment; filename="invoices-${stamp}.zip"`,
+      // The body is a zip, so the caller has no other way to learn how many
+      // invoices actually rendered. Without this the UI would report the number
+      // selected and overstate a batch that silently skipped a bad invoice.
+      "X-Rendered-Count": String(succeeded),
     },
   });
 }

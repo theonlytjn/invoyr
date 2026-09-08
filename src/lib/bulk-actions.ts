@@ -16,6 +16,16 @@
  */
 export const MAX_BULK_IDS = 50;
 
+/**
+ * Most ids one bulk *PDF* request may carry.
+ *
+ * Lower than `MAX_BULK_IDS` because rendering is the expensive bulk action: each
+ * PDF is rendered sequentially (concurrent rendering is memory-hungry on a
+ * serverless function), so 50 of them would not finish inside the route's
+ * `maxDuration` and the user would get a timeout instead of a zip.
+ */
+export const MAX_BULK_PDF_IDS = 15;
+
 export type SkipReason = { count: number; reason: string };
 
 export type Partition<T> = {

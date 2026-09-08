@@ -7,7 +7,7 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import InvoiceStatusBadge from "./InvoiceStatusBadge";
 import { Input } from "@/components/ui/input";
 import { useRowSelection } from "@/hooks/useRowSelection";
-import { MAX_BULK_IDS } from "@/lib/bulk-actions";
+import { MAX_BULK_IDS, MAX_BULK_PDF_IDS } from "@/lib/bulk-actions";
 import { BulkActionBar, BulkDeleteDialog, RowCheckbox } from "@/components/ui";
 import {
   DropdownMenu,
@@ -176,28 +176,49 @@ export default function InvoicesTable({ invoices, canBulk = false }: Props) {
   }
 
   async function handleDownloadPdfs() {
-    setBulkState("downloading");
-    const res = await fetch("/api/invoices/bulk/pdf", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ids: selectedIds }),
-    });
-
-    if (!res.ok) {
-      setBulkState("idle");
-      showToast("Could not build the download. Please try again.");
+    // Rendering is the expensive bulk action and its route caps ids lower than the
+    // rest. Say so here rather than letting the request come back "Invalid request".
+    if (selectedIds.length > MAX_BULK_PDF_IDS) {
+      showToast(`PDF downloads are limited to ${MAX_BULK_PDF_IDS} invoices at a time.`);
       return;
     }
 
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `invoices-${new Date().toISOString().slice(0, 10)}.zip`;
-    a.click();
-    URL.revokeObjectURL(url);
-    setBulkState("idle");
-    showToast(`Downloaded ${selectedIds.length} invoice${selectedIds.length !== 1 ? "s" : ""}.`);
+    setBulkState("downloading");
+
+    // Without this, a thrown fetch (offline, aborted connection) would leave
+    // bulkState on "downloading" forever and disable the whole bar.
+    try {
+      const res = await fetch("/api/invoices/bulk/pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: selectedIds }),
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        showToast(body?.error ?? "Could not build the download. Please try again.");
+        return;
+      }
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `invoices-${new Date().toISOString().slice(0, 10)}.zip`;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      // The route skips invoices it could not render, so report what is actually
+      // in the zip rather than the number selected.
+      const header = res.headers.get("X-Rendered-Count");
+      const rendered = header !== null && Number.isFinite(Number(header)) ? Number(header) : null;
+      const count = rendered ?? selectedIds.length;
+      showToast(`Downloaded ${count} invoice${count !== 1 ? "s" : ""}.`);
+    } catch {
+      showToast("Could not build the download. Please try again.");
+    } finally {
+      setBulkState("idle");
+    }
   }
 
   return (
