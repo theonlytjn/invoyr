@@ -23,6 +23,21 @@
   `src/app/api/invoices/bulk/void/route.ts`.
 - Hard delete. No `deleted_at` column, no trash view, no undo, no schema migration.
 - Every deleted record writes an `audit_logs` row with `meta.bulk = true`.
+- **Audit-write failures must be observable** (ruled during execution, applies to every route in this
+  plan): capture the error from the `audit_logs` insert and `console.error` it with the action name
+  and affected ids. Do **not** fail the request — the records are already deleted, so a 500 would tell
+  the user the action failed when it succeeded. This deliberately diverges from the existing
+  `bulk/void` route, which discards the error entirely.
+  ```ts
+  const { error: auditError } = await supabase.from("audit_logs").insert(...);
+  if (auditError) {
+    console.error("[bulk] audit log write failed", { action: "invoice.deleted", ids: deleteIds, error: auditError.message });
+  }
+  ```
+- **Known accepted limitation** (ruled during execution): routes that perform two writes — the
+  invoice route's expense cleanup followed by the delete — are not wrapped in a transaction. A
+  transient failure between them leaves expenses unbilled while their invoice still exists; a retry
+  heals it. Accepted rather than adding a Postgres RPC. Record it in the docs task, do not fix it.
 - Batch cap is 50 ids per request, matching `src/app/api/invoices/bulk/void/route.ts`.
 - No hardcoded brand colours — use the neutral Tailwind scale already used by the surrounding components.
 - All new UI is responsive, dark-mode aware, and has loading/empty/success/error states.
@@ -1949,6 +1964,8 @@ Expected: the invoice is gone, and the expense reappears as unbilled — `invoic
 In `docs/INV-001-current-state-audit.md`, find the section describing the list views and bulk actions and record: multi-select delete on invoices, estimates, expenses and clients; ungated on all plans; the per-resource eligibility rules; that Send and Void remain Business-plan features. Match the surrounding document's heading style and tone.
 
 If Part 2 has already been implemented when you reach this step, also record the invoice quick actions (mark as paid, send reminders, duplicate, download PDFs) and their eligibility rules. If not, leave that for the end of Part 2.
+
+Also record this known, accepted limitation: the invoice bulk delete route performs the billed-expense cleanup and the invoice delete as two separate writes, not one transaction. If the delete fails after the cleanup succeeds, the affected expenses are left marked unbilled while their invoice still exists. Retrying the delete heals it. This was accepted deliberately rather than introducing a Postgres function, and it applies to any future bulk route that performs more than one write.
 
 - [ ] **Step 6: Commit**
 
