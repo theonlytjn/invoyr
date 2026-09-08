@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createElement } from "react";
 import { z } from "zod";
+import { bulkIdsSchema } from "@/lib/bulk-request";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
 import { orgHasFeature } from "@/lib/billing";
@@ -9,7 +10,7 @@ import { InvoiceSentEmail } from "@/emails/transactional/InvoiceSentEmail";
 import { computeTotals } from "@/lib/invoice-totals";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
-const schema = z.object({ ids: z.array(z.string().uuid()).min(1).max(50) });
+const schema = z.object({ ids: bulkIdsSchema() });
 
 const SENDABLE = ["draft", "issued", "sent"];
 

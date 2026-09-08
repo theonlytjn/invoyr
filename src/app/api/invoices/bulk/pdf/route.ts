@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { bulkIdsSchema } from "@/lib/bulk-request";
 import JSZip from "jszip";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
 import { orgHasFeature } from "@/lib/billing";
 import { renderInvoicePdf } from "@/lib/invoice-pdf";
 
-const schema = z.object({ ids: z.array(z.string().uuid()).min(1).max(50) });
+const schema = z.object({ ids: bulkIdsSchema() });
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
@@ -24,8 +25,9 @@ export async function POST(req: NextRequest) {
   const parsed = schema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "Invalid request" }, { status: 400 });
 
-  // Dedupe: a repeated id must not be rendered twice or produce a duplicate zip entry.
-  const ids = Array.from(new Set(parsed.data.ids));
+  // `bulkIdsSchema` has already deduped: a repeated id must not be rendered twice
+  // or produce a duplicate zip entry.
+  const { ids } = parsed.data;
 
   // Scope to the org before rendering anything.
   const { data: invoices } = await supabase

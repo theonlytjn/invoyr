@@ -7,6 +7,7 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import InvoiceStatusBadge from "./InvoiceStatusBadge";
 import { Input } from "@/components/ui/input";
 import { useRowSelection } from "@/hooks/useRowSelection";
+import { MAX_BULK_IDS } from "@/lib/bulk-actions";
 import { BulkActionBar, BulkDeleteDialog, RowCheckbox } from "@/components/ui";
 import {
   DropdownMenu,
@@ -122,13 +123,31 @@ export default function InvoicesTable({ invoices, canBulk = false }: Props) {
   const canSend = selectedInvoices.some((i) => SENDABLE.has(i.status));
   const canVoid = selectedInvoices.some((i) => VOIDABLE.has(i.status));
 
+  // "Select all" is bounded by the same cap the bulk routes enforce. None of these
+  // lists paginate, so on a large org an uncapped select-all would build a request
+  // the server rejects with a bare "Invalid request" and no explanation.
+  const [selectAllCapped, setSelectAllCapped] = useState(false);
+  const selectableIds = allFilteredIds.slice(0, MAX_BULK_IDS);
+  const selectionNote =
+    selectAllCapped && selection.count >= MAX_BULK_IDS ? `First ${MAX_BULK_IDS} selected` : undefined;
+
+  function handleSelectAll() {
+    setSelectAllCapped(!selection.allSelected(selectableIds) && allFilteredIds.length > MAX_BULK_IDS);
+    selection.toggleAll(selectableIds);
+  }
+
+  function clearSelection() {
+    setSelectAllCapped(false);
+    selection.clear();
+  }
+
   async function handleBulkSend() {
     setBulkState("sending");
     const ids = selectedInvoices.filter((i) => SENDABLE.has(i.status)).map((i) => i.id);
     const res = await fetch("/api/invoices/bulk/send", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ids }) });
     const json = await res.json();
     setBulkState("idle");
-    selection.clear();
+    clearSelection();
     showToast(`Sent ${json.sent} invoice${json.sent !== 1 ? "s" : ""}${json.skipped > 0 ? `, ${json.skipped} skipped` : ""}.`);
     router.refresh();
   }
@@ -140,7 +159,7 @@ export default function InvoicesTable({ invoices, canBulk = false }: Props) {
     const res = await fetch("/api/invoices/bulk/void", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ids }) });
     const json = await res.json();
     setBulkState("idle");
-    selection.clear();
+    clearSelection();
     showToast(`Voided ${json.voided} invoice${json.voided !== 1 ? "s" : ""}${json.skipped > 0 ? `, ${json.skipped} skipped` : ""}.`);
     router.refresh();
   }
@@ -192,7 +211,7 @@ export default function InvoicesTable({ invoices, canBulk = false }: Props) {
       />
 
       {/* Bulk action bar */}
-      <BulkActionBar count={selection.count} onClear={selection.clear}>
+      <BulkActionBar count={selection.count} onClear={clearSelection} note={selectionNote}>
         {canBulk && canSend && (
           <button
             onClick={handleBulkSend}
@@ -275,8 +294,8 @@ export default function InvoicesTable({ invoices, canBulk = false }: Props) {
               <tr>
                 <th className="py-3 pl-4 pr-2 w-8">
                   <RowCheckbox
-                    checked={selection.allSelected(allFilteredIds)}
-                    onChange={() => selection.toggleAll(allFilteredIds)}
+                    checked={selection.allSelected(selectableIds)}
+                    onChange={handleSelectAll}
                     label="Select all"
                   />
                 </th>
@@ -350,7 +369,7 @@ export default function InvoicesTable({ invoices, canBulk = false }: Props) {
           onDeleted={(result) => {
             const toastFor = ACTIONS[action].toastFor;
             setAction(null);
-            selection.clear();
+            clearSelection();
             showToast(toastFor(result.deleted, result.skipped));
             router.refresh();
           }}

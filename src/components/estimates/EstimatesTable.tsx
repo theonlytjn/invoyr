@@ -7,6 +7,7 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import EstimateStatusBadge from "./EstimateStatusBadge";
 import { BulkActionBar, BulkDeleteDialog, RowCheckbox } from "@/components/ui";
 import { useRowSelection } from "@/hooks/useRowSelection";
+import { MAX_BULK_IDS } from "@/lib/bulk-actions";
 import type { EstimateWithClient } from "@/lib/supabase/types";
 
 interface Props {
@@ -27,9 +28,27 @@ export default function EstimatesTable({ estimates }: Props) {
   const allIds = estimates.map((e) => e.id);
   const selectedIds = allIds.filter((id) => selection.isSelected(id));
 
+  // "Select all" is bounded by the same cap the bulk routes enforce. None of these
+  // lists paginate, so on a large org an uncapped select-all would build a request
+  // the server rejects with a bare "Invalid request" and no explanation.
+  const [selectAllCapped, setSelectAllCapped] = useState(false);
+  const selectableIds = allIds.slice(0, MAX_BULK_IDS);
+  const selectionNote =
+    selectAllCapped && selection.count >= MAX_BULK_IDS ? `First ${MAX_BULK_IDS} selected` : undefined;
+
+  function handleSelectAll() {
+    setSelectAllCapped(!selection.allSelected(selectableIds) && allIds.length > MAX_BULK_IDS);
+    selection.toggleAll(selectableIds);
+  }
+
+  function clearSelection() {
+    setSelectAllCapped(false);
+    selection.clear();
+  }
+
   return (
     <div className="space-y-4">
-      <BulkActionBar count={selection.count} onClear={selection.clear}>
+      <BulkActionBar count={selection.count} onClear={clearSelection} note={selectionNote}>
         <button
           onClick={() => setDeleteOpen(true)}
           className="px-3 py-1.5 bg-neutral-800 dark:bg-neutral-700 text-white font-medium rounded-lg hover:bg-red-700 transition-colors"
@@ -45,8 +64,8 @@ export default function EstimatesTable({ estimates }: Props) {
               <tr className="border-b border-neutral-200 dark:border-neutral-800">
                 <th className="py-3 pl-5 pr-2 w-8">
                   <RowCheckbox
-                    checked={selection.allSelected(allIds)}
-                    onChange={() => selection.toggleAll(allIds)}
+                    checked={selection.allSelected(selectableIds)}
+                    onChange={handleSelectAll}
                     label="Select all"
                   />
                 </th>
@@ -111,7 +130,7 @@ export default function EstimatesTable({ estimates }: Props) {
         onCancel={() => setDeleteOpen(false)}
         onDeleted={(result) => {
           setDeleteOpen(false);
-          selection.clear();
+          clearSelection();
           showToast(
             `Deleted ${result.deleted} estimate${result.deleted !== 1 ? "s" : ""}` +
               (result.skipped > 0 ? `, ${result.skipped} skipped` : "") +

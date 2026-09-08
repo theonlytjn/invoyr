@@ -12,6 +12,7 @@ import MetricCard from "@/components/dashboard/MetricCard";
 import BankImportModal from "./BankImportModal";
 import { BulkActionBar, BulkDeleteDialog, RowCheckbox } from "@/components/ui";
 import { useRowSelection } from "@/hooks/useRowSelection";
+import { MAX_BULK_IDS } from "@/lib/bulk-actions";
 
 const PERIODS = [
   { value: "all",           label: "All time" },
@@ -166,6 +167,24 @@ export default function ExpensesList({ initialExpenses, clients, orgId, orgCurre
 
   const visibleIds = expenses.map((e) => e.id);
   const selectedIds = visibleIds.filter((id) => selection.isSelected(id));
+
+  // "Select all" is bounded by the same cap the bulk routes enforce. None of these
+  // lists paginate, so on a large org an uncapped select-all would build a request
+  // the server rejects with a bare "Invalid request" and no explanation.
+  const [selectAllCapped, setSelectAllCapped] = useState(false);
+  const selectableIds = visibleIds.slice(0, MAX_BULK_IDS);
+  const selectionNote =
+    selectAllCapped && selection.count >= MAX_BULK_IDS ? `First ${MAX_BULK_IDS} selected` : undefined;
+
+  function handleSelectAll() {
+    setSelectAllCapped(!selection.allSelected(selectableIds) && visibleIds.length > MAX_BULK_IDS);
+    selection.toggleAll(selectableIds);
+  }
+
+  function clearSelection() {
+    setSelectAllCapped(false);
+    selection.clear();
+  }
 
   return (
     <div className="space-y-5">
@@ -355,7 +374,7 @@ export default function ExpensesList({ initialExpenses, clients, orgId, orgCurre
         </div>
       ) : (
         <div className="space-y-3">
-          <BulkActionBar count={selection.count} onClear={selection.clear}>
+          <BulkActionBar count={selection.count} onClear={clearSelection} note={selectionNote}>
             <button
               onClick={() => setBulkDeleteOpen(true)}
               className="px-3 py-1.5 bg-neutral-800 dark:bg-neutral-700 text-white font-medium rounded-lg hover:bg-red-700 transition-colors"
@@ -370,8 +389,8 @@ export default function ExpensesList({ initialExpenses, clients, orgId, orgCurre
                 <tr className="border-b border-neutral-100 dark:border-neutral-800">
                   <th className="py-3 pl-4 pr-2 w-8">
                     <RowCheckbox
-                      checked={selection.allSelected(visibleIds)}
-                      onChange={() => selection.toggleAll(visibleIds)}
+                      checked={selection.allSelected(selectableIds)}
+                      onChange={handleSelectAll}
                       label="Select all"
                     />
                   </th>
@@ -486,7 +505,7 @@ export default function ExpensesList({ initialExpenses, clients, orgId, orgCurre
         onCancel={() => setBulkDeleteOpen(false)}
         onDeleted={async (result) => {
           setBulkDeleteOpen(false);
-          selection.clear();
+          clearSelection();
           // This list owns its rows in state, so refetch rather than router.refresh().
           // Every parameter of fetchExpenses defaults to the current filter state,
           // so calling it with no arguments preserves the active period and category.

@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { bulkIdsSchema } from "@/lib/bulk-request";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
 import { outstandingBalance, partitionMarkPaid, summarise } from "@/lib/bulk-actions";
 
 const schema = z.object({
-  ids: z.array(z.string().uuid()).min(1).max(50),
+  ids: bulkIdsSchema(),
   dryRun: z.boolean().optional().default(false),
   // "stripe" is a valid db value but is deliberately not offered here: Stripe payments
   // arrive via webhook, which is the source of truth for them, and letting someone

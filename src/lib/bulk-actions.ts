@@ -6,6 +6,16 @@
  * it asks the API with `dryRun: true` instead.
  */
 
+/**
+ * Most ids one bulk request may carry.
+ *
+ * Defined here so the server's Zod schemas and the lists' "select all" agree on
+ * one number: an uncapped select-all on an unpaginated list would otherwise POST
+ * more ids than the routes accept and fail validation with a bare "Invalid
+ * request". See `bulkIdsSchema` in `bulk-request.ts` for the server half.
+ */
+export const MAX_BULK_IDS = 50;
+
 export type SkipReason = { count: number; reason: string };
 
 export type Partition<T> = {

@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { bulkIdsSchema } from "@/lib/bulk-request";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
 import { generateInvoiceNumber } from "@/lib/invoice-number";
 import { summarise, type SkipReason } from "@/lib/bulk-actions";
 
 const schema = z.object({
-  ids: z.array(z.string().uuid()).min(1).max(50),
+  ids: bulkIdsSchema(),
   dryRun: z.boolean().optional().default(false),
 });
 

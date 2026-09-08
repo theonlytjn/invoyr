@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createElement } from "react";
 import { z } from "zod";
+import { bulkIdsSchema } from "@/lib/bulk-request";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
 import { sendTransactionalEmail } from "@/lib/resend/send-transactional-email";
@@ -10,7 +11,7 @@ import { orgHasFeature } from "@/lib/billing";
 import { partitionRemind, summarise, type RemindRow, type SkipReason } from "@/lib/bulk-actions";
 
 const schema = z.object({
-  ids: z.array(z.string().uuid()).min(1).max(50),
+  ids: bulkIdsSchema(),
   dryRun: z.boolean().optional().default(false),
 });
 
