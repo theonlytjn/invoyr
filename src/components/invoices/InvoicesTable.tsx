@@ -194,7 +194,9 @@ export default function InvoicesTable({ invoices, canBulk = false }: Props) {
     // Rendering is the expensive bulk action and its route caps ids lower than the
     // rest. Say so here rather than letting the request come back "Invalid request".
     if (selectedIds.length > MAX_BULK_PDF_IDS) {
-      showToast(`PDF downloads are limited to ${MAX_BULK_PDF_IDS} invoices at a time.`);
+      showToast(
+        `PDF downloads are limited to ${MAX_BULK_PDF_IDS} at a time — select ${MAX_BULK_PDF_IDS} or fewer.`
+      );
       return;
     }
 
