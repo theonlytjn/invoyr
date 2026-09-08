@@ -20,6 +20,10 @@ interface Props {
   /** Singular noun for the record type, e.g. "invoice". */
   noun: string;
   nounPlural: string;
+  /** Verb shown in the title and button, e.g. "Mark as paid". Defaults to "Delete". */
+  verb?: string;
+  /** Set false for non-destructive actions to drop the "cannot be undone" line. */
+  destructive?: boolean;
   onCancel: () => void;
   onDeleted: (result: BulkActionResult) => void;
 }
@@ -41,9 +45,13 @@ export function BulkDeleteDialog({
   ids,
   noun,
   nounPlural,
+  verb,
+  destructive,
   onCancel,
   onDeleted,
 }: Props) {
+  const resolvedVerb = verb ?? "Delete";
+  const isDestructive = destructive !== false;
   const [preview, setPreview] = useState<BulkActionResult | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -110,6 +118,10 @@ export function BulkDeleteDialog({
 
   const deletable = preview?.deleted ?? 0;
   const target = deletable === 1 ? noun : nounPlural;
+  // The original copy ("Nothing can be deleted", "Deleting…", …) only reads correctly
+  // for the delete verb, so it's preserved verbatim for the default case and a
+  // generic verb-agnostic phrasing is used for every other action.
+  const isDefaultDelete = resolvedVerb === "Delete";
 
   return (
     <Dialog
@@ -127,15 +139,23 @@ export function BulkDeleteDialog({
             {preview === null
               ? "Checking…"
               : deletable === 0
-                ? `Nothing can be deleted`
-                : `Delete ${deletable} ${target}?`}
+                ? isDefaultDelete
+                  ? "Nothing can be deleted"
+                  : `Nothing to ${resolvedVerb.toLowerCase()}`
+                : `${resolvedVerb} ${deletable} ${target}?`}
           </DialogTitle>
           <DialogDescription>
             {preview === null
-              ? "Working out what can be deleted."
+              ? isDefaultDelete
+                ? "Working out what can be deleted."
+                : "Working out what's eligible."
               : deletable === 0
-                ? "None of what you selected can be deleted."
-                : "This cannot be undone."}
+                ? isDefaultDelete
+                  ? "None of what you selected can be deleted."
+                  : "None of what you selected is eligible."
+                : isDestructive
+                  ? "This cannot be undone."
+                  : undefined}
           </DialogDescription>
         </DialogHeader>
 
@@ -158,11 +178,15 @@ export function BulkDeleteDialog({
             Cancel
           </Button>
           <Button
-            variant="destructive"
+            variant={isDestructive ? "destructive" : "default"}
             onClick={handleConfirm}
             disabled={busy || preview === null || deletable === 0}
           >
-            {busy ? "Deleting…" : `Delete ${deletable > 0 ? deletable : ""}`.trim()}
+            {busy
+              ? isDefaultDelete
+                ? "Deleting…"
+                : `${resolvedVerb}…`
+              : `${resolvedVerb} ${deletable > 0 ? deletable : ""}`.trim()}
           </Button>
         </DialogFooter>
       </DialogContent>

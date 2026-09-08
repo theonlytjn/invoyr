@@ -8,6 +8,13 @@ import InvoiceStatusBadge from "./InvoiceStatusBadge";
 import { Input } from "@/components/ui/input";
 import { useRowSelection } from "@/hooks/useRowSelection";
 import { BulkActionBar, BulkDeleteDialog, RowCheckbox } from "@/components/ui";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ChevronDownIcon } from "@/components/icons";
 import type { InvoiceWithClient } from "@/lib/supabase/types";
 
 interface Props {
@@ -17,6 +24,15 @@ interface Props {
 
 const SENDABLE = new Set(["draft", "issued", "sent"]);
 const VOIDABLE = new Set(["draft", "issued", "sent"]);
+
+type BulkAction = "delete" | "mark-paid" | "remind" | "duplicate";
+
+const ACTIONS: Record<BulkAction, { endpoint: string; verb: string; destructive: boolean; past: string }> = {
+  "delete":    { endpoint: "/api/invoices/bulk/delete",    verb: "Delete",         destructive: true,  past: "Deleted" },
+  "mark-paid": { endpoint: "/api/invoices/bulk/mark-paid", verb: "Mark as paid",   destructive: false, past: "Marked paid" },
+  "remind":    { endpoint: "/api/invoices/bulk/remind",    verb: "Send reminders", destructive: false, past: "Reminded" },
+  "duplicate": { endpoint: "/api/invoices/bulk/duplicate", verb: "Duplicate",      destructive: false, past: "Duplicated" },
+};
 
 function buildCsv(rows: InvoiceWithClient[]): string {
   const escape = (v: unknown) => {
@@ -43,8 +59,8 @@ export default function InvoicesTable({ invoices, canBulk = false }: Props) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const selection = useRowSelection();
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const [bulkState, setBulkState] = useState<"idle" | "sending" | "voiding">("idle");
+  const [action, setAction] = useState<BulkAction | null>(null);
+  const [bulkState, setBulkState] = useState<"idle" | "sending" | "voiding" | "downloading">("idle");
   const [toast, setToast] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -99,6 +115,31 @@ export default function InvoicesTable({ invoices, canBulk = false }: Props) {
     URL.revokeObjectURL(url);
   }
 
+  async function handleDownloadPdfs() {
+    setBulkState("downloading");
+    const res = await fetch("/api/invoices/bulk/pdf", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: selectedIds }),
+    });
+
+    if (!res.ok) {
+      setBulkState("idle");
+      showToast("Could not build the download. Please try again.");
+      return;
+    }
+
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `invoices-${new Date().toISOString().slice(0, 10)}.zip`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setBulkState("idle");
+    showToast(`Downloaded ${selectedIds.length} invoice${selectedIds.length !== 1 ? "s" : ""}.`);
+  }
+
   return (
     <div className="space-y-4">
       <Input
@@ -121,27 +162,52 @@ export default function InvoicesTable({ invoices, canBulk = false }: Props) {
           </button>
         )}
         <button
-          onClick={handleBulkExport}
-          className="px-3 py-1.5 bg-neutral-800 dark:bg-neutral-700 text-white font-medium rounded-lg hover:bg-neutral-700 dark:hover:bg-neutral-600 transition-colors"
+          onClick={() => setAction("mark-paid")}
+          disabled={bulkState !== "idle"}
+          className="px-3 py-1.5 bg-neutral-800 dark:bg-neutral-700 text-white font-medium rounded-lg hover:bg-neutral-700 dark:hover:bg-neutral-600 disabled:opacity-50 transition-colors"
         >
-          Export CSV
+          Mark as paid
         </button>
-        {canBulk && canVoid && (
-          <button
-            onClick={handleBulkVoid}
-            disabled={bulkState !== "idle"}
-            className="px-3 py-1.5 bg-neutral-800 dark:bg-neutral-700 text-white font-medium rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
-          >
-            {bulkState === "voiding" ? "Voiding…" : "Void"}
-          </button>
-        )}
         <button
-          onClick={() => setDeleteOpen(true)}
+          onClick={() => setAction("delete")}
           disabled={bulkState !== "idle"}
           className="px-3 py-1.5 bg-neutral-800 dark:bg-neutral-700 text-white font-medium rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
         >
           Delete
         </button>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              disabled={bulkState !== "idle"}
+              className="px-3 py-1.5 bg-neutral-800 dark:bg-neutral-700 text-white font-medium rounded-lg hover:bg-neutral-700 dark:hover:bg-neutral-600 disabled:opacity-50 transition-colors flex items-center gap-1"
+            >
+              More
+              <ChevronDownIcon size={14} />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={handleBulkExport}>Export CSV</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setAction("duplicate")}>Duplicate</DropdownMenuItem>
+            {canBulk && (
+              <>
+                <DropdownMenuItem onClick={handleDownloadPdfs} disabled={bulkState !== "idle"}>
+                  {bulkState === "downloading" ? "Downloading…" : "Download PDFs"}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setAction("remind")}>Send reminders</DropdownMenuItem>
+                {canVoid && (
+                  <DropdownMenuItem
+                    onClick={handleBulkVoid}
+                    disabled={bulkState !== "idle"}
+                    className="text-red-600 focus:text-red-600"
+                  >
+                    {bulkState === "voiding" ? "Voiding…" : "Void"}
+                  </DropdownMenuItem>
+                )}
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </BulkActionBar>
 
       <div className="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 overflow-x-auto">
@@ -225,24 +291,29 @@ export default function InvoicesTable({ invoices, canBulk = false }: Props) {
         </div>
       )}
 
-      <BulkDeleteDialog
-        open={deleteOpen}
-        endpoint="/api/invoices/bulk/delete"
-        ids={selectedIds}
-        noun="invoice"
-        nounPlural="invoices"
-        onCancel={() => setDeleteOpen(false)}
-        onDeleted={(result) => {
-          setDeleteOpen(false);
-          selection.clear();
-          showToast(
-            `Deleted ${result.deleted} invoice${result.deleted !== 1 ? "s" : ""}` +
-              (result.skipped > 0 ? `, ${result.skipped} skipped` : "") +
-              "."
-          );
-          router.refresh();
-        }}
-      />
+      {action && (
+        <BulkDeleteDialog
+          open
+          endpoint={ACTIONS[action].endpoint}
+          verb={ACTIONS[action].verb}
+          destructive={ACTIONS[action].destructive}
+          ids={selectedIds}
+          noun="invoice"
+          nounPlural="invoices"
+          onCancel={() => setAction(null)}
+          onDeleted={(result) => {
+            const past = ACTIONS[action].past;
+            setAction(null);
+            selection.clear();
+            showToast(
+              `${past} ${result.deleted} invoice${result.deleted !== 1 ? "s" : ""}` +
+                (result.skipped > 0 ? `, ${result.skipped} skipped` : "") +
+                "."
+            );
+            router.refresh();
+          }}
+        />
+      )}
     </div>
   );
 }
