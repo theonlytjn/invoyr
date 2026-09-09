@@ -3,6 +3,7 @@ import {
   partitionInvoices,
   partitionEstimates,
   partitionExpenses,
+  partitionExpenseEdit,
   partitionClients,
   summarise,
   partitionMarkPaid,
@@ -204,6 +205,42 @@ describe("partitionExpenses", () => {
     // Deliberate copy quirk carried over from the brief: "an invoice" stays
     // singular even when multiple expenses are being reported on.
     expect(partitionExpenses(rows).skips).toEqual([
+      { count: 2, reason: "2 expenses have been billed to an invoice" },
+    ]);
+  });
+});
+
+describe("partitionExpenseEdit", () => {
+  it("accepts expenses that have not been billed", () => {
+    const rows = [
+      { id: "a", title: "Train", invoice_id: null },
+      { id: "b", title: "Hotel", invoice_id: null },
+    ];
+    const result = partitionExpenseEdit(rows);
+    expect(result.deletable.map((r) => r.id)).toEqual(["a", "b"]);
+    expect(result.skips).toEqual([]);
+  });
+
+  it("uses singular wording for one billed expense", () => {
+    const rows = [
+      { id: "a", title: "Train", invoice_id: null },
+      { id: "b", title: "Hotel", invoice_id: "inv-1" },
+    ];
+    const result = partitionExpenseEdit(rows);
+    expect(result.deletable.map((r) => r.id)).toEqual(["a"]);
+    expect(result.skips).toEqual([
+      { count: 1, reason: "1 expense has been billed to an invoice" },
+    ]);
+  });
+
+  it("uses plural wording for multiple billed expenses", () => {
+    const rows = [
+      { id: "a", title: "Hotel", invoice_id: "inv-1" },
+      { id: "b", title: "Flight", invoice_id: "inv-2" },
+    ];
+    const result = partitionExpenseEdit(rows);
+    expect(result.deletable).toEqual([]);
+    expect(result.skips).toEqual([
       { count: 2, reason: "2 expenses have been billed to an invoice" },
     ]);
   });

@@ -172,6 +172,32 @@ export function partitionExpenses(rows: ExpenseRow[]): Partition<ExpenseRow> {
   };
 }
 
+export type ExpenseEditRow = {
+  id: string;
+  title: string;
+  invoice_id: string | null;
+};
+
+/**
+ * Bulk edit uses the same rule as bulk delete: an expense already billed onto an
+ * invoice is left alone. Changing its client or billable flag would contradict the
+ * invoice it was billed to, and one rule per record type keeps the product
+ * explainable — the user sees the same sentence whichever action they tried.
+ */
+export function partitionExpenseEdit(rows: ExpenseEditRow[]): Partition<ExpenseEditRow> {
+  const deletable = rows.filter((r) => r.invoice_id === null);
+  const billed = rows.length - deletable.length;
+
+  return {
+    deletable,
+    skips: skip(
+      billed,
+      "expense has been billed to an invoice",
+      "expenses have been billed to an invoice"
+    ),
+  };
+}
+
 export function partitionClients(rows: ClientRow[]): Partition<ClientRow> {
   const deletable = rows.filter((r) => !r.hasLinkedRecords);
   const linked = rows.length - deletable.length;
