@@ -148,7 +148,7 @@ Balance uses `outstandingBalance()` from `src/lib/bulk-actions.ts`, the canonica
 
 Credit note creation must reuse the existing logic in `src/app/api/invoices/[id]/credit-notes/route.ts` — numbering from `organisations.next_credit_note_number`, the `credit_applied` update, the audit row. Extract the shared part rather than duplicating it, so the two paths cannot drift.
 
-Accepted methods match the database enum: `bank_transfer`, `cash`, `cheque`, `other`. `stripe` is excluded — the webhook is the source of truth for those.
+Accepted methods are the full database enum: `bank_transfer`, `stripe`, `cash`, `cheque`, `other` — matching what `RecordPaymentModal` offers today. **This deliberately differs from the bulk mark-paid route, which excludes `stripe`.** The distinction: recording one payment is a considered human action on a known invoice, where "the client paid via a Stripe link I sent manually" is legitimate; asserting Stripe payments across fifty invoices at once is not. Moving this path server-side must not quietly remove an option users have today.
 
 ### Closing the standing violation
 
