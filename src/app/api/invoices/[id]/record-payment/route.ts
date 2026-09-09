@@ -89,6 +89,29 @@ export async function POST(
 
   if (payError) return NextResponse.json({ error: payError.message }, { status: 500 });
 
+  // Logged the moment the payment itself is durable — before the invoice update is
+  // even attempted, not after it succeeds. `updateError`, the CAS-conflict 409, and
+  // a later write-off failure all return early past this point; if the audit insert
+  // sat any later, every one of those paths would commit money with no trail. `meta`
+  // only records what's actually true right now (the payment as inserted) — not the
+  // eventual invoice status, which isn't decided yet and would be wrong on every
+  // failure path below.
+  const { error: auditError } = await supabase.from("audit_logs").insert({
+    org_id: org.id,
+    user_id: user.id,
+    action: "payment.recorded",
+    entity_type: "invoice",
+    entity_id: invoice.id,
+    meta: { amount, method, reference: reference?.trim() || null },
+  });
+
+  if (auditError) {
+    console.error("[record-payment] audit log write failed", {
+      invoice_id: invoice.id,
+      error: auditError.message,
+    });
+  }
+
   // amount_paid accumulates the payment just recorded — it is not set from `total`,
   // which would double-count an existing part payment and swallow late fees/credits.
   const newAmountPaid = Number(invoice.amount_paid) + amount;
@@ -120,6 +143,27 @@ export async function POST(
   if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 });
 
   if (!updatedRows || updatedRows.length === 0) {
+    // The payment is already committed and already audited above — but a reader of
+    // the trail scanning for "payment.recorded" alone would see a normal-looking
+    // entry and have no way to tell the invoice's own totals never picked it up. A
+    // distinct action name makes that state legible without needing to correlate
+    // against the 409 response, which isn't itself persisted anywhere.
+    const { error: conflictAuditError } = await supabase.from("audit_logs").insert({
+      org_id: org.id,
+      user_id: user.id,
+      action: "payment.invoice_update_conflict",
+      entity_type: "invoice",
+      entity_id: invoice.id,
+      meta: { amount, method },
+    });
+
+    if (conflictAuditError) {
+      console.error("[record-payment] conflict audit log write failed", {
+        invoice_id: invoice.id,
+        error: conflictAuditError.message,
+      });
+    }
+
     return NextResponse.json(
       {
         error:
@@ -127,25 +171,6 @@ export async function POST(
       },
       { status: 409 }
     );
-  }
-
-  // Logged as soon as the payment itself is durable — before the write-off is even
-  // attempted — so the one failure mode where a trail matters most (payment
-  // committed, write-off broken, invoice left half-finished) still leaves a record.
-  const { error: auditError } = await supabase.from("audit_logs").insert({
-    org_id: org.id,
-    user_id: user.id,
-    action: "payment.recorded",
-    entity_type: "invoice",
-    entity_id: invoice.id,
-    meta: { amount, method, reference: reference?.trim() || null, writeOffRequested: writeOffRemainder },
-  });
-
-  if (auditError) {
-    console.error("[record-payment] audit log write failed", {
-      invoice_id: invoice.id,
-      error: auditError.message,
-    });
   }
 
   let creditNoteIssued = false;
