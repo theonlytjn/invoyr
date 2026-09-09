@@ -1,6 +1,6 @@
 # Invoyr — Development Status & Handoff
 
-_Last updated: 8 September 2026._
+_Last updated: 9 September 2026._
 _Snapshot of everything completed in the recent development phase and what's left before/at launch._
 
 ---
@@ -57,6 +57,13 @@ Shipped across commits `5a94452`, `ea8cba0`, `70c1f10`, `337cc50`, `3dc4b48`, `4
 - **One batch cap.** `MAX_BULK_IDS` (50) is shared by every bulk route's Zod schema and by each list's "select all"; the PDF route caps lower (`MAX_BULK_PDF_IDS`, 15) because renders are sequential.
 - Full detail — eligibility rules, the fail-closed/no-transaction/batch-resilience decisions, and the known `RecordPaymentModal` frontend-payment-write violation left unfixed — is recorded in the `docs/INV-001-current-state-audit.md` addendum (§11).
 
+### Bulk edit, client deletion and payment write-off
+- **Bulk edit on expenses.** `POST /api/expenses/bulk/update`, ungated. Edits `category`, `client` and `billable` across a selection in one request — all three tri-state, where an absent field means leave it unchanged and an explicit `null` on client means clear it. Expenses already billed to an invoice are skipped, the same rule bulk delete uses. Dry run first, so the user sees "N will update, M skipped" before committing.
+- **Client deletion is now allowed.** Previously clients could only be archived: `invoices.client_id`/`estimates.client_id` are `ON DELETE SET NULL`, and neither table stored the client's own billing details, so deleting a client stripped name, address and VAT number from every historical document, including paid invoices and the page customers pay from. New `client_snapshot` jsonb columns on `invoices` and `estimates` hold a copy written immediately before deletion; five surfaces (the invoice PDF, the invoice detail page, the estimate detail page, and both public `/pay`/`/estimate` token pages) resolve a document's client through `resolveDocumentClient`, falling back to the snapshot once the live link is gone. The delete route **fails closed** — if a snapshot write errors, nothing is deleted. Archive remains available as the reversible option.
+- **Payments are now recorded server-side, with an optional write-off.** New `POST /api/invoices/[id]/record-payment` records a payment, recomputes status, and can issue a credit note for whatever balance remains in the same request. `RecordPaymentModal` is now a thin form posting to it — it no longer writes to Supabase directly, which **closes the standing `CLAUDE.md` violation** noted in the §11 audit addendum (that modal used to insert the `payments` row and set `status: 'paid'` from the browser).
+- Two things worth knowing before they're mistaken for bugs: (1) once a client is deleted, the send/remind/checkout routes correctly find no client and skip that invoice — a deleted client shouldn't get emailed, and a snapshot has no inbox; (2) neither the record-payment route nor credit-note creation can use a database transaction (the Supabase JS client has no primitive for it) — both are ordered to fail in the safer direction instead, so a failure leaves more evidence than an aggregate figure that never happened.
+- Full detail, including the exact ordering/fail-closed reasoning and the render-surface audit, is in the `docs/INV-001-current-state-audit.md` addendum (§12).
+
 ### Docs
 - `docs/product-overview.md` — source-verified marketing/pitch reference (positioning, tiers, feature breakdown, integrations, messaging).
 
@@ -88,7 +95,7 @@ TrueLayer: `TRUELAYER_CLIENT_ID`, `TRUELAYER_CLIENT_SECRET`, `TRUELAYER_REDIRECT
 
 ## ⚠️ Gotchas / conventions
 
-- **No migration pipeline** — `supabase/schema.sql` is applied to prod **by hand**. Re-run a table+column audit after any schema edit (drift has bitten before).
+- **No migration pipeline** — `supabase/schema.sql` is applied to prod **by hand**. Re-run a table+column audit after any schema edit (drift has bitten before). Most recent instance: the two `client_snapshot jsonb` columns (`invoices`, `estimates`) added for client deletion — applied to the live database by hand and mirrored into `schema.sql`.
 - **`ADMIN_EMAIL`** is hardcoded `tony@theonlytjn.com` in `middleware.ts` and `src/lib/admin.ts` (real admin gate; not shown publicly).
 - **Fail-open patterns**: rate-limiter, Turnstile verify, and token encryption all no-op until their env keys are present — so the app never breaks before keys are added, and activates once they are.
 - **Payment state is webhook-driven** — never mark invoices paid from the frontend (per CLAUDE.md / product constitution).
