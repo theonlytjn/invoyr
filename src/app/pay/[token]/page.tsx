@@ -4,6 +4,7 @@ import { getOrgPlan } from "@/lib/billing";
 import { canAccess } from "@/config/plans";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { computeTotals } from "@/lib/invoice-totals";
+import { resolveDocumentClient } from "@/lib/client-snapshot";
 import PayButton from "./PayButton";
 import PayPalButton from "./PayPalButton";
 
@@ -19,7 +20,7 @@ export default async function PayPage({ params, searchParams }: Props) {
 
   const { data: invoice } = await supabase
     .from("invoices")
-    .select("*, clients(*), invoice_items(*), late_fee_amount, late_fee_applied_at")
+    .select("*, clients(*), invoice_items(*), late_fee_amount, late_fee_applied_at, client_snapshot")
     .eq("public_token", token)
     .single();
 
@@ -36,7 +37,9 @@ export default async function PayPage({ params, searchParams }: Props) {
   const showBranding = !canAccess(plan, "white_label");
 
   const items = invoice.invoice_items ?? [];
-  const client = Array.isArray(invoice.clients) ? invoice.clients[0] : invoice.clients;
+  // Live join wins when the client still exists; falls back to the snapshot
+  // taken at delete-time otherwise. See src/app/(app)/invoices/[id]/page.tsx.
+  const client = resolveDocumentClient(invoice);
   const totals = computeTotals(
     items.map((i: { quantity: number; unit_price: number; vat_rate: number }) => ({
       description: "",

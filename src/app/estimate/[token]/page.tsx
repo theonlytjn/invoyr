@@ -4,6 +4,7 @@ import { getOrgPlan } from "@/lib/billing";
 import { canAccess } from "@/config/plans";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { computeTotals } from "@/lib/invoice-totals";
+import { resolveDocumentClient } from "@/lib/client-snapshot";
 import EstimateDecisionButtons from "./EstimateDecisionButtons";
 
 interface Props {
@@ -16,7 +17,7 @@ export default async function PublicEstimatePage({ params }: Props) {
 
   const { data: estimate } = await supabase
     .from("estimates")
-    .select("*, clients(*), estimate_items(*)")
+    .select("*, clients(*), estimate_items(*), client_snapshot")
     .eq("public_token", token)
     .single();
 
@@ -31,7 +32,9 @@ export default async function PublicEstimatePage({ params }: Props) {
     .single();
 
   const items = estimate.estimate_items ?? [];
-  const client = Array.isArray(estimate.clients) ? estimate.clients[0] : estimate.clients;
+  // Live join wins when the client still exists; falls back to the snapshot
+  // taken at delete-time otherwise. See src/app/(app)/invoices/[id]/page.tsx.
+  const client = resolveDocumentClient(estimate);
   const totals = computeTotals(
     items.map((i: { quantity: number; unit_price: number; vat_rate: number }) => ({
       description: "",
