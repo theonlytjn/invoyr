@@ -21,7 +21,7 @@ export type ClientSnapshot = {
   vat_number: string | null;
 };
 
-type ClientLike = Partial<ClientSnapshot> & { name?: string | null };
+type ClientLike = Partial<ClientSnapshot>;
 
 export function buildClientSnapshot(client: ClientLike): ClientSnapshot {
   // Deliberately excludes `id`: the row it points at is about to stop existing.
@@ -47,7 +47,7 @@ export function resolveDocumentClient(record: {
   if (joined) return buildClientSnapshot(joined);
 
   const snapshot = record.client_snapshot;
-  if (snapshot && typeof snapshot === "object") {
+  if (snapshot && typeof snapshot === "object" && !Array.isArray(snapshot)) {
     return buildClientSnapshot(snapshot as ClientLike);
   }
 

@@ -62,4 +62,15 @@ describe("resolveDocumentClient", () => {
     const resolved = resolveDocumentClient({ clients: [client], client_snapshot: null });
     expect(resolved?.name).toBe("Globex");
   });
+
+  it("returns null for an empty clients array", () => {
+    expect(resolveDocumentClient({ clients: [], client_snapshot: null })).toBeNull();
+  });
+
+  it("rejects an array-shaped snapshot, returning null instead of a fake client", () => {
+    // Corrupt data: snapshot is an array instead of an object.
+    // Must return null rather than building a fake client from the array.
+    expect(resolveDocumentClient({ clients: null, client_snapshot: [] })).toBeNull();
+    expect(resolveDocumentClient({ clients: null, client_snapshot: [{ name: "fake" }] })).toBeNull();
+  });
 });
