@@ -191,7 +191,10 @@ const schema = z
     is_billable: z.boolean().optional(),
   })
   .refine(
-    (v) => v.category !== undefined || v.client_id !== undefined || v.is_billable !== undefined,
+    // A dry run is asking "what would be eligible?", which needs only the ids — so the
+    // at-least-one-field rule applies to real writes only. Requiring a field on dry runs
+    // would force the client to invent a placeholder value it never intends to save.
+    (v) => v.dryRun || v.category !== undefined || v.client_id !== undefined || v.is_billable !== undefined,
     { message: "Choose at least one field to change" }
   );
 
@@ -356,7 +359,8 @@ export default function BulkEditExpensesModal({ open, ids, clients, onCancel, on
     const res = await fetch("/api/expenses/bulk/update", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ids, dryRun, ...(dryRun ? { category: "other" } : buildPatch()) }),
+      // A dry run sends only the ids — the route's at-least-one-field rule exempts it.
+      body: JSON.stringify({ ids, dryRun, ...(dryRun ? {} : buildPatch()) }),
       signal,
     });
     const json = await res.json();
