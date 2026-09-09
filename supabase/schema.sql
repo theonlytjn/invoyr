@@ -756,7 +756,9 @@ create table if not exists public.credit_notes (
   amount              numeric(12,2) not null check (amount > 0),
   reason              text,
   status              text not null default 'issued' check (status in ('issued','void')),
-  public_token        text unique default encode(gen_random_bytes(24), 'base64url'),
+  -- `base64url` is not a recognised encoding for encode() on PostgreSQL 17, so the
+  -- previous default threw on every insert. Matches the estimates table's form.
+  public_token        text unique default translate(encode(gen_random_bytes(24), 'base64'), '+/=', '-_'),
   issued_at           timestamptz not null default now(),
   created_at          timestamptz not null default now(),
   updated_at          timestamptz not null default now()

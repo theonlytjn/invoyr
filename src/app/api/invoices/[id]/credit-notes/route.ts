@@ -96,7 +96,17 @@ export async function POST(
     .single();
 
   if (insertError || !creditNote) {
-    return NextResponse.json({ error: "Failed to create credit note" }, { status: 500 });
+    // Log the real Postgres error. This branch previously returned only the generic
+    // message, which hid a broken column default for every credit note ever attempted.
+    console.error("credit note insert failed", {
+      invoice_id: id,
+      credit_note_number: creditNoteNumber,
+      error: insertError?.message,
+    });
+    return NextResponse.json(
+      { error: insertError?.message ?? "Failed to create credit note" },
+      { status: 500 }
+    );
   }
 
   await supabase
