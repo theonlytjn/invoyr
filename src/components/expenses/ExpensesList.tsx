@@ -11,6 +11,7 @@ import { PlusIcon, PencilIcon, TrashIcon, AttachmentIcon } from "@/components/ic
 import MetricCard from "@/components/dashboard/MetricCard";
 import BankImportModal from "./BankImportModal";
 import { BulkActionBar, BulkDeleteDialog, RowCheckbox } from "@/components/ui";
+import BulkEditExpensesModal from "./BulkEditExpensesModal";
 import { useRowSelection } from "@/hooks/useRowSelection";
 import { MAX_BULK_IDS, selectAllAddition } from "@/lib/bulk-actions";
 
@@ -77,6 +78,7 @@ export default function ExpensesList({ initialExpenses, clients, orgId, orgCurre
 
   const selection = useRowSelection();
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [bulkEditOpen, setBulkEditOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -407,6 +409,12 @@ export default function ExpensesList({ initialExpenses, clients, orgId, orgCurre
         <div className="space-y-3">
           <BulkActionBar count={selection.count} onClear={clearSelection} note={selectionNote}>
             <button
+              onClick={() => setBulkEditOpen(true)}
+              className="px-3 py-1.5 bg-neutral-800 dark:bg-neutral-700 text-white font-medium rounded-lg hover:bg-neutral-700 dark:hover:bg-neutral-600 transition-colors"
+            >
+              Edit
+            </button>
+            <button
               onClick={() => setBulkDeleteOpen(true)}
               className="px-3 py-1.5 bg-neutral-800 dark:bg-neutral-700 text-white font-medium rounded-lg hover:bg-red-700 transition-colors"
             >
@@ -526,6 +534,27 @@ export default function ExpensesList({ initialExpenses, clients, orgId, orgCurre
           </button>
         </div>
       )}
+
+      <BulkEditExpensesModal
+        open={bulkEditOpen}
+        ids={selectedIds}
+        clients={clients}
+        onCancel={() => setBulkEditOpen(false)}
+        onSaved={async (result) => {
+          setBulkEditOpen(false);
+          clearSelection();
+          // This list owns its rows in state, so refetch rather than router.refresh().
+          // Every parameter of fetchExpenses defaults to the current filter state,
+          // so calling it with no arguments preserves the active period and category.
+          await fetchExpenses();
+          const succeeded = result.succeeded ?? result.deleted;
+          showToast(
+            `Updated ${succeeded} expense${succeeded !== 1 ? "s" : ""}` +
+              (result.skipped > 0 ? `, ${result.skipped} skipped` : "") +
+              "."
+          );
+        }}
+      />
 
       <BulkDeleteDialog
         open={bulkDeleteOpen}
