@@ -768,6 +768,48 @@ git commit -m "feat: render invoice client from snapshot when the client is gone
 
 ---
 
+### Task 5b: The remaining render sites
+
+Added during execution. Task 5's audit found that the plan wired only the invoice PDF and invoice detail page to the resolver, while three other surfaces render client billing details from a live join with no fallback. Without this, enabling deletion in Task 6 would blank the billing block on the **public pay page a customer visits to pay** — and would write snapshots onto estimates that nothing ever reads.
+
+Like Task 5, this must land before Task 6.
+
+**Files:**
+- Modify: `src/app/(app)/estimates/[id]/page.tsx`
+- Modify: `src/app/pay/[token]/page.tsx`
+- Modify: `src/app/estimate/[token]/page.tsx`
+
+**Interfaces:**
+- Consumes: `resolveDocumentClient` from `@/lib/client-snapshot`.
+
+- [ ] **Step 1: Apply the same change Task 5 made, to each of the three pages**
+
+For each file: add `client_snapshot` to the query's `.select()`, and replace the manual client unwrapping with `resolveDocumentClient(record)`.
+
+Read `src/app/(app)/invoices/[id]/page.tsx` first — Task 5 already did exactly this, including how it adapted the `ClientSnapshot` / `Client` type difference at the call site. Follow that precedent rather than inventing a second approach.
+
+The same constraint applies as in Task 5, and it matters more here because two of these pages are public: **a document whose client still exists must render byte-identically to before.** Trace each page's client fields before and after.
+
+- [ ] **Step 2: Watch for `client.id` usage**
+
+`ClientSnapshot` has no `id`. Task 5 hit this on the invoice page, where a "View client" link used `client.id`; it repointed the link at `invoice.client_id` (the same value while the client exists) and hid the link when that is null. If any of these three pages uses `client.id`, apply the same pattern with that page's own foreign key. The public pages are unlikely to link to a client record — if one does, that is worth reporting.
+
+- [ ] **Step 3: Verify**
+
+Run: `npm run build` and `npm test`.
+Expected: build clean, 65 tests pass.
+
+These pages have no unit tests and cannot be checked without a running session. State in your report what a human must verify: each of the three pages renders identically for a document whose client still exists.
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add "src/app/(app)/estimates/[id]/page.tsx" "src/app/pay/[token]/page.tsx" "src/app/estimate/[token]/page.tsx"
+git commit -m "feat: resolve client from snapshot on estimate and public pages"
+```
+
+---
+
 ### Task 6: Client deletion with snapshot
 
 **Files:**
