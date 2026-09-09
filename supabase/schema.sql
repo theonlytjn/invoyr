@@ -1016,3 +1016,79 @@ comment on column public.organisations.comp_reason is
   'Why this org is comped, e.g. founder, friends_family, partner, beta.';
 comment on column public.organisations.comp_expires_at is
   'When the comp lapses back to billed. Null = never expires.';
+
+-- ----------------------------------------------------------------
+-- 20. STORAGE POLICIES
+-- ----------------------------------------------------------------
+-- These live on storage.objects, which Supabase manages, so they are not created
+-- by the table definitions above. They were previously untracked here — the live
+-- database had them and this file did not, so a fresh environment got a working
+-- app with no storage access control at all. Recorded 2026-09-09.
+--
+-- Both buckets are public for reads via getPublicUrl (that path does not consult
+-- RLS); these policies govern writes and the authenticated reads that RETURNING
+-- requires.
+--
+-- Note the SELECT policy is load-bearing, not cosmetic: PostgreSQL requires a
+-- SELECT policy whenever an INSERT uses RETURNING, which Supabase Storage's upload
+-- does. Dropping it silently breaks every upload with "new row violates row-level
+-- security policy" — which is exactly what happened to logo uploads between the
+-- 2026-07-27 security pass and 2026-09-09.
+
+-- logos: scoped so an org member can only write inside their own org's folder.
+drop policy if exists logos_select on storage.objects;
+drop policy if exists logos_insert on storage.objects;
+drop policy if exists logos_update on storage.objects;
+drop policy if exists logos_delete on storage.objects;
+
+create policy logos_select on storage.objects for select to authenticated
+using (
+  bucket_id = 'logos'
+  and exists (
+    select 1 from public.org_members
+    where org_members.org_id::text = (storage.foldername(storage.objects.name))[1]
+      and org_members.user_id = auth.uid()
+  )
+);
+
+create policy logos_insert on storage.objects for insert to authenticated
+with check (
+  bucket_id = 'logos'
+  and exists (
+    select 1 from public.org_members
+    where org_members.org_id::text = (storage.foldername(storage.objects.name))[1]
+      and org_members.user_id = auth.uid()
+  )
+);
+
+create policy logos_update on storage.objects for update to authenticated
+using (
+  bucket_id = 'logos'
+  and exists (
+    select 1 from public.org_members
+    where org_members.org_id::text = (storage.foldername(storage.objects.name))[1]
+      and org_members.user_id = auth.uid()
+  )
+);
+
+create policy logos_delete on storage.objects for delete to authenticated
+using (
+  bucket_id = 'logos'
+  and exists (
+    select 1 from public.org_members
+    where org_members.org_id::text = (storage.foldername(storage.objects.name))[1]
+      and org_members.user_id = auth.uid()
+  )
+);
+
+-- receipts: the existing live policy, recorded here as-is.
+drop policy if exists "Org members can manage receipts" on storage.objects;
+create policy "Org members can manage receipts" on storage.objects for all
+using (
+  bucket_id = 'receipts'
+  and exists (
+    select 1 from public.org_members
+    where org_members.org_id::text = (storage.foldername(storage.objects.name))[1]
+      and org_members.user_id = auth.uid()
+  )
+);
