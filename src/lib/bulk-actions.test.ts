@@ -9,6 +9,8 @@ import {
   partitionMarkPaid,
   partitionRemind,
   outstandingBalance,
+  paymentOutcome,
+  buildExpenseEditPatch,
   selectAllAddition,
   MAX_BULK_IDS,
 } from "./bulk-actions";
@@ -351,6 +353,100 @@ describe("outstandingBalance", () => {
         credit_applied: "200",
       })
     ).toBe(550);
+  });
+});
+
+describe("paymentOutcome", () => {
+  it("leaves the unpaid remainder of a part payment, and stays partial", () => {
+    const result = paymentOutcome({ total: 1000, amount_paid: 0 }, 400);
+    expect(result.newAmountPaid).toBe(400);
+    expect(result.remainder).toBe(600);
+    expect(result.status).toBe("partial");
+    expect(result.hasRemainder).toBe(true);
+  });
+
+  it("accumulates onto an existing part payment rather than replacing it", () => {
+    const result = paymentOutcome({ total: 1000, amount_paid: 400 }, 100);
+    expect(result.newAmountPaid).toBe(500);
+    expect(result.remainder).toBe(500);
+  });
+
+  it("counts the late fee as owed, so the remainder covers it too", () => {
+    // Without the fee this would write off 600; the client would be short by 50.
+    const result = paymentOutcome({ total: 1000, amount_paid: 0, late_fee_amount: 50 }, 400);
+    expect(result.remainder).toBe(650);
+    expect(result.status).toBe("partial");
+  });
+
+  it("counts credit already applied as settled, so it is not written off twice", () => {
+    // Without the credit this would write off 800 — money already credited once.
+    const result = paymentOutcome({ total: 1000, amount_paid: 0, credit_applied: 200 }, 200);
+    expect(result.newAmountPaid).toBe(200);
+    expect(result.remainder).toBe(600);
+  });
+
+  it("is paid with nothing to write off when the payment settles the balance exactly", () => {
+    const result = paymentOutcome(
+      { total: 1000, amount_paid: 300, late_fee_amount: 50, credit_applied: 200 },
+      550
+    );
+    expect(result.newAmountPaid).toBe(850);
+    expect(result.remainder).toBe(0);
+    expect(result.status).toBe("paid");
+    expect(result.hasRemainder).toBe(false);
+  });
+
+  it("treats a sliver of floating-point noise as settled, not as a remainder", () => {
+    // 0.1 + 0.2 is 0.30000000000000004, so the remainder is a real non-zero
+    // sliver. Without the tolerance this invoice would sit at "partial" forever
+    // and offer to write off a fraction of a penny.
+    const result = paymentOutcome({ total: 0.3, amount_paid: 0.1 }, 0.2);
+    expect(result.remainder).not.toBe(0);
+    expect(Math.abs(result.remainder)).toBeLessThan(0.001);
+    expect(result.status).toBe("paid");
+    expect(result.hasRemainder).toBe(false);
+  });
+
+  it("coerces the numeric strings Postgres can hand back", () => {
+    // Without Number() `"300" + 100` would be "300100" and the remainder nonsense.
+    const result = paymentOutcome({ total: "1000", amount_paid: "300" }, 100);
+    expect(result.newAmountPaid).toBe(400);
+    expect(result.remainder).toBe(600);
+  });
+});
+
+describe("buildExpenseEditPatch", () => {
+  it("writes only the one field that was set", () => {
+    expect(buildExpenseEditPatch({ category: "travel" })).toEqual({ category: "travel" });
+  });
+
+  it("keeps is_billable: false — a falsy value is still a value the user chose", () => {
+    const patch = buildExpenseEditPatch({ is_billable: false });
+    expect(patch).toEqual({ is_billable: false });
+    expect("is_billable" in patch).toBe(true);
+  });
+
+  it("keeps client_id: null, which is how an expense is unlinked from a client", () => {
+    const patch = buildExpenseEditPatch({ client_id: null });
+    expect(patch).toEqual({ client_id: null });
+    expect("client_id" in patch).toBe(true);
+  });
+
+  it("produces no key at all for a field the user left alone", () => {
+    const patch = buildExpenseEditPatch({ category: "travel", client_id: undefined, is_billable: undefined });
+    expect(Object.keys(patch)).toEqual(["category"]);
+    expect("client_id" in patch).toBe(false);
+    expect("is_billable" in patch).toBe(false);
+  });
+
+  it("writes nothing when nothing was set", () => {
+    expect(buildExpenseEditPatch({})).toEqual({});
+  });
+
+  it("writes all three together, falsy values included", () => {
+    expect(
+      buildExpenseEditPatch({ category: "other", client_id: null, is_billable: false })
+    ).toEqual({ category: "other", client_id: null, is_billable: false });
   });
 });
 

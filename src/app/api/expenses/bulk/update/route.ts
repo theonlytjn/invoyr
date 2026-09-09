@@ -3,7 +3,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
 import { bulkIdsSchema } from "@/lib/bulk-request";
-import { partitionExpenseEdit, summarise } from "@/lib/bulk-actions";
+import { buildExpenseEditPatch, partitionExpenseEdit, summarise } from "@/lib/bulk-actions";
 
 const schema = z
   .object({
@@ -73,10 +73,12 @@ export async function POST(req: NextRequest) {
   }
 
   const updateIds = partition.deletable.map((e) => e.id);
-  const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
-  if (category !== undefined) patch.category = category;
-  if (client_id !== undefined) patch.client_id = client_id;
-  if (is_billable !== undefined) patch.is_billable = is_billable;
+  // Pure, and tested as such (`buildExpenseEditPatch` in bulk-actions.test.ts):
+  // `false` and `null` are real values that must be written, and an absent field
+  // must produce no key at all. `updated_at` is added here because it is neither
+  // a user field nor pure.
+  const fieldPatch = buildExpenseEditPatch({ category, client_id, is_billable });
+  const patch = { ...fieldPatch, updated_at: new Date().toISOString() };
 
   const { error: updateError } = await supabase
     .from("expenses")
@@ -93,7 +95,7 @@ export async function POST(req: NextRequest) {
       action: "expense.updated",
       entity_type: "expense",
       entity_id: exp.id,
-      meta: { title: exp.title, changed: Object.keys(patch).filter((k) => k !== "updated_at"), bulk: true },
+      meta: { title: exp.title, changed: Object.keys(fieldPatch), bulk: true },
     }))
   );
 

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
-import { outstandingBalance } from "@/lib/bulk-actions";
+import { outstandingBalance, paymentOutcome } from "@/lib/bulk-actions";
 import { createCreditNote } from "@/lib/credit-notes";
 import { formatCurrency } from "@/lib/utils";
 
@@ -112,11 +112,16 @@ export async function POST(
     });
   }
 
-  // amount_paid accumulates the payment just recorded — it is not set from `total`,
-  // which would double-count an existing part payment and swallow late fees/credits.
-  const newAmountPaid = Number(invoice.amount_paid) + amount;
-  const remainderAfterPayment = outstandingBalance({ ...invoice, amount_paid: newAmountPaid });
-  const newStatus = remainderAfterPayment <= 0.001 ? "paid" : "partial";
+  // Pure, and tested as such (`paymentOutcome` in bulk-actions.test.ts): the
+  // remainder it returns is the amount a write-off credit note is issued for, so
+  // it is the one calculation on this route that must not live only inside a
+  // request handler.
+  const {
+    newAmountPaid,
+    remainder: remainderAfterPayment,
+    status: newStatus,
+    hasRemainder,
+  } = paymentOutcome(invoice, amount);
   // Uses the payment's own `paidAt` (the date the user recorded, or "now" if they
   // didn't specify one) rather than a fresh `new Date()` — otherwise a back-dated
   // payment would leave the payment row and the invoice disagreeing about when it
@@ -183,7 +188,7 @@ export async function POST(
   // the new credit_applied equals total + late fee) and its write is the last one
   // to touch the row. Our update above never clobbers it: it only ran first to
   // record the payment-only state for the case where no write-off happens.
-  if (writeOffRemainder && remainderAfterPayment > 0.001) {
+  if (writeOffRemainder && hasRemainder) {
     const { creditNote, error: creditNoteError } = await createCreditNote({
       supabase,
       org: {

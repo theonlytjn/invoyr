@@ -309,6 +309,73 @@ export function outstandingBalance(row: {
   );
 }
 
+/**
+ * What a payment of `amount` does to an invoice, before anything is written.
+ *
+ * `remainder` is the figure a "write off the rest" credit note would be issued
+ * for, which is why this is a pure function rather than three lines inside the
+ * record-payment route: an off-by-one-operand error here issues a credit note
+ * for the wrong amount against a real ledger, and that is the exact bug that
+ * shipped once already. Tested directly.
+ *
+ * `amount_paid` accumulates — it is never set from `total`, which would
+ * double-count an existing part payment and swallow late fees and credits.
+ * The 0.001 tolerance is the same tenth-of-a-penny used everywhere else a
+ * balance is compared to zero: `numeric(12,2)` arithmetic in floating point
+ * leaves slivers that must not keep an invoice off "paid".
+ */
+export function paymentOutcome(
+  row: {
+    total: number | string;
+    amount_paid: number | string;
+    late_fee_amount?: number | string | null;
+    credit_applied?: number | string | null;
+  },
+  amount: number
+): {
+  /** `amount_paid` after this payment. */
+  newAmountPaid: number;
+  /** Still owed once this payment lands — what a write-off would credit. */
+  remainder: number;
+  /** The invoice's status from the payment alone, before any write-off. */
+  status: "paid" | "partial";
+  /** Whether there is anything left for a requested write-off to cover. */
+  hasRemainder: boolean;
+} {
+  const newAmountPaid = Number(row.amount_paid) + amount;
+  const remainder = outstandingBalance({ ...row, amount_paid: newAmountPaid });
+  return {
+    newAmountPaid,
+    remainder,
+    status: remainder <= 0.001 ? "paid" : "partial",
+    hasRemainder: remainder > 0.001,
+  };
+}
+
+/**
+ * The fields a bulk expense edit actually writes.
+ *
+ * Tri-state on purpose, and the reason this is a pure function: `undefined`
+ * means "the user left this field alone" and must produce **no key at all**,
+ * while `null` (clearing the client) and `false` (marking non-billable) are
+ * real values that must survive. A truthiness check anywhere in here would
+ * silently refuse to un-bill an expense or unlink it from a client.
+ *
+ * `updated_at` is deliberately not set here — it is not a user field and it is
+ * not pure. The caller adds it.
+ */
+export function buildExpenseEditPatch(fields: {
+  category?: string;
+  client_id?: string | null;
+  is_billable?: boolean;
+}): Record<string, unknown> {
+  const patch: Record<string, unknown> = {};
+  if (fields.category !== undefined) patch.category = fields.category;
+  if (fields.client_id !== undefined) patch.client_id = fields.client_id;
+  if (fields.is_billable !== undefined) patch.is_billable = fields.is_billable;
+  return patch;
+}
+
 export type RemindRow = {
   id: string;
   invoice_number: string;
