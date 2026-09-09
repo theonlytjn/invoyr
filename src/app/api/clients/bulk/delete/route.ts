@@ -43,20 +43,34 @@ export async function POST(req: NextRequest) {
   // Linked invoices and estimates no longer gate deletability — they're what get
   // snapshotted — but the counts still travel to the UI so the confirmation
   // dialog can say what will happen with real numbers instead of a vague warning.
+  // Recurring schedules are the fourth foreign key into `clients` and the only
+  // one that keeps *producing* records after the client is gone, so they're
+  // counted here and ended below.
   const invoiceCounts = new Map<string, number>();
   const estimateCounts = new Map<string, number>();
+  const recurringCounts = new Map<string, number>();
 
   if (candidateIds.length > 0) {
-    const [invoices, estimates] = await Promise.all([
+    const [invoices, estimates, recurring] = await Promise.all([
       supabase.from("invoices").select("client_id").in("client_id", candidateIds),
       supabase.from("estimates").select("client_id").in("client_id", candidateIds),
+      supabase
+        .from("recurring_invoices")
+        .select("client_id")
+        .in("client_id", candidateIds)
+        .eq("org_id", org.id)
+        // Only `active` schedules generate anything (see the cron at
+        // /api/cron/recurring, which filters on exactly this). A paused or
+        // already-ended schedule produces nothing, so there is nothing to warn
+        // about and nothing to stop.
+        .eq("status", "active"),
     ]);
 
     // Fail closed: a failed query here must never be read as "no linked records".
     // `.data` would come back null alongside a populated `.error`, and `?? []`
     // would silently treat that as zero links, understating the confirmation
     // copy. Abort instead; a transient error should cost the user a retry.
-    for (const { error } of [invoices, estimates]) {
+    for (const { error } of [invoices, estimates, recurring]) {
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
@@ -66,6 +80,9 @@ export async function POST(req: NextRequest) {
     for (const row of estimates.data ?? []) {
       if (row.client_id) estimateCounts.set(row.client_id, (estimateCounts.get(row.client_id) ?? 0) + 1);
     }
+    for (const row of recurring.data ?? []) {
+      if (row.client_id) recurringCounts.set(row.client_id, (recurringCounts.get(row.client_id) ?? 0) + 1);
+    }
   }
 
   const rows: ClientRow[] = (clients ?? []).map((c) => ({
@@ -73,6 +90,7 @@ export async function POST(req: NextRequest) {
     name: c.name,
     linkedInvoices: invoiceCounts.get(c.id) ?? 0,
     linkedEstimates: estimateCounts.get(c.id) ?? 0,
+    linkedRecurring: recurringCounts.get(c.id) ?? 0,
   }));
 
   const partition = partitionClients(rows);
@@ -92,17 +110,30 @@ export async function POST(req: NextRequest) {
   // failed snapshot is exactly the data loss this design exists to prevent.
   // Expenses render no billing details, so they need no snapshot — their
   // `client_id` is left to null via ON DELETE SET NULL.
+  //
+  // Recurring schedules are ended in the same step, and under the same rule. A
+  // snapshot cannot save them: they are generators, not documents, and once
+  // their `client_id` nulls the cron keeps producing an unsendable clientless
+  // draft every period with no signal to the user. `ended` is the schema's own
+  // terminal value (`recurring_status` is 'active' | 'paused' | 'ended', and the
+  // cron writes 'ended' when a schedule runs past its end date).
   for (const client of partition.deletable) {
     const fullClient = fullClientsById.get(client.id);
     if (!fullClient) continue;
     const snapshot = buildClientSnapshot(fullClient);
 
-    const [invSnap, estSnap] = await Promise.all([
+    const [invSnap, estSnap, recEnded] = await Promise.all([
       supabase.from("invoices").update({ client_snapshot: snapshot }).eq("client_id", client.id).eq("org_id", org.id),
       supabase.from("estimates").update({ client_snapshot: snapshot }).eq("client_id", client.id).eq("org_id", org.id),
+      supabase
+        .from("recurring_invoices")
+        .update({ status: "ended" })
+        .eq("client_id", client.id)
+        .eq("org_id", org.id)
+        .eq("status", "active"),
     ]);
 
-    for (const { error } of [invSnap, estSnap]) {
+    for (const { error } of [invSnap, estSnap, recEnded]) {
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     }
   }
@@ -127,6 +158,7 @@ export async function POST(req: NextRequest) {
         bulk: true,
         linkedInvoices: client.linkedInvoices,
         linkedEstimates: client.linkedEstimates,
+        endedRecurring: client.linkedRecurring,
       },
     }))
   );

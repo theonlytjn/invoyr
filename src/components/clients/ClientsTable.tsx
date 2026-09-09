@@ -65,23 +65,39 @@ export default function ClientsTable({ clients, showArchived }: Props) {
       (acc, c) => ({
         invoices: acc.invoices + c.linkedInvoices,
         estimates: acc.estimates + c.linkedEstimates,
+        recurring: acc.recurring + c.linkedRecurring,
       }),
-      { invoices: 0, estimates: 0 }
+      { invoices: 0, estimates: 0, recurring: 0 }
     );
 
-    if (totals.invoices === 0 && totals.estimates === 0) {
-      return "This cannot be undone.";
+    const sentences: string[] = [];
+
+    if (totals.invoices > 0 || totals.estimates > 0) {
+      const linkedText = [
+        totals.invoices > 0 ? pluralize(totals.invoices, "invoice", "invoices") : null,
+        totals.estimates > 0 ? pluralize(totals.estimates, "estimate", "estimates") : null,
+      ]
+        .filter((part): part is string => part !== null)
+        .join(" and ");
+      const docWord = totals.invoices + totals.estimates === 1 ? "document" : "documents";
+      sentences.push(
+        `${linkedText} will keep the client's billing details, but the ${docWord} will no longer be linked to a client record.`
+      );
     }
 
-    const linkedText = [
-      totals.invoices > 0 ? pluralize(totals.invoices, "invoice", "invoices") : null,
-      totals.estimates > 0 ? pluralize(totals.estimates, "estimate", "estimates") : null,
-    ]
-      .filter((part): part is string => part !== null)
-      .join(" and ");
-    const docWord = totals.invoices + totals.estimates === 1 ? "document" : "documents";
+    // Recurring schedules are the one linked record that keeps generating work
+    // after the client is gone, so the warning has to name the consequence, not
+    // just the count.
+    if (totals.recurring > 0) {
+      sentences.push(
+        `${pluralize(totals.recurring, "active recurring schedule", "active recurring schedules")} will be stopped.`
+      );
+    }
 
-    return `${linkedText} will keep the client's billing details, but the ${docWord} will no longer be linked to a client record. This cannot be undone — archive instead if you'd rather keep the link.`;
+    if (sentences.length === 0) return "This cannot be undone.";
+
+    sentences.push("This cannot be undone — archive instead if you'd rather keep the link.");
+    return sentences.join(" ");
   }
 
   // "Select all" is bounded by the same cap the bulk routes enforce. None of these
