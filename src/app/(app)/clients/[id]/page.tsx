@@ -8,6 +8,7 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import Topbar from "@/components/shell/Topbar";
 import InvoiceStatusBadge from "@/components/invoices/InvoiceStatusBadge";
 import ClientArchiveButton from "@/components/clients/ClientArchiveButton";
+import ClientDeleteButton from "@/components/clients/ClientDeleteButton";
 import CopyPortalLinkButton from "@/components/clients/CopyPortalLinkButton";
 import EmailStatementButton from "@/components/clients/EmailStatementButton";
 import type { Metadata } from "next";
@@ -65,6 +66,7 @@ export default async function ClientDetailPage({ params }: Props) {
               Edit client
             </Link>
             <ClientArchiveButton clientId={id} archived={client.archived} />
+            <ClientDeleteButton clientId={id} clientName={client.name} />
           </div>
         }
       />
