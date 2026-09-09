@@ -117,9 +117,10 @@ export function BulkDeleteDialog({
 }: Props) {
   const isDestructive = destructive !== false;
   // Whether a caller has opted into custom copy at all. Callers that pass
-  // none of these props (estimates, expenses, and plain invoice deletes) get
-  // today's exact delete wording throughout, including the "checking"/
-  // "nothing eligible" states.
+  // none of these props (estimates and expenses) get today's exact delete
+  // wording throughout, including the "checking"/"nothing eligible" states.
+  // Invoices are not in that list: `InvoicesTable` supplies `titleFor` and
+  // `confirmLabel` for every one of its actions, delete included.
   const isCustom = titleFor !== undefined || confirmLabel !== undefined || describeFor !== undefined;
   const [preview, setPreview] = useState<BulkActionResult | null>(null);
   const [busy, setBusy] = useState(false);

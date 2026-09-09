@@ -119,7 +119,19 @@ export async function POST(req: NextRequest) {
   // cron writes 'ended' when a schedule runs past its end date).
   for (const client of partition.deletable) {
     const fullClient = fullClientsById.get(client.id);
-    if (!fullClient) continue;
+    if (!fullClient) {
+      // `deleteIds` was computed before this loop, so `continue` would have left
+      // this id queued for deletion with nothing saved — the one fail-open path
+      // in a route whose entire justification is failing closed. Unreachable
+      // today (both collections derive from the same fetch), which is exactly
+      // why it must not be left as the odd one out for a future refactor to trip
+      // over. Every other failure here returns 500 before the delete; so does this.
+      console.error("[bulk] client row missing before snapshot", { id: client.id });
+      return NextResponse.json(
+        { error: "Could not read the client's details before deleting it" },
+        { status: 500 }
+      );
+    }
     const snapshot = buildClientSnapshot(fullClient);
 
     const [invSnap, estSnap, recEnded] = await Promise.all([
