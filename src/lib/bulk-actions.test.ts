@@ -248,28 +248,20 @@ describe("partitionExpenseEdit", () => {
 
 describe("partitionClients", () => {
   it("deletes clients with no linked records", () => {
-    const rows = [{ id: "a", name: "Acme", hasLinkedRecords: false }];
-    expect(partitionClients(rows).deletable.map((r) => r.id)).toEqual(["a"]);
-  });
-
-  it("skips clients with linked records and suggests archiving", () => {
-    const rows = [
-      { id: "a", name: "Acme", hasLinkedRecords: false },
-      { id: "b", name: "Globex", hasLinkedRecords: true },
-      { id: "c", name: "Initech", hasLinkedRecords: true },
-    ];
+    const rows = [{ id: "a", name: "Acme", linkedInvoices: 0, linkedEstimates: 0 }];
     const result = partitionClients(rows);
     expect(result.deletable.map((r) => r.id)).toEqual(["a"]);
-    expect(result.skips).toEqual([
-      { count: 2, reason: "2 clients have invoices or expenses — archive them instead" },
-    ]);
+    expect(result.skips).toEqual([]);
   });
 
-  it("uses singular wording for one client with linked records", () => {
-    const rows = [{ id: "a", name: "Acme", hasLinkedRecords: true }];
-    expect(partitionClients(rows).skips).toEqual([
-      { count: 1, reason: "1 client has invoices or expenses — archive it instead" },
-    ]);
+  it("also deletes clients that have linked records, since their details are snapshotted", () => {
+    const rows = [
+      { id: "a", name: "Acme", linkedInvoices: 0, linkedEstimates: 0 },
+      { id: "b", name: "Globex", linkedInvoices: 12, linkedEstimates: 3 },
+    ];
+    const result = partitionClients(rows);
+    expect(result.deletable.map((r) => r.id)).toEqual(["a", "b"]);
+    expect(result.skips).toEqual([]);
   });
 });
 

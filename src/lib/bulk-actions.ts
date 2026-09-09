@@ -93,8 +93,10 @@ export type ExpenseRow = {
 export type ClientRow = {
   id: string;
   name: string;
-  /** True when the client is referenced by any invoice, estimate or expense. */
-  hasLinkedRecords: boolean;
+  /** How many invoices reference this client. */
+  linkedInvoices: number;
+  /** How many estimates reference this client. */
+  linkedEstimates: number;
 };
 
 const DELETABLE_INVOICE_STATUSES = new Set(["draft", "void"]);
@@ -198,18 +200,14 @@ export function partitionExpenseEdit(rows: ExpenseEditRow[]): Partition<ExpenseE
   };
 }
 
+/**
+ * Clients are now deletable even when documents reference them: the delete route
+ * snapshots their billing details onto those documents first, so the paperwork
+ * survives. The counts travel back to the UI so the confirmation can state what
+ * will be detached rather than warning in the abstract.
+ */
 export function partitionClients(rows: ClientRow[]): Partition<ClientRow> {
-  const deletable = rows.filter((r) => !r.hasLinkedRecords);
-  const linked = rows.length - deletable.length;
-
-  return {
-    deletable,
-    skips: skip(
-      linked,
-      "client has invoices or expenses — archive it instead",
-      "clients have invoices or expenses — archive them instead"
-    ),
-  };
+  return { deletable: rows, skips: [] };
 }
 
 export type BulkActionResult = {
