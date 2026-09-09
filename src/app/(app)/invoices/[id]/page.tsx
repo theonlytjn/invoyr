@@ -5,6 +5,7 @@ import { requireOrg } from "@/lib/auth";
 import { getOrgPlan } from "@/lib/billing";
 import { canAccess } from "@/config/plans";
 import { computeTotals } from "@/lib/invoice-totals";
+import { resolveDocumentClient } from "@/lib/client-snapshot";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import Topbar from "@/components/shell/Topbar";
 import InvoiceStatusBadge from "@/components/invoices/InvoiceStatusBadge";
@@ -46,7 +47,7 @@ export default async function InvoiceDetailPage({ params }: Props) {
   const [{ data }, { data: auditLogs }, { data: emailLogs }] = await Promise.all([
     supabase
       .from("invoices")
-      .select("*, clients(*), invoice_items(*)")
+      .select("*, clients(*), invoice_items(*), client_snapshot")
       .eq("id", id)
       .eq("org_id", org.id)
       .single(),
@@ -86,12 +87,15 @@ export default async function InvoiceDetailPage({ params }: Props) {
   const invoice = data as unknown as Invoice & {
     invoice_items: InvoiceItem[];
     clients: Client | Client[] | null;
+    client_snapshot?: unknown;
   };
 
   const items: InvoiceItem[] = invoice.invoice_items ?? [];
-  const client: Client | null = Array.isArray(invoice.clients)
-    ? (invoice.clients[0] ?? null)
-    : invoice.clients ?? null;
+  // Live join wins when the client still exists; falls back to the snapshot
+  // taken at delete-time otherwise. `Client` carries `id` and a few other
+  // columns ClientSnapshot deliberately omits, but nothing on this page reads
+  // them from `client` itself — see task-5-report.md for the audit.
+  const client = resolveDocumentClient(invoice) as unknown as Client | null;
 
   const totals = computeTotals(
     items.map((i) => ({
@@ -239,9 +243,11 @@ export default async function InvoiceDetailPage({ params }: Props) {
                 {client.company_name && <p className="text-neutral-500 dark:text-neutral-400">{client.company_name}</p>}
                 {client.email && <p className="text-neutral-500 dark:text-neutral-400">{client.email}</p>}
               </div>
-              <Link href={`/clients/${client.id}`} className="text-sm text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-50">
-                View client →
-              </Link>
+              {invoice.client_id && (
+                <Link href={`/clients/${invoice.client_id}`} className="text-sm text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-50">
+                  View client →
+                </Link>
+              )}
             </div>
           )}
 

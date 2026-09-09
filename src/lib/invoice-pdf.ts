@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getOrgPlan } from "@/lib/billing";
 import { canAccess } from "@/config/plans";
 import { computeTotals } from "@/lib/invoice-totals";
+import { resolveDocumentClient } from "@/lib/client-snapshot";
 import type { Invoice, InvoiceItem, Client, Organisation } from "@/lib/supabase/types";
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
@@ -79,7 +80,7 @@ export async function renderInvoicePdf(
 
   const { data: invoiceRaw } = await supabase
     .from("invoices")
-    .select("*, clients(*), invoice_items(*)")
+    .select("*, clients(*), invoice_items(*), client_snapshot")
     .eq("id", invoiceId)
     .eq("org_id", org.id)
     .maybeSingle();
@@ -90,9 +91,11 @@ export async function renderInvoicePdf(
   const invoice = invoiceRaw as any;
 
   const items: InvoiceItem[] = Array.isArray(invoice.invoice_items) ? invoice.invoice_items : [];
-  const client: Client | null = Array.isArray(invoice.clients)
-    ? (invoice.clients[0] ?? null)
-    : (invoice.clients ?? null);
+  // Live join wins when the client still exists; falls back to the snapshot
+  // taken at delete-time otherwise. `Client` carries `id` and a few other
+  // columns ClientSnapshot deliberately omits, but no template reads them —
+  // see task-5-report.md for the audit.
+  const client = resolveDocumentClient(invoice) as unknown as Client | null;
 
   const totals = computeTotals(
     items.map((i) => ({
