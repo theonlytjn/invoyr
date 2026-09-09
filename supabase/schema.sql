@@ -251,6 +251,13 @@ create table if not exists public.recurring_invoices (
   auto_send       boolean not null default false,
   status          public.recurring_status not null default 'active',
   next_run_at     date not null,
+  -- Null until the schedule has generated at least once. Written by the
+  -- recurring cron (src/app/api/cron/recurring/route.ts) from the same
+  -- `YYYY-MM-DD` value it writes to next_run_at in the same statement, hence
+  -- `date` rather than timestamptz. This column exists in production and was
+  -- missing from this file: applying schema.sql to a fresh environment produced
+  -- a table the cron then failed against on every run.
+  last_run_at     date,
   created_at      timestamptz not null default now(),
   updated_at      timestamptz not null default now()
 );

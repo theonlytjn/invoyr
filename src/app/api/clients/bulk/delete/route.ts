@@ -43,9 +43,9 @@ export async function POST(req: NextRequest) {
   // Linked invoices and estimates no longer gate deletability — they're what get
   // snapshotted — but the counts still travel to the UI so the confirmation
   // dialog can say what will happen with real numbers instead of a vague warning.
-  // Recurring schedules are the fourth foreign key into `clients` and the only
-  // one that keeps *producing* records after the client is gone, so they're
-  // counted here and ended below.
+  // Recurring schedules are the one linked record that keeps *producing* rows
+  // after the client is gone rather than merely referencing it, so they're
+  // counted here and ended in a single statement just before the delete.
   const invoiceCounts = new Map<string, number>();
   const estimateCounts = new Map<string, number>();
   const expenseCounts = new Map<string, number>();
@@ -61,10 +61,13 @@ export async function POST(req: NextRequest) {
         .select("client_id")
         .in("client_id", candidateIds)
         .eq("org_id", org.id)
-        // Only `active` schedules generate anything (see the cron at
-        // /api/cron/recurring, which filters on exactly this). A paused or
-        // already-ended schedule produces nothing, so there is nothing to warn
-        // about and nothing to stop.
+        // The COUNT is active-only: only `active` schedules generate anything
+        // (see the cron at /api/cron/recurring, which filters on exactly this),
+        // so those are what the confirmation copy warns is running and will be
+        // stopped. The UPDATE below deliberately does not filter — a paused
+        // schedule is resumable and would then be generating too. Counting the
+        // paused ones here instead would mean telling the user about automation
+        // that isn't currently doing anything.
         .eq("status", "active"),
     ]);
 
@@ -117,12 +120,9 @@ export async function POST(req: NextRequest) {
   // Expenses render no billing details, so they need no snapshot — their
   // `client_id` is left to null via ON DELETE SET NULL.
   //
-  // Recurring schedules are ended in the same step, and under the same rule. A
-  // snapshot cannot save them: they are generators, not documents, and once
-  // their `client_id` nulls the cron keeps producing an unsendable clientless
-  // draft every period with no signal to the user. `ended` is the schema's own
-  // terminal value (`recurring_status` is 'active' | 'paused' | 'ended', and the
-  // cron writes 'ended' when a schedule runs past its end date).
+  // This loop is per-client because the snapshot genuinely is: each client's
+  // details go onto that client's own documents. Ending the schedules is not
+  // per-client and must not be done here — see the batched update below.
   for (const client of partition.deletable) {
     const fullClient = fullClientsById.get(client.id);
     if (!fullClient) {
@@ -140,21 +140,42 @@ export async function POST(req: NextRequest) {
     }
     const snapshot = buildClientSnapshot(fullClient);
 
-    const [invSnap, estSnap, recEnded] = await Promise.all([
+    const [invSnap, estSnap] = await Promise.all([
       supabase.from("invoices").update({ client_snapshot: snapshot }).eq("client_id", client.id).eq("org_id", org.id),
       supabase.from("estimates").update({ client_snapshot: snapshot }).eq("client_id", client.id).eq("org_id", org.id),
-      supabase
-        .from("recurring_invoices")
-        .update({ status: "ended" })
-        .eq("client_id", client.id)
-        .eq("org_id", org.id)
-        .eq("status", "active"),
     ]);
 
-    for (const { error } of [invSnap, estSnap, recEnded]) {
+    for (const { error } of [invSnap, estSnap]) {
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     }
   }
+
+  // End every schedule belonging to every client being deleted, in ONE statement
+  // immediately before the delete.
+  //
+  // Why not in the loop above: a half-written snapshot is inert — the client
+  // still exists, the documents still read the live join, and a retry overwrites
+  // it. `status: 'ended'` is not. If this ran per-client and a later iteration
+  // failed, earlier clients would be left alive with their billing automation
+  // permanently stopped and nothing in the 500 to say so. Batching shrinks that
+  // window to a single statement that either applies to all of them or none.
+  //
+  // No `.eq("status", "active")` here, unlike the count above. A *paused*
+  // schedule keeps its nulled `client_id` too, and `RecurringList` offers Resume
+  // for anything not already `ended` — resuming one would produce exactly the
+  // clientless drafts this exists to prevent. The count stays active-only so the
+  // confirmation copy reports what is actually running; the update ends them all.
+  //
+  // `ended` is the schema's own terminal value (`recurring_status` is
+  // 'active' | 'paused' | 'ended') and the value the recurring cron itself writes
+  // when a schedule runs past its end date.
+  const { error: recurringError } = await supabase
+    .from("recurring_invoices")
+    .update({ status: "ended" })
+    .in("client_id", deleteIds)
+    .eq("org_id", org.id);
+
+  if (recurringError) return NextResponse.json({ error: recurringError.message }, { status: 500 });
 
   const { error: deleteError } = await supabase
     .from("clients")
