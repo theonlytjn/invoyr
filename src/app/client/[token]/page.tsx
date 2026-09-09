@@ -85,7 +85,9 @@ export default async function ClientPortalPage({ params }: Props) {
   const defaultCurrency = invoices?.[0]?.currency ?? "GBP";
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    // text-gray-900 is load-bearing — see the note on the pay page. Without it, unstyled
+    // spans inherit --foreground, which .dark flips to near-white, on a forced-light card.
+    <div className="min-h-screen bg-gray-50 text-gray-900">
       {/* Header */}
       <div className="text-white py-8 px-4" style={{ backgroundColor: accentColor }}>
         <div className="max-w-3xl mx-auto">

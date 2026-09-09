@@ -48,7 +48,9 @@ export default async function PublicEstimatePage({ params }: Props) {
   const isDecided = ["approved", "rejected", "converted"].includes(estimate.status);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 py-12">
+    // text-gray-900 is load-bearing — see the note on the pay page. Without it, unstyled
+    // spans inherit --foreground, which .dark flips to near-white, on a forced-light card.
+    <div className="min-h-screen bg-gray-50 text-gray-900 flex flex-col items-center justify-center px-4 py-12">
       <div className="w-full max-w-lg bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         {/* Header */}
         <div className="p-6 text-white" style={{ backgroundColor: accentColor }}>

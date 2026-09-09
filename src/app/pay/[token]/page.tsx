@@ -64,7 +64,12 @@ export default async function PayPage({ params, searchParams }: Props) {
   const bankHeading = showStripe || showPaypal ? "Or pay by bank transfer" : "Pay by bank transfer";
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 py-12">
+    // text-gray-900 is load-bearing: this page forces a light card, but `body` inherits
+    // --foreground, which the .dark class flips to near-white. Without an explicit colour
+    // here, every unstyled span (invoice number, dates, billed-to, "Amount due") renders
+    // white-on-white for any visitor whose device is in dark mode. The header below sets
+    // its own text-white, so it is unaffected.
+    <div className="min-h-screen bg-gray-50 text-gray-900 flex flex-col items-center justify-center px-4 py-12">
       <div className="w-full max-w-xl bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         {/* Header */}
         <div className="p-8 text-white" style={{ backgroundColor: accentColor }}>
