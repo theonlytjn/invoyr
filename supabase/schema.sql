@@ -151,7 +151,8 @@ create table if not exists public.clients (
   vat_number      text,
   notes           text,
   archived        boolean not null default false,
-  portal_token    text unique default encode(gen_random_bytes(24), 'base64url'),
+  -- `base64url` is not valid for encode() on PostgreSQL 17; this matches the live column.
+  portal_token    text unique default translate(encode(gen_random_bytes(24), 'base64'), '+/=', '-_'),
   created_at      timestamptz not null default now(),
   updated_at      timestamptz not null default now()
 );
@@ -190,7 +191,9 @@ create table if not exists public.invoices (
   notes               text,
   terms               text,
   stripe_payment_link text,
-  public_token        text unique default encode(gen_random_bytes(24), 'base64url'),
+  -- `base64url` is not valid for encode() on PostgreSQL 17; this matches the live column
+  -- exactly (18 bytes, and '+/' only — the live invoices default predates the estimates form).
+  public_token        text unique default translate(encode(gen_random_bytes(18), 'base64'), '+/', '-_'),
   sent_at             timestamptz,
   paid_at             timestamptz,
   voided_at           timestamptz,
