@@ -693,6 +693,12 @@ alter table public.invoices add column if not exists late_fee_applied_at timesta
 -- invoices: total credits applied (from credit notes)
 alter table public.invoices add column if not exists credit_applied numeric(12,2) not null default 0;
 
+-- Invoices and estimates render client billing details from a live join. These hold a
+-- copy written immediately before a client is deleted, so historical documents still
+-- render. Nullable: only populated when a client is removed.
+alter table public.invoices  add column if not exists client_snapshot jsonb;
+alter table public.estimates add column if not exists client_snapshot jsonb;
+
 -- organisations: credit note numbering
 alter table public.organisations add column if not exists credit_note_prefix       text not null default 'CN';
 alter table public.organisations add column if not exists next_credit_note_number  integer not null default 1;
