@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   Dialog,
   DialogContent,
@@ -36,6 +36,18 @@ interface Props {
    * to "Delete N", matching today's behaviour.
    */
   confirmLabel?: string;
+  /**
+   * Renders the description body from the dialog's own resolved dry-run result,
+   * once there is something eligible to act on. The dialog already performs the
+   * dry run and holds the result — this hands it to the caller instead of making
+   * them fetch it a second time just to read fields (like per-record counts) that
+   * the default "This cannot be undone." can't express. Not called for the
+   * loading or "nothing eligible" states, which keep their own fixed copy;
+   * only once `preview` has resolved with at least one eligible record. Defaults
+   * to today's wording (`destructive` ? "This cannot be undone." : nothing), so
+   * callers that don't pass this keep today's exact description.
+   */
+  describeFor?: (preview: BulkActionResult) => ReactNode;
   /** Set false for non-destructive actions to drop the "cannot be undone" line. */
   destructive?: boolean;
   onCancel: () => void;
@@ -98,15 +110,17 @@ export function BulkDeleteDialog({
   nounPlural,
   titleFor,
   confirmLabel,
+  describeFor,
   destructive,
   onCancel,
   onDeleted,
 }: Props) {
   const isDestructive = destructive !== false;
   // Whether a caller has opted into custom copy at all. Callers that pass
-  // neither prop (clients, estimates, expenses) get today's exact delete
-  // wording throughout, including the "checking"/"nothing eligible" states.
-  const isCustom = titleFor !== undefined || confirmLabel !== undefined;
+  // none of these props (estimates, expenses, and plain invoice deletes) get
+  // today's exact delete wording throughout, including the "checking"/
+  // "nothing eligible" states.
+  const isCustom = titleFor !== undefined || confirmLabel !== undefined || describeFor !== undefined;
   const [preview, setPreview] = useState<BulkActionResult | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -212,9 +226,11 @@ export function BulkDeleteDialog({
                 ? isCustom
                   ? "None of what you selected is eligible."
                   : "None of what you selected can be deleted."
-                : isDestructive
-                  ? "This cannot be undone."
-                  : undefined}
+                : describeFor
+                  ? describeFor(preview)
+                  : isDestructive
+                    ? "This cannot be undone."
+                    : undefined}
           </DialogDescription>
         </DialogHeader>
 

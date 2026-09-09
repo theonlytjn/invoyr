@@ -1,15 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { BulkActionBar, BulkDeleteDialog, RowCheckbox } from "@/components/ui";
 import { useRowSelection } from "@/hooks/useRowSelection";
-import { MAX_BULK_IDS, selectAllAddition } from "@/lib/bulk-actions";
+import { MAX_BULK_IDS, selectAllAddition, type BulkActionResult } from "@/lib/bulk-actions";
 import type { Client } from "@/lib/supabase/types";
-
-type LinkedCounts = { linkedInvoices: number; linkedEstimates: number };
 
 function pluralize(n: number, singular: string, plural: string): string {
   return `${n} ${n === 1 ? singular : plural}`;
@@ -46,71 +44,34 @@ export default function ClientsTable({ clients, showArchived }: Props) {
   const filteredIds = filtered.map((c) => c.id);
   const selectedIds = clients.filter((c) => selection.isSelected(c.id)).map((c) => c.id);
 
-  // Delivers the linked-invoice and linked-estimate counts the dry run already
-  // computes server-side, so the confirmation dialog can say what will actually
-  // happen instead of warning in the abstract. This is a second dry run, not the
-  // dialog's internal one: BulkDeleteDialog only exposes the aggregate eligible
-  // count to `titleFor`, not the per-client breakdown the copy below needs.
-  const [linkedCounts, setLinkedCounts] = useState<Map<string, LinkedCounts> | null>(null);
-
-  useEffect(() => {
-    if (!deleteOpen || selectedIds.length === 0) {
-      setLinkedCounts(null);
-      return;
-    }
-
-    let cancelled = false;
-
-    fetch("/api/clients/bulk/delete", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ids: selectedIds, dryRun: true }),
-    })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data: { clients?: ({ id: string } & LinkedCounts)[] } | null) => {
-        if (cancelled || !data?.clients) return;
-        setLinkedCounts(
-          new Map(
-            data.clients.map((c) => [
-              c.id,
-              { linkedInvoices: c.linkedInvoices, linkedEstimates: c.linkedEstimates },
-            ])
-          )
-        );
-      })
-      .catch(() => {
-        // Best-effort: BulkDeleteDialog's own dry run is the source of truth for
-        // what actually gets deleted. If this one fails, the title just falls
-        // back to the plain wording below.
-      });
-
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [deleteOpen, selectedIds.join(",")]);
-
-  // Both must appear, and neither may be softened into the other: the documents
-  // keep their billing details, and the deletion still cannot be undone (that
-  // second line comes from BulkDeleteDialog's own default description). Archive
-  // is mentioned as the reversible alternative whenever there is anything to lose.
+  // Kept short on purpose — the substance lives in `describeForDelete` below.
+  // Personalised by name only for a single selection, where "Delete Acme?" is
+  // still short; a plural selection falls back to the plain count.
   function titleForDelete(n: number): string {
-    const plain = `Delete ${pluralize(n, "client", "clients")}?`;
-    if (!linkedCounts) return plain;
+    if (n === 1) {
+      const only = clients.find((c) => selection.isSelected(c.id));
+      if (only) return `Delete ${only.name}?`;
+    }
+    return `Delete ${pluralize(n, "client", "clients")}?`;
+  }
 
-    const selectedClients = clients.filter((c) => selection.isSelected(c.id));
-    const totals = selectedClients.reduce(
-      (acc, c) => {
-        const counts = linkedCounts.get(c.id);
-        return {
-          invoices: acc.invoices + (counts?.linkedInvoices ?? 0),
-          estimates: acc.estimates + (counts?.linkedEstimates ?? 0),
-        };
-      },
+  // Built from BulkDeleteDialog's own dry-run result — no second request. Both
+  // truths must appear, and neither may be softened into the other: the
+  // documents keep their billing details, and the deletion still cannot be
+  // undone. Archive is named as the reversible alternative whenever there is
+  // anything linked to lose.
+  function describeForDelete(preview: BulkActionResult): string {
+    const totals = (preview.clients ?? []).reduce(
+      (acc, c) => ({
+        invoices: acc.invoices + c.linkedInvoices,
+        estimates: acc.estimates + c.linkedEstimates,
+      }),
       { invoices: 0, estimates: 0 }
     );
 
-    if (totals.invoices === 0 && totals.estimates === 0) return plain;
+    if (totals.invoices === 0 && totals.estimates === 0) {
+      return "This cannot be undone.";
+    }
 
     const linkedText = [
       totals.invoices > 0 ? pluralize(totals.invoices, "invoice", "invoices") : null,
@@ -118,13 +79,9 @@ export default function ClientsTable({ clients, showArchived }: Props) {
     ]
       .filter((part): part is string => part !== null)
       .join(" and ");
+    const docWord = totals.invoices + totals.estimates === 1 ? "document" : "documents";
 
-    if (n === 1) {
-      const name = selectedClients[0]?.name ?? "This client";
-      return `Delete ${name}? ${name} has ${linkedText}. Their billing details will be kept on those documents, but they will no longer be linked to a client record. Archive instead if you want to keep that link.`;
-    }
-
-    return `Delete ${n} clients? Between them they have ${linkedText}. Their billing details will be kept on those documents, but they will no longer be linked to a client record. Archive instead if you want to keep that link.`;
+    return `${linkedText} will keep the client's billing details, but the ${docWord} will no longer be linked to a client record. This cannot be undone — archive instead if you'd rather keep the link.`;
   }
 
   // "Select all" is bounded by the same cap the bulk routes enforce. None of these
@@ -264,6 +221,7 @@ export default function ClientsTable({ clients, showArchived }: Props) {
         noun="client"
         nounPlural="clients"
         titleFor={titleForDelete}
+        describeFor={describeForDelete}
         onCancel={() => setDeleteOpen(false)}
         onDeleted={(result) => {
           setDeleteOpen(false);

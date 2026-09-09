@@ -80,17 +80,9 @@ export async function POST(req: NextRequest) {
 
   if (dryRun || partition.deletable.length === 0) {
     // Not folded into `reasons`, which is reserved for skips — these clients
-    // aren't skipped, so the counts travel under their own key for the dialog
-    // to build its confirmation copy from.
-    return NextResponse.json({
-      ...result,
-      clients: partition.deletable.map((c) => ({
-        id: c.id,
-        name: c.name,
-        linkedInvoices: c.linkedInvoices,
-        linkedEstimates: c.linkedEstimates,
-      })),
-    });
+    // aren't skipped, so the counts travel under their own `clients` key for
+    // the dialog's `describeFor` to build its confirmation copy from.
+    return NextResponse.json({ ...result, clients: partition.deletable });
   }
 
   const deleteIds = partition.deletable.map((c) => c.id);

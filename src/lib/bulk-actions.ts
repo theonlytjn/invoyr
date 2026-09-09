@@ -227,6 +227,14 @@ export type BulkActionResult = {
   succeeded?: number;
   skipped: number;
   reasons: SkipReason[];
+  /**
+   * Per-client linked-invoice/estimate counts. Route-specific and optional:
+   * only the client bulk-delete route populates it, on its dry-run response, so
+   * that `ClientsTable` can build real numbers into its confirmation copy via
+   * `BulkDeleteDialog`'s `describeFor` without a second request. Every other
+   * action leaves this undefined.
+   */
+  clients?: ClientRow[];
 };
 
 /**
