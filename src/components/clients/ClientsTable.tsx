@@ -55,11 +55,12 @@ export default function ClientsTable({ clients, showArchived }: Props) {
     return `Delete ${pluralize(n, "client", "clients")}?`;
   }
 
-  // Built from BulkDeleteDialog's own dry-run result — no second request. Both
-  // truths must appear, and neither may be softened into the other: the
-  // documents keep their billing details, and the deletion still cannot be
-  // undone. Archive is named as the reversible alternative whenever there is
-  // anything linked to lose.
+  // Built from BulkDeleteDialog's own dry-run result — no second request. Every
+  // truth must appear, and none may be softened into another: the documents keep
+  // their billing details, the expenses lose their client attribution, the active
+  // recurring schedules are stopped, and the deletion still cannot be undone.
+  // Archive is named as the reversible alternative whenever there is anything
+  // linked to lose.
   function describeForDelete(preview: BulkActionResult): string {
     const totals = (preview.clients ?? []).reduce(
       (acc, c) => ({
