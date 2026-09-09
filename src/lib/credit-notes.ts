@@ -79,10 +79,22 @@ export async function createCreditNote({
     return { error: insertError?.message ?? "Failed to create credit note" };
   }
 
-  await supabase
+  // The counter is best-effort: a failure here would mean the *next* credit note
+  // might reuse a number, not that this one is wrong, so it's logged rather than
+  // failing a credit note that has already been issued.
+  const { error: counterError } = await supabase
     .from("organisations")
     .update({ next_credit_note_number: nextNum + 1 })
     .eq("id", invoice.org_id);
+
+  if (counterError) {
+    console.error("credit note counter update failed", {
+      invoice_id: invoice.id,
+      org_id: invoice.org_id,
+      credit_note_number: creditNoteNumber,
+      error: counterError.message,
+    });
+  }
 
   const newCreditApplied = creditAlready + amount;
   const totalOwed = invoice.total + lateFee;
@@ -96,12 +108,25 @@ export async function createCreditNote({
     newStatus = "partial";
   }
 
-  await supabase
+  // Unlike the counter and the audit row below, this write is load-bearing: if it
+  // fails, the credit note exists but was never applied to the invoice, which would
+  // leave `credit_applied` stale and the status wrong. Surface it to the caller
+  // rather than reporting success on a half-finished operation.
+  const { error: invoiceUpdateError } = await supabase
     .from("invoices")
     .update({ credit_applied: newCreditApplied, status: newStatus, paid_at: paidAt })
     .eq("id", invoice.id);
 
-  await supabase.from("audit_logs").insert({
+  if (invoiceUpdateError) {
+    console.error("credit note issued but invoice update failed", {
+      invoice_id: invoice.id,
+      credit_note_number: creditNoteNumber,
+      error: invoiceUpdateError.message,
+    });
+    return { error: invoiceUpdateError.message };
+  }
+
+  const { error: auditError } = await supabase.from("audit_logs").insert({
     org_id: invoice.org_id,
     user_id: userId,
     action: "invoice.credit_note_issued",
@@ -109,6 +134,14 @@ export async function createCreditNote({
     entity_id: invoice.id,
     meta: { credit_note_number: creditNoteNumber, amount, reason: reason ?? null },
   });
+
+  if (auditError) {
+    console.error("credit note audit log write failed", {
+      invoice_id: invoice.id,
+      credit_note_number: creditNoteNumber,
+      error: auditError.message,
+    });
+  }
 
   return { creditNote };
 }

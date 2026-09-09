@@ -32,7 +32,7 @@ interface Props {
 export default function RecordPaymentModal({ invoice, open, onClose, onSuccess }: Props) {
   const balance = outstandingBalance(invoice);
 
-  const [amount, setAmount] = useState(String(balance));
+  const [amount, setAmount] = useState(balance.toFixed(2));
   const [method, setMethod] = useState<PaymentMethod>("bank_transfer");
   const [reference, setReference] = useState("");
   const [paidAt, setPaidAt] = useState(formatDateInput(new Date()));
@@ -53,9 +53,34 @@ export default function RecordPaymentModal({ invoice, open, onClose, onSuccess }
     if (remainder <= 0 && writeOff) setWriteOff(false);
   }, [remainder, writeOff]);
 
+  // Every field re-syncs from the live invoice whenever the dialog opens — not just
+  // `amount`. Without this, `amount` initialised once (from the balance at first
+  // mount) and never changed again: after a part payment the balance shrinks, but
+  // reopening the dialog would still show the old, now-too-large figure, which the
+  // server would then reject. Keyed on `open` rather than done inside
+  // `resetAndClose` because a `setTimeout`-deferred close (see the success path in
+  // `handleSubmit`) closes over a stale `balance` from the render at submit time —
+  // resetting on the next *open* instead always reads the current prop.
+  useEffect(() => {
+    if (open) {
+      setAmount(balance.toFixed(2));
+      setMethod("bank_transfer");
+      setReference("");
+      setPaidAt(formatDateInput(new Date()));
+      setWriteOff(false);
+      setError(null);
+      setSuccessMessage(null);
+    }
+    // Intentionally only reacts to `open` transitioning — including `balance` would
+    // re-run (and stomp on what the user is typing) on every render while the
+    // dialog is already open, since `balance` is recomputed from `invoice` each time.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
   function resetAndClose() {
     setSuccessMessage(null);
     setWriteOff(false);
+    setError(null);
     onClose();
   }
 
@@ -88,8 +113,12 @@ export default function RecordPaymentModal({ invoice, open, onClose, onSuccess }
 
     const parts = [`Recorded payment of ${formatCurrency(parsedAmount, invoice.currency)}.`];
     if (json.creditNoteIssued) {
+      // Reports the amount the server actually issued (`creditNoteAmount`), not the
+      // client's predicted `remainder` — the two can diverge if, say, a late fee
+      // landed between page load and submit, and the user should be told what was
+      // really written off, not what they saw on screen a moment earlier.
       parts.push(
-        `Wrote off ${formatCurrency(Math.max(remainder, 0), invoice.currency)} as credit note ${json.creditNoteNumber}.`
+        `Wrote off ${formatCurrency(json.creditNoteAmount ?? 0, invoice.currency)} as credit note ${json.creditNoteNumber}.`
       );
     }
     setSuccessMessage(parts.join(" "));

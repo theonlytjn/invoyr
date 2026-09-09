@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
 import { outstandingBalance } from "@/lib/bulk-actions";
 import { createCreditNote } from "@/lib/credit-notes";
+import { formatCurrency } from "@/lib/utils";
 
 // Full db enum (see `payment_method` in supabase/schema.sql). Unlike the bulk
 // mark-paid route, "stripe" is included here: recording one payment is a
@@ -71,7 +72,7 @@ export async function POST(
 
   if (amount > balance + 0.001) {
     return NextResponse.json(
-      { error: `Payment amount cannot exceed the outstanding balance of ${balance.toFixed(2)}` },
+      { error: `Payment amount cannot exceed the outstanding balance of ${formatCurrency(balance, invoice.currency)}` },
       { status: 400 }
     );
   }
@@ -93,9 +94,18 @@ export async function POST(
   const newAmountPaid = Number(invoice.amount_paid) + amount;
   const remainderAfterPayment = outstandingBalance({ ...invoice, amount_paid: newAmountPaid });
   const newStatus = remainderAfterPayment <= 0.001 ? "paid" : "partial";
-  const newPaidAt = newStatus === "paid" ? new Date().toISOString() : null;
+  // Uses the payment's own `paidAt` (the date the user recorded, or "now" if they
+  // didn't specify one) rather than a fresh `new Date()` — otherwise a back-dated
+  // payment would leave the payment row and the invoice disagreeing about when it
+  // was settled.
+  const newPaidAt = newStatus === "paid" ? paidAt : null;
 
-  const { error: updateError } = await supabase
+  // `.eq("amount_paid", invoice.amount_paid)` makes this a compare-and-swap: if
+  // another request changed `amount_paid` between our fetch and this write (two
+  // operators recording payments on the same invoice at once), the filter matches
+  // zero rows instead of silently overwriting the other write. `.select("id")`
+  // is what lets us tell "0 rows matched" apart from "matched, nothing changed".
+  const { data: updatedRows, error: updateError } = await supabase
     .from("invoices")
     .update({
       amount_paid: newAmountPaid,
@@ -103,12 +113,44 @@ export async function POST(
       paid_at: newPaidAt,
     })
     .eq("id", invoice.id)
-    .eq("org_id", org.id);
+    .eq("org_id", org.id)
+    .eq("amount_paid", invoice.amount_paid)
+    .select("id");
 
   if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 });
 
+  if (!updatedRows || updatedRows.length === 0) {
+    return NextResponse.json(
+      {
+        error:
+          "This invoice changed since it was loaded, so the payment could not be applied. Refresh and try again.",
+      },
+      { status: 409 }
+    );
+  }
+
+  // Logged as soon as the payment itself is durable — before the write-off is even
+  // attempted — so the one failure mode where a trail matters most (payment
+  // committed, write-off broken, invoice left half-finished) still leaves a record.
+  const { error: auditError } = await supabase.from("audit_logs").insert({
+    org_id: org.id,
+    user_id: user.id,
+    action: "payment.recorded",
+    entity_type: "invoice",
+    entity_id: invoice.id,
+    meta: { amount, method, reference: reference?.trim() || null, writeOffRequested: writeOffRemainder },
+  });
+
+  if (auditError) {
+    console.error("[record-payment] audit log write failed", {
+      invoice_id: invoice.id,
+      error: auditError.message,
+    });
+  }
+
   let creditNoteIssued = false;
   let creditNoteNumber: string | undefined;
+  let creditNoteAmount: number | undefined;
 
   // Write off whatever the payment didn't cover. `createCreditNote` is handed the
   // invoice as it stands *after* the update above — amount_paid already includes
@@ -150,23 +192,11 @@ export async function POST(
 
     creditNoteIssued = true;
     creditNoteNumber = creditNote.credit_note_number;
+    // The amount actually issued, from the row that was actually written — not the
+    // client's predicted remainder, which can be stale (e.g. a late fee landed
+    // between page load and submit) and would then misreport what the user consented to.
+    creditNoteAmount = creditNote.amount;
   }
 
-  const { error: auditError } = await supabase.from("audit_logs").insert({
-    org_id: org.id,
-    user_id: user.id,
-    action: "payment.recorded",
-    entity_type: "invoice",
-    entity_id: invoice.id,
-    meta: { amount, method, reference: reference?.trim() || null, writeOffRemainder: creditNoteIssued },
-  });
-
-  if (auditError) {
-    console.error("[record-payment] audit log write failed", {
-      invoice_id: invoice.id,
-      error: auditError.message,
-    });
-  }
-
-  return NextResponse.json({ ok: true, creditNoteIssued, creditNoteNumber });
+  return NextResponse.json({ ok: true, creditNoteIssued, creditNoteNumber, creditNoteAmount });
 }
