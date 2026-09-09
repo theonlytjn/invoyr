@@ -130,17 +130,26 @@ export default function BulkEditExpensesModal({ open, ids, clients, onCancel, on
       <DialogContent className="max-w-md">
         <DialogHeader aria-live="polite">
           <DialogTitle>
-            {preview === null ? "Checking…" : `Edit ${eligible} expense${eligible === 1 ? "" : "s"}`}
+            {preview === null
+              ? "Checking…"
+              : eligible === 0
+                ? "Nothing eligible"
+                : `Edit ${eligible} expense${eligible === 1 ? "" : "s"}`}
           </DialogTitle>
           <DialogDescription>
-            Leave a field unchanged to keep its current value on every selected expense.
+            {preview === null
+              ? "Working out what's eligible."
+              : eligible === 0
+                ? "None of what you selected is eligible."
+                : "Leave a field unchanged to keep its current value on every selected expense."}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="space-y-1.5">
-            <Label>Category</Label>
+            <Label htmlFor="bulk-edit-category">Category</Label>
             <select
+              id="bulk-edit-category"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               className="w-full px-3 py-2.5 text-sm border border-neutral-200 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-neutral-950 dark:text-neutral-50"
@@ -153,8 +162,9 @@ export default function BulkEditExpensesModal({ open, ids, clients, onCancel, on
           </div>
 
           <div className="space-y-1.5">
-            <Label>Client</Label>
+            <Label htmlFor="bulk-edit-client">Client</Label>
             <select
+              id="bulk-edit-client"
               value={clientId}
               onChange={(e) => setClientId(e.target.value)}
               className="w-full px-3 py-2.5 text-sm border border-neutral-200 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-neutral-950 dark:text-neutral-50"
@@ -168,8 +178,9 @@ export default function BulkEditExpensesModal({ open, ids, clients, onCancel, on
           </div>
 
           <div className="space-y-1.5">
-            <Label>Billable</Label>
+            <Label htmlFor="bulk-edit-billable">Billable</Label>
             <select
+              id="bulk-edit-billable"
               value={billable}
               onChange={(e) => setBillable(e.target.value)}
               className="w-full px-3 py-2.5 text-sm border border-neutral-200 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-neutral-950 dark:text-neutral-50"
