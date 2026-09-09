@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
-import { formatDateInput } from "@/lib/utils";
+import { useEffect, useState } from "react";
+import { formatCurrency, formatDateInput } from "@/lib/utils";
+import { outstandingBalance } from "@/lib/bulk-actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,112 +30,144 @@ interface Props {
 }
 
 export default function RecordPaymentModal({ invoice, open, onClose, onSuccess }: Props) {
-  const [amount, setAmount] = useState(String(invoice.total - invoice.amount_paid));
+  const balance = outstandingBalance(invoice);
+
+  const [amount, setAmount] = useState(String(balance));
   const [method, setMethod] = useState<PaymentMethod>("bank_transfer");
   const [reference, setReference] = useState("");
   const [paidAt, setPaidAt] = useState(formatDateInput(new Date()));
+  const [writeOff, setWriteOff] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const parsedAmount = parseFloat(amount) || 0;
+  // Rounded to cents so floating-point noise (e.g. 100.10 - 100.10 producing a
+  // sliver like -3.5e-15) can't flicker the checkbox on or off.
+  const remainder = Math.round((balance - parsedAmount) * 100) / 100;
+
+  // The checkbox disappears once the entered amount covers the full balance — if
+  // it was ticked before the user topped the amount up, drop the flag too, so a
+  // stale `writeOffRemainder: true` can't ride along on a full payment.
+  useEffect(() => {
+    if (remainder <= 0 && writeOff) setWriteOff(false);
+  }, [remainder, writeOff]);
+
+  function resetAndClose() {
+    setSuccessMessage(null);
+    setWriteOff(false);
+    onClose();
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
     setError(null);
-    const supabase = createClient();
 
-    const { error: payErr } = await supabase.from("payments").insert({
-      org_id: invoice.org_id,
-      invoice_id: invoice.id,
-      amount: parseFloat(amount),
-      currency: invoice.currency,
-      method,
-      reference: reference || null,
-      paid_at: new Date(paidAt).toISOString(),
+    const res = await fetch(`/api/invoices/${invoice.id}/record-payment`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        amount: parsedAmount,
+        method,
+        reference: reference.trim() || undefined,
+        paidAt: new Date(paidAt).toISOString(),
+        writeOffRemainder: writeOff,
+      }),
     });
 
-    if (payErr) {
-      setError(payErr.message);
+    const json = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      setError(json.error ?? "Failed to record payment.");
       setSaving(false);
       return;
     }
 
-    const newAmountPaid = invoice.amount_paid + parseFloat(amount);
-    const isPaid = newAmountPaid >= invoice.total;
-    const isPartial = !isPaid && newAmountPaid > 0;
-
-    await supabase
-      .from("invoices")
-      .update({
-        amount_paid: newAmountPaid,
-        status: isPaid ? "paid" : isPartial ? "partial" : "sent",
-        paid_at: isPaid ? new Date().toISOString() : null,
-      })
-      .eq("id", invoice.id);
-
-    await supabase.from("audit_logs").insert({
-      org_id: invoice.org_id,
-      action: "payment.recorded",
-      entity_type: "payment",
-      entity_id: invoice.id,
-      meta: { amount: parseFloat(amount), method },
-    });
-
     setSaving(false);
+
+    const parts = [`Recorded payment of ${formatCurrency(parsedAmount, invoice.currency)}.`];
+    if (json.creditNoteIssued) {
+      parts.push(
+        `Wrote off ${formatCurrency(Math.max(remainder, 0), invoice.currency)} as credit note ${json.creditNoteNumber}.`
+      );
+    }
+    setSuccessMessage(parts.join(" "));
     onSuccess();
-    onClose();
+
+    setTimeout(() => {
+      resetAndClose();
+    }, 1600);
   }
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={(next) => !next && resetAndClose()}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Record payment</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4 py-2">
-          <div className="space-y-1.5">
-            <Label>Amount ({invoice.currency})</Label>
-            <Input
-              type="number"
-              min="0.01"
-              step="0.01"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              required
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label>Payment method</Label>
-            <Select value={method} onValueChange={(v) => setMethod(v as PaymentMethod)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="bank_transfer">Bank transfer</SelectItem>
-                <SelectItem value="stripe">Stripe</SelectItem>
-                <SelectItem value="cash">Cash</SelectItem>
-                <SelectItem value="cheque">Cheque</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-1.5">
-            <Label>Reference (optional)</Label>
-            <Input
-              value={reference}
-              onChange={(e) => setReference(e.target.value)}
-              placeholder="Transaction ID or reference number"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label>Date paid</Label>
-            <Input type="date" value={paidAt} onChange={(e) => setPaidAt(e.target.value)} required />
-          </div>
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-            <Button type="submit" disabled={saving}>
-              {saving ? "Saving…" : "Record payment"}
-            </Button>
-          </DialogFooter>
-        </form>
+        {successMessage ? (
+          <p className="py-6 text-sm text-neutral-700 dark:text-neutral-300">{successMessage}</p>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label>Amount ({invoice.currency})</Label>
+              <Input
+                type="number"
+                min="0.01"
+                step="0.01"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Payment method</Label>
+              <Select value={method} onValueChange={(v) => setMethod(v as PaymentMethod)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="bank_transfer">Bank transfer</SelectItem>
+                  <SelectItem value="stripe">Stripe</SelectItem>
+                  <SelectItem value="cash">Cash</SelectItem>
+                  <SelectItem value="cheque">Cheque</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Reference (optional)</Label>
+              <Input
+                value={reference}
+                onChange={(e) => setReference(e.target.value)}
+                placeholder="Transaction ID or reference number"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Date paid</Label>
+              <Input type="date" value={paidAt} onChange={(e) => setPaidAt(e.target.value)} required />
+            </div>
+            {remainder > 0 && (
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={writeOff}
+                  onChange={(e) => setWriteOff(e.target.checked)}
+                  className="mt-0.5 rounded border-neutral-300 dark:border-neutral-600 accent-neutral-950 dark:accent-neutral-50"
+                />
+                <span className="text-sm text-neutral-700 dark:text-neutral-300">
+                  Write off the remaining {formatCurrency(remainder, invoice.currency)} as a credit note
+                </span>
+              </label>
+            )}
+            {error && <p className="text-sm text-red-600">{error}</p>}
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={resetAndClose}>Cancel</Button>
+              <Button type="submit" disabled={saving}>
+                {saving ? "Saving…" : writeOff && remainder > 0 ? "Record payment & write off" : "Record payment"}
+              </Button>
+            </DialogFooter>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   );

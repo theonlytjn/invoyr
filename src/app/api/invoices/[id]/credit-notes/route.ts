@@ -6,6 +6,7 @@ import { sendTransactionalEmail } from "@/lib/resend/send-transactional-email";
 import { CreditNoteEmail } from "@/emails/transactional/CreditNoteEmail";
 import { formatCurrency } from "@/lib/utils";
 import { createCreditNote } from "@/lib/credit-notes";
+import { outstandingBalance } from "@/lib/bulk-actions";
 
 const schema = z.object({
   amount: z.number().positive(),
@@ -69,7 +70,15 @@ export async function POST(
 
   const lateFee = (invoice as { late_fee_amount?: number }).late_fee_amount ?? 0;
   const creditAlready = (invoice as { credit_applied?: number }).credit_applied ?? 0;
-  const remainingBalance = invoice.total + lateFee - invoice.amount_paid - creditAlready;
+  // The single source of truth for what this invoice still owes — never recomputed
+  // inline. See the docstring on `outstandingBalance` for the bug a second copy of
+  // this formula previously caused.
+  const remainingBalance = outstandingBalance({
+    total: invoice.total,
+    amount_paid: invoice.amount_paid,
+    late_fee_amount: lateFee,
+    credit_applied: creditAlready,
+  });
 
   if (amount > remainingBalance + 0.001) {
     return NextResponse.json(
