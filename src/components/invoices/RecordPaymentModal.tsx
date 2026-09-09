@@ -89,17 +89,30 @@ export default function RecordPaymentModal({ invoice, open, onClose, onSuccess }
     setSaving(true);
     setError(null);
 
-    const res = await fetch(`/api/invoices/${invoice.id}/record-payment`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        amount: parsedAmount,
-        method,
-        reference: reference.trim() || undefined,
-        paidAt: new Date(paidAt).toISOString(),
-        writeOffRemainder: writeOff,
-      }),
-    });
+    let res: Response;
+    try {
+      res = await fetch(`/api/invoices/${invoice.id}/record-payment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: parsedAmount,
+          method,
+          reference: reference.trim() || undefined,
+          paidAt: new Date(paidAt).toISOString(),
+          writeOffRemainder: writeOff,
+        }),
+      });
+    } catch {
+      // A rejected fetch (offline, DNS, connection reset) used to leave an
+      // unhandled rejection and `saving` stuck on. That was survivable while the
+      // dialog could still be dismissed; now that dismissal is blocked during a
+      // save, leaving `saving` on would trap the user in a modal with no way out.
+      // The request may or may not have reached the server, so the copy must not
+      // claim it didn't.
+      setError("Could not reach the server. Check the invoice before trying again.");
+      setSaving(false);
+      return;
+    }
 
     const json = await res.json().catch(() => ({}));
 
@@ -130,7 +143,18 @@ export default function RecordPaymentModal({ invoice, open, onClose, onSuccess }
   }
 
   return (
-    <Dialog open={open} onOpenChange={(next) => !next && resetAndClose()}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        // Ignore every dismiss path — Escape, overlay click, the dialog's own
+        // close button — while the request is in flight, not just Cancel. The
+        // write lands regardless of whether this dialog is still on screen, so
+        // dismissing it mid-flight would leave the user never told whether a
+        // credit note was issued, or for how much, or under what number.
+        if (saving) return;
+        if (!next) resetAndClose();
+      }}
+    >
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Record payment</DialogTitle>
@@ -190,7 +214,9 @@ export default function RecordPaymentModal({ invoice, open, onClose, onSuccess }
             )}
             {error && <p className="text-sm text-red-600">{error}</p>}
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={resetAndClose}>Cancel</Button>
+              <Button type="button" variant="outline" onClick={resetAndClose} disabled={saving}>
+                Cancel
+              </Button>
               <Button type="submit" disabled={saving}>
                 {saving ? "Saving…" : writeOff && remainder > 0 ? "Record payment & write off" : "Record payment"}
               </Button>
