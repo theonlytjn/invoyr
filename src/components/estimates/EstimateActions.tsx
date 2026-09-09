@@ -50,7 +50,16 @@ export default function EstimateActions({ estimate }: Props) {
   async function handleDelete() {
     if (!confirm("Delete this estimate? This cannot be undone.")) return;
     const res = await fetch(`/api/estimates/${estimate.id}`, { method: "DELETE" });
-    if (res.ok) router.push("/estimates");
+
+    if (res.ok) {
+      router.push("/estimates");
+      return;
+    }
+
+    // The route applies the same eligibility rule as bulk delete and answers 409
+    // with the reason (e.g. a converted estimate). Previously this failed silently.
+    const json = await res.json().catch(() => null);
+    alert(json?.error ?? "Failed to delete estimate");
   }
 
   return (

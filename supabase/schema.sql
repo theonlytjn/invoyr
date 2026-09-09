@@ -151,7 +151,8 @@ create table if not exists public.clients (
   vat_number      text,
   notes           text,
   archived        boolean not null default false,
-  portal_token    text unique default encode(gen_random_bytes(24), 'base64url'),
+  -- `base64url` is not valid for encode() on PostgreSQL 17; this matches the live column.
+  portal_token    text unique default translate(encode(gen_random_bytes(24), 'base64'), '+/=', '-_'),
   created_at      timestamptz not null default now(),
   updated_at      timestamptz not null default now()
 );
@@ -190,7 +191,9 @@ create table if not exists public.invoices (
   notes               text,
   terms               text,
   stripe_payment_link text,
-  public_token        text unique default encode(gen_random_bytes(24), 'base64url'),
+  -- `base64url` is not valid for encode() on PostgreSQL 17; this matches the live column
+  -- exactly (18 bytes, and '+/' only — the live invoices default predates the estimates form).
+  public_token        text unique default translate(encode(gen_random_bytes(18), 'base64'), '+/', '-_'),
   sent_at             timestamptz,
   paid_at             timestamptz,
   voided_at           timestamptz,
@@ -248,6 +251,13 @@ create table if not exists public.recurring_invoices (
   auto_send       boolean not null default false,
   status          public.recurring_status not null default 'active',
   next_run_at     date not null,
+  -- Null until the schedule has generated at least once. Written by the
+  -- recurring cron (src/app/api/cron/recurring/route.ts) from the same
+  -- `YYYY-MM-DD` value it writes to next_run_at in the same statement, hence
+  -- `date` rather than timestamptz. This column exists in production and was
+  -- missing from this file: applying schema.sql to a fresh environment produced
+  -- a table the cron then failed against on every run.
+  last_run_at     date,
   created_at      timestamptz not null default now(),
   updated_at      timestamptz not null default now()
 );
@@ -690,6 +700,12 @@ alter table public.invoices add column if not exists late_fee_applied_at timesta
 -- invoices: total credits applied (from credit notes)
 alter table public.invoices add column if not exists credit_applied numeric(12,2) not null default 0;
 
+-- Invoices and estimates render client billing details from a live join. These hold a
+-- copy written immediately before a client is deleted, so historical documents still
+-- render. Nullable: only populated when a client is removed.
+alter table public.invoices  add column if not exists client_snapshot jsonb;
+alter table public.estimates add column if not exists client_snapshot jsonb;
+
 -- organisations: credit note numbering
 alter table public.organisations add column if not exists credit_note_prefix       text not null default 'CN';
 alter table public.organisations add column if not exists next_credit_note_number  integer not null default 1;
@@ -756,7 +772,9 @@ create table if not exists public.credit_notes (
   amount              numeric(12,2) not null check (amount > 0),
   reason              text,
   status              text not null default 'issued' check (status in ('issued','void')),
-  public_token        text unique default encode(gen_random_bytes(24), 'base64url'),
+  -- `base64url` is not a recognised encoding for encode() on PostgreSQL 17, so the
+  -- previous default threw on every insert. Matches the estimates table's form.
+  public_token        text unique default translate(encode(gen_random_bytes(24), 'base64'), '+/=', '-_'),
   issued_at           timestamptz not null default now(),
   created_at          timestamptz not null default now(),
   updated_at          timestamptz not null default now()
@@ -998,3 +1016,79 @@ comment on column public.organisations.comp_reason is
   'Why this org is comped, e.g. founder, friends_family, partner, beta.';
 comment on column public.organisations.comp_expires_at is
   'When the comp lapses back to billed. Null = never expires.';
+
+-- ----------------------------------------------------------------
+-- 20. STORAGE POLICIES
+-- ----------------------------------------------------------------
+-- These live on storage.objects, which Supabase manages, so they are not created
+-- by the table definitions above. They were previously untracked here — the live
+-- database had them and this file did not, so a fresh environment got a working
+-- app with no storage access control at all. Recorded 2026-09-09.
+--
+-- Both buckets are public for reads via getPublicUrl (that path does not consult
+-- RLS); these policies govern writes and the authenticated reads that RETURNING
+-- requires.
+--
+-- Note the SELECT policy is load-bearing, not cosmetic: PostgreSQL requires a
+-- SELECT policy whenever an INSERT uses RETURNING, which Supabase Storage's upload
+-- does. Dropping it silently breaks every upload with "new row violates row-level
+-- security policy" — which is exactly what happened to logo uploads between the
+-- 2026-07-27 security pass and 2026-09-09.
+
+-- logos: scoped so an org member can only write inside their own org's folder.
+drop policy if exists logos_select on storage.objects;
+drop policy if exists logos_insert on storage.objects;
+drop policy if exists logos_update on storage.objects;
+drop policy if exists logos_delete on storage.objects;
+
+create policy logos_select on storage.objects for select to authenticated
+using (
+  bucket_id = 'logos'
+  and exists (
+    select 1 from public.org_members
+    where org_members.org_id::text = (storage.foldername(storage.objects.name))[1]
+      and org_members.user_id = auth.uid()
+  )
+);
+
+create policy logos_insert on storage.objects for insert to authenticated
+with check (
+  bucket_id = 'logos'
+  and exists (
+    select 1 from public.org_members
+    where org_members.org_id::text = (storage.foldername(storage.objects.name))[1]
+      and org_members.user_id = auth.uid()
+  )
+);
+
+create policy logos_update on storage.objects for update to authenticated
+using (
+  bucket_id = 'logos'
+  and exists (
+    select 1 from public.org_members
+    where org_members.org_id::text = (storage.foldername(storage.objects.name))[1]
+      and org_members.user_id = auth.uid()
+  )
+);
+
+create policy logos_delete on storage.objects for delete to authenticated
+using (
+  bucket_id = 'logos'
+  and exists (
+    select 1 from public.org_members
+    where org_members.org_id::text = (storage.foldername(storage.objects.name))[1]
+      and org_members.user_id = auth.uid()
+  )
+);
+
+-- receipts: the existing live policy, recorded here as-is.
+drop policy if exists "Org members can manage receipts" on storage.objects;
+create policy "Org members can manage receipts" on storage.objects for all
+using (
+  bucket_id = 'receipts'
+  and exists (
+    select 1 from public.org_members
+    where org_members.org_id::text = (storage.foldername(storage.objects.name))[1]
+      and org_members.user_id = auth.uid()
+  )
+);

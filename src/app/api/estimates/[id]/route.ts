@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
 import { computeTotals } from "@/lib/invoice-totals";
+import { partitionEstimates } from "@/lib/bulk-actions";
 import { z } from "zod";
 
 const schema = z.object({
@@ -92,6 +93,27 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
   const org = await requireOrg();
   const supabase = await createClient();
 
+  // The same rule bulk delete enforces, applied through the same pure function
+  // rather than restated here — otherwise the row action would delete a converted
+  // estimate that the bulk bar refuses to touch.
+  const { data: estimate, error: fetchError } = await supabase
+    .from("estimates")
+    .select("id, estimate_number, converted_invoice_id")
+    .eq("id", id)
+    .eq("org_id", org.id)
+    .maybeSingle();
+
+  if (fetchError) return NextResponse.json({ error: fetchError.message }, { status: 500 });
+  if (!estimate) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  const partition = partitionEstimates([estimate]);
+  if (partition.deletable.length === 0) {
+    return NextResponse.json(
+      { error: partition.skips.map((s) => s.reason).join(". ") },
+      { status: 409 }
+    );
+  }
+
   const { error } = await supabase
     .from("estimates")
     .delete()
@@ -99,5 +121,27 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
     .eq("org_id", org.id);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // Capture and log, but do not fail: the estimate is already gone, so a 500 here
+  // would tell the caller the delete failed when it succeeded.
+  const { error: auditError } = await supabase.from("audit_logs").insert({
+    org_id: org.id,
+    user_id: user?.id ?? null,
+    action: "estimate.deleted",
+    entity_type: "estimate",
+    entity_id: id,
+    meta: { estimate_number: estimate.estimate_number },
+  });
+
+  if (auditError) {
+    console.error("audit log write failed", {
+      action: "estimate.deleted",
+      ids: [id],
+      error: auditError.message,
+    });
+  }
+
   return NextResponse.json({ ok: true });
 }

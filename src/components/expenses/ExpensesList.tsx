@@ -10,6 +10,10 @@ import { EXPENSE_CATEGORIES } from "./expense-config";
 import { PlusIcon, PencilIcon, TrashIcon, AttachmentIcon } from "@/components/icons";
 import MetricCard from "@/components/dashboard/MetricCard";
 import BankImportModal from "./BankImportModal";
+import { BulkActionBar, BulkDeleteDialog, RowCheckbox } from "@/components/ui";
+import BulkEditExpensesModal from "./BulkEditExpensesModal";
+import { useRowSelection } from "@/hooks/useRowSelection";
+import { MAX_BULK_IDS, selectAllAddition } from "@/lib/bulk-actions";
 
 const PERIODS = [
   { value: "all",           label: "All time" },
@@ -72,6 +76,16 @@ export default function ExpensesList({ initialExpenses, clients, orgId, orgCurre
   const [customFrom, setCustomFrom] = useState("");
   const [customTo,   setCustomTo]   = useState("");
 
+  const selection = useRowSelection();
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [bulkEditOpen, setBulkEditOpen] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 4000);
+  };
+
   const [periodOpen,   setPeriodOpen]   = useState(false);
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [showDates,    setShowDates]    = useState(false);
@@ -105,6 +119,12 @@ export default function ExpensesList({ initialExpenses, clients, orgId, orgCurre
     const res = await fetch(`/api/expenses?${params}`);
     const body = await res.json();
     setExpenses(body.expenses ?? []);
+    // The selection refers to the rows it was made against. This list replaces its
+    // rows wholesale on every filter change, so a surviving selection would leave
+    // the bar counting ids that are no longer on screen — and `selectedIds`, which
+    // is derived from the visible rows, could then be empty while the bar still
+    // said "3 selected", making Delete POST `{ ids: [] }`.
+    clearSelection();
     setLoading(false);
   }
 
@@ -144,14 +164,60 @@ export default function ExpensesList({ initialExpenses, clients, orgId, orgCurre
   async function handleDelete(id: string) {
     if (!confirm("Delete this expense?")) return;
     setDeletingId(id);
-    await fetch(`/api/expenses/${id}`, { method: "DELETE" });
-    setExpenses((prev) => prev.filter((e) => e.id !== id));
+    const res = await fetch(`/api/expenses/${id}`, { method: "DELETE" });
     setDeletingId(null);
+
+    // The route applies the same eligibility rule as bulk delete and answers 409
+    // with the reason (e.g. a billed expense). Say so rather than dropping the row
+    // from the list as though it had been deleted.
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      showToast(body?.error ?? "Could not delete this expense.");
+      return;
+    }
+
+    setExpenses((prev) => prev.filter((e) => e.id !== id));
   }
 
   const total = expenses.reduce((s, e) => s + Number(e.amount), 0);
   const billableTotal = expenses.filter((e) => e.is_billable && !e.invoiced_at).reduce((s, e) => s + Number(e.amount), 0);
   const topCurrency = expenses[0]?.currency ?? orgCurrency;
+
+  const visibleIds = expenses.map((e) => e.id);
+  const selectedIds = visibleIds.filter((id) => selection.isSelected(id));
+
+  // "Select all" is bounded by the same cap the bulk routes enforce. None of these
+  // lists paginate, so on a large org an uncapped select-all would build a request
+  // the server rejects with a bare "Invalid request" and no explanation. The cap
+  // is measured against the whole selection, not just the visible rows: toggleAll
+  // unions, and a selection survives a change of search, so selecting all under
+  // one search and then all under another would otherwise reach twice the cap.
+  const [selectAllCapped, setSelectAllCapped] = useState(false);
+  const selectableIds = visibleIds.slice(0, MAX_BULK_IDS);
+  const selectionNote =
+    selectAllCapped && selection.count >= MAX_BULK_IDS ? `Maximum ${MAX_BULK_IDS} per action` : undefined;
+
+  function handleSelectAll() {
+    if (selection.allSelected(selectableIds)) {
+      setSelectAllCapped(false);
+      selection.toggleAll(selectableIds);
+      return;
+    }
+
+    const { add, capped } = selectAllAddition(
+      visibleIds,
+      selection.isSelected,
+      selection.count,
+      MAX_BULK_IDS
+    );
+    setSelectAllCapped(capped);
+    selection.toggleAll(add);
+  }
+
+  function clearSelection() {
+    setSelectAllCapped(false);
+    selection.clear();
+  }
 
   return (
     <div className="space-y-5">
@@ -340,77 +406,108 @@ export default function ExpensesList({ initialExpenses, clients, orgId, orgCurre
           </button>
         </div>
       ) : (
-        <div className="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-neutral-100 dark:border-neutral-800">
-                <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500 uppercase tracking-wide">Date</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500 uppercase tracking-wide">Description</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500 uppercase tracking-wide hidden sm:table-cell">Category</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500 uppercase tracking-wide hidden md:table-cell">Client</th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-neutral-500 uppercase tracking-wide">Amount</th>
-                <th className="px-4 py-3 w-10" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800">
-              {expenses.map((expense) => {
-                const clientName = expense.clients
-                  ? (expense.clients.company_name ?? expense.clients.name)
-                  : null;
-                return (
-                  <tr key={expense.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
-                    <td className="px-4 py-3 text-neutral-500 whitespace-nowrap">{formatDate(expense.date)}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-neutral-900 dark:text-neutral-100 truncate max-w-[200px]">{expense.title}</span>
-                        {expense.receipt_url && (
-                          <a href={expense.receipt_url} target="_blank" rel="noopener noreferrer" className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 shrink-0">
-                            <AttachmentIcon size={14} />
-                          </a>
-                        )}
-                        {expense.is_billable && !expense.invoiced_at && (
-                          <span className="shrink-0 text-xs font-medium text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 px-1.5 py-0.5 rounded-full">
-                            Billable
-                          </span>
-                        )}
-                        {expense.invoiced_at && (
-                          <span className="shrink-0 text-xs font-medium text-neutral-500 bg-neutral-100 dark:bg-neutral-800 px-1.5 py-0.5 rounded-full">
-                            Invoiced
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 hidden sm:table-cell">
-                      <ExpenseCategoryBadge category={expense.category} />
-                    </td>
-                    <td className="px-4 py-3 text-neutral-500 hidden md:table-cell">
-                      {clientName ?? <span className="text-neutral-300 dark:text-neutral-600">—</span>}
-                    </td>
-                    <td className="px-4 py-3 text-right font-semibold text-neutral-950 dark:text-neutral-50 whitespace-nowrap">
-                      {formatCurrency(expense.amount, expense.currency)}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-1 justify-end">
-                        <button
-                          onClick={() => { setEditing(expense); setModalOpen(true); }}
-                          className="p-1.5 rounded text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
-                        >
-                          <PencilIcon size={14} />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(expense.id)}
-                          disabled={deletingId === expense.id}
-                          className="p-1.5 rounded text-neutral-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
-                        >
-                          <TrashIcon size={14} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        <div className="space-y-3">
+          <BulkActionBar count={selection.count} onClear={clearSelection} note={selectionNote}>
+            <button
+              onClick={() => setBulkEditOpen(true)}
+              className="px-3 py-1.5 bg-neutral-800 dark:bg-neutral-700 text-white font-medium rounded-lg hover:bg-neutral-700 dark:hover:bg-neutral-600 transition-colors"
+            >
+              Edit
+            </button>
+            <button
+              onClick={() => setBulkDeleteOpen(true)}
+              className="px-3 py-1.5 bg-neutral-800 dark:bg-neutral-700 text-white font-medium rounded-lg hover:bg-red-700 transition-colors"
+            >
+              Delete
+            </button>
+          </BulkActionBar>
+
+          <div className="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 overflow-hidden">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-neutral-100 dark:border-neutral-800">
+                  <th className="py-3 pl-4 pr-2 w-8">
+                    <RowCheckbox
+                      checked={selection.allSelected(selectableIds)}
+                      onChange={handleSelectAll}
+                      label="Select all"
+                    />
+                  </th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500 uppercase tracking-wide">Date</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500 uppercase tracking-wide">Description</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500 uppercase tracking-wide hidden sm:table-cell">Category</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500 uppercase tracking-wide hidden md:table-cell">Client</th>
+                  <th className="text-right px-4 py-3 text-xs font-medium text-neutral-500 uppercase tracking-wide">Amount</th>
+                  <th className="px-4 py-3 w-10" />
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800">
+                {expenses.map((expense) => {
+                  const clientName = expense.clients
+                    ? (expense.clients.company_name ?? expense.clients.name)
+                    : null;
+                  return (
+                    <tr key={expense.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
+                      <td className="py-3 pl-4 pr-2">
+                        <RowCheckbox
+                          checked={selection.isSelected(expense.id)}
+                          onChange={() => selection.toggleOne(expense.id)}
+                          label={`Select ${expense.title}`}
+                        />
+                      </td>
+                      <td className="px-4 py-3 text-neutral-500 whitespace-nowrap">{formatDate(expense.date)}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-neutral-900 dark:text-neutral-100 truncate max-w-[200px]">{expense.title}</span>
+                          {expense.receipt_url && (
+                            <a href={expense.receipt_url} target="_blank" rel="noopener noreferrer" className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 shrink-0">
+                              <AttachmentIcon size={14} />
+                            </a>
+                          )}
+                          {expense.is_billable && !expense.invoiced_at && (
+                            <span className="shrink-0 text-xs font-medium text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 px-1.5 py-0.5 rounded-full">
+                              Billable
+                            </span>
+                          )}
+                          {expense.invoiced_at && (
+                            <span className="shrink-0 text-xs font-medium text-neutral-500 bg-neutral-100 dark:bg-neutral-800 px-1.5 py-0.5 rounded-full">
+                              Invoiced
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 hidden sm:table-cell">
+                        <ExpenseCategoryBadge category={expense.category} />
+                      </td>
+                      <td className="px-4 py-3 text-neutral-500 hidden md:table-cell">
+                        {clientName ?? <span className="text-neutral-300 dark:text-neutral-600">—</span>}
+                      </td>
+                      <td className="px-4 py-3 text-right font-semibold text-neutral-950 dark:text-neutral-50 whitespace-nowrap">
+                        {formatCurrency(expense.amount, expense.currency)}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-1 justify-end">
+                          <button
+                            onClick={() => { setEditing(expense); setModalOpen(true); }}
+                            className="p-1.5 rounded text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
+                          >
+                            <PencilIcon size={14} />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(expense.id)}
+                            disabled={deletingId === expense.id}
+                            className="p-1.5 rounded text-neutral-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
+                          >
+                            <TrashIcon size={14} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
@@ -435,6 +532,56 @@ export default function ExpensesList({ initialExpenses, clients, orgId, orgCurre
           >
             <PlusIcon size={22} />
           </button>
+        </div>
+      )}
+
+      <BulkEditExpensesModal
+        open={bulkEditOpen}
+        ids={selectedIds}
+        clients={clients}
+        onCancel={() => setBulkEditOpen(false)}
+        onSaved={async (result) => {
+          setBulkEditOpen(false);
+          clearSelection();
+          // This list owns its rows in state, so refetch rather than router.refresh().
+          // Every parameter of fetchExpenses defaults to the current filter state,
+          // so calling it with no arguments preserves the active period and category.
+          await fetchExpenses();
+          const succeeded = result.succeeded ?? result.deleted;
+          showToast(
+            `Updated ${succeeded} expense${succeeded !== 1 ? "s" : ""}` +
+              (result.skipped > 0 ? `, ${result.skipped} skipped` : "") +
+              "."
+          );
+        }}
+      />
+
+      <BulkDeleteDialog
+        open={bulkDeleteOpen}
+        endpoint="/api/expenses/bulk/delete"
+        ids={selectedIds}
+        noun="expense"
+        nounPlural="expenses"
+        onCancel={() => setBulkDeleteOpen(false)}
+        onDeleted={async (result) => {
+          setBulkDeleteOpen(false);
+          clearSelection();
+          // This list owns its rows in state, so refetch rather than router.refresh().
+          // Every parameter of fetchExpenses defaults to the current filter state,
+          // so calling it with no arguments preserves the active period and category.
+          await fetchExpenses();
+          const succeeded = result.succeeded ?? result.deleted;
+          showToast(
+            `Deleted ${succeeded} expense${succeeded !== 1 ? "s" : ""}` +
+              (result.skipped > 0 ? `, ${result.skipped} skipped` : "") +
+              "."
+          );
+        }}
+      />
+
+      {toast && (
+        <div className="fixed bottom-24 lg:bottom-6 left-1/2 -translate-x-1/2 px-4 py-2.5 bg-neutral-950 text-white text-sm font-medium rounded-xl shadow-lg z-50 pointer-events-none">
+          {toast}
         </div>
       )}
     </div>

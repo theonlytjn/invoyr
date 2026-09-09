@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { bulkIdsSchema } from "@/lib/bulk-request";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
 import { orgHasFeature } from "@/lib/billing";
 
-const schema = z.object({ ids: z.array(z.string().uuid()).min(1).max(50) });
+const schema = z.object({ ids: bulkIdsSchema() });
 
 const VOIDABLE = ["draft", "issued", "sent"];
 

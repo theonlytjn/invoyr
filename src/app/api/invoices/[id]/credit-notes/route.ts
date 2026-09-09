@@ -5,6 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 import { sendTransactionalEmail } from "@/lib/resend/send-transactional-email";
 import { CreditNoteEmail } from "@/emails/transactional/CreditNoteEmail";
 import { formatCurrency } from "@/lib/utils";
+import { createCreditNote } from "@/lib/credit-notes";
+import { outstandingBalance } from "@/lib/bulk-actions";
 
 const schema = z.object({
   amount: z.number().positive(),
@@ -68,7 +70,15 @@ export async function POST(
 
   const lateFee = (invoice as { late_fee_amount?: number }).late_fee_amount ?? 0;
   const creditAlready = (invoice as { credit_applied?: number }).credit_applied ?? 0;
-  const remainingBalance = invoice.total + lateFee - invoice.amount_paid - creditAlready;
+  // The single source of truth for what this invoice still owes — never recomputed
+  // inline. See the docstring on `outstandingBalance` for the bug a second copy of
+  // this formula previously caused.
+  const remainingBalance = outstandingBalance({
+    total: invoice.total,
+    amount_paid: invoice.amount_paid,
+    late_fee_amount: lateFee,
+    credit_applied: creditAlready,
+  });
 
   if (amount > remainingBalance + 0.001) {
     return NextResponse.json(
@@ -77,58 +87,36 @@ export async function POST(
     );
   }
 
-  const prefix = (org as { credit_note_prefix?: string })?.credit_note_prefix ?? "CN";
-  const nextNum = (org as { next_credit_note_number?: number })?.next_credit_note_number ?? 1;
-  const creditNoteNumber = `${prefix}-${String(nextNum).padStart(4, "0")}`;
-
-  const { data: creditNote, error: insertError } = await supabase
-    .from("credit_notes")
-    .insert({
+  const { creditNote, error: creditNoteError } = await createCreditNote({
+    supabase,
+    org: {
+      credit_note_prefix: (org as { credit_note_prefix?: string })?.credit_note_prefix ?? "CN",
+      next_credit_note_number: (org as { next_credit_note_number?: number })?.next_credit_note_number ?? 1,
+    },
+    invoice: {
+      id,
       org_id: invoice.org_id,
-      invoice_id: id,
       client_id: invoice.client_id ?? null,
-      credit_note_number: creditNoteNumber,
-      amount,
-      reason: reason ?? null,
-      status: "issued",
-    })
-    .select()
-    .single();
-
-  if (insertError || !creditNote) {
-    return NextResponse.json({ error: "Failed to create credit note" }, { status: 500 });
-  }
-
-  await supabase
-    .from("organisations")
-    .update({ next_credit_note_number: nextNum + 1 })
-    .eq("id", invoice.org_id);
-
-  const newCreditApplied = creditAlready + amount;
-  const totalOwed = invoice.total + lateFee;
-  let newStatus = invoice.status;
-  let paidAt = invoice.paid_at ?? null;
-
-  if (invoice.amount_paid + newCreditApplied >= totalOwed - 0.001) {
-    newStatus = "paid";
-    paidAt = paidAt ?? new Date().toISOString();
-  } else if (invoice.amount_paid + newCreditApplied > 0) {
-    newStatus = "partial";
-  }
-
-  await supabase
-    .from("invoices")
-    .update({ credit_applied: newCreditApplied, status: newStatus, paid_at: paidAt })
-    .eq("id", id);
-
-  await supabase.from("audit_logs").insert({
-    org_id: invoice.org_id,
-    user_id: user.id,
-    action: "invoice.credit_note_issued",
-    entity_type: "invoice",
-    entity_id: id,
-    meta: { credit_note_number: creditNoteNumber, amount, reason: reason ?? null },
+      total: invoice.total,
+      amount_paid: invoice.amount_paid,
+      status: invoice.status,
+      paid_at: invoice.paid_at ?? null,
+      late_fee_amount: lateFee,
+      credit_applied: creditAlready,
+    },
+    amount,
+    reason,
+    userId: user.id,
   });
+
+  if (creditNoteError || !creditNote) {
+    return NextResponse.json(
+      { error: creditNoteError ?? "Failed to create credit note" },
+      { status: 500 }
+    );
+  }
+
+  const creditNoteNumber = creditNote.credit_note_number;
 
   if (sendEmail && client?.email) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.invoyr.io";

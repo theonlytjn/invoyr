@@ -21,7 +21,7 @@ const MATRIX: Group[] = [
       { label: "Credit notes & late fees", starter: true, business: true, pro: true },
       { label: "4 invoice templates", starter: true, business: true, pro: true },
       { label: "Recurring invoices", starter: false, business: true, pro: true },
-      { label: "Bulk invoice actions", starter: false, business: true, pro: true },
+      { label: "Bulk send, void, reminders & PDF export", starter: false, business: true, pro: true },
     ],
   },
   {

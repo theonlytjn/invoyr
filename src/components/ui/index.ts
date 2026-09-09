@@ -1,5 +1,7 @@
 export * from './avatar';
 export * from './badge';
+export * from './BulkActionBar';
+export * from './BulkDeleteDialog';
 export * from './button';
 export * from './card';
 export * from './dialog';
@@ -7,6 +9,7 @@ export * from './dropdown-menu';
 export * from './input';
 export * from './label';
 export * from './select';
+export * from './RowCheckbox';
 export * from './separator';
 export * from './skeleton';
 export * from './table';
