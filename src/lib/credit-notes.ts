@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { outstandingBalance } from "@/lib/bulk-actions";
 import type { CreditNote, Invoice, Organisation } from "@/lib/supabase/types";
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
@@ -47,8 +48,10 @@ export async function createCreditNote({
   reason,
   userId,
 }: CreateCreditNoteParams): Promise<CreateCreditNoteResult> {
-  const lateFee = invoice.late_fee_amount ?? 0;
-  const creditAlready = invoice.credit_applied ?? 0;
+  // Coerced, not just defaulted: Postgres `numeric` columns can arrive as
+  // strings through PostgREST, and `"200" + 350` is `"200350"`, not 550.
+  const lateFee = Number(invoice.late_fee_amount ?? 0);
+  const creditAlready = Number(invoice.credit_applied ?? 0);
 
   const prefix = org.credit_note_prefix ?? "CN";
   const nextNum = org.next_credit_note_number ?? 1;
@@ -97,14 +100,24 @@ export async function createCreditNote({
   }
 
   const newCreditApplied = creditAlready + amount;
-  const totalOwed = invoice.total + lateFee;
+  // The canonical balance helper, not a private re-derivation of it. This used to
+  // compute `total + lateFee` and compare `amount_paid + newCreditApplied` against
+  // it inline — arithmetically the same thing, but a second live copy of the one
+  // formula that has already caused invoices to record the wrong amounts once. The
+  // remainder being within a tenth of a penny of zero is what "paid" means.
+  const remainingAfterCredit = outstandingBalance({
+    total: invoice.total,
+    late_fee_amount: lateFee,
+    amount_paid: invoice.amount_paid,
+    credit_applied: newCreditApplied,
+  });
   let newStatus = invoice.status;
   let paidAt = invoice.paid_at ?? null;
 
-  if (invoice.amount_paid + newCreditApplied >= totalOwed - 0.001) {
+  if (remainingAfterCredit <= 0.001) {
     newStatus = "paid";
     paidAt = paidAt ?? new Date().toISOString();
-  } else if (invoice.amount_paid + newCreditApplied > 0) {
+  } else if (Number(invoice.amount_paid) + newCreditApplied > 0) {
     newStatus = "partial";
   }
 
