@@ -18,6 +18,14 @@ export interface CreateCreditNoteParams {
   amount: number;
   reason?: string | null;
   userId: string;
+  /**
+   * The date to stamp on the invoice if this credit note is what settles it, for
+   * callers that know a better answer than "now" — the record-payment route
+   * passes the user's chosen payment date, so a back-dated part payment written
+   * off doesn't leave the invoice's `paid_at` disagreeing with its payment row.
+   * Ignored when the invoice already carries a `paid_at`. Defaults to now.
+   */
+  settledAt?: string | null;
 }
 
 export type CreateCreditNoteResult =
@@ -47,6 +55,7 @@ export async function createCreditNote({
   amount,
   reason,
   userId,
+  settledAt,
 }: CreateCreditNoteParams): Promise<CreateCreditNoteResult> {
   // Coerced, not just defaulted: Postgres `numeric` columns can arrive as
   // strings through PostgREST, and `"200" + 350` is `"200350"`, not 550.
@@ -116,7 +125,7 @@ export async function createCreditNote({
 
   if (remainingAfterCredit <= 0.001) {
     newStatus = "paid";
-    paidAt = paidAt ?? new Date().toISOString();
+    paidAt = paidAt ?? settledAt ?? new Date().toISOString();
   } else if (Number(invoice.amount_paid) + newCreditApplied > 0) {
     newStatus = "partial";
   }

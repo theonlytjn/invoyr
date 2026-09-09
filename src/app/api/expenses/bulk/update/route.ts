@@ -4,6 +4,18 @@ import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
 import { bulkIdsSchema } from "@/lib/bulk-request";
 import { buildExpenseEditPatch, partitionExpenseEdit, summarise } from "@/lib/bulk-actions";
+import { EXPENSE_CATEGORIES } from "@/components/expenses/expense-config";
+import type { ExpenseCategory } from "@/lib/supabase/types";
+
+// Derived, not retyped. The categories are already defined three times — the DB
+// check constraint, the `ExpenseCategory` union and `EXPENSE_CATEGORIES` — and a
+// fourth hand-written copy here is the one that would silently start rejecting a
+// category the picker offers the moment someone adds one. The cast to a non-empty
+// tuple is what `z.enum` needs; the array is never empty.
+const CATEGORY_VALUES = EXPENSE_CATEGORIES.map((c) => c.value) as [
+  ExpenseCategory,
+  ...ExpenseCategory[],
+];
 
 const schema = z
   .object({
@@ -11,9 +23,7 @@ const schema = z
     dryRun: z.boolean().optional().default(false),
     // Absent = leave unchanged. No .default() anywhere here: a default would
     // erase the difference between "not sent" and "sent as null".
-    category: z
-      .enum(["travel", "software", "office", "meals", "marketing", "professional", "equipment", "other"])
-      .optional(),
+    category: z.enum(CATEGORY_VALUES).optional(),
     client_id: z.string().uuid().nullable().optional(),
     is_billable: z.boolean().optional(),
   })

@@ -93,8 +93,10 @@ export default async function InvoiceDetailPage({ params }: Props) {
   const items: InvoiceItem[] = invoice.invoice_items ?? [];
   // Live join wins when the client still exists; falls back to the snapshot
   // taken at delete-time otherwise. `Client` carries `id` and a few other
-  // columns ClientSnapshot deliberately omits, but nothing on this page reads
-  // them from `client` itself — see task-5-report.md for the audit.
+  // columns ClientSnapshot deliberately omits; this page was read through and
+  // reads none of them from `client` itself (the "View client" link uses
+  // `invoice.client_id`), so the cast is sound today — but it is a double cast
+  // through `unknown`, so it will not stop a future edit that starts reading one.
   const client = resolveDocumentClient(invoice) as unknown as Client | null;
 
   const totals = computeTotals(

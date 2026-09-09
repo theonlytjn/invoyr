@@ -93,8 +93,10 @@ export async function renderInvoicePdf(
   const items: InvoiceItem[] = Array.isArray(invoice.invoice_items) ? invoice.invoice_items : [];
   // Live join wins when the client still exists; falls back to the snapshot
   // taken at delete-time otherwise. `Client` carries `id` and a few other
-  // columns ClientSnapshot deliberately omits, but no template reads them —
-  // see task-5-report.md for the audit.
+  // columns ClientSnapshot deliberately omits; all four PDF templates were read
+  // field by field and none of them touches one, so the cast is sound today —
+  // but it is a double cast through `unknown`, so it will not stop a future
+  // template edit that starts reading `client.id`.
   const client = resolveDocumentClient(invoice) as unknown as Client | null;
 
   const totals = computeTotals(

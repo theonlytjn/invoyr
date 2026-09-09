@@ -209,6 +209,11 @@ export async function POST(
       amount: remainderAfterPayment,
       reason: "Balance written off",
       userId: user.id,
+      // The invoice reaches "paid" here, not on the update above — `newPaidAt` is
+      // null on the partial path, so without this the helper would fall through to
+      // `new Date()` and stamp a back-dated part payment as settled today, leaving
+      // the invoice disagreeing with its own payment row.
+      settledAt: paidAt,
     });
 
     if (creditNoteError || !creditNote) {
