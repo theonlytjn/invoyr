@@ -7,7 +7,7 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import InvoiceStatusBadge from "./InvoiceStatusBadge";
 import { Input } from "@/components/ui/input";
 import { useRowSelection } from "@/hooks/useRowSelection";
-import { MAX_BULK_IDS, MAX_BULK_PDF_IDS, selectAllAddition } from "@/lib/bulk-actions";
+import { isVoidable, MAX_BULK_IDS, MAX_BULK_PDF_IDS, selectAllAddition } from "@/lib/bulk-actions";
 import { BulkActionBar, BulkDeleteDialog, RowCheckbox } from "@/components/ui";
 import {
   DropdownMenu,
@@ -24,7 +24,6 @@ interface Props {
 }
 
 const SENDABLE = new Set(["draft", "issued", "sent"]);
-const VOIDABLE = new Set(["draft", "issued", "sent"]);
 
 type BulkAction = "delete" | "mark-paid" | "remind" | "duplicate";
 
@@ -121,7 +120,7 @@ export default function InvoicesTable({ invoices, canBulk = false }: Props) {
   const selectedInvoices = invoices.filter((i) => selection.isSelected(i.id));
   const selectedIds = selectedInvoices.map((i) => i.id);
   const canSend = selectedInvoices.some((i) => SENDABLE.has(i.status));
-  const canVoid = selectedInvoices.some((i) => VOIDABLE.has(i.status));
+  const canVoid = selectedInvoices.some((i) => isVoidable(i.status));
 
   // "Select all" is bounded by the same cap the bulk routes enforce. None of these
   // lists paginate, so on a large org an uncapped select-all would build a request
@@ -168,9 +167,9 @@ export default function InvoicesTable({ invoices, canBulk = false }: Props) {
   }
 
   async function handleBulkVoid() {
-    if (!confirm(`Void ${selectedInvoices.filter((i) => VOIDABLE.has(i.status)).length} invoice(s)? This cannot be undone.`)) return;
+    if (!confirm(`Void ${selectedInvoices.filter((i) => isVoidable(i.status)).length} invoice(s)? This cannot be undone.`)) return;
     setBulkState("voiding");
-    const ids = selectedInvoices.filter((i) => VOIDABLE.has(i.status)).map((i) => i.id);
+    const ids = selectedInvoices.filter((i) => isVoidable(i.status)).map((i) => i.id);
     const res = await fetch("/api/invoices/bulk/void", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ids }) });
     const json = await res.json();
     setBulkState("idle");

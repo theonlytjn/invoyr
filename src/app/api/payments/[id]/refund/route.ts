@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
+import { outstandingBalance } from "@/lib/bulk-actions";
 
 const schema = z.object({
   amount: z.number().positive(),
@@ -61,14 +62,24 @@ export async function POST(
 
   if (refundError) return NextResponse.json({ error: refundError.message }, { status: 500 });
 
-  // Recalculate invoice amount_paid and status
-  const newAmountPaid = Math.max(0, invoice.amount_paid - amount);
-  const lateFee = (invoice as { late_fee_amount?: number }).late_fee_amount ?? 0;
-  const creditApplied = (invoice as { credit_applied?: number }).credit_applied ?? 0;
-  const totalOwed = invoice.total + lateFee - creditApplied;
+  // Recalculate invoice amount_paid and status.
+  //
+  // This used to compute the threshold inline as
+  //   newAmountPaid + creditApplied >= (total + lateFee - creditApplied)
+  // which counts the credit note twice, so the bar for "paid" sat one credit too
+  // low. A £1,000 invoice with a £500 credit and £500 paid, refunded by £100, has
+  // £100 genuinely outstanding — the old form marked it paid. Harmless when no
+  // credit note exists, which is why it went unnoticed.
+  //
+  // outstandingBalance is the canonical formula used by every other payment path:
+  // total + late_fee_amount - amount_paid - credit_applied, with each operand
+  // coerced, since Postgres numerics can arrive as strings.
+  const newAmountPaid = Math.max(0, Number(invoice.amount_paid) - amount);
+  const creditApplied = Number((invoice as { credit_applied?: number }).credit_applied ?? 0);
+  const remaining = outstandingBalance({ ...invoice, amount_paid: newAmountPaid });
 
   let newStatus = invoice.status;
-  if (newAmountPaid + creditApplied >= totalOwed - 0.001) {
+  if (remaining <= 0.001) {
     newStatus = "paid";
   } else if (newAmountPaid + creditApplied > 0) {
     newStatus = "partial";

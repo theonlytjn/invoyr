@@ -4,10 +4,10 @@ import { bulkIdsSchema } from "@/lib/bulk-request";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
 import { orgHasFeature } from "@/lib/billing";
+import { isVoidable } from "@/lib/bulk-actions";
 
 const schema = z.object({ ids: bulkIdsSchema() });
 
-const VOIDABLE = ["draft", "issued", "sent"];
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     .in("id", ids)
     .eq("org_id", org.id);
 
-  const voidable = (invoices ?? []).filter((i) => VOIDABLE.includes(i.status));
+  const voidable = (invoices ?? []).filter((i) => isVoidable(i.status));
   if (!voidable.length) return NextResponse.json({ voided: 0, skipped: ids.length });
 
   const voidIds = voidable.map((i) => i.id);

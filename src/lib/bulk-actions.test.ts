@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
+  isVoidable,
   partitionInvoices,
   partitionEstimates,
   partitionExpenses,
@@ -613,5 +614,26 @@ describe("partitionRemind", () => {
     expect(partitionRemind(rows).skips).toEqual([
       { count: 2, reason: "2 invoices have clients with no email address" },
     ]);
+  });
+});
+
+describe("isVoidable", () => {
+  it("accepts every status an unpaid invoice can hold", () => {
+    expect(isVoidable("draft")).toBe(true);
+    expect(isVoidable("issued")).toBe(true);
+    expect(isVoidable("sent")).toBe(true);
+  });
+
+  it("accepts overdue — an unpaid sent invoice past its date is still cancellable", () => {
+    expect(isVoidable("overdue")).toBe(true);
+  });
+
+  it("refuses paid and already-voided invoices", () => {
+    expect(isVoidable("paid")).toBe(false);
+    expect(isVoidable("void")).toBe(false);
+  });
+
+  it("refuses partial — money has been received against it", () => {
+    expect(isVoidable("partial")).toBe(false);
   });
 });

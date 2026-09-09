@@ -116,6 +116,25 @@ export type ClientRow = {
 
 const DELETABLE_INVOICE_STATUSES = new Set(["draft", "void"]);
 
+/**
+ * Which invoices can be voided.
+ *
+ * This rule had three separate definitions that disagreed: the bulk route and the
+ * invoices list both excluded `overdue`, while the single-invoice route only blocked
+ * `paid` and `void` — so the same invoice could be voided from its own page but not
+ * from the bulk bar. `overdue` is included here because an overdue invoice is simply
+ * an unpaid sent invoice past its date; there is no reason it should be less
+ * cancellable than the sent invoice it was a day earlier. Excluding it also created a
+ * dead end: an invoice refunded after its due date could be neither voided nor deleted.
+ *
+ * All three call sites now read this.
+ */
+export const VOIDABLE_INVOICE_STATUSES = new Set(["draft", "issued", "sent", "overdue"]);
+
+export function isVoidable(status: string): boolean {
+  return VOIDABLE_INVOICE_STATUSES.has(status);
+}
+
 function skip(count: number, singular: string, plural: string): SkipReason[] {
   if (count === 0) return [];
   return [{ count, reason: count === 1 ? `1 ${singular}` : `${count} ${plural}` }];

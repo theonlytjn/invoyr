@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrgPermission } from "@/lib/permissions";
 import { dispatchWebhook } from "@/lib/webhooks/dispatch";
+import { isVoidable } from "@/lib/bulk-actions";
 
 export async function POST(
   _req: NextRequest,
@@ -23,8 +24,15 @@ export async function POST(
 
   const permErr = await requireOrgPermission(invoice.org_id, "void_invoice");
   if (permErr) return NextResponse.json({ error: permErr.error }, { status: permErr.status });
-  if (["paid", "void"].includes(invoice.status)) {
-    return NextResponse.json({ error: "Cannot void a paid or already voided invoice" }, { status: 400 });
+  // Reads the shared rule rather than its own inverse list. These previously
+  // disagreed: this route allowed voiding an overdue invoice while the bulk route
+  // refused it, so the same invoice behaved differently depending on where you
+  // clicked.
+  if (!isVoidable(invoice.status)) {
+    return NextResponse.json(
+      { error: "Only unpaid invoices can be voided. Refund the payment first if it was recorded in error." },
+      { status: 400 }
+    );
   }
 
   await supabase
