@@ -48,12 +48,14 @@ export async function POST(req: NextRequest) {
   // counted here and ended below.
   const invoiceCounts = new Map<string, number>();
   const estimateCounts = new Map<string, number>();
+  const expenseCounts = new Map<string, number>();
   const recurringCounts = new Map<string, number>();
 
   if (candidateIds.length > 0) {
-    const [invoices, estimates, recurring] = await Promise.all([
+    const [invoices, estimates, expenses, recurring] = await Promise.all([
       supabase.from("invoices").select("client_id").in("client_id", candidateIds),
       supabase.from("estimates").select("client_id").in("client_id", candidateIds),
+      supabase.from("expenses").select("client_id").in("client_id", candidateIds).eq("org_id", org.id),
       supabase
         .from("recurring_invoices")
         .select("client_id")
@@ -70,7 +72,7 @@ export async function POST(req: NextRequest) {
     // `.data` would come back null alongside a populated `.error`, and `?? []`
     // would silently treat that as zero links, understating the confirmation
     // copy. Abort instead; a transient error should cost the user a retry.
-    for (const { error } of [invoices, estimates, recurring]) {
+    for (const { error } of [invoices, estimates, expenses, recurring]) {
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
@@ -79,6 +81,9 @@ export async function POST(req: NextRequest) {
     }
     for (const row of estimates.data ?? []) {
       if (row.client_id) estimateCounts.set(row.client_id, (estimateCounts.get(row.client_id) ?? 0) + 1);
+    }
+    for (const row of expenses.data ?? []) {
+      if (row.client_id) expenseCounts.set(row.client_id, (expenseCounts.get(row.client_id) ?? 0) + 1);
     }
     for (const row of recurring.data ?? []) {
       if (row.client_id) recurringCounts.set(row.client_id, (recurringCounts.get(row.client_id) ?? 0) + 1);
@@ -90,6 +95,7 @@ export async function POST(req: NextRequest) {
     name: c.name,
     linkedInvoices: invoiceCounts.get(c.id) ?? 0,
     linkedEstimates: estimateCounts.get(c.id) ?? 0,
+    linkedExpenses: expenseCounts.get(c.id) ?? 0,
     linkedRecurring: recurringCounts.get(c.id) ?? 0,
   }));
 
@@ -170,6 +176,7 @@ export async function POST(req: NextRequest) {
         bulk: true,
         linkedInvoices: client.linkedInvoices,
         linkedEstimates: client.linkedEstimates,
+        linkedExpenses: client.linkedExpenses,
         endedRecurring: client.linkedRecurring,
       },
     }))

@@ -65,9 +65,10 @@ export default function ClientsTable({ clients, showArchived }: Props) {
       (acc, c) => ({
         invoices: acc.invoices + c.linkedInvoices,
         estimates: acc.estimates + c.linkedEstimates,
+        expenses: acc.expenses + c.linkedExpenses,
         recurring: acc.recurring + c.linkedRecurring,
       }),
-      { invoices: 0, estimates: 0, recurring: 0 }
+      { invoices: 0, estimates: 0, expenses: 0, recurring: 0 }
     );
 
     const sentences: string[] = [];
@@ -82,6 +83,17 @@ export default function ClientsTable({ clients, showArchived }: Props) {
       const docWord = totals.invoices + totals.estimates === 1 ? "document" : "documents";
       sentences.push(
         `${linkedText} will keep the client's billing details, but the ${docWord} will no longer be linked to a client record.`
+      );
+    }
+
+    // Expenses carry no billing details, so they need no snapshot — but they do
+    // lose their client attribution, which is what per-client profitability is
+    // reported from. Silence here would under-report what the delete costs.
+    if (totals.expenses > 0) {
+      sentences.push(
+        `${pluralize(totals.expenses, "expense", "expenses")} will lose ${
+          totals.expenses === 1 ? "its" : "their"
+        } client attribution.`
       );
     }
 

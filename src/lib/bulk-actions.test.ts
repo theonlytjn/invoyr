@@ -250,7 +250,7 @@ describe("partitionExpenseEdit", () => {
 
 describe("partitionClients", () => {
   it("deletes clients with no linked records", () => {
-    const rows = [{ id: "a", name: "Acme", linkedInvoices: 0, linkedEstimates: 0, linkedRecurring: 0 }];
+    const rows = [{ id: "a", name: "Acme", linkedInvoices: 0, linkedEstimates: 0, linkedExpenses: 0, linkedRecurring: 0 }];
     const result = partitionClients(rows);
     expect(result.deletable.map((r) => r.id)).toEqual(["a"]);
     expect(result.skips).toEqual([]);
@@ -258,8 +258,8 @@ describe("partitionClients", () => {
 
   it("also deletes clients that have linked records, since their details are snapshotted", () => {
     const rows = [
-      { id: "a", name: "Acme", linkedInvoices: 0, linkedEstimates: 0, linkedRecurring: 0 },
-      { id: "b", name: "Globex", linkedInvoices: 12, linkedEstimates: 3, linkedRecurring: 0 },
+      { id: "a", name: "Acme", linkedInvoices: 0, linkedEstimates: 0, linkedExpenses: 0, linkedRecurring: 0 },
+      { id: "b", name: "Globex", linkedInvoices: 12, linkedEstimates: 3, linkedExpenses: 0, linkedRecurring: 0 },
     ];
     const result = partitionClients(rows);
     expect(result.deletable.map((r) => r.id)).toEqual(["a", "b"]);
@@ -267,7 +267,7 @@ describe("partitionClients", () => {
   });
 
   it("deletes clients with active recurring schedules — the route ends them rather than blocking", () => {
-    const rows = [{ id: "b", name: "Globex", linkedInvoices: 0, linkedEstimates: 0, linkedRecurring: 2 }];
+    const rows = [{ id: "b", name: "Globex", linkedInvoices: 0, linkedEstimates: 0, linkedExpenses: 0, linkedRecurring: 2 }];
     const result = partitionClients(rows);
     expect(result.deletable.map((r) => r.id)).toEqual(["b"]);
     expect(result.skips).toEqual([]);

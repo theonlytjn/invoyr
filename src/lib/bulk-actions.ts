@@ -98,6 +98,13 @@ export type ClientRow = {
   /** How many estimates reference this client. */
   linkedEstimates: number;
   /**
+   * How many expenses reference this client. These render no billing details so
+   * they need no snapshot, but their `client_id` nulls on delete and with it the
+   * per-client attribution that profitability reporting is built on — so the
+   * user is told the number before it happens.
+   */
+  linkedExpenses: number;
+  /**
    * How many *active* recurring invoice schedules reference this client. Unlike
    * invoices and estimates, these are not documents that can carry a snapshot —
    * a schedule with no client generates a clientless draft every period, forever.
