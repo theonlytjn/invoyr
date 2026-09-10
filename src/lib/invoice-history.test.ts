@@ -22,6 +22,32 @@ describe("labelForAction", () => {
     expect(labelForAction("payment.received")).toBe("Payment received");
   });
 
+  it("distinguishes a client's own payment from the owner asserting one", () => {
+    // INV-0009 was paid by a client via PayPal and read "Marked as paid", which is
+    // what a manual tick looks like. The timeline is used to evidence disputes.
+    expect(labelForAction("invoice.paid", { paypal_capture: "3UA19765YP699862A" })).toBe(
+      "Paid by client via PayPal"
+    );
+    expect(labelForAction("invoice.paid", { paypal_order: "0PD59430FU850870F" })).toBe(
+      "Paid by client via PayPal"
+    );
+    expect(labelForAction("invoice.paid", { stripe_session: "cs_test_1" })).toBe(
+      "Paid by client by card"
+    );
+  });
+
+  it("still says marked as paid for a manual mark-paid", () => {
+    expect(labelForAction("invoice.paid", { bulk: true, method: "bank_transfer" })).toBe(
+      "Marked as paid"
+    );
+    expect(labelForAction("invoice.paid")).toBe("Marked as paid");
+    expect(labelForAction("invoice.paid", null)).toBe("Marked as paid");
+  });
+
+  it("does not treat an array-shaped meta as an object", () => {
+    expect(labelForAction("invoice.paid", ["paypal_capture"])).toBe("Marked as paid");
+  });
+
   it("makes a lost payment record impossible to skim past", () => {
     expect(labelForAction("payment.record_failed")).toBe(
       "Payment received but NOT recorded — needs attention"
@@ -136,6 +162,28 @@ describe("buildInvoiceHistory", () => {
 
     expect(entries).toHaveLength(1);
     expect(entries[0]).toMatchObject({ label: "Duplicated", kind: "internal" });
+  });
+
+  it("labels a real PayPal payment correctly end to end", () => {
+    // The exact rows behind INV-0009.
+    const [entry] = buildInvoiceHistory(
+      [
+        {
+          action: "invoice.paid",
+          created_at: "2026-09-10T20:19:35.046Z",
+          meta: {
+            amount: 350,
+            paypal_order: "0PD59430FU850870F",
+            paypal_capture: "3UA19765YP699862A",
+          },
+        },
+      ],
+      [],
+      { formatAmount: (n) => `£${n.toFixed(2)}` }
+    );
+
+    expect(entry.label).toBe("Paid by client via PayPal");
+    expect(entry.detail).toBe("£350.00");
   });
 
   it("carries the amount and method through on a payment", () => {

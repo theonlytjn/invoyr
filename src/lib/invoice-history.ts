@@ -91,7 +91,27 @@ export function humaniseAction(action: string): string {
   return words ? words.charAt(0).toUpperCase() + words.slice(1) : action;
 }
 
-export function labelForAction(action: string): string {
+/**
+ * `invoice.paid` is written by four different paths — the PayPal capture route, the
+ * PayPal webhook, the Stripe webhook and a manual mark-as-paid — so a single label has
+ * to describe all of them, and "Marked as paid" describes only the last. A client who
+ * paid by PayPal appeared in the history as though the owner had ticked a box.
+ *
+ * That matters beyond wording: this timeline is what gets used to evidence a payment
+ * dispute, and it should distinguish "they paid us" from "we asserted they paid us".
+ * Each writer's meta already identifies it; nothing new needs recording.
+ */
+function labelForPaid(meta: unknown): string {
+  if (meta && typeof meta === "object" && !Array.isArray(meta)) {
+    const m = meta as Record<string, unknown>;
+    if (m.paypal_capture || m.paypal_order) return "Paid by client via PayPal";
+    if (m.stripe_session || m.stripe_payment_intent) return "Paid by client by card";
+  }
+  return "Marked as paid";
+}
+
+export function labelForAction(action: string, meta?: unknown): string {
+  if (action === "invoice.paid") return labelForPaid(meta);
   return ACTION_LABELS[action] ?? humaniseAction(action);
 }
 
@@ -182,7 +202,7 @@ export function buildInvoiceHistory(
 
     entries.push({
       at: row.created_at,
-      label: labelForAction(row.action),
+      label: labelForAction(row.action, row.meta),
       detail: amountDetail(row.meta, options.formatAmount),
       kind: isInternal ? "internal" : "client",
     });
