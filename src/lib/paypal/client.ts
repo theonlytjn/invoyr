@@ -3,10 +3,49 @@ const BASE_URL =
     ? "https://api-m.paypal.com"
     : "https://api-m.sandbox.paypal.com";
 
+/**
+ * Explains an OAuth rejection using PayPal's own response.
+ *
+ * The original code threw a bare "PayPal auth failed", discarding the body — which is
+ * the only part that says *why*. That turned a one-line misconfiguration into a blind
+ * hunt: the logs could not distinguish rejected credentials from a mismatched
+ * environment, and the two have completely different fixes.
+ *
+ * The secret is never included — only whether it is set. The client ID is public (it
+ * ships to the browser in the SDK URL), but only its leading characters are logged,
+ * which is enough to tell two credential pairs apart at a glance.
+ */
+export function describeAuthFailure(
+  status: number,
+  data: unknown,
+  env: { baseUrl: string; clientId?: string; hasSecret: boolean }
+): string {
+  const body = (data && typeof data === "object" ? data : {}) as Record<string, unknown>;
+  const reason = [body.error, body.error_description]
+    .filter((v): v is string => typeof v === "string" && v.length > 0)
+    .join(": ");
+
+  // invalid_client is overwhelmingly the cause, and its two triggers look identical
+  // from the outside, so name both rather than leaving the reader to guess.
+  const hint =
+    body.error === "invalid_client"
+      ? " — PayPal rejected the credentials. The ID and secret must be a matching pair from the SAME app, and from the same environment as the endpoint below."
+      : "";
+
+  const clientId = env.clientId
+    ? `${env.clientId.slice(0, 8)}…(${env.clientId.length} chars)`
+    : "MISSING";
+
+  return (
+    `PayPal auth failed (HTTP ${status})${reason ? `: ${reason}` : ""}${hint}` +
+    ` [endpoint=${env.baseUrl} clientId=${clientId} secret=${env.hasSecret ? "set" : "MISSING"}]`
+  );
+}
+
 async function getAccessToken(): Promise<string> {
-  const credentials = Buffer.from(
-    `${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`
-  ).toString("base64");
+  const clientId = process.env.PAYPAL_CLIENT_ID;
+  const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
+  const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
 
   const res = await fetch(`${BASE_URL}/v1/oauth2/token`, {
     method: "POST",
@@ -18,8 +57,16 @@ async function getAccessToken(): Promise<string> {
     cache: "no-store",
   });
 
-  const data = await res.json();
-  if (!data.access_token) throw new Error("PayPal auth failed");
+  const data = await res.json().catch(() => null);
+  if (!data || typeof data.access_token !== "string") {
+    throw new Error(
+      describeAuthFailure(res.status, data, {
+        baseUrl: BASE_URL,
+        clientId,
+        hasSecret: !!clientSecret,
+      })
+    );
+  }
   return data.access_token;
 }
 

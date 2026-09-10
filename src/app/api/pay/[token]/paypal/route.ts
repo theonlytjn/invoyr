@@ -45,15 +45,33 @@ export async function POST(
 
   if (amountDue <= 0) return NextResponse.json({ error: "Nothing due" }, { status: 400 });
 
-  const order = await createPayPalOrder({
-    invoiceId: invoice.id,
-    amount: amountDue,
-    currency: invoice.currency,
-    payeeEmail: org.paypal_email,
-    invoiceNumber: invoice.invoice_number,
-  });
+  // An uncaught throw here returned a 500 with an empty body, so the payer saw a
+  // generic failure and the cause never reached the logs in a readable form. The
+  // payer still gets a calm message — they cannot act on a credentials fault — but
+  // the reason is now recorded where it can be found.
+  let order: { id?: string };
+  try {
+    order = await createPayPalOrder({
+      invoiceId: invoice.id,
+      amount: amountDue,
+      currency: invoice.currency,
+      payeeEmail: org.paypal_email,
+      invoiceNumber: invoice.invoice_number,
+    });
+  } catch (error) {
+    console.error("[paypal] could not create order", {
+      invoiceId: invoice.id,
+      invoiceNumber: invoice.invoice_number,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return NextResponse.json(
+      { error: "PayPal is unavailable right now. Please try another payment method." },
+      { status: 502 }
+    );
+  }
 
   if (!order.id) {
+    console.error("[paypal] order created without an id", { invoiceId: invoice.id });
     return NextResponse.json({ error: "Failed to create PayPal order" }, { status: 500 });
   }
 

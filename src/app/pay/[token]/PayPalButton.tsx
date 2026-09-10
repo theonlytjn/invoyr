@@ -67,8 +67,12 @@ export default function PayPalButton({ token, currency, accentColor }: Props) {
             }
             window.location.href = `/pay/${token}?paid=1`;
           },
-          onError: () => {
-            setError("PayPal encountered an error. Please try again.");
+          onError: (err: unknown) => {
+            // The payer keeps a calm message — a credentials fault is not theirs to
+            // fix — but the underlying error is no longer thrown away. Losing it is
+            // what made this failure take days to place.
+            console.error("[paypal] button error", err);
+            setError("PayPal encountered an error. Please try another payment method.");
           },
           onCancel: () => {
             // user cancelled — no action needed
