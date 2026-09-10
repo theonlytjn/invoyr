@@ -35,7 +35,7 @@ const BASE_URL = resolvePayPalBaseUrl(process.env.PAYPAL_ENV);
 export function describeAuthFailure(
   status: number,
   data: unknown,
-  env: { baseUrl: string; clientId?: string; hasSecret: boolean }
+  env: { baseUrl: string; clientId?: string; hasSecret: boolean; paypalEnv?: string }
 ): string {
   const body = (data && typeof data === "object" ? data : {}) as Record<string, unknown>;
   const reason = [body.error, body.error_description]
@@ -53,9 +53,17 @@ export function describeAuthFailure(
     ? `${env.clientId.slice(0, 8)}…(${env.clientId.length} chars)`
     : "MISSING";
 
+  // The endpoint alone says which host was used but not why. Quoting the raw
+  // PAYPAL_ENV distinguishes "never set on this environment" from "set to a value
+  // that doesn't mean live" — different fixes, and guessing between them cost a
+  // deploy cycle. The value is a environment name, never a credential.
+  const declaredEnv =
+    env.paypalEnv === undefined ? "UNSET" : JSON.stringify(env.paypalEnv);
+
   return (
     `PayPal auth failed (HTTP ${status})${reason ? `: ${reason}` : ""}${hint}` +
-    ` [endpoint=${env.baseUrl} clientId=${clientId} secret=${env.hasSecret ? "set" : "MISSING"}]`
+    ` [endpoint=${env.baseUrl} PAYPAL_ENV=${declaredEnv}` +
+    ` clientId=${clientId} secret=${env.hasSecret ? "set" : "MISSING"}]`
   );
 }
 
@@ -81,6 +89,7 @@ async function getAccessToken(): Promise<string> {
         baseUrl: BASE_URL,
         clientId,
         hasSecret: !!clientSecret,
+        paypalEnv: process.env.PAYPAL_ENV,
       })
     );
   }

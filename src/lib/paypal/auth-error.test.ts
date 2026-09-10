@@ -70,6 +70,26 @@ describe("describeAuthFailure", () => {
     expect(message).not.toContain("AXvnJh5QsuydUDztOUOjwZzXljroiYu0");
   });
 
+  it("distinguishes an unset PAYPAL_ENV from one set to the wrong word", () => {
+    // These need different fixes — add the variable, versus correct its value —
+    // and the endpoint alone cannot tell them apart.
+    const unset = describeAuthFailure(401, {}, { baseUrl: SANDBOX, hasSecret: true });
+    expect(unset).toContain("PAYPAL_ENV=UNSET");
+
+    const wrong = describeAuthFailure(401, {}, {
+      baseUrl: SANDBOX,
+      hasSecret: true,
+      paypalEnv: "prod",
+    });
+    expect(wrong).toContain('PAYPAL_ENV="prod"');
+  });
+
+  it("quotes PAYPAL_ENV so invisible whitespace is visible", () => {
+    expect(
+      describeAuthFailure(401, {}, { baseUrl: SANDBOX, hasSecret: true, paypalEnv: "production " })
+    ).toContain('PAYPAL_ENV="production "');
+  });
+
   it("still produces a usable message when the body is not JSON", () => {
     const message = describeAuthFailure(503, null, {
       baseUrl: LIVE,
