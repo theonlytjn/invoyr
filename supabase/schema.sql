@@ -639,6 +639,21 @@ create policy subs_select on public.subscriptions for select to authenticated us
 drop policy if exists audit_select on public.audit_logs;
 create policy audit_select on public.audit_logs for select to authenticated using (is_org_member(org_id));
 
+-- Without this INSERT policy the table is read-only to the application: RLS silently
+-- rejects every audit write made through the cookie-bound client, which is what the
+-- browser and every API route using createClient() use. Only service-role writers
+-- (crons, webhooks) landed rows, so the per-invoice history sat empty and audit rows
+-- added throughout the app were discarded without error. Added 2026-09-10.
+--
+-- The user_id clause stops an entry being attributed to somebody else; it stays
+-- nullable because some server paths record an action with no acting user.
+drop policy if exists audit_insert on public.audit_logs;
+create policy audit_insert on public.audit_logs for insert to authenticated
+with check (
+  is_org_member(org_id)
+  and (user_id is null or user_id = auth.uid())
+);
+
 -- EMAIL_LOGS
 drop policy if exists email_select on public.email_logs;
 create policy email_select on public.email_logs for select to authenticated
