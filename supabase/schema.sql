@@ -345,6 +345,12 @@ do $$ begin
 exception when duplicate_object then null;
 end $$;
 
+-- 'paypal' was missing from the original enum while both PayPal paths insert it, so
+-- every PayPal payment was rejected by the database and the row silently lost. Added
+-- separately rather than in the create above, so existing databases pick it up too.
+-- Applied to prod as migration add_paypal_to_payment_method_enum.
+alter type public.payment_method add value if not exists 'paypal';
+
 create table if not exists public.payments (
   id                          uuid primary key default gen_random_uuid(),
   org_id                      uuid not null references public.organisations(id) on delete cascade,

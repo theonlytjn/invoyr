@@ -11,6 +11,7 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import { z } from "zod";
 import { apiError } from "@/lib/api/errors";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
+import { recordPaymentRow } from "@/lib/payments/record-payment-row";
 
 const bodySchema = z.object({ orderId: z.string().min(1).max(200) });
 
@@ -70,15 +71,19 @@ export async function POST(
   const newStatus = newAmountPaid >= totalOwed - 0.001 ? "paid" : "partial";
   const now = new Date().toISOString();
 
-  await supabase.from("payments").insert({
-    org_id: invoice.org_id,
-    invoice_id: invoice.id,
-    amount: capturedAmount,
-    currency,
-    method: "paypal",
-    stripe_payment_intent_id: captureId, // reusing field to store capture ID
-    paid_at: now,
-  });
+  await recordPaymentRow(
+    supabase,
+    {
+      org_id: invoice.org_id,
+      invoice_id: invoice.id,
+      amount: capturedAmount,
+      currency,
+      method: "paypal",
+      stripe_payment_intent_id: captureId, // reusing field to store capture ID
+      paid_at: now,
+    },
+    { paypal_order: orderId, paypal_capture: captureId }
+  );
 
   await supabase
     .from("invoices")

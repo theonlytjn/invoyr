@@ -63,6 +63,9 @@ const ACTION_LABELS: Record<string, string> = {
   "payment.failed": "Payment failed",
   "invoice.payment_failed": "Payment failed",
   "payment.invoice_update_conflict": "Payment recorded, invoice not updated",
+  // Deliberately blunt: the money arrived but the books do not show it, and whoever
+  // reads this timeline is the person who has to fix it.
+  "payment.record_failed": "Payment received but NOT recorded — needs attention",
 };
 
 /**

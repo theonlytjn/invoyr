@@ -11,6 +11,7 @@ import { SubscriptionActivatedEmail } from "@/emails/transactional/SubscriptionA
 import { InvoicePaidOwnerEmail } from "@/emails/transactional/InvoicePaidOwnerEmail";
 import { getPlanByPriceId } from "@/config/plans";
 import { formatDate } from "@/lib/utils";
+import { recordPaymentRow } from "@/lib/payments/record-payment-row";
 import type Stripe from "stripe";
 
 export async function POST(req: NextRequest) {
@@ -65,15 +66,19 @@ async function handleInvoiceCheckout(session: Stripe.Checkout.Session) {
   const amountPaid = (session.amount_total ?? 0) / 100;
   const currency = (session.currency ?? "gbp").toUpperCase();
 
-  await supabase.from("payments").insert({
-    org_id: orgId,
-    invoice_id: invoiceId,
-    amount: amountPaid,
-    currency,
-    method: "stripe",
-    stripe_payment_intent_id: session.payment_intent as string | null,
-    paid_at: new Date().toISOString(),
-  });
+  await recordPaymentRow(
+    supabase,
+    {
+      org_id: orgId,
+      invoice_id: invoiceId,
+      amount: amountPaid,
+      currency,
+      method: "stripe",
+      stripe_payment_intent_id: session.payment_intent as string | null,
+      paid_at: new Date().toISOString(),
+    },
+    { stripe_session: session.id }
+  );
 
   await supabase
     .from("invoices")

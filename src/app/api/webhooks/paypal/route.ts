@@ -6,6 +6,7 @@ import { sendTransactionalEmail } from "@/lib/resend/send-transactional-email";
 import { PaymentReceivedEmail } from "@/emails/transactional/PaymentReceivedEmail";
 import { InvoicePaidOwnerEmail } from "@/emails/transactional/InvoicePaidOwnerEmail";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { recordPaymentRow } from "@/lib/payments/record-payment-row";
 
 export async function POST(req: NextRequest) {
   const body = await req.text();
@@ -67,15 +68,19 @@ export async function POST(req: NextRequest) {
   const newStatus = newAmountPaid >= totalOwed - 0.001 ? "paid" : "partial";
   const now = new Date().toISOString();
 
-  await supabase.from("payments").insert({
-    org_id: invoice.org_id,
-    invoice_id: invoiceId,
-    amount: capturedAmount,
-    currency,
-    method: "paypal",
-    stripe_payment_intent_id: captureId,
-    paid_at: now,
-  });
+  await recordPaymentRow(
+    supabase,
+    {
+      org_id: invoice.org_id,
+      invoice_id: invoiceId,
+      amount: capturedAmount,
+      currency,
+      method: "paypal",
+      stripe_payment_intent_id: captureId,
+      paid_at: now,
+    },
+    { paypal_capture: captureId, source: "webhook" }
+  );
 
   await supabase
     .from("invoices")

@@ -22,6 +22,12 @@ describe("labelForAction", () => {
     expect(labelForAction("payment.received")).toBe("Payment received");
   });
 
+  it("makes a lost payment record impossible to skim past", () => {
+    expect(labelForAction("payment.record_failed")).toBe(
+      "Payment received but NOT recorded — needs attention"
+    );
+  });
+
   it("degrades readably for an action nobody has labelled yet", () => {
     expect(labelForAction("invoice.some_new_thing")).toBe("Some new thing");
   });
