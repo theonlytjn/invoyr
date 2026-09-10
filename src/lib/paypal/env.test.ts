@@ -31,6 +31,27 @@ describe("resolvePayPalBaseUrl", () => {
     expect(resolvePayPalBaseUrl("sandbox")).toBe(PAYPAL_SANDBOX_API);
   });
 
+  it("accepts the live API hostname, which is what production actually held", () => {
+    // PAYPAL_ENV="api-m.paypal.com" resolved to sandbox, so live credentials were
+    // rejected as invalid_client and the fault looked like a bad secret.
+    expect(resolvePayPalBaseUrl("api-m.paypal.com")).toBe(PAYPAL_LIVE_API);
+    expect(resolvePayPalBaseUrl("https://api-m.paypal.com")).toBe(PAYPAL_LIVE_API);
+    expect(resolvePayPalBaseUrl("https://api-m.paypal.com/")).toBe(PAYPAL_LIVE_API);
+  });
+
+  it("keeps the sandbox hostname on sandbox rather than matching a live rule", () => {
+    // The dangerous direction: a substring match on "paypal.com" would send these
+    // to the live API and take real money in a test.
+    expect(resolvePayPalBaseUrl("api-m.sandbox.paypal.com")).toBe(PAYPAL_SANDBOX_API);
+    expect(resolvePayPalBaseUrl("https://api-m.sandbox.paypal.com")).toBe(PAYPAL_SANDBOX_API);
+    expect(resolvePayPalBaseUrl("sandbox.paypal.com")).toBe(PAYPAL_SANDBOX_API);
+  });
+
+  it("accepts the bare live domain", () => {
+    expect(resolvePayPalBaseUrl("paypal.com")).toBe(PAYPAL_LIVE_API);
+    expect(resolvePayPalBaseUrl("www.paypal.com")).toBe(PAYPAL_LIVE_API);
+  });
+
   it("falls back to sandbox for anything it does not recognise", () => {
     expect(resolvePayPalBaseUrl("prod")).toBe(PAYPAL_SANDBOX_API);
     expect(resolvePayPalBaseUrl("true")).toBe(PAYPAL_SANDBOX_API);

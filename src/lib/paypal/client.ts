@@ -1,21 +1,47 @@
 export const PAYPAL_LIVE_API = "https://api-m.paypal.com";
 export const PAYPAL_SANDBOX_API = "https://api-m.sandbox.paypal.com";
 
+// Exact hosts only — no substring matching, or "api-m.sandbox.paypal.com" would
+// match a "paypal.com" rule and quietly send sandbox traffic to the live API.
+const LIVE_HOSTS = new Set(["api-m.paypal.com", "www.paypal.com", "paypal.com"]);
+const SANDBOX_HOSTS = new Set([
+  "api-m.sandbox.paypal.com",
+  "www.sandbox.paypal.com",
+  "sandbox.paypal.com",
+]);
+
 /**
  * Chooses the API host from PAYPAL_ENV.
  *
- * PayPal's dashboard labels the two environments "Sandbox" and "Live" — the word
- * "production" appears nowhere in its UI — so PAYPAL_ENV gets written as "live" at
- * least as readily as "production". The original strict `=== "production"` sent live
- * credentials to the sandbox host, which PayPal rejects as `invalid_client`: the exact
- * same error as a genuinely wrong secret. That ambiguity is what made this cost a day.
+ * A name like PAYPAL_ENV invites three different answers, and this variable has now
+ * been wrong in production in two of them:
  *
- * Sandbox stays the default, so an unset variable can never move real money by
- * accident. Case and surrounding whitespace are ignored.
+ *   - an environment word — but PayPal's dashboard says "Sandbox" and "Live" and
+ *     never "production", so "live" is at least as natural to write
+ *   - the API hostname, which is what it actually held: "api-m.paypal.com"
+ *
+ * The original strict `=== "production"` treated everything except one exact word as
+ * sandbox, silently. Live credentials sent to the sandbox host come back as
+ * `invalid_client` — identical to the error for a genuinely wrong secret — so the
+ * misconfiguration was indistinguishable from a credentials fault. That is what made
+ * it expensive: the failure pointed at the wrong thing.
+ *
+ * Each accepted value states the intended environment unambiguously; a PayPal API
+ * hostname has no second reading. Anything unrecognised falls back to sandbox, so a
+ * typo can never move real money.
  */
 export function resolvePayPalBaseUrl(value: string | undefined): string {
-  const env = value?.trim().toLowerCase();
-  return env === "production" || env === "live" ? PAYPAL_LIVE_API : PAYPAL_SANDBOX_API;
+  const raw = value
+    ?.trim()
+    .toLowerCase()
+    .replace(/^https?:\/\//, "")
+    .replace(/\/+$/, "");
+
+  if (!raw) return PAYPAL_SANDBOX_API;
+  if (raw === "production" || raw === "live") return PAYPAL_LIVE_API;
+  if (SANDBOX_HOSTS.has(raw)) return PAYPAL_SANDBOX_API;
+  if (LIVE_HOSTS.has(raw)) return PAYPAL_LIVE_API;
+  return PAYPAL_SANDBOX_API;
 }
 
 const BASE_URL = resolvePayPalBaseUrl(process.env.PAYPAL_ENV);
