@@ -1,7 +1,24 @@
-const BASE_URL =
-  process.env.PAYPAL_ENV === "production"
-    ? "https://api-m.paypal.com"
-    : "https://api-m.sandbox.paypal.com";
+export const PAYPAL_LIVE_API = "https://api-m.paypal.com";
+export const PAYPAL_SANDBOX_API = "https://api-m.sandbox.paypal.com";
+
+/**
+ * Chooses the API host from PAYPAL_ENV.
+ *
+ * PayPal's dashboard labels the two environments "Sandbox" and "Live" — the word
+ * "production" appears nowhere in its UI — so PAYPAL_ENV gets written as "live" at
+ * least as readily as "production". The original strict `=== "production"` sent live
+ * credentials to the sandbox host, which PayPal rejects as `invalid_client`: the exact
+ * same error as a genuinely wrong secret. That ambiguity is what made this cost a day.
+ *
+ * Sandbox stays the default, so an unset variable can never move real money by
+ * accident. Case and surrounding whitespace are ignored.
+ */
+export function resolvePayPalBaseUrl(value: string | undefined): string {
+  const env = value?.trim().toLowerCase();
+  return env === "production" || env === "live" ? PAYPAL_LIVE_API : PAYPAL_SANDBOX_API;
+}
+
+const BASE_URL = resolvePayPalBaseUrl(process.env.PAYPAL_ENV);
 
 /**
  * Explains an OAuth rejection using PayPal's own response.
