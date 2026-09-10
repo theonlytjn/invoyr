@@ -36,10 +36,42 @@ export function clientIp(req: NextRequest): string {
   return req.headers.get("x-real-ip") ?? "unknown";
 }
 
+/** The shape we depend on, so the fail-open behaviour can be tested with a stub. */
+type Limiter = { limit: (key: string) => Promise<{ success: boolean }> };
+
+/**
+ * Runs the limiter, allowing the request if the limiter itself is unavailable.
+ *
+ * The original code only failed open when Upstash was *unconfigured*. When the env
+ * vars were set but the host had gone away, `limit()` threw and the error escaped
+ * the calling route as a 500 — which took down every route behind the limiter,
+ * including PayPal order creation, Stripe checkout and the contact form. A deleted
+ * Upstash database did exactly that in production: `getaddrinfo ENOTFOUND`, and
+ * customers could not pay.
+ *
+ * A rate limiter is a protective measure, not a correctness gate. If it cannot be
+ * reached, the right failure is to let the request through and make the outage
+ * loud in the logs — not to stop taking money.
+ */
+export async function checkLimit(limiter: Limiter | null, key: string): Promise<{ success: boolean }> {
+  if (!limiter) return { success: true };
+
+  try {
+    const { success } = await limiter.limit(key);
+    return { success };
+  } catch (error) {
+    console.error("[rate-limit] limiter unreachable — allowing request", {
+      key,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return { success: true };
+  }
+}
+
 /**
  * Check a rate limit. `bucket` namespaces the counter (e.g. "contact"),
  * `identifier` is usually the client IP. Returns { success } — true when the
- * request is allowed. Fails open (allows) if Upstash isn't configured.
+ * request is allowed. Fails open when Upstash is unconfigured *or* unreachable.
  */
 export async function rateLimit(
   bucket: string,
@@ -47,8 +79,5 @@ export async function rateLimit(
   limit: number,
   windowSeconds: number,
 ): Promise<{ success: boolean }> {
-  const limiter = getLimiter(limit, windowSeconds);
-  if (!limiter) return { success: true };
-  const { success } = await limiter.limit(`${bucket}:${identifier}`);
-  return { success };
+  return checkLimit(getLimiter(limit, windowSeconds), `${bucket}:${identifier}`);
 }
