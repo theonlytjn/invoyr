@@ -210,9 +210,24 @@ export async function verifyPayPalWebhook({
   transmissionSig: string;
   body: string;
 }) {
-  const token = await getAccessToken();
+  // Checked before the auth round-trip: with no webhook ID there is nothing to verify
+  // against, so asking PayPal for a token first is wasted work on every delivery.
+  //
+  // Both failure modes below return 400, which PayPal retries and then gives up on —
+  // so a webhook that never verifies looks exactly like a webhook that was never sent.
+  // Payments would quietly stop recording for anyone who closed the tab mid-flow. Say
+  // out loud which of the two it is. The webhook ID identifies a subscription; it is
+  // not a credential, and PayPal shows it in the dashboard.
   const webhookId = process.env.PAYPAL_WEBHOOK_ID;
-  if (!webhookId) return false;
+  if (!webhookId) {
+    console.error(
+      "[paypal] PAYPAL_WEBHOOK_ID is not set — every webhook delivery will be rejected." +
+        " Create the webhook on the LIVE app and put its ID in this variable."
+    );
+    return false;
+  }
+
+  const token = await getAccessToken();
 
   const res = await fetch(`${BASE_URL}/v1/notifications/verify-webhook-signature`, {
     method: "POST",
@@ -231,6 +246,20 @@ export async function verifyPayPalWebhook({
     }),
   });
 
-  const data = await res.json();
-  return data.verification_status === "SUCCESS";
+  const data = await res.json().catch(() => null);
+  const verified = data?.verification_status === "SUCCESS";
+
+  if (!verified) {
+    // A webhook ID from the Sandbox app verified against the live API fails here, as
+    // does a live ID after the app's credentials are rotated. Neither is visible from
+    // the 400 alone.
+    console.error("[paypal] webhook signature not verified", {
+      httpStatus: res.status,
+      verificationStatus: data?.verification_status ?? "no response",
+      endpoint: BASE_URL,
+      webhookId: `${webhookId.slice(0, 6)}…`,
+    });
+  }
+
+  return verified;
 }
