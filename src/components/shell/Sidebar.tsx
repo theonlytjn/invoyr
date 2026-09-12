@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   DashboardIcon,
   InvoiceIcon,
@@ -18,7 +18,7 @@ import {
   ExpenseIcon,
 } from "@/components/icons";
 import { cn } from "@/lib/utils";
-import { createClient } from "@/lib/supabase/client";
+import { useSignOut } from "@/hooks/useSignOut";
 import type { Organisation } from "@/lib/supabase/types";
 import { canAccess, type Feature } from "@/config/plans";
 import OrgSwitcher from "./OrgSwitcher";
@@ -44,14 +44,9 @@ interface Props {
 
 export default function Sidebar({ org, orgs, userEmail, plan, isAdmin }: Props) {
   const pathname = usePathname();
-  const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
 
-  async function handleSignOut() {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push("/login");
-  }
+  const { signOut, signingOut } = useSignOut();
 
   return (
     <aside
@@ -182,8 +177,9 @@ export default function Sidebar({ org, orgs, userEmail, plan, isAdmin }: Props) 
 
           {!collapsed && (
             <button
-              onClick={handleSignOut}
-              className="text-neutral-500 hover:text-neutral-950 dark:hover:text-neutral-50 transition-colors shrink-0"
+              onClick={signOut}
+              disabled={signingOut}
+              className="text-neutral-500 hover:text-neutral-950 dark:hover:text-neutral-50 transition-colors shrink-0 disabled:opacity-50"
               aria-label="Sign out"
             >
               <LogOutIcon size={16} />

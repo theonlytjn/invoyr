@@ -4,17 +4,30 @@ import Topbar from "@/components/shell/Topbar";
 import ChangePasswordForm from "@/components/settings/ChangePasswordForm";
 import DeleteAccountForm from "@/components/settings/DeleteAccountForm";
 import { ConnectedAccountsPanel } from "@/components/settings/ConnectedAccountsPanel";
+import SignOutPanel from "@/components/settings/SignOutPanel";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Settings — Account" };
 
 export default async function AccountSettingsPage() {
-  await requireOrg();
+  const org = await requireOrg();
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   return (
     <div className="space-y-6">
+      {/* Session — first, because on a phone this page is the only way to sign out:
+          the sidebar that carries the desktop control is hidden below `lg`. */}
+      <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5 space-y-4">
+        <div>
+          <h2 className="text-lg font-serif text-neutral-950 dark:text-neutral-50">Session</h2>
+          <p className="text-sm text-neutral-500 mt-1">
+            Sign out on this device. Anything already saved stays where it is.
+          </p>
+        </div>
+        <SignOutPanel email={user?.email ?? ""} orgName={org?.name} />
+      </div>
+
       {/* Change password */}
       <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5 space-y-4">
         <div>
