@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { computeTotals } from "@/lib/invoice-totals";
+import { computeTotals, DISCOUNT_REASON_MAX_LENGTH } from "@/lib/invoice-totals";
 import { formatDateInput } from "@/lib/utils";
 import LineItemsEditor, { type LineItemRow } from "./LineItemsEditor";
 import { TEMPLATE_MAP, TEMPLATE_LABELS } from "@/components/invoice-templates";
@@ -55,6 +55,7 @@ export default function InvoiceForm({ org, clients, invoice, existingItems, invo
   const [terms, setTerms] = useState(invoice?.terms ?? org.default_terms ?? "");
   const [poNumber, setPoNumber] = useState(invoice?.po_number ?? "");
   const [discount, setDiscount] = useState(invoice?.discount ?? 0);
+  const [discountReason, setDiscountReason] = useState(invoice?.discount_reason ?? "");
   const [items, setItems] = useState<LineItemRow[]>(
     existingItems?.map(itemToRow) ?? [
       { id: crypto.randomUUID(), description: "", quantity: 1, unit_price: 0, vat_rate: 20 },
@@ -70,6 +71,8 @@ export default function InvoiceForm({ org, clients, invoice, existingItems, invo
   }
 
   const totals = computeTotals(items, discount);
+  // A reason only means something beside a discount the client will actually see.
+  const savedDiscountReason = totals.discount > 0 ? discountReason.trim() || null : null;
   const TemplatePreview = TEMPLATE_MAP[template];
 
   async function handleSave(status: "draft" | "issued") {
@@ -89,6 +92,7 @@ export default function InvoiceForm({ org, clients, invoice, existingItems, invo
       subtotal: totals.subtotal,
       vat_amount: totals.vat_amount,
       discount: totals.discount,
+      discount_reason: savedDiscountReason,
       total: totals.total,
       notes: notes || null,
       terms: terms || null,
@@ -262,16 +266,37 @@ export default function InvoiceForm({ org, clients, invoice, existingItems, invo
           <LineItemsEditor items={items} onChange={setItems} />
 
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-            <div className="space-y-1.5 sm:w-48">
-              <Label>Discount ({invoice?.currency ?? "GBP"})</Label>
-              <Input
-                type="number"
-                min="0"
-                step="0.01"
-                value={discount === 0 ? "" : discount}
-                onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
-                placeholder="0.00"
-              />
+            <div className="space-y-3 sm:w-64">
+              <div className="space-y-1.5">
+                <Label htmlFor="invoice-discount">Discount ({invoice?.currency ?? "GBP"})</Label>
+                <Input
+                  id="invoice-discount"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={discount === 0 ? "" : discount}
+                  onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
+                  placeholder="0.00"
+                />
+              </div>
+              {discount > 0 && (
+                <div className="space-y-1.5">
+                  <Label htmlFor="invoice-discount-reason">
+                    Reason <span className="font-normal text-neutral-500">(optional)</span>
+                  </Label>
+                  <Input
+                    id="invoice-discount-reason"
+                    value={discountReason}
+                    onChange={(e) => setDiscountReason(e.target.value)}
+                    maxLength={DISCOUNT_REASON_MAX_LENGTH}
+                    placeholder="e.g. 50% loyalty discount"
+                    aria-describedby="invoice-discount-reason-hint"
+                  />
+                  <p id="invoice-discount-reason-hint" className="text-xs text-neutral-500">
+                    Shown to your client next to the discount.
+                  </p>
+                </div>
+              )}
             </div>
             <div className="w-52 space-y-1.5 text-sm">
               <div className="flex justify-between text-neutral-500">
@@ -283,9 +308,11 @@ export default function InvoiceForm({ org, clients, invoice, existingItems, invo
                 <span>{formatCurrency(totals.vat_amount)}</span>
               </div>
               {totals.discount > 0 && (
-                <div className="flex justify-between text-neutral-500">
-                  <span>Discount</span>
-                  <span>−{formatCurrency(totals.discount)}</span>
+                <div className="flex justify-between gap-3 text-neutral-500">
+                  <span className="min-w-0 break-words">
+                    Discount{savedDiscountReason ? ` (${savedDiscountReason})` : ""}
+                  </span>
+                  <span className="shrink-0">−{formatCurrency(totals.discount)}</span>
                 </div>
               )}
               <div className="flex justify-between font-bold text-base pt-2 border-t border-neutral-200 dark:border-neutral-700 dark:text-neutral-50">
@@ -354,6 +381,7 @@ export default function InvoiceForm({ org, clients, invoice, existingItems, invo
                   subtotal: totals.subtotal,
                   vat_amount: totals.vat_amount,
                   discount: totals.discount,
+                  discount_reason: savedDiscountReason,
                   total: totals.total,
                   currency: "GBP",
                   notes: notes || null,

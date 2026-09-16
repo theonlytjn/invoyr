@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
 import { getOrgPlan } from "@/lib/billing";
 import { canAccess } from "@/config/plans";
-import { computeTotals } from "@/lib/invoice-totals";
+import { computeTotals, discountLabel } from "@/lib/invoice-totals";
 import { resolveDocumentClient } from "@/lib/client-snapshot";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import Topbar from "@/components/shell/Topbar";
@@ -95,7 +95,8 @@ export default async function InvoiceDetailPage({ params }: Props) {
       quantity: i.quantity,
       unit_price: i.unit_price,
       vat_rate: i.vat_rate,
-    }))
+    })),
+    invoice.discount ?? 0
   );
 
   const Template = TEMPLATE_MAP[invoice.template] ?? TEMPLATE_MAP.tjn_classic;
@@ -169,7 +170,7 @@ export default async function InvoiceDetailPage({ params }: Props) {
               </div>
               {invoice.discount > 0 && (
                 <div className="flex justify-between text-neutral-500">
-                  <dt>Discount</dt>
+                  <dt className="min-w-0 break-words pr-3">{discountLabel(invoice.discount_reason)}</dt>
                   <dd>−{formatCurrency(invoice.discount, invoice.currency)}</dd>
                 </div>
               )}

@@ -1,5 +1,6 @@
 import { formatCurrency, formatDate } from "@/lib/utils";
 import type { InvoiceTemplateProps } from "./types";
+import { discountLabel } from "@/lib/invoice-totals";
 
 export default function BoldSplit({ invoice, items, client, org, totals }: InvoiceTemplateProps) {
   const STATUS_LABEL: Record<string, string> = {
@@ -89,7 +90,7 @@ export default function BoldSplit({ invoice, items, client, org, totals }: Invoi
             </div>
             {(totals.discount ?? 0) > 0 && (
               <div className="flex justify-between opacity-75">
-                <span>Discount</span><span>−{formatCurrency(totals.discount!, invoice.currency)}</span>
+                <span className="min-w-0 break-words pr-3">{discountLabel(invoice.discount_reason)}</span><span>−{formatCurrency(totals.discount!, invoice.currency)}</span>
               </div>
             )}
             <div className="flex justify-between font-bold text-base pt-2 border-t border-white/20">

@@ -7,7 +7,7 @@ import { requireOrg } from "@/lib/auth";
 import { orgHasFeature } from "@/lib/billing";
 import { sendTransactionalEmail } from "@/lib/resend/send-transactional-email";
 import { InvoiceSentEmail } from "@/emails/transactional/InvoiceSentEmail";
-import { computeTotals } from "@/lib/invoice-totals";
+import { invoiceEmailAmounts } from "@/lib/invoice-totals";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 const schema = z.object({ ids: bulkIdsSchema() });
@@ -50,12 +50,7 @@ export async function POST(req: NextRequest) {
         return;
       }
 
-      const items = invoice.invoice_items ?? [];
-      const totals = computeTotals(
-        items.map((i: { quantity: number; unit_price: number; vat_rate: number }) => ({
-          description: "", quantity: i.quantity, unit_price: i.unit_price, vat_rate: i.vat_rate,
-        }))
-      );
+      const amounts = invoiceEmailAmounts(invoice.invoice_items ?? [], invoice, formatCurrency);
 
       const payUrl = invoice.public_token
         ? `${process.env.NEXT_PUBLIC_APP_URL}/pay/${invoice.public_token}`
@@ -77,7 +72,7 @@ export async function POST(req: NextRequest) {
           logoUrl,
           accentColor: org?.accent_color ?? "#111827",
           invoiceNumber: invoice.invoice_number,
-          invoiceTotal: formatCurrency(totals.total, invoice.currency),
+          ...amounts,
           issueDate: invoice.issue_date ? formatDate(invoice.issue_date) : undefined,
           dueDate: invoice.due_date ? formatDate(invoice.due_date) : undefined,
           payUrl,

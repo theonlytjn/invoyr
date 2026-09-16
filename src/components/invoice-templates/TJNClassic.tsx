@@ -1,5 +1,6 @@
 import { formatCurrency, formatDate } from "@/lib/utils";
 import type { InvoiceTemplateProps } from "./types";
+import { discountLabel } from "@/lib/invoice-totals";
 
 export default function TJNClassic({ invoice, items, client, org, totals, documentType = "invoice", showInvoyrBranding = true }: InvoiceTemplateProps) {
   return (
@@ -91,7 +92,7 @@ export default function TJNClassic({ invoice, items, client, org, totals, docume
           </div>
           {(totals.discount ?? 0) > 0 && (
             <div className="flex justify-between text-sm">
-              <span className="text-gray-500">Discount</span>
+              <span className="min-w-0 break-words pr-3 text-gray-500">{discountLabel(invoice.discount_reason)}</span>
               <span>−{formatCurrency(totals.discount!, invoice.currency)}</span>
             </div>
           )}

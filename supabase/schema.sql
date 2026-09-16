@@ -703,6 +703,12 @@ alter table public.organisations add column if not exists payment_reminder_days 
 alter table public.invoices add column if not exists po_number text;
 alter table public.invoices add column if not exists discount  numeric(12,2) not null default 0;
 
+-- invoices: optional reason shown to the client beside the discount line
+alter table public.invoices add column if not exists discount_reason text;
+alter table public.invoices drop constraint if exists invoices_discount_reason_length;
+alter table public.invoices add constraint invoices_discount_reason_length
+  check (discount_reason is null or char_length(discount_reason) <= 200);
+
 -- organisations: estimate number counter
 alter table public.organisations add column if not exists next_estimate_number integer not null default 1;
 

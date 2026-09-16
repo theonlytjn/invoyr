@@ -3,7 +3,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { getOrgPlan } from "@/lib/billing";
 import { canAccess } from "@/config/plans";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { computeTotals } from "@/lib/invoice-totals";
+import { computeTotals, discountLabel } from "@/lib/invoice-totals";
 import { resolveDocumentClient } from "@/lib/client-snapshot";
 import PayButton from "./PayButton";
 import PayPalButton from "./PayPalButton";
@@ -143,6 +143,12 @@ export default async function PayPage({ params, searchParams }: Props) {
                   <span>VAT</span>
                   <span>{formatCurrency(totals.vat_amount, invoice.currency)}</span>
                 </div>
+                {invoice.discount > 0 && (
+                  <div className="flex justify-between gap-4 text-base text-gray-500">
+                    <span className="min-w-0 break-words">{discountLabel(invoice.discount_reason)}</span>
+                    <span className="shrink-0">−{formatCurrency(invoice.discount, invoice.currency)}</span>
+                  </div>
+                )}
                 {lateFeeAmount > 0 && (
                   <div className="flex justify-between text-base text-orange-600">
                     <span>Late fee</span>

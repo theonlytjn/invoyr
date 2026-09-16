@@ -1,6 +1,6 @@
 # Invoyr — Development Status & Handoff
 
-_Last updated: 9 September 2026._
+_Last updated: 16 September 2026._
 _Snapshot of everything completed in the recent development phase and what's left before/at launch._
 
 ---
@@ -63,6 +63,12 @@ Shipped across commits `5a94452`, `ea8cba0`, `70c1f10`, `337cc50`, `3dc4b48`, `4
 - **Payments are now recorded server-side, with an optional write-off.** New `POST /api/invoices/[id]/record-payment` records a payment, recomputes status, and can issue a credit note for whatever balance remains in the same request. `RecordPaymentModal` is now a thin form posting to it — it no longer writes to Supabase directly, which **closes the standing `CLAUDE.md` violation** noted in the §11 audit addendum (that modal used to insert the `payments` row and set `status: 'paid'` from the browser).
 - Two things worth knowing before they're mistaken for bugs: (1) once a client is deleted, the send/remind routes correctly find no client and skip that invoice — a deleted client shouldn't get emailed, and a snapshot has no inbox — but checkout does **not** skip; it still creates the Stripe session, just without a prefilled email; (2) neither the record-payment route nor credit-note creation can use a database transaction (the Supabase JS client has no primitive for it) — both are ordered to fail in the safer direction instead, so a failure leaves more evidence than an aggregate figure that never happened.
 - Full detail, including the exact ordering/fail-closed reasoning and the render-surface audit, is in the `docs/INV-001-current-state-audit.md` addendum (§12).
+
+### Invoice discounts shown to the client (16 Sep 2026)
+- **Bug fixed: the invoice email quoted the pre-discount total.** Both send routes (`api/invoices/[id]/send`, `api/invoices/bulk/send`) recomputed the total from the line items and never passed the invoice's `discount`, so INV-0012 (£675 less a £337.50 discount) was emailed as "£675.00" while the pay page correctly asked for £337.50. The email amounts now come from `invoiceEmailAmounts` in `src/lib/invoice-totals.ts` (unit tested), and the email shows "Before discount", "Discount" and "Total" rows. The invoice detail page's template preview had the same omission and is fixed too.
+- **The discount is now visible everywhere the client sees the invoice:** the `/pay/[token]` page (new discount row), the email, all four web templates and all four PDF templates.
+- **Optional discount reason.** New nullable `invoices.discount_reason` (max 200 chars, enforced by the `invoices_discount_reason_length` check constraint and the form's `maxLength`). The reason field appears in the invoice form once a discount is entered and renders as "Discount (reason)" via `discountLabel`. It is saved as null when the discount is zero, and invoice duplication copies it. Estimates have no reason field yet (their previews pass `discount_reason: null`), and converting an estimate does not add one.
+- Invoices sent **before** this fix still carry the wrong email in the client's inbox — resend them if needed.
 
 ### Docs
 - `docs/product-overview.md` — source-verified marketing/pitch reference (positioning, tiers, feature breakdown, integrations, messaging).

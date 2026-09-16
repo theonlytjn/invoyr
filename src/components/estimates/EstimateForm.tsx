@@ -132,6 +132,7 @@ export default function EstimateForm({ org, clients, estimate, existingItems, mo
     po_number: poNumber || null,
     subtotal: totals.subtotal,
     discount: totals.discount,
+    discount_reason: null,
     vat_amount: totals.vat_amount,
     total: totals.total,
     amount_paid: 0,

@@ -1,6 +1,7 @@
 import { Document, Page, Text, View, Image, StyleSheet } from "@react-pdf/renderer";
 import type { InvoiceTemplateProps } from "../types";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { discountLabel } from "@/lib/invoice-totals";
 
 const styles = StyleSheet.create({
   page: { fontFamily: "Helvetica", fontSize: 10, padding: 48, color: "#111827", backgroundColor: "#ffffff" },
@@ -126,7 +127,7 @@ export default function TJNClassicPdf({ invoice, items, client, org, totals, wat
             </View>
             {(totals.discount ?? 0) > 0 ? (
               <View style={styles.totalsRow}>
-                <Text style={styles.totalsLabel}>Discount</Text>
+                <Text style={[styles.totalsLabel, { flexShrink: 1, paddingRight: 8 }]}>{discountLabel(invoice.discount_reason)}</Text>
                 <Text>−{formatCurrency(totals.discount!, invoice.currency)}</Text>
               </View>
             ) : null}

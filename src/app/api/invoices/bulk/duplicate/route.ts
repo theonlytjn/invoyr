@@ -76,6 +76,7 @@ export async function POST(req: NextRequest) {
           // without it left a discounted duplicate whose stored total disagreed with
           // the one the PDF recomputes from the items and the (missing) discount.
           discount: source.discount,
+          discount_reason: source.discount_reason,
           subtotal: source.subtotal,
           vat_amount: source.vat_amount,
           total: source.total,

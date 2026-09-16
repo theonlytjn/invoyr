@@ -1,6 +1,7 @@
 import { Document, Page, Text, View, Image, StyleSheet } from "@react-pdf/renderer";
 import type { InvoiceTemplateProps } from "../types";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { discountLabel } from "@/lib/invoice-totals";
 
 const styles = StyleSheet.create({
   page: { fontFamily: "Helvetica", fontSize: 10, padding: 48, color: "#111827", backgroundColor: "#ffffff" },
@@ -136,7 +137,7 @@ export default function ModernStudioPdf({ invoice, items, client, org, totals, w
             </View>
             {(totals.discount ?? 0) > 0 ? (
               <View style={styles.subRow}>
-                <Text style={styles.subLabel}>Discount</Text>
+                <Text style={[styles.subLabel, { flexShrink: 1, paddingRight: 8 }]}>{discountLabel(invoice.discount_reason)}</Text>
                 <Text style={styles.subValue}>−{formatCurrency(totals.discount!, invoice.currency)}</Text>
               </View>
             ) : null}

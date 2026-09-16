@@ -162,6 +162,7 @@ export interface Invoice {
   amount_paid: number;
   po_number: string | null;
   discount: number;
+  discount_reason: string | null;
   notes: string | null;
   terms: string | null;
   stripe_payment_link: string | null;

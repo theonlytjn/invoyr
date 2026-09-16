@@ -1,5 +1,6 @@
 import { formatCurrency, formatDate } from "@/lib/utils";
 import type { InvoiceTemplateProps } from "./types";
+import { discountLabel } from "@/lib/invoice-totals";
 
 export default function CleanMinimal({ invoice, items, client, org, totals, documentType = "invoice", showInvoyrBranding = true }: InvoiceTemplateProps) {
   return (
@@ -73,7 +74,7 @@ export default function CleanMinimal({ invoice, items, client, org, totals, docu
           </div>
           {(totals.discount ?? 0) > 0 && (
             <div className="flex justify-between text-gray-500">
-              <span>Discount</span><span>−{formatCurrency(totals.discount!, invoice.currency)}</span>
+              <span className="min-w-0 break-words pr-3">{discountLabel(invoice.discount_reason)}</span><span>−{formatCurrency(totals.discount!, invoice.currency)}</span>
             </div>
           )}
           <div className="flex justify-between font-bold text-base pt-2 border-t border-gray-200 mt-2">

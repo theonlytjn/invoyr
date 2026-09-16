@@ -1,6 +1,7 @@
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 import type { InvoiceTemplateProps } from "../types";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { discountLabel } from "@/lib/invoice-totals";
 
 const STATUS_LABEL: Record<string, string> = {
   draft: "DRAFT",
@@ -117,7 +118,7 @@ export default function BoldSplitPdf({ invoice, items, client, org, totals, wate
               </View>
               {(totals.discount ?? 0) > 0 ? (
                 <View style={styles.totalsRow}>
-                  <Text style={styles.totalsLabel}>Discount</Text>
+                  <Text style={[styles.totalsLabel, { flexShrink: 1, paddingRight: 8 }]}>{discountLabel(invoice.discount_reason)}</Text>
                   <Text style={styles.totalsValue}>−{formatCurrency(totals.discount!, invoice.currency)}</Text>
                 </View>
               ) : null}

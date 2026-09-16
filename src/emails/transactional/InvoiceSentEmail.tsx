@@ -18,7 +18,12 @@ export interface InvoiceSentEmailProps {
   logoUrl?: string | null;
   accentColor?: string;
   invoiceNumber: string;
+  /** The amount the client owes, after any discount. */
   invoiceTotal: string;
+  /** Amount before the discount. Pass with `discount` so the client can see how the total was reached. */
+  totalBeforeDiscount?: string;
+  discount?: string;
+  discountReason?: string | null;
   issueDate?: string;
   dueDate?: string;
   payUrl: string;
@@ -32,6 +37,9 @@ export function InvoiceSentEmail({
   accentColor = "#111827",
   invoiceNumber,
   invoiceTotal,
+  totalBeforeDiscount,
+  discount,
+  discountReason,
   issueDate,
   dueDate,
   payUrl,
@@ -67,6 +75,9 @@ export function InvoiceSentEmail({
         issueDate={issueDate}
         dueDate={dueDate}
         total={invoiceTotal}
+        totalBeforeDiscount={totalBeforeDiscount}
+        discount={discount}
+        discountReason={discountReason}
         accentColor={accentColor}
       />
 

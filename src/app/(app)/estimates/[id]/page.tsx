@@ -83,6 +83,7 @@ export default async function EstimateDetailPage({ params }: Props) {
     po_number: estimate.po_number,
     subtotal: estimate.subtotal,
     discount: estimate.discount,
+    discount_reason: null,
     vat_amount: estimate.vat_amount,
     total: estimate.total,
     amount_paid: 0,
