@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
+import ClientQuickCreateDialog from "@/components/clients/ClientQuickCreateDialog";
 import { formatCurrency } from "@/lib/utils";
 import type { Client, Invoice, InvoiceItem, Organisation, InvoiceTemplate } from "@/lib/supabase/types";
 
@@ -43,6 +44,10 @@ function itemToRow(item: InvoiceItem): LineItemRow {
 
 export default function InvoiceForm({ org, clients, invoice, existingItems, invoiceNumber, mode }: Props) {
   const router = useRouter();
+  // Seeded from the server list, then extended by the inline "New client"
+  // dialog so a client created mid-invoice is selectable without a reload.
+  const [clientOptions, setClientOptions] = useState<Client[]>(clients);
+  const [clientDialogOpen, setClientDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -199,12 +204,21 @@ export default function InvoiceForm({ org, clients, invoice, existingItems, invo
           </div>
 
           <div className="space-y-1.5">
-            <Label>Client</Label>
+            <div className="flex items-center justify-between gap-3">
+              <Label>Client</Label>
+              <button
+                type="button"
+                onClick={() => setClientDialogOpen(true)}
+                className="text-sm font-medium text-neutral-950 underline underline-offset-4 hover:text-neutral-600 dark:text-neutral-50 dark:hover:text-neutral-300"
+              >
+                + New client
+              </button>
+            </div>
             <SearchableSelect
               value={clientId}
               onChange={setClientId}
-              placeholder="Select a client"
-              options={clients.map((c) => ({
+              placeholder={clientOptions.length ? "Select a client" : "No clients yet — add one"}
+              options={clientOptions.map((c) => ({
                 value: c.id,
                 label: c.name,
                 sublabel: c.company_name ?? undefined,
@@ -365,6 +379,16 @@ export default function InvoiceForm({ org, clients, invoice, existingItems, invo
           </Button>
         </div>
       </div>
+
+      <ClientQuickCreateDialog
+        open={clientDialogOpen}
+        onOpenChange={setClientDialogOpen}
+        orgId={org.id}
+        onCreated={(client) => {
+          setClientOptions((prev) => [client, ...prev]);
+          setClientId(client.id);
+        }}
+      />
 
       {/* Live preview */}
       <div className="hidden xl:block">

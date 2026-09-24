@@ -8,6 +8,7 @@ interface Props {
   onComplete: () => void;
   onConsentChange: (value: boolean) => void;
   saving: boolean;
+  error?: string | null;
 }
 
 const FEATURES = [
@@ -47,7 +48,7 @@ const FEATURES = [
   },
 ];
 
-export default function StepFirstInvoice({ data, onBack, onComplete, onConsentChange, saving }: Props) {
+export default function StepFirstInvoice({ data, onBack, onComplete, onConsentChange, saving, error }: Props) {
   return (
     <div className="space-y-6">
       <div>
@@ -91,6 +92,12 @@ export default function StepFirstInvoice({ data, onBack, onComplete, onConsentCh
           Send me occasional product tips and updates by email. You can unsubscribe at any time. We&apos;ll never share your email.
         </span>
       </label>
+
+      {error && (
+        <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-xs text-red-700">
+          {error}
+        </p>
+      )}
 
       <div className="flex gap-3">
         <button

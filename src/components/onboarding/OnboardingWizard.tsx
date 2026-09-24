@@ -41,6 +41,7 @@ const STEPS = [
 export default function OnboardingWizard({ userId, userName }: Props) {
   const [step, setStep] = useState(1);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<OnboardingData>({
     orgName: "",
     orgSlug: "",
@@ -63,44 +64,38 @@ export default function OnboardingWizard({ userId, userName }: Props) {
 
   async function complete() {
     setSaving(true);
+    setError(null);
     const supabase = createClient();
 
-    const orgId = crypto.randomUUID();
-
-    const { error: orgError } = await supabase
-      .from("organisations")
-      .insert({
-        id: orgId,
+    // Organisations are created server-side: RLS has no authenticated INSERT
+    // policy on the table, so inserting from the browser here always failed.
+    const res = await fetch("/api/org/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
         name: data.orgName,
-        slug: (data.orgSlug || slugify(data.orgName)) + "-" + orgId.slice(0, 6),
-        email: data.email || null,
-        phone: data.phone || null,
-        address_line1: data.address || null,
-        city: data.city || null,
-        postcode: data.postcode || null,
+        slug: data.orgSlug || slugify(data.orgName),
+        email: data.email,
+        phone: data.phone,
+        address: data.address,
+        city: data.city,
+        postcode: data.postcode,
         country: data.country,
-        vat_number: data.vatNumber || null,
-        logo_url: data.logoUrl || null,
-        accent_color: data.accentColor,
-      });
+        vatNumber: data.vatNumber,
+        logoUrl: data.logoUrl,
+        accentColor: data.accentColor,
+      }),
+    }).catch(() => null);
 
-    if (orgError) {
-      console.error("org insert failed", orgError);
+    const payload = res ? await res.json().catch(() => ({})) : {};
+
+    if (!res?.ok || !payload?.org?.id) {
+      setError(payload?.error ?? "We couldn't finish setting up your business. Please try again.");
       setSaving(false);
       return;
     }
 
-    const { error: memberError } = await supabase.from("org_members").insert({
-      org_id: orgId,
-      user_id: userId,
-      role: "owner",
-    });
-
-    if (memberError) {
-      console.error("member insert failed", memberError);
-      setSaving(false);
-      return;
-    }
+    const orgId: string = payload.org.id;
 
     const { error: profileError } = await supabase
       .from("profiles")
@@ -108,7 +103,7 @@ export default function OnboardingWizard({ userId, userName }: Props) {
       .eq("id", userId);
 
     if (profileError) {
-      console.error("profile upsert failed", profileError);
+      setError(profileError.message);
       setSaving(false);
       return;
     }
@@ -190,7 +185,7 @@ export default function OnboardingWizard({ userId, userName }: Props) {
             {step === 1 && <StepOrgSetup data={data} update={update} onNext={() => setStep(2)} />}
             {step === 2 && <StepBranding data={data} update={update} onBack={() => setStep(1)} onNext={() => setStep(3)} />}
             {step === 3 && <StepPlanSelection data={data} update={update} onBack={() => setStep(2)} onNext={() => setStep(4)} />}
-            {step === 4 && <StepFirstInvoice data={data} onBack={() => setStep(3)} onComplete={complete} onConsentChange={(v) => update({ marketingConsent: v })} saving={saving} />}
+            {step === 4 && <StepFirstInvoice data={data} onBack={() => setStep(3)} onComplete={complete} onConsentChange={(v) => update({ marketingConsent: v })} saving={saving} error={error} />}
           </div>
         </div>
       </div>
