@@ -17,6 +17,14 @@ describe("orgCreateSchema", () => {
     expect(parsed.success).toBe(true);
   });
 
+  it("drops a malformed logo URL instead of blocking onboarding", () => {
+    const parsed = orgCreateSchema.parse({ name: "Acme", logoUrl: "logo.png" });
+    expect(parsed.logoUrl).toBeUndefined();
+    expect(orgCreateSchema.parse({ name: "Acme", logoUrl: "https://cdn.acme.com/logo.png" }).logoUrl).toBe(
+      "https://cdn.acme.com/logo.png"
+    );
+  });
+
   it("rejects a malformed email or accent colour", () => {
     expect(orgCreateSchema.safeParse({ name: "Acme", email: "nope" }).success).toBe(false);
     expect(orgCreateSchema.safeParse({ name: "Acme", accentColor: "red" }).success).toBe(false);

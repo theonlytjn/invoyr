@@ -15,7 +15,15 @@ export const orgCreateSchema = z.object({
   postcode: z.string().trim().max(20).optional(),
   country: z.string().trim().length(2).optional(),
   vatNumber: z.string().trim().max(50).optional(),
-  logoUrl: z.string().trim().url().max(500).optional().or(z.literal("")),
+  // Lenient on purpose: onboarding asks for a logo URL as free text, and a typo
+  // there must never block the final step. An unusable value is dropped rather
+  // than rejected — the logo is editable in settings afterwards.
+  logoUrl: z
+    .string()
+    .trim()
+    .max(500)
+    .optional()
+    .transform((value) => (value && /^https?:\/\/\S+$/i.test(value) ? value : undefined)),
   accentColor: z
     .string()
     .trim()
@@ -25,14 +33,17 @@ export const orgCreateSchema = z.object({
 
 export type OrgCreateInput = z.infer<typeof orgCreateSchema>;
 
+/** Every field but the name is optional, whether or not a transform supplied it. */
+export type OrgCreateFields = Partial<Omit<OrgCreateInput, "name">> & { name: string };
+
 /** `organisations.slug` is unique, so a suffix of the new id keeps names collision-free. */
-export function buildOrgSlug(input: Pick<OrgCreateInput, "name" | "slug">, orgId: string): string {
+export function buildOrgSlug(input: Pick<OrgCreateFields, "name" | "slug">, orgId: string): string {
   const base = slugify(input.slug?.trim() || input.name);
   return `${base || "org"}-${orgId.slice(0, 6)}`;
 }
 
 /** Maps validated input onto the `organisations` columns, blanks becoming null. */
-export function buildOrgRow(input: OrgCreateInput, orgId: string) {
+export function buildOrgRow(input: OrgCreateFields, orgId: string) {
   const blankToNull = (value?: string) => {
     const trimmed = value?.trim();
     return trimmed ? trimmed : null;
