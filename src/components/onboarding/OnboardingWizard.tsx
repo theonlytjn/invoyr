@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
@@ -25,7 +25,6 @@ export type OnboardingData = {
   postcode: string;
   country: string;
   vatNumber: string;
-  logoUrl: string;
   accentColor: string;
   plan: string;
   marketingConsent: boolean;
@@ -42,6 +41,11 @@ export default function OnboardingWizard({ userId, userName }: Props) {
   const [step, setStep] = useState(1);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  // Set once the org exists. A retry after a failed logo upload must not create
+  // a second organisation, and neither must a double-click.
+  const [createdOrgId, setCreatedOrgId] = useState<string | null>(null);
+  const createdOrgIdRef = useRef<string | null>(null);
   const [data, setData] = useState<OnboardingData>({
     orgName: "",
     orgSlug: "",
@@ -52,7 +56,6 @@ export default function OnboardingWizard({ userId, userName }: Props) {
     postcode: "",
     country: "GB",
     vatNumber: "",
-    logoUrl: "",
     accentColor: "#111827",
     plan: "starter",
     marketingConsent: false,
@@ -69,33 +72,38 @@ export default function OnboardingWizard({ userId, userName }: Props) {
 
     // Organisations are created server-side: RLS has no authenticated INSERT
     // policy on the table, so inserting from the browser here always failed.
-    const res = await fetch("/api/org/create", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: data.orgName,
-        slug: data.orgSlug || slugify(data.orgName),
-        email: data.email,
-        phone: data.phone,
-        address: data.address,
-        city: data.city,
-        postcode: data.postcode,
-        country: data.country,
-        vatNumber: data.vatNumber,
-        logoUrl: data.logoUrl,
-        accentColor: data.accentColor,
-      }),
-    }).catch(() => null);
+    let orgId = createdOrgIdRef.current;
 
-    const payload = res ? await res.json().catch(() => ({})) : {};
+    if (!orgId) {
+      const res = await fetch("/api/org/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: data.orgName,
+          slug: data.orgSlug || slugify(data.orgName),
+          email: data.email,
+          phone: data.phone,
+          address: data.address,
+          city: data.city,
+          postcode: data.postcode,
+          country: data.country,
+          vatNumber: data.vatNumber,
+          accentColor: data.accentColor,
+        }),
+      }).catch(() => null);
 
-    if (!res?.ok || !payload?.org?.id) {
-      setError(payload?.error ?? "We couldn't finish setting up your business. Please try again.");
-      setSaving(false);
-      return;
+      const payload = res ? await res.json().catch(() => ({})) : {};
+
+      if (!res?.ok || !payload?.org?.id) {
+        setError(payload?.error ?? "We couldn't finish setting up your business. Please try again.");
+        setSaving(false);
+        return;
+      }
+
+      orgId = payload.org.id as string;
+      createdOrgIdRef.current = orgId;
+      setCreatedOrgId(orgId);
     }
-
-    const orgId: string = payload.org.id;
 
     const { error: profileError } = await supabase
       .from("profiles")
@@ -106,6 +114,27 @@ export default function OnboardingWizard({ userId, userName }: Props) {
       setError(profileError.message);
       setSaving(false);
       return;
+    }
+
+    // The logo can only be uploaded now: the storage policies key on the org id
+    // that has just been created.
+    if (logoFile) {
+      const body = new FormData();
+      body.append("orgId", orgId);
+      body.append("file", logoFile);
+
+      const logoRes = await fetch("/api/onboarding/logo", { method: "POST", body }).catch(() => null);
+
+      if (!logoRes?.ok) {
+        const logoPayload = logoRes ? await logoRes.json().catch(() => ({})) : {};
+        setError(
+          `${data.orgName || "Your business"} is set up, but the logo didn't upload${
+            logoPayload?.error ? ` (${logoPayload.error})` : ""
+          }. Try again, or add it later in Settings.`
+        );
+        setSaving(false);
+        return;
+      }
     }
 
     await fetch("/api/onboarding/welcome", {
@@ -183,9 +212,9 @@ export default function OnboardingWizard({ userId, userName }: Props) {
 
             {/* Step content */}
             {step === 1 && <StepOrgSetup data={data} update={update} onNext={() => setStep(2)} />}
-            {step === 2 && <StepBranding data={data} update={update} onBack={() => setStep(1)} onNext={() => setStep(3)} />}
+            {step === 2 && <StepBranding data={data} update={update} logoFile={logoFile} onLogoChange={setLogoFile} onBack={() => setStep(1)} onNext={() => setStep(3)} />}
             {step === 3 && <StepPlanSelection data={data} update={update} onBack={() => setStep(2)} onNext={() => setStep(4)} />}
-            {step === 4 && <StepFirstInvoice data={data} onBack={() => setStep(3)} onComplete={complete} onConsentChange={(v) => update({ marketingConsent: v })} saving={saving} error={error} />}
+            {step === 4 && <StepFirstInvoice data={data} onBack={() => setStep(3)} onComplete={complete} onConsentChange={(v) => update({ marketingConsent: v })} saving={saving} error={error} onSkip={createdOrgId ? () => { window.location.href = "/dashboard"; } : undefined} />}
           </div>
         </div>
       </div>

@@ -9,6 +9,8 @@ interface Props {
   onConsentChange: (value: boolean) => void;
   saving: boolean;
   error?: string | null;
+  /** Offered once the org exists, so a failed logo upload can't trap the user. */
+  onSkip?: () => void;
 }
 
 const FEATURES = [
@@ -48,7 +50,7 @@ const FEATURES = [
   },
 ];
 
-export default function StepFirstInvoice({ data, onBack, onComplete, onConsentChange, saving, error }: Props) {
+export default function StepFirstInvoice({ data, onBack, onComplete, onConsentChange, saving, error, onSkip }: Props) {
   return (
     <div className="space-y-6">
       <div>
@@ -94,9 +96,18 @@ export default function StepFirstInvoice({ data, onBack, onComplete, onConsentCh
       </label>
 
       {error && (
-        <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-xs text-red-700">
-          {error}
-        </p>
+        <div role="alert" className="space-y-2 rounded-xl border border-red-200 bg-red-50 p-4">
+          <p className="text-xs text-red-700">{error}</p>
+          {onSkip && (
+            <button
+              type="button"
+              onClick={onSkip}
+              className="text-xs font-medium text-red-700 underline underline-offset-4 hover:text-red-900"
+            >
+              Continue to dashboard
+            </button>
+          )}
+        </div>
       )}
 
       <div className="flex gap-3">
