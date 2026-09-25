@@ -104,11 +104,29 @@ export default function InvoiceAttachments({ invoiceId, orgId, initialAttachment
     // Extract storage path from URL
     const url = new URL(attachment.file_url);
     const storagePath = url.pathname.split("/object/public/attachments/")[1];
-    if (storagePath) {
-      await supabase.storage.from("attachments").remove([storagePath]);
+
+    // The row is removed first: an orphaned file is invisible clutter, whereas a
+    // row whose file is gone shows the user a broken download.
+    const { data: removed, error: rowError } = await supabase
+      .from("invoice_attachments")
+      .delete()
+      .eq("id", attachment.id)
+      .select("id");
+
+    if (rowError || !removed?.length) {
+      setError(rowError?.message ?? "That attachment couldn't be removed. Please reload and try again.");
+      setDeletingId(null);
+      return;
     }
 
-    await supabase.from("invoice_attachments").delete().eq("id", attachment.id);
+    if (storagePath) {
+      const { error: storageError } = await supabase.storage
+        .from("attachments")
+        .remove([storagePath]);
+      // The attachment is already detached from the invoice; a leftover file is
+      // worth logging but not worth failing the action the user asked for.
+      if (storageError) console.error("attachment file was not removed", storageError);
+    }
 
     setAttachments((prev) => prev.filter((a) => a.id !== attachment.id));
     setDeletingId(null);

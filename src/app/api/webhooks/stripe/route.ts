@@ -12,6 +12,7 @@ import { InvoicePaidOwnerEmail } from "@/emails/transactional/InvoicePaidOwnerEm
 import { getPlanByPriceId } from "@/config/plans";
 import { formatDate } from "@/lib/utils";
 import { recordPaymentRow } from "@/lib/payments/record-payment-row";
+import { applyInvoicePaymentState } from "@/lib/payments/apply-invoice-payment-state";
 import type Stripe from "stripe";
 
 export async function POST(req: NextRequest) {
@@ -33,7 +34,12 @@ export async function POST(req: NextRequest) {
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
       if (session.mode === "payment") {
-        await handleInvoiceCheckout(session);
+        // Answering 200 after a failed state write would stop Stripe retrying,
+        // leaving a paid invoice reading unpaid for good.
+        const applied = await handleInvoiceCheckout(session);
+        if (!applied) {
+          return NextResponse.json({ error: "Invoice state not updated" }, { status: 500 });
+        }
       } else if (session.mode === "subscription") {
         await handleSubscriptionCheckout(session);
       }
@@ -57,14 +63,40 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ received: true });
 }
 
-async function handleInvoiceCheckout(session: Stripe.Checkout.Session) {
+async function handleInvoiceCheckout(session: Stripe.Checkout.Session): Promise<boolean> {
   const invoiceId = session.metadata?.invoice_id;
   const orgId = session.metadata?.org_id;
-  if (!invoiceId || !orgId) return;
+  if (!invoiceId || !orgId) return true;
 
   const supabase = await createServiceClient();
   const amountPaid = (session.amount_total ?? 0) / 100;
   const currency = (session.currency ?? "gbp").toUpperCase();
+
+  // This handler can now answer 500 so Stripe retries a failed state write, so
+  // it has to be idempotent. The PayPal paths already dedupe on the capture id;
+  // this one keys on the payment intent, stored in the same column.
+  const paymentIntentId = (session.payment_intent as string | null) ?? null;
+
+  if (paymentIntentId) {
+    const { data: existing } = await supabase
+      .from("payments")
+      .select("id")
+      .eq("stripe_payment_intent_id", paymentIntentId)
+      .maybeSingle();
+
+    if (existing) {
+      const { applied: reapplied } = await applyInvoicePaymentState(
+        supabase,
+        {
+          orgId,
+          invoiceId,
+          state: { status: "paid", paid_at: new Date().toISOString(), amount_paid: amountPaid },
+        },
+        { stripe_session: session.id, retry: true }
+      );
+      return reapplied;
+    }
+  }
 
   await recordPaymentRow(
     supabase,
@@ -74,16 +106,25 @@ async function handleInvoiceCheckout(session: Stripe.Checkout.Session) {
       amount: amountPaid,
       currency,
       method: "stripe",
-      stripe_payment_intent_id: session.payment_intent as string | null,
+      stripe_payment_intent_id: paymentIntentId,
       paid_at: new Date().toISOString(),
     },
     { stripe_session: session.id }
   );
 
-  await supabase
-    .from("invoices")
-    .update({ status: "paid", paid_at: new Date().toISOString(), amount_paid: amountPaid })
-    .eq("id", invoiceId);
+  const { applied } = await applyInvoicePaymentState(
+    supabase,
+    {
+      orgId,
+      invoiceId,
+      state: { status: "paid", paid_at: new Date().toISOString(), amount_paid: amountPaid },
+    },
+    { stripe_session: session.id }
+  );
+
+  // Stop before the receipt emails: the caller answers 500 so Stripe retries,
+  // and the retry is what should send them.
+  if (!applied) return false;
 
   await supabase.from("audit_logs").insert({
     org_id: orgId,
@@ -200,6 +241,8 @@ async function handleInvoiceCheckout(session: Stripe.Checkout.Session) {
       })(),
     ]);
   }
+
+  return true;
 }
 
 async function handleSubscriptionCheckout(session: Stripe.Checkout.Session) {

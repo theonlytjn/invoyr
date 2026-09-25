@@ -1108,6 +1108,59 @@ using (
   )
 );
 
+-- attachments: invoice attachments, written as `<org_id>/<invoice_id>/<file>`.
+-- The bucket itself was MISSING in production until 25 Sep 2026 (migration
+-- create_attachments_bucket_and_policies) — every upload had failed since the
+-- feature shipped, and `invoice_attachments` had no rows.
+insert into storage.buckets (id, name, public, file_size_limit)
+values ('attachments', 'attachments', true, 10485760)
+on conflict (id) do nothing;
+
+drop policy if exists attachments_select on storage.objects;
+drop policy if exists attachments_insert on storage.objects;
+drop policy if exists attachments_update on storage.objects;
+drop policy if exists attachments_delete on storage.objects;
+
+create policy attachments_select on storage.objects for select to authenticated
+using (
+  bucket_id = 'attachments'
+  and exists (
+    select 1 from public.org_members
+    where org_members.org_id::text = (storage.foldername(storage.objects.name))[1]
+      and org_members.user_id = auth.uid()
+  )
+);
+
+create policy attachments_insert on storage.objects for insert to authenticated
+with check (
+  bucket_id = 'attachments'
+  and exists (
+    select 1 from public.org_members
+    where org_members.org_id::text = (storage.foldername(storage.objects.name))[1]
+      and org_members.user_id = auth.uid()
+  )
+);
+
+create policy attachments_update on storage.objects for update to authenticated
+using (
+  bucket_id = 'attachments'
+  and exists (
+    select 1 from public.org_members
+    where org_members.org_id::text = (storage.foldername(storage.objects.name))[1]
+      and org_members.user_id = auth.uid()
+  )
+);
+
+create policy attachments_delete on storage.objects for delete to authenticated
+using (
+  bucket_id = 'attachments'
+  and exists (
+    select 1 from public.org_members
+    where org_members.org_id::text = (storage.foldername(storage.objects.name))[1]
+      and org_members.user_id = auth.uid()
+  )
+);
+
 -- receipts: the existing live policy, recorded here as-is.
 drop policy if exists "Org members can manage receipts" on storage.objects;
 create policy "Org members can manage receipts" on storage.objects for all

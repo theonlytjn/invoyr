@@ -117,7 +117,7 @@ export default function InvoiceForm({ org, clients, invoice, existingItems, invo
         return;
       }
 
-      await supabase.from("invoice_items").insert(
+      const { error: itemsErr } = await supabase.from("invoice_items").insert(
         items.map((item, idx) => ({
           invoice_id: inv.id,
           description: item.description,
@@ -128,7 +128,16 @@ export default function InvoiceForm({ org, clients, invoice, existingItems, invo
         }))
       );
 
-      await supabase.from("audit_logs").insert({
+      if (itemsErr) {
+        // An invoice carrying a total with no lines is worse than no invoice at
+        // all, and it would keep the invoice number. Undo the header.
+        await supabase.from("invoices").delete().eq("id", inv.id);
+        setError(itemsErr.message);
+        setSaving(false);
+        return;
+      }
+
+      const { error: auditErr } = await supabase.from("audit_logs").insert({
         org_id: org.id,
         action: "invoice.created",
         entity_type: "invoice",
@@ -136,21 +145,30 @@ export default function InvoiceForm({ org, clients, invoice, existingItems, invo
         meta: { invoice_number: inv.invoice_number },
       });
 
+      // Best-effort: the invoice exists, so a missing history row must not fail
+      // the save — but it is logged rather than discarded.
+      if (auditErr) console.error("invoice.created audit log failed", auditErr);
+
       router.push(`/invoices/${inv.id}`);
     } else if (invoice) {
-      const { error: updateErr } = await supabase
+      // `.select()` is load-bearing: a row hidden by RLS is filtered rather than
+      // rejected, so an UPDATE that changes nothing still returns error: null.
+      const { data: updated, error: updateErr } = await supabase
         .from("invoices")
         .update({ ...payload, invoice_number: undefined })
-        .eq("id", invoice.id);
+        .eq("id", invoice.id)
+        .select("id");
 
-      if (updateErr) {
-        setError(updateErr.message);
+      if (updateErr || !updated?.length) {
+        setError(updateErr?.message ?? "This invoice couldn't be saved. Please reload and try again.");
         setSaving(false);
         return;
       }
 
-      await supabase.from("invoice_items").delete().eq("invoice_id", invoice.id);
-      await supabase.from("invoice_items").insert(
+      // New lines are written BEFORE the old ones are removed. The previous
+      // order (delete, then insert) meant a failed insert left the invoice with
+      // its total and no line items at all, and still redirected as a success.
+      const { error: insertErr } = await supabase.from("invoice_items").insert(
         items.map((item, idx) => ({
           invoice_id: invoice.id,
           description: item.description,
@@ -160,6 +178,29 @@ export default function InvoiceForm({ org, clients, invoice, existingItems, invo
           sort_order: idx,
         }))
       );
+
+      if (insertErr) {
+        setError(insertErr.message);
+        setSaving(false);
+        return;
+      }
+
+      const previousItemIds = (existingItems ?? []).map((item) => item.id);
+
+      if (previousItemIds.length) {
+        const { error: deleteErr } = await supabase
+          .from("invoice_items")
+          .delete()
+          .in("id", previousItemIds);
+
+        if (deleteErr) {
+          setError(
+            `Your changes were saved, but the previous line items couldn't be removed (${deleteErr.message}). Reload the invoice before editing it again.`
+          );
+          setSaving(false);
+          return;
+        }
+      }
 
       router.push(`/invoices/${invoice.id}`);
     }

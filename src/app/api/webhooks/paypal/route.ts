@@ -7,6 +7,7 @@ import { PaymentReceivedEmail } from "@/emails/transactional/PaymentReceivedEmai
 import { InvoicePaidOwnerEmail } from "@/emails/transactional/InvoicePaidOwnerEmail";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { recordPaymentRow } from "@/lib/payments/record-payment-row";
+import { applyInvoicePaymentState } from "@/lib/payments/apply-invoice-payment-state";
 
 export async function POST(req: NextRequest) {
   const body = await req.text();
@@ -82,14 +83,25 @@ export async function POST(req: NextRequest) {
     { paypal_capture: captureId, source: "webhook" }
   );
 
-  await supabase
-    .from("invoices")
-    .update({
-      status: newStatus,
-      amount_paid: newAmountPaid,
-      paid_at: newStatus === "paid" ? now : invoice.paid_at,
-    })
-    .eq("id", invoiceId);
+  const { applied } = await applyInvoicePaymentState(
+    supabase,
+    {
+      orgId: invoice.org_id,
+      invoiceId,
+      state: {
+        status: newStatus,
+        amount_paid: newAmountPaid,
+        paid_at: newStatus === "paid" ? now : invoice.paid_at,
+      },
+    },
+    { paypal_capture: captureId, source: "webhook" }
+  );
+
+  // 500 so PayPal retries; the capture-id guard above makes the retry safe.
+  // Answering 200 here would leave a paid invoice reading unpaid for good.
+  if (!applied) {
+    return NextResponse.json({ error: "Invoice state not updated" }, { status: 500 });
+  }
 
   await supabase.from("audit_logs").insert({
     org_id: invoice.org_id,

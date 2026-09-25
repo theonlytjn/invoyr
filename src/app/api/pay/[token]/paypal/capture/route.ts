@@ -12,6 +12,7 @@ import { z } from "zod";
 import { apiError } from "@/lib/api/errors";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { recordPaymentRow } from "@/lib/payments/record-payment-row";
+import { applyInvoicePaymentState } from "@/lib/payments/apply-invoice-payment-state";
 
 const bodySchema = z.object({ orderId: z.string().min(1).max(200) });
 
@@ -85,14 +86,23 @@ export async function POST(
     { paypal_order: orderId, paypal_capture: captureId }
   );
 
-  await supabase
-    .from("invoices")
-    .update({
-      status: newStatus,
-      amount_paid: newAmountPaid,
-      paid_at: newStatus === "paid" ? now : invoice.paid_at,
-    })
-    .eq("id", invoice.id);
+  // Deliberately does NOT fail the request: the payer's money is captured, so
+  // an error here would tell someone who has just paid that it went wrong. The
+  // failure is recorded loudly instead (log + `invoice.payment_state_failed` in
+  // the invoice's history), and the PayPal webhook retries the state write.
+  await applyInvoicePaymentState(
+    supabase,
+    {
+      orgId: invoice.org_id,
+      invoiceId: invoice.id,
+      state: {
+        status: newStatus,
+        amount_paid: newAmountPaid,
+        paid_at: newStatus === "paid" ? now : invoice.paid_at,
+      },
+    },
+    { paypal_order: orderId, paypal_capture: captureId }
+  );
 
   await supabase.from("audit_logs").insert({
     org_id: invoice.org_id,

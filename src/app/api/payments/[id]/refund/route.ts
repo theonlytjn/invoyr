@@ -3,6 +3,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
 import { outstandingBalance } from "@/lib/bulk-actions";
+import { applyInvoicePaymentState } from "@/lib/payments/apply-invoice-payment-state";
 
 const schema = z.object({
   amount: z.number().positive(),
@@ -89,14 +90,28 @@ export async function POST(
     newStatus = isOverdue ? "overdue" : "sent";
   }
 
-  await supabase
-    .from("invoices")
-    .update({
-      amount_paid: newAmountPaid,
-      status: newStatus,
-      paid_at: newStatus === "paid" ? undefined : null,
-    })
-    .eq("id", payment.invoice_id);
+  const { applied, error: stateError } = await applyInvoicePaymentState(
+    supabase,
+    {
+      orgId: org.id,
+      invoiceId: payment.invoice_id,
+      state: {
+        amount_paid: newAmountPaid,
+        status: newStatus,
+        paid_at: newStatus === "paid" ? undefined : null,
+      },
+    },
+    { payment_id: id, refund_amount: amount }
+  );
+
+  // The refund itself is already recorded, so this reports the discrepancy
+  // rather than pretending the invoice was recalculated.
+  if (!applied) {
+    return NextResponse.json(
+      { error: `The refund was recorded but the invoice total wasn't updated (${stateError}).` },
+      { status: 500 }
+    );
+  }
 
   await supabase.from("audit_logs").insert({
     org_id: org.id,
