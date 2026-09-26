@@ -21,7 +21,11 @@ function isMarketingPath(pathname: string): boolean {
   return MARKETING_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
 
-// Content-Security-Policy, ENFORCING since 26 Sep 2026. The same value is set on
+// Content-Security-Policy. BACK TO REPORT-ONLY on 26 Sep 2026: enforcing it broke
+// /login (blank page) and stopped the Turnstile widget rendering on /signup, both
+// of which are unreachable in a signed-in browser and so were never observed under
+// Report-Only. Do not flip again until those two pages are checked signed-out.
+// The same value is set on
 // the REQUEST header, which Next.js reads to add the per-request nonce to its own
 // scripts. Before flipping, the two flows that had never been checked under
 // Report-Only were verified on production: the /pay/[token] page with the PayPal
@@ -55,7 +59,7 @@ export async function middleware(request: NextRequest) {
   const nonce = btoa(crypto.randomUUID());
   const csp = buildCsp(nonce);
   const applyCsp = (res: NextResponse) => {
-    res.headers.set("Content-Security-Policy", csp);
+    res.headers.set("Content-Security-Policy-Report-Only", csp);
     return res;
   };
   const nextWithNonce = () => {
