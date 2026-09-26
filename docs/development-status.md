@@ -1,6 +1,6 @@
 # Invoyr — Development Status & Handoff
 
-_Last updated: 16 September 2026._
+_Last updated: 26 September 2026._
 _Snapshot of everything completed in the recent development phase and what's left before/at launch._
 
 ---
@@ -69,6 +69,13 @@ Shipped across commits `5a94452`, `ea8cba0`, `70c1f10`, `337cc50`, `3dc4b48`, `4
 - **Fix.** Onboarding now posts to `POST /api/org/create`, which validates with Zod (`src/lib/onboarding/org-input.ts`, unit tested) and writes the row with the service client. That route previously accepted only `name` — it now takes the wizard's full payload (contact details, logo, accent colour) and **deletes the org if the `org_members` insert fails**, since an org with no members is invisible to every RLS policy and unreachable forever. The wizard surfaces the error instead of swallowing it. RLS is unchanged: `organisations` still has no authenticated INSERT policy.
 - **LESSON (third of its kind, after `logos_select` and the PayPal enum): dropping a policy needs proof that every writer of that table is server-side.** A grep for `.from("organisations").insert` in `src/components` would have caught it. Browser writes fail silently wherever the caller only logs to the console.
 
+### CSP is now ENFORCING, and the launch checklist re-checked (26 Sep 2026)
+- **CSP flipped from Report-Only to enforcing** (`applyCsp` in `middleware.ts`). The two flows that blocked this for two months were checked on production first, under Report-Only: `/pay/[token]` with the PayPal SDK (buttons render, **zero violations — no `'unsafe-eval'` needed**) and the app shell. Re-verified after the flip: pay page and dashboard both render clean with the enforcing header. Turnstile was not directly observable (a signed-in browser can't reach `/signup`), but `challenges.cloudflare.com` is allowed in `script-src`, `frame-src` and `connect-src` — **worth one confirmation in a private window**.
+- **TrueLayer is STILL NOT APPROVED for production** (checked live 26 Sep via `/api/bank/connect`): the auth dialog still shows "Testing mode active — This application has not been authorised for production use… reach out to sales@truelayer.com". Open Banking remains developer-only until TrueLayer grants it. **Action: email sales@truelayer.com.**
+- Tony completed: PayPal client secret rotated; live PayPal webhook created with its ID set; leaked-password protection enabled; dead Upstash vars removed from Vercel; plan gating verified (upgrade prompts correct); inline client creation, emails and the estimate/credit-note/client-deletion flows all verified working; a real client paid a PayPal invoice successfully.
+- **RATE LIMITING IS NOW FULLY OFF.** The Upstash vars were removed rather than repointed, so `rateLimit` fails open on `/api/contact` and every `/api/pay/[token]/*` endpoint. That is a deliberate launch decision to make, not an oversight to forget: either provision a working Redis or accept unthrottled public endpoints.
+- Still untested: **Stripe card payment end-to-end** (blocked on creating the Invoyr Stripe account) and **invoice attachments** (the bucket was only created 25 Sep, so nothing has ever been uploaded).
+
 ### Swept the codebase for silently-swallowed write failures (25 Sep 2026)
 Triggered by the onboarding bug: ~90 write sites ignore their result. Top tier fixed; the rest are listed below as follow-ups.
 - **Invoice attachments had NEVER worked in production.** The `attachments` storage bucket did not exist (only `logos` and `receipts` did) and was absent from schema.sql — `invoice_attachments` had zero rows. Created via migration `create_attachments_bucket_and_policies` (public, 10MB cap) with four org-scoped policies mirroring `logos`, and recorded in schema.sql §20. **Note: the bucket is public (unguessable paths), matching receipts/logos. If attachments hold sensitive documents, switch to a private bucket + signed URLs.**
@@ -99,11 +106,11 @@ Triggered by the onboarding bug: ~90 write sites ignore their result. Top tier f
 
 ## 🔧 Left to do (pick-up list)
 
-1. **Flip CSP to enforcing.** Currently Report-Only on app pages (`middleware.ts` → `applyCsp` sets `Content-Security-Policy-Report-Only`). Before flipping to `Content-Security-Policy`, confirm **no blocking violations** on: (a) `/pay/[token]` with the **PayPal SDK** loaded (PayPal sometimes needs `'unsafe-eval'`), and (b) `/signup` **Turnstile**. Neither was reachable in-session (no PayPal-configured invoice token; logged-in users can't view `/signup`).
-2. **TrueLayer production approval** (external) — live still shows "Testing mode active"; real customers can't connect until approved.
+1. **Stripe card payment E2E** — blocked on the Invoyr Stripe account being created.
+2. **TrueLayer production approval** (external) — re-checked 26 Sep 2026, still "Testing mode active". Email sales@truelayer.com; real customers cannot connect until approved.
 3. **Legal review** of `/privacy` + `/terms` (external).
-4. **Leaked-password protection** — Supabase → Authentication → Providers → Email → "Prevent use of leaked passwords" (available on Pro). _Toggle by hand._
-5. **Payments E2E test** — a real Stripe card payment via the invoice → pay page → webhook → status flow, ideally from a second account. (Founder intended to self-test.)
+4. **Trial never starts at signup** — onboarding shows "Starter · 7-Day Trial" but writes no subscription row, so a new org resolves to *no plan* and even Starter's `custom_branding` is locked. Decide: start a trial at signup, or change the copy.
+5. **Rate limiting decision** — Upstash vars removed from Vercel (26 Sep), so public endpoints are unthrottled. Provision Redis or accept it knowingly.
 6. **Marketing-side CSP** — the nonce CSP is app-only (marketing kept static). A full script-src CSP for marketing would need a hash/nonce approach that preserves static generation.
 
 ---
