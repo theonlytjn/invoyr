@@ -4,7 +4,6 @@ import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { ACTIVE_ORG_COOKIE } from "@/lib/auth";
 import { buildOrgRow, orgCreateSchema } from "@/lib/onboarding/org-input";
-import { TRIAL_DAYS } from "@/config/plans";
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}));
@@ -43,23 +42,6 @@ export async function POST(req: Request) {
     await service.from("organisations").delete().eq("id", org.id);
     return NextResponse.json({ error: memberErr.message }, { status: 500 });
   }
-
-  // Start the 7-day trial the onboarding wizard promises. Without this row the
-  // org resolves to *no plan* — not even Starter's own features — because
-  // getOrgPlan falls back to `subscriptions` and finds nothing.
-  const trialEndsAt = new Date(Date.now() + TRIAL_DAYS * 24 * 60 * 60 * 1000).toISOString();
-
-  const { error: trialErr } = await service.from("subscriptions").insert({
-    org_id: org.id,
-    plan: parsed.data.plan ?? "starter",
-    status: "trialing",
-    trial_ends_at: trialEndsAt,
-  });
-
-  // Not fatal: the org exists and is usable, and billing can start a real
-  // subscription later. Logged rather than discarded so a silent "no plan"
-  // signup is traceable.
-  if (trialErr) console.error("trial subscription was not created", { orgId: org.id, error: trialErr.message });
 
   const cookieStore = await cookies();
   cookieStore.set(ACTIVE_ORG_COOKIE, org.id, {

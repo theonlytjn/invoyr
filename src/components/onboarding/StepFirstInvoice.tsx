@@ -1,5 +1,6 @@
 "use client";
 
+import { TRIAL_DAYS } from "@/config/plans";
 import type { OnboardingData } from "./OnboardingWizard";
 
 interface Props {
@@ -55,7 +56,9 @@ export default function StepFirstInvoice({ data, onBack, onComplete, onConsentCh
     <div className="space-y-6">
       <div>
         <h2 className="text-3xl font-serif text-neutral-950 mb-1">You&apos;re almost ready!</h2>
-        <p className="text-sm text-neutral-500">Here&apos;s what you can do straight away.</p>
+        <p className="text-sm text-neutral-500">
+          Add a card to start your {TRIAL_DAYS}-day trial. Nothing is charged until it ends.
+        </p>
       </div>
 
       <div className="space-y-3">
@@ -79,7 +82,7 @@ export default function StepFirstInvoice({ data, onBack, onComplete, onConsentCh
         </div>
         <div className="mt-2 flex items-center justify-between">
           <span className="text-neutral-500">Plan</span>
-          <span className="font-medium text-neutral-950 capitalize">{data.plan} · 7-day trial</span>
+          <span className="font-medium text-neutral-950 capitalize">{data.plan} · {TRIAL_DAYS}-day trial</span>
         </div>
       </div>
 
@@ -125,7 +128,7 @@ export default function StepFirstInvoice({ data, onBack, onComplete, onConsentCh
           disabled={saving}
           className="flex-1 rounded-lg bg-neutral-950 px-4 py-2.5 text-sm font-medium text-white hover:bg-neutral-800 transition-colors disabled:opacity-50"
         >
-          {saving ? "Setting up…" : "Go to dashboard →"}
+          {saving ? "Setting up…" : "Add payment details →"}
         </button>
       </div>
     </div>

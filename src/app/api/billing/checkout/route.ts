@@ -9,6 +9,8 @@ import { TRIAL_DAYS } from "@/config/plans";
 
 const schema = z.object({
   planId: z.enum(["starter", "business", "pro"]),
+  /** Where the user came from, so they land somewhere sensible afterwards. */
+  origin: z.enum(["billing", "onboarding"]).default("billing"),
 });
 
 export async function POST(req: NextRequest) {
@@ -22,7 +24,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
   }
 
-  const { planId } = parsed.data;
+  const { planId, origin } = parsed.data;
   const priceId = getPriceId(planId as PlanId);
   if (!priceId) {
     return NextResponse.json({ error: "Plan not configured" }, { status: 500 });
@@ -56,8 +58,13 @@ export async function POST(req: NextRequest) {
       metadata: { org_id: org.id, plan_id: planId },
     },
     payment_method_collection: "always",
-    success_url: `${appUrl}/settings/billing?upgraded=1`,
-    cancel_url: `${appUrl}/settings/billing`,
+    success_url:
+      origin === "onboarding"
+        ? `${appUrl}/dashboard?welcome=1`
+        : `${appUrl}/settings/billing?upgraded=1`,
+    // A cancelled onboarding checkout still has an org, so it lands on billing
+    // where the lockout explains what is needed.
+    cancel_url: `${appUrl}/settings/billing${origin === "onboarding" ? "?reason=subscription_required" : ""}`,
     allow_promotion_codes: true,
   });
 

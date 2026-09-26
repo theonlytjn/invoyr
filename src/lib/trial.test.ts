@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isSubscriptionActive, trialDaysRemaining } from "./billing";
+import { hasActiveComp, isSubscriptionActive, trialDaysRemaining } from "./trial";
 
 const inDays = (days: number) => new Date(Date.now() + days * 86400000).toISOString();
 
@@ -39,5 +39,20 @@ describe("trialDaysRemaining", () => {
     expect(trialDaysRemaining("trialing", inDays(-1))).toBe(0);
     expect(trialDaysRemaining("active", inDays(3))).toBeNull();
     expect(trialDaysRemaining("trialing", null)).toBeNull();
+  });
+});
+
+describe("hasActiveComp", () => {
+  it("counts a comp with no expiry", () => {
+    expect(hasActiveComp({ comp_plan: "pro", comp_expires_at: null })).toBe(true);
+  });
+
+  it("ignores an expired comp", () => {
+    expect(hasActiveComp({ comp_plan: "pro", comp_expires_at: inDays(-1) })).toBe(false);
+  });
+
+  it("is false without a comp plan", () => {
+    expect(hasActiveComp({ comp_plan: null })).toBe(false);
+    expect(hasActiveComp(null)).toBe(false);
   });
 });

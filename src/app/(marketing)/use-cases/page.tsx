@@ -177,7 +177,7 @@ export default function UseCasesPage() {
       {/* CTA */}
       <section className="border-t border-neutral-200 dark:border-neutral-900 py-24 text-center">
         <h2 className="font-serif text-4xl md:text-5xl text-neutral-900 dark:text-neutral-50">See it in action</h2>
-        <p className="mt-4 text-neutral-600 dark:text-neutral-200">Start a free 7-day trial — no credit card needed.</p>
+        <p className="mt-4 text-neutral-600 dark:text-neutral-200">Start a free 14-day trial — cancel any time before it ends.</p>
         <Link href="/signup" className="mt-9 inline-block px-6 py-3.5 rounded-xl bg-neutral-950 dark:bg-neutral-50 text-white dark:text-neutral-950 font-medium hover:bg-neutral-800 dark:hover:bg-white transition-colors">
           Start free trial →
         </Link>

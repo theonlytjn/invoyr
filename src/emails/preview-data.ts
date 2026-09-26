@@ -75,8 +75,12 @@ export const PREVIEW_DATA = {
   } satisfies OverdueReminderEmailProps,
 
   trialEnding: {
-    firstName: "Alex",
+    firstName: "Sarah",
     ctaUrl: "https://app.invoyr.io/settings/billing",
+    daysLeft: 3,
+    endsOn: "3 October",
+    willBeCharged: true,
+    orgName: "Invoyr",
   } satisfies TrialEndingEmailProps,
 
   paymentFailed: {

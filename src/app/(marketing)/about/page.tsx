@@ -11,7 +11,7 @@ const CONTAINER = "max-w-[1600px] mx-auto px-6 lg:px-12";
 const CARD = "rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-gradient-to-br from-emerald-50/70 dark:from-emerald-800/20 via-white dark:via-neutral-900 to-white dark:to-neutral-950";
 
 const STATS = [
-  { stat: "7 days", label: "Free trial, no card required" },
+  { stat: "14 days", label: "Free trial on every plan" },
   { stat: "Direct", label: "Payments go straight to your Stripe" },
   { stat: "2 min", label: "From new invoice to sent" },
 ];
@@ -116,7 +116,7 @@ export default function AboutPage() {
       {/* CTA */}
       <section className="border-t border-neutral-200 dark:border-neutral-900 py-24 text-center">
         <h2 className="font-serif text-4xl md:text-5xl text-neutral-900 dark:text-neutral-50">Built for the person doing the work.</h2>
-        <p className="mt-4 text-neutral-600 dark:text-neutral-200">7-day free trial. No credit card required.</p>
+        <p className="mt-4 text-neutral-600 dark:text-neutral-200">14-day free trial. Cancel any time before it ends.</p>
         <div className="mt-9 flex items-center justify-center gap-5">
           <Link href="/signup" className="px-6 py-3.5 rounded-xl bg-neutral-950 dark:bg-neutral-50 text-white dark:text-neutral-950 font-medium hover:bg-neutral-800 dark:hover:bg-white transition-colors">
             Start free trial

@@ -144,7 +144,28 @@ export default function OnboardingWizard({ userId, userName }: Props) {
       body: JSON.stringify({ orgId, plan: data.plan, marketingConsent: data.marketingConsent }),
     }).catch(() => {});
 
-    window.location.href = "/dashboard";
+    // The trial lives in Stripe, not in our database: a card is collected here
+    // and nothing is charged until the trial ends. Without this the org has no
+    // subscription and the app is locked to the billing page.
+    const checkoutRes = await fetch("/api/billing/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ planId: data.plan, origin: "onboarding" }),
+    }).catch(() => null);
+
+    const checkout = checkoutRes ? await checkoutRes.json().catch(() => ({})) : {};
+
+    if (!checkoutRes?.ok || !checkout?.url) {
+      setError(
+        `${data.orgName || "Your business"} is set up, but we couldn't open the payment page${
+          checkout?.error ? ` (${checkout.error})` : ""
+        }. You can add your card from Billing.`
+      );
+      setSaving(false);
+      return;
+    }
+
+    window.location.href = checkout.url;
   }
 
   return (

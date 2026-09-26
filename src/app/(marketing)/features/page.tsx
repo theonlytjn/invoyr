@@ -244,7 +244,7 @@ export default function FeaturesPage() {
       {/* CTA */}
       <section className="border-t border-neutral-200 dark:border-neutral-900 py-24 text-center">
         <h2 className="font-serif text-4xl md:text-5xl text-neutral-900 dark:text-neutral-50">Everything included from day one</h2>
-        <p className="mt-4 text-neutral-600 dark:text-neutral-200">7-day free trial. No credit card required.</p>
+        <p className="mt-4 text-neutral-600 dark:text-neutral-200">14-day free trial. Cancel any time before it ends.</p>
         <Link href="/signup" className="mt-9 inline-block px-6 py-3.5 rounded-xl bg-neutral-950 dark:bg-neutral-50 text-white dark:text-neutral-950 font-medium hover:bg-neutral-800 dark:hover:bg-white transition-colors">
           Get started free →
         </Link>

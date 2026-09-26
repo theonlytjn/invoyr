@@ -1,6 +1,10 @@
 import { getStripe } from "./stripe/client";
 import { createServiceClient } from "./supabase/server";
 import { canAccess, type Feature } from "@/config/plans";
+import { isSubscriptionActive, trialDaysRemaining } from "@/lib/trial";
+
+// Re-exported so existing callers keep importing entitlement helpers from here.
+export { isSubscriptionActive, trialDaysRemaining };
 import type { Organisation } from "./supabase/types";
 
 export async function getOrCreateStripeCustomer(org: Organisation): Promise<string> {
@@ -30,36 +34,6 @@ export async function getSubscription(orgId: string) {
     .eq("org_id", orgId)
     .single();
   return data;
-}
-
-/**
- * Whether a subscription still entitles the org to its plan.
- *
- * `trial_ends_at` is checked because onboarding now writes a `trialing` row with
- * no Stripe subscription behind it (see POST /api/org/create). Nothing external
- * ever moves that row off `trialing`, so without the date check a signup would
- * keep its plan free forever. A Stripe-backed trial is moved to `active` or
- * `past_due` by the webhook, so this only bites the self-serve trial.
- */
-export function isSubscriptionActive(
-  status: string | null | undefined,
-  trialEndsAt?: string | null
-): boolean {
-  if (status === "active") return true;
-  if (status !== "trialing") return false;
-  if (!trialEndsAt) return true;
-  return new Date(trialEndsAt) > new Date();
-}
-
-/** Days left in a self-serve trial, or null when there isn't one running. */
-export function trialDaysRemaining(
-  status: string | null | undefined,
-  trialEndsAt?: string | null
-): number | null {
-  if (status !== "trialing" || !trialEndsAt) return null;
-  const ms = new Date(trialEndsAt).getTime() - Date.now();
-  if (ms <= 0) return 0;
-  return Math.ceil(ms / (1000 * 60 * 60 * 24));
 }
 
 export function getCompPlan(

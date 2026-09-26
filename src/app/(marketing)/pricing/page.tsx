@@ -106,7 +106,7 @@ export default function PricingPage() {
             <span className="text-neutral-500 dark:text-neutral-400">No per-invoice fees, ever.</span>
           </h1>
           <p className="mt-6 mx-auto max-w-2xl text-xl text-neutral-600 dark:text-neutral-200 leading-relaxed">
-            Every plan is billed annually and includes a 7-day free trial — no card required.
+            Every plan is billed annually and includes a 14-day free trial — cancel any time before it ends.
             Start on Starter, move up when your business does.
           </p>
         </div>
@@ -199,7 +199,7 @@ export default function PricingPage() {
         {/* Close */}
         <div data-reveal className="mt-20 border-t border-neutral-200 dark:border-neutral-800/60 pt-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <p className="text-neutral-600 dark:text-neutral-200">
-            Not sure which plan? Start on the 7-day trial — you can change tier any time.
+            Not sure which plan? Start on the 14-day trial — you can change tier any time.
           </p>
           <Link
             href="/signup"

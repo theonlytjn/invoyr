@@ -54,7 +54,7 @@ const PLANS = [
 ];
 
 const FAQS = [
-  { q: "Is there a free trial?", a: "Yes — every plan starts with a 7-day free trial, no card required." },
+  { q: "Is there a free trial?", a: "Yes — every plan starts with a 14-day free trial. You add a card when you pick your plan, nothing is charged until the trial ends, and you can cancel any time before then." },
   { q: "What payment methods can my clients use?", a: "Stripe card payments on every plan, plus PayPal (Business+) and bank transfer." },
   { q: "Are there per-invoice fees?", a: "No. One price a year — send as many invoices as you like." },
   { q: "Can I change plan later?", a: "Any time. Start on Starter and move up as your business grows." },
@@ -92,8 +92,8 @@ export default function HomePage() {
               </Link>
             </div>
             <div className="reveal mt-6 flex flex-wrap justify-center gap-x-6 gap-y-2 text-base text-neutral-500 dark:text-neutral-400">
-              <span className="inline-flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-brand" />No credit card needed</span>
-              <span className="inline-flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-brand" />7-day free trial</span>
+              <span className="inline-flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-brand" />Cancel any time</span>
+              <span className="inline-flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-brand" />14-day free trial</span>
             </div>
           </div>
           {/* Trust marquee — anchored toward the bottom of the viewport */}
@@ -166,7 +166,7 @@ export default function HomePage() {
                     <span className="mt-3 inline-block rounded-md bg-neutral-950 dark:bg-neutral-50 px-3 py-1.5 text-xs font-medium text-white dark:text-neutral-950">Pay now</span>
                   </div>
                   <div className="mt-5 flex items-center gap-2.5 border-t border-neutral-200 dark:border-neutral-900 pt-5 font-mono text-[11px] text-neutral-500 dark:text-neutral-400">
-                    <span className="inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />7 days</span>
+                    <span className="inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />14 days</span>
                     <span>→</span><span>14 days</span><span>→</span><span>30 days</span>
                   </div>
                 </div>
@@ -427,7 +427,7 @@ export default function HomePage() {
               <br />
               <span className="text-neutral-500 dark:text-neutral-400">No per-invoice fees, ever.</span>
             </h2>
-            <p className="mt-5 text-lg text-neutral-600 dark:text-neutral-200">Every plan is billed annually and includes a 7-day free trial — no card required.</p>
+            <p className="mt-5 text-lg text-neutral-600 dark:text-neutral-200">Every plan is billed annually and includes a 14-day free trial — cancel any time before it ends.</p>
           </div>
           <div className="mt-14 grid md:grid-cols-3 gap-px bg-neutral-200 dark:bg-neutral-800/60 border border-neutral-200 dark:border-neutral-800/60 rounded-2xl overflow-hidden">
             {PLANS.map((plan) => (
@@ -489,7 +489,7 @@ export default function HomePage() {
           <Link href="/signup" className="mt-10 inline-block px-6 py-3.5 rounded-xl bg-neutral-950 dark:bg-neutral-50 text-white dark:text-neutral-950 font-medium text-base hover:bg-neutral-800 dark:hover:bg-white transition-colors">
             Start your free trial
           </Link>
-          <p className={`mt-4 ${KICKER}`}>7-day free trial · no credit card required</p>
+          <p className={`mt-4 ${KICKER}`}>14-day free trial · cancel any time</p>
         </div>
       </section>
     </div>

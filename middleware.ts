@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { hasActiveComp, isSubscriptionActive } from "@/lib/trial";
 
 const APP_DOMAIN = "app.invoyr.io";
 const MARKETING_DOMAINS = new Set(["invoyr.io", "www.invoyr.io"]);
@@ -180,9 +181,14 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/onboarding", request.url));
     }
 
-    const isBillingPage = pathname.startsWith("/settings/billing");
+    // Paying (or trialling, or comped) is what buys access: there is no free
+    // tier. Billing stays reachable so they can subscribe, and Account stays
+    // reachable so a lapsed customer can still export their own invoices
+    // rather than having their records held hostage.
+    const isAlwaysAllowed =
+      pathname.startsWith("/settings/billing") || pathname.startsWith("/settings/account");
 
-    if (profile?.onboarding_completed && !isBillingPage) {
+    if (profile?.onboarding_completed && !isAlwaysAllowed) {
       const { data: member } = await supabase
         .from("org_members")
         .select("org_id")
@@ -191,13 +197,24 @@ export async function middleware(request: NextRequest) {
         .single();
 
       if (member?.org_id) {
-        const { data: sub } = await supabase
-          .from("subscriptions")
-          .select("status")
-          .eq("org_id", member.org_id)
-          .single();
+        const [{ data: org }, { data: sub }] = await Promise.all([
+          supabase
+            .from("organisations")
+            .select("comp_plan, comp_expires_at")
+            .eq("id", member.org_id)
+            .single(),
+          supabase
+            .from("subscriptions")
+            .select("status, trial_ends_at")
+            .eq("org_id", member.org_id)
+            .maybeSingle(),
+        ]);
 
-        if (sub?.status === "canceled") {
+        // Comp grants win over Stripe, exactly as getOrgPlan resolves them.
+        const entitled =
+          hasActiveComp(org) || isSubscriptionActive(sub?.status, sub?.trial_ends_at);
+
+        if (!entitled) {
           return NextResponse.redirect(
             new URL("/settings/billing?reason=subscription_required", request.url)
           );
