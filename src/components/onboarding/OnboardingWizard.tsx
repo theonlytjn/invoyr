@@ -89,6 +89,7 @@ export default function OnboardingWizard({ userId, userName }: Props) {
           country: data.country,
           vatNumber: data.vatNumber,
           accentColor: data.accentColor,
+          plan: data.plan,
         }),
       }).catch(() => null);
 

@@ -5,6 +5,7 @@ import { getStripe } from "@/lib/stripe/client";
 import { getOrCreateStripeCustomer } from "@/lib/billing";
 import { requireOrg } from "@/lib/auth";
 import { getPriceId, type PlanId } from "@/config/plans";
+import { TRIAL_DAYS } from "@/config/plans";
 
 const schema = z.object({
   planId: z.enum(["starter", "business", "pro"]),
@@ -49,7 +50,7 @@ export async function POST(req: NextRequest) {
     metadata: { org_id: org.id, plan_id: planId },
     subscription_data: {
       ...(isNewSubscriber && {
-        trial_period_days: 7,
+        trial_period_days: TRIAL_DAYS,
         trial_settings: { end_behavior: { missing_payment_method: "cancel" } },
       }),
       metadata: { org_id: org.id, plan_id: planId },

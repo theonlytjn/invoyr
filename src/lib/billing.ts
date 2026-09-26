@@ -32,8 +32,34 @@ export async function getSubscription(orgId: string) {
   return data;
 }
 
-export function isSubscriptionActive(status: string | null | undefined): boolean {
-  return status === "active" || status === "trialing";
+/**
+ * Whether a subscription still entitles the org to its plan.
+ *
+ * `trial_ends_at` is checked because onboarding now writes a `trialing` row with
+ * no Stripe subscription behind it (see POST /api/org/create). Nothing external
+ * ever moves that row off `trialing`, so without the date check a signup would
+ * keep its plan free forever. A Stripe-backed trial is moved to `active` or
+ * `past_due` by the webhook, so this only bites the self-serve trial.
+ */
+export function isSubscriptionActive(
+  status: string | null | undefined,
+  trialEndsAt?: string | null
+): boolean {
+  if (status === "active") return true;
+  if (status !== "trialing") return false;
+  if (!trialEndsAt) return true;
+  return new Date(trialEndsAt) > new Date();
+}
+
+/** Days left in a self-serve trial, or null when there isn't one running. */
+export function trialDaysRemaining(
+  status: string | null | undefined,
+  trialEndsAt?: string | null
+): number | null {
+  if (status !== "trialing" || !trialEndsAt) return null;
+  const ms = new Date(trialEndsAt).getTime() - Date.now();
+  if (ms <= 0) return 0;
+  return Math.ceil(ms / (1000 * 60 * 60 * 24));
 }
 
 export function getCompPlan(
@@ -58,10 +84,10 @@ export async function getOrgPlan(orgId: string): Promise<string | null> {
 
   const { data } = await supabase
     .from("subscriptions")
-    .select("plan, status")
+    .select("plan, status, trial_ends_at")
     .eq("org_id", orgId)
     .single();
-  if (!data || !isSubscriptionActive(data.status)) return null;
+  if (!data || !isSubscriptionActive(data.status, data.trial_ends_at)) return null;
   return data.plan ?? null;
 }
 
@@ -85,7 +111,7 @@ export async function getOrgIdsWithFeature(feature: Feature): Promise<Set<string
       .from("organisations")
       .select("id, comp_plan, comp_expires_at")
       .not("comp_plan", "is", null),
-    supabase.from("subscriptions").select("org_id, plan, status"),
+    supabase.from("subscriptions").select("org_id, plan, status, trial_ends_at"),
   ]);
 
   for (const o of comps ?? []) {
@@ -93,7 +119,7 @@ export async function getOrgIdsWithFeature(feature: Feature): Promise<Set<string
     if (plan && canAccess(plan, feature)) ids.add(o.id);
   }
   for (const s of subs ?? []) {
-    if (isSubscriptionActive(s.status) && canAccess(s.plan, feature)) ids.add(s.org_id);
+    if (isSubscriptionActive(s.status, s.trial_ends_at) && canAccess(s.plan, feature)) ids.add(s.org_id);
   }
 
   return ids;

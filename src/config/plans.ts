@@ -1,3 +1,6 @@
+/** Length of the free trial, both at signup and on Stripe checkout. */
+export const TRIAL_DAYS = 7;
+
 export type PlanId = "starter" | "business" | "pro";
 
 export type Feature =

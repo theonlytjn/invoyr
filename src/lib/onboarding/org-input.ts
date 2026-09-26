@@ -24,6 +24,7 @@ export const orgCreateSchema = z.object({
     .max(500)
     .optional()
     .transform((value) => (value && /^https?:\/\/\S+$/i.test(value) ? value : undefined)),
+  plan: z.enum(["starter", "business", "pro"]).optional(),
   accentColor: z
     .string()
     .trim()
