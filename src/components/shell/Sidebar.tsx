@@ -39,10 +39,11 @@ interface Props {
   orgs: Organisation[];
   userEmail: string;
   plan?: string | null;
+  trialDaysLeft?: number | null;
   isAdmin?: boolean;
 }
 
-export default function Sidebar({ org, orgs, userEmail, plan, isAdmin }: Props) {
+export default function Sidebar({ org, orgs, userEmail, plan, trialDaysLeft, isAdmin }: Props) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
 
@@ -86,7 +87,7 @@ export default function Sidebar({ org, orgs, userEmail, plan, isAdmin }: Props) 
 
       {/* Org switcher */}
       {org && !collapsed && (
-        <OrgSwitcher activeOrg={org} orgs={orgs} plan={plan} />
+        <OrgSwitcher activeOrg={org} orgs={orgs} plan={plan} trialDaysLeft={trialDaysLeft} />
       )}
 
       {/* New invoice */}
@@ -172,6 +173,16 @@ export default function Sidebar({ org, orgs, userEmail, plan, isAdmin }: Props) 
             <div className="flex-1 overflow-hidden space-y-0.5">
               <p className="text-sm font-medium text-neutral-950 dark:text-neutral-50 truncate">{userEmail}</p>
               <p className="text-xs text-neutral-500 capitalize">{plan ? `${plan} plan` : "Free plan"}</p>
+              {typeof trialDaysLeft === "number" && (
+                <Link
+                  href="/settings/billing"
+                  className="inline-block text-xs font-medium text-blue-700 hover:underline dark:text-blue-400"
+                >
+                  {trialDaysLeft === 0
+                    ? "Trial ends today"
+                    : `${trialDaysLeft} day${trialDaysLeft === 1 ? "" : "s"} left in trial`}
+                </Link>
+              )}
             </div>
           )}
 

@@ -8,7 +8,7 @@ import LatestInvoicesTable from "@/components/dashboard/LatestInvoicesTable";
 import ActivityFeed from "@/components/dashboard/ActivityFeed";
 import type { Metadata } from "next";
 import type { InvoiceWithClient, AuditLog } from "@/lib/supabase/types";
-import { getSubscription } from "@/lib/billing";
+import { getSubscription, trialDaysRemaining } from "@/lib/billing";
 import { InvoiceIcon, UsersIcon, CreditCardIcon, XCircleIcon } from "@/components/icons";
 
 export const metadata: Metadata = { title: "Dashboard" };
@@ -24,6 +24,7 @@ export default async function DashboardPage() {
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
 
   const sub = await getSubscription(org.id);
+  const trialDaysLeft = trialDaysRemaining(sub?.status, sub?.trial_ends_at);
 
   const { data: { user } } = await supabase.auth.getUser();
   const { data: profile } = await supabase
@@ -106,25 +107,30 @@ export default async function DashboardPage() {
           <p className="text-base text-neutral-500 mt-0.5">Here&apos;s what&apos;s happening with {org.name}.</p>
         </div>
 
-        {sub?.status === "trialing" && sub.trial_ends_at && (() => {
-          const daysLeft = Math.max(0, Math.ceil(
-            (new Date(sub.trial_ends_at).getTime() - Date.now()) / 86_400_000
-          ));
+        {trialDaysLeft !== null && sub?.trial_ends_at && (() => {
           const endsOn = new Date(sub.trial_ends_at).toLocaleDateString("en-GB", { day: "numeric", month: "long" });
+          // A trial started at signup has no Stripe subscription behind it, so
+          // nothing gets charged when it ends — saying otherwise would be a lie
+          // to every self-serve signup.
+          const willBeCharged = Boolean(sub.stripe_subscription_id);
           return (
-            <div className="flex items-center justify-between gap-4 rounded-lg bg-blue-50 border border-blue-200 px-4 py-3 text-sm">
-              <p className="text-blue-800">
-                <span className="font-semibold">7-day trial</span>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-lg bg-blue-50 border border-blue-200 px-4 py-3 text-sm dark:bg-blue-950/30 dark:border-blue-900">
+              <p className="text-blue-800 dark:text-blue-300">
+                <span className="font-semibold">
+                  {trialDaysLeft === 0
+                    ? "Trial ends today"
+                    : `${trialDaysLeft} day${trialDaysLeft === 1 ? "" : "s"} left in your trial`}
+                </span>
                 {" — "}
-                {daysLeft === 0
-                  ? "Trial ends today. Your card will be charged when it expires."
-                  : `${daysLeft} day${daysLeft !== 1 ? "s" : ""} remaining. Your card will be charged on ${endsOn}.`}
+                {willBeCharged
+                  ? `your card will be charged on ${endsOn}.`
+                  : `choose a plan before ${endsOn} to keep your features.`}
               </p>
               <Link
                 href="/settings/billing"
-                className="shrink-0 px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-md hover:bg-blue-700 transition-colors"
+                className="shrink-0 self-start px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-md hover:bg-blue-700 transition-colors"
               >
-                View billing
+                {willBeCharged ? "View billing" : "Choose a plan"}
               </Link>
             </div>
           );

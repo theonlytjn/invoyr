@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import AppShell from "@/components/shell/AppShell";
 import { ACTIVE_ORG_COOKIE } from "@/lib/auth";
-import { getOrgPlan } from "@/lib/billing";
+import { getOrgPlan, getSubscription, trialDaysRemaining } from "@/lib/billing";
 import { ADMIN_EMAIL } from "@/lib/admin";
 import type { Organisation } from "@/lib/supabase/types";
 
@@ -32,10 +32,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   // Comp-aware: complimentary grants win, and canceled/past_due rows don't count.
   const plan = activeOrg?.id ? await getOrgPlan(activeOrg.id) : null;
 
+  // Days left in a running trial, so the shell can count it down on every page.
+  // Null for comped orgs and paid subscriptions — neither is counting down.
+  const sub = activeOrg?.id ? await getSubscription(activeOrg.id) : null;
+  const trialDaysLeft = trialDaysRemaining(sub?.status, sub?.trial_ends_at);
+
   const isAdmin = user.email === ADMIN_EMAIL;
 
   return (
-    <AppShell org={activeOrg} orgs={orgs} userEmail={user.email ?? ""} plan={plan} isAdmin={isAdmin}>
+    <AppShell org={activeOrg} orgs={orgs} userEmail={user.email ?? ""} plan={plan} trialDaysLeft={trialDaysLeft} isAdmin={isAdmin}>
       {children}
     </AppShell>
   );

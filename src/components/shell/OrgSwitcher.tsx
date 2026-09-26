@@ -10,9 +10,10 @@ interface Props {
   activeOrg: Organisation | null;
   orgs: Organisation[];
   plan?: string | null;
+  trialDaysLeft?: number | null;
 }
 
-export default function OrgSwitcher({ activeOrg, orgs, plan }: Props) {
+export default function OrgSwitcher({ activeOrg, orgs, plan, trialDaysLeft }: Props) {
   const [open, setOpen] = useState(false);
   const [switching, setSwitching] = useState<string | null>(null);
   const ref = useRef<HTMLDivElement>(null);
@@ -68,6 +69,11 @@ export default function OrgSwitcher({ activeOrg, orgs, plan }: Props) {
           <p className="text-sm font-medium text-neutral-950 dark:text-neutral-50 truncate leading-5">{activeOrg.name}</p>
           <p className="text-xs text-neutral-500 capitalize leading-4">
             {plan ? `${plan} plan` : "Free plan"}
+            {typeof trialDaysLeft === "number" && (
+              <span className="ml-1.5 normal-case text-blue-700 dark:text-blue-400">
+                · {trialDaysLeft === 0 ? "ends today" : `${trialDaysLeft}d left`}
+              </span>
+            )}
           </p>
         </div>
         {orgs.length > 1 && (
