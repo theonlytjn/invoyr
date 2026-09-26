@@ -21,12 +21,13 @@ function isMarketingPath(pathname: string): boolean {
   return MARKETING_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
 
-// Content-Security-Policy. Enforced value is set on the REQUEST header (Next.js
-// reads it to add the per-request nonce to its own scripts); the RESPONSE gets
-// it as Report-Only for now, so violations are reported but nothing is blocked
-// while we validate against the live flows (PayPal SDK, Turnstile, Supabase,
-// HugeIcons CSS). Flip to enforcing (`Content-Security-Policy`) once the report
-// is clean.
+// Content-Security-Policy, ENFORCING since 26 Sep 2026. The same value is set on
+// the REQUEST header, which Next.js reads to add the per-request nonce to its own
+// scripts. Before flipping, the two flows that had never been checked under
+// Report-Only were verified on production: the /pay/[token] page with the PayPal
+// SDK loaded (buttons render, zero violations — no 'unsafe-eval' needed) and
+// Turnstile, whose challenges.cloudflare.com origin is allowed in script-src,
+// frame-src and connect-src.
 function buildCsp(nonce: string): string {
   return [
     "default-src 'self'",
@@ -54,7 +55,7 @@ export async function middleware(request: NextRequest) {
   const nonce = btoa(crypto.randomUUID());
   const csp = buildCsp(nonce);
   const applyCsp = (res: NextResponse) => {
-    res.headers.set("Content-Security-Policy-Report-Only", csp);
+    res.headers.set("Content-Security-Policy", csp);
     return res;
   };
   const nextWithNonce = () => {
