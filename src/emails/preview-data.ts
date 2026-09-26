@@ -77,6 +77,7 @@ export const PREVIEW_DATA = {
   trialEnding: {
     firstName: "Sarah",
     ctaUrl: "https://app.invoyr.io/settings/billing",
+    state: "ending",
     daysLeft: 3,
     endsOn: "3 October",
     willBeCharged: true,
