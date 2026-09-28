@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import LegalDoc from "@/components/marketing/LegalDoc";
 import { LEGAL_ENTITY } from "@/config/legal";
 
@@ -11,8 +12,8 @@ export const metadata: Metadata = {
 // @/config/legal so this page and the Privacy Policy cannot drift apart; the
 // company number clause renders only once the number is set there.
 //
-// STILL OUTSTANDING: sections 13 and 34 refer to a Data Processing Addendum
-// that does not exist yet as a page, and legal counsel has not reviewed this.
+// STILL OUTSTANDING: legal counsel has not reviewed this. The Data Processing
+// Addendum referenced in sections 13 and 34 now exists at /dpa.
 export default function TermsPage() {
   return (
     <LegalDoc title="Terms & Conditions" lastUpdated="28 September 2026">
@@ -240,7 +241,10 @@ export default function TermsPage() {
           Invoyr will generally process that information on your behalf as a data processor.
         </li>
       </ul>
-      <p>Our Data Processing Addendum forms part of these Terms and governs this processing.</p>
+      <p>
+        Our <Link href="/dpa">Data Processing Addendum</Link> forms part of these Terms and governs
+        this processing.
+      </p>
 
       <h2>14. Automated invoice reminders and chasing</h2>
       <p>
@@ -549,9 +553,10 @@ export default function TermsPage() {
 
       <h2>34. Entire agreement</h2>
       <p>
-        These Terms, our Privacy Policy and the Data Processing Addendum, together with any
-        plan-specific terms expressly presented to you, constitute the agreement between you and
-        Invoyr concerning the Service.
+        These Terms, our <Link href="/privacy">Privacy Policy</Link> and the{" "}
+        <Link href="/dpa">Data Processing Addendum</Link>, together with any plan-specific terms
+        expressly presented to you, constitute the agreement between you and Invoyr concerning the
+        Service.
       </p>
 
       <h2>35. Severability</h2>

@@ -15,6 +15,7 @@ const MARKETING_PATHS = [
   "/contact",
   "/privacy",
   "/terms",
+  "/dpa",
 ];
 
 function isMarketingPath(pathname: string): boolean {
