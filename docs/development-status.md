@@ -130,7 +130,7 @@ Triggered by the onboarding bug: ~90 write sites ignore their result. Top tier f
 
 1. **Stripe card payment E2E** — blocked on the Invoyr Stripe account being created.
 2. **TrueLayer production approval** (external) — re-checked 26 Sep 2026, still "Testing mode active". Email sales@truelayer.com; real customers cannot connect until approved.
-3. **Legal review** of `/privacy` + `/terms` (external).
+3. **Legal pages.** `/terms` replaced 28 Sep 2026 with the founder-supplied 38-section Terms & Conditions. Entity details now live in `src/config/legal.ts` so Terms and Privacy cannot drift. **Outstanding:** (a) `companyNumber` is `null` until Invoyr Ltd is registered — the clause is omitted rather than printing a placeholder, so set it once Companies House confirms; (b) sections 13 and 34 refer to a **Data Processing Addendum that does not exist** as a page — either write one or remove the references before launch; (c) `/privacy` is still the older starter policy and does not match the new Terms' detail (trial auto-conversion, 7-day deletion, processor role); (d) neither page has been reviewed by counsel.
 4. **Trial never starts at signup** — onboarding shows "Starter · 7-Day Trial" but writes no subscription row, so a new org resolves to *no plan* and even Starter's `custom_branding` is locked. Decide: start a trial at signup, or change the copy.
 5. ~~Rate limiting~~ — **done 28 Sep**: new Upstash Redis, verified enforcing (429 after the limit).
 6. **Marketing-side CSP** — the nonce CSP is app-only (marketing kept static). A full script-src CSP for marketing would need a hash/nonce approach that preserves static generation.
