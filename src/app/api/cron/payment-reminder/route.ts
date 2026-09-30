@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
   const { data: invoices } = await supabase
     .from("invoices")
     .select(
-      "id, org_id, invoice_number, total, currency, due_date, public_token, clients(name, email), organisations(name, accent_color, logo_url, from_email, payment_reminder_days)"
+      "id, org_id, invoice_number, total, currency, due_date, public_token, clients(name, email, cc_emails), organisations(name, accent_color, logo_url, from_email, payment_reminder_days)"
     )
     .in("status", ["sent", "issued"])
     .in("org_id", [...proOrgIds])
@@ -85,6 +85,7 @@ export async function GET(req: NextRequest) {
         orgId: inv.org_id,
         invoiceId: inv.id,
         to: client.email,
+        cc: client.cc_emails,
         subject: `Reminder: Invoice ${inv.invoice_number} is due ${dueDateLabel}`,
         templateName,
         fromEmail: (org as { from_email?: string | null })?.from_email,

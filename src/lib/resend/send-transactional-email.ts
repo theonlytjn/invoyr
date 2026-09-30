@@ -4,11 +4,14 @@ import { getResend } from "./client";
 import { createServiceClient } from "@/lib/supabase/server";
 import type { TransactionalTemplateName } from "@/emails/registry";
 import { sendViaSmtp } from "@/lib/smtp/send";
+import { ccRecipients } from "@/lib/email-recipients";
 
 interface SendTransactionalEmailOptions {
   orgId: string;
   invoiceId?: string | null;
   to: string;
+  /** Additional recipients copied on the email; invalid entries are dropped. */
+  cc?: string[] | null;
   subject: string;
   templateName: TransactionalTemplateName | string;
   react: ReactElement;
@@ -25,6 +28,7 @@ export async function sendTransactionalEmail({
   orgId,
   invoiceId,
   to,
+  cc,
   subject,
   templateName,
   react,
@@ -40,6 +44,11 @@ export async function sendTransactionalEmail({
   }
 
   const supabase = await createServiceClient();
+
+  // A typo in a CC field must never stop the invoice reaching the client.
+  const ccList = ccRecipients(to, cc);
+  // email_logs has no cc column, so the history records every recipient here.
+  const loggedRecipients = [to, ...ccList].join(", ");
 
   // Check if the org has custom SMTP configured
   const { data: orgSmtp } = await supabase
@@ -63,14 +72,14 @@ export async function sendTransactionalEmail({
         fromName: orgSmtp.smtp_from_name ?? orgSmtp.smtp_from_email,
         fromEmail: orgSmtp.smtp_from_email,
       },
-      { to, subject, html }
+      { to, cc: ccList.length ? ccList : undefined, subject, html }
     );
 
     await supabase.from("email_logs").insert({
       org_id: orgId,
       invoice_id: invoiceId ?? null,
       resend_id: null,
-      to_email: to,
+      to_email: loggedRecipients,
       subject,
       template_name: templateName,
       status: result.ok ? "sent" : "failed",
@@ -83,13 +92,19 @@ export async function sendTransactionalEmail({
   const resend = getResend();
   const from = fromEmail ?? process.env.RESEND_FROM_EMAIL ?? "invoices@invoyr.io";
 
-  const { data, error: resendErr } = await resend.emails.send({ from, to, subject, html });
+  const { data, error: resendErr } = await resend.emails.send({
+    from,
+    to,
+    ...(ccList.length ? { cc: ccList } : {}),
+    subject,
+    html,
+  });
 
   await supabase.from("email_logs").insert({
     org_id: orgId,
     invoice_id: invoiceId ?? null,
     resend_id: data?.id ?? null,
-    to_email: to,
+    to_email: loggedRecipients,
     subject,
     template_name: templateName,
     status: resendErr ? "failed" : "sent",

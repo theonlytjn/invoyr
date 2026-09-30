@@ -11,6 +11,7 @@ export interface SmtpConfig {
 
 export async function sendViaSmtp(config: SmtpConfig, opts: {
   to: string;
+  cc?: string[];
   subject: string;
   html: string;
 }): Promise<{ ok: boolean; error?: string }> {
@@ -25,6 +26,7 @@ export async function sendViaSmtp(config: SmtpConfig, opts: {
     await transporter.sendMail({
       from: `"${config.fromName}" <${config.fromEmail}>`,
       to: opts.to,
+      ...(opts.cc?.length ? { cc: opts.cc } : {}),
       subject: opts.subject,
       html: opts.html,
     });

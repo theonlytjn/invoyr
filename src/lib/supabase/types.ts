@@ -131,6 +131,8 @@ export interface Client {
   org_id: string;
   name: string;
   email: string | null;
+  /** Additional recipients copied on every invoice email for this client. */
+  cc_emails: string[] | null;
   phone: string | null;
   company_name: string | null;
   address_line1: string | null;

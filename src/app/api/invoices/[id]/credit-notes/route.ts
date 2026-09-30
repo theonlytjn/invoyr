@@ -129,6 +129,7 @@ export async function POST(
       orgId: invoice.org_id,
       invoiceId: id,
       to: client.email,
+      cc: client.cc_emails,
       subject: `Credit note ${creditNoteNumber} from ${(org as { name?: string })?.name ?? ""}`,
       templateName: "credit-note",
       fromEmail: (org as { from_email?: string | null })?.from_email,

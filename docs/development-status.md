@@ -69,6 +69,12 @@ Shipped across commits `5a94452`, `ea8cba0`, `70c1f10`, `337cc50`, `3dc4b48`, `4
 - **Fix.** Onboarding now posts to `POST /api/org/create`, which validates with Zod (`src/lib/onboarding/org-input.ts`, unit tested) and writes the row with the service client. That route previously accepted only `name` — it now takes the wizard's full payload (contact details, logo, accent colour) and **deletes the org if the `org_members` insert fails**, since an org with no members is invisible to every RLS policy and unreachable forever. The wizard surfaces the error instead of swallowing it. RLS is unchanged: `organisations` still has no authenticated INSERT policy.
 - **LESSON (third of its kind, after `logos_select` and the PayPal enum): dropping a policy needs proof that every writer of that table is server-side.** A grep for `.from("organisations").insert` in `src/components` would have caught it. Browser writes fail silently wherever the caller only logs to the console.
 
+### Invoices can be copied to additional recipients (30 Sep 2026)
+- A client's organisation often has more than one person who needs the invoice (an accounts inbox, a manager). New nullable `clients.cc_emails text[]` (max 5, enforced by `clients_cc_emails_max` and the form), edited on the client form as a comma-separated list and shown on the client page as "Also copied".
+- Applied everywhere that emails a client, not just the send button: invoice send (single + bulk), reminders (manual, bulk and the payment-reminder cron), credit notes, estimate send and client statements. `sendTransactionalEmail` takes a `cc` option and passes it to both Resend and the custom-SMTP path.
+- **A bad CC address never blocks the invoice.** `ccRecipients` (unit tested in `src/lib/email-recipients.ts`) drops invalid entries and removes the primary recipient so nobody is both To and CC. Validation on the form catches typos up front; the send-time filter is the backstop.
+- `email_logs` has no cc column, so `to_email` records every recipient joined with commas — the invoice history therefore shows who actually received it. The Resend webhook matches on `resend_id`, so this doesn't affect delivery or open tracking.
+
 ### Card-first 14-day trial, and no free tier (26 Sep 2026)
 Product decision: there is **no free plan**. Access is bought by trialling (with a card on file) or paying.
 - **`TRIAL_DAYS` is now 14**, shared by Stripe checkout and all copy.

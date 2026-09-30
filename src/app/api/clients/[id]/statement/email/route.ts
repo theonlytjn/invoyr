@@ -9,6 +9,7 @@ import { getResend } from "@/lib/resend/client";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { ClientStatementEmail } from "@/emails/transactional/ClientStatementEmail";
 import type { Organisation, Client, Invoice } from "@/lib/supabase/types";
+import { ccRecipients } from "@/lib/email-recipients";
 
 const STATEMENT_STATUSES = ["issued", "sent", "overdue", "paid", "partial"];
 
@@ -103,9 +104,14 @@ export async function POST(
   const from = org.from_email ?? process.env.RESEND_FROM_EMAIL ?? "invoices@invoyr.io";
   const subject = `Statement of account from ${org.name}`;
 
+  // This route talks to Resend directly rather than through
+  // sendTransactionalEmail, so it filters the CC list itself.
+  const ccList = ccRecipients(client.email, client.cc_emails);
+
   const { data, error: resendErr } = await resend.emails.send({
     from,
     to: client.email,
+    ...(ccList.length ? { cc: ccList } : {}),
     subject,
     html,
     attachments: [

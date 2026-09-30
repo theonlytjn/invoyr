@@ -63,6 +63,7 @@ export async function POST(req: NextRequest) {
         orgId: invoice.org_id,
         invoiceId: invoice.id,
         to: client.email,
+        cc: client.cc_emails,
         subject: `Invoice ${invoice.invoice_number}${org?.name ? ` from ${org.name}` : ""}`,
         templateName: "invoice-sent",
         fromEmail: (org as { from_email?: string | null })?.from_email,

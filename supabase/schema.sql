@@ -699,6 +699,12 @@ alter table public.organisations add column if not exists from_email    text;
 alter table public.organisations add column if not exists reminder_days integer[];
 alter table public.organisations add column if not exists payment_reminder_days integer[];
 
+-- clients: additional invoice recipients (CC), e.g. a client's accounts inbox
+alter table public.clients add column if not exists cc_emails text[];
+alter table public.clients drop constraint if exists clients_cc_emails_max;
+alter table public.clients add constraint clients_cc_emails_max
+  check (cc_emails is null or array_length(cc_emails, 1) <= 5);
+
 -- invoices: PO number and discount
 alter table public.invoices add column if not exists po_number text;
 alter table public.invoices add column if not exists discount  numeric(12,2) not null default 0;

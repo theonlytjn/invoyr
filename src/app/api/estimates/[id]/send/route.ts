@@ -46,6 +46,7 @@ export async function POST(_req: NextRequest, { params }: Params) {
     orgId: estimate.org_id,
     invoiceId: null,
     to: client.email,
+    cc: client.cc_emails,
     subject: `Estimate ${estimate.estimate_number}${org?.name ? ` from ${org.name}` : ""}`,
     templateName: "estimate-sent",
     fromEmail: (org as { from_email?: string | null })?.from_email,

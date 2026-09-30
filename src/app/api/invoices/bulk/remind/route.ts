@@ -96,6 +96,7 @@ export async function POST(req: NextRequest) {
         orgId: org.id,
         invoiceId: invoice.id,
         to: client.email,
+        cc: client.cc_emails,
         subject,
         templateName: "overdue-reminder",
         fromEmail: orgRow?.from_email,

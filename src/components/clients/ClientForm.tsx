@@ -7,6 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  MAX_CC_RECIPIENTS,
+  parseRecipientList,
+  validateRecipientList,
+} from "@/lib/email-recipients";
 import type { Client, Organisation } from "@/lib/supabase/types";
 
 interface Props {
@@ -23,6 +28,7 @@ export default function ClientForm({ org, client, mode }: Props) {
   const [name, setName] = useState(client?.name ?? "");
   const [company, setCompany] = useState(client?.company_name ?? "");
   const [email, setEmail] = useState(client?.email ?? "");
+  const [ccEmails, setCcEmails] = useState((client?.cc_emails ?? []).join(", "));
   const [phone, setPhone] = useState(client?.phone ?? "");
   const [address, setAddress] = useState(client?.address_line1 ?? "");
   const [city, setCity] = useState(client?.city ?? "");
@@ -32,6 +38,13 @@ export default function ClientForm({ org, client, mode }: Props) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    const ccList = parseRecipientList(ccEmails);
+    const ccProblem = validateRecipientList(ccList);
+    if (ccProblem) {
+      setError(ccProblem);
+      return;
+    }
+
     setSaving(true);
     setError(null);
     const supabase = createClient();
@@ -41,6 +54,7 @@ export default function ClientForm({ org, client, mode }: Props) {
       name,
       company_name: company || null,
       email: email || null,
+      cc_emails: ccList.length ? ccList : null,
       phone: phone || null,
       address_line1: address || null,
       city: city || null,
@@ -81,6 +95,22 @@ export default function ClientForm({ org, client, mode }: Props) {
           <Label htmlFor="phone">Phone</Label>
           <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
         </div>
+      </div>
+      <div className="space-y-1.5">
+        <Label htmlFor="ccEmails">
+          Also send invoices to <span className="font-normal text-neutral-500">(optional)</span>
+        </Label>
+        <Input
+          id="ccEmails"
+          value={ccEmails}
+          onChange={(e) => setCcEmails(e.target.value)}
+          placeholder="accounts@client.com, manager@client.com"
+          aria-describedby="ccEmails-hint"
+        />
+        <p id="ccEmails-hint" className="text-xs text-neutral-500">
+          Copied on every invoice, reminder and statement for this client. Separate addresses with
+          commas, up to {MAX_CC_RECIPIENTS}.
+        </p>
       </div>
       <div className="space-y-1.5">
         <Label htmlFor="address">Address</Label>

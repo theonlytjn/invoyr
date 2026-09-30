@@ -48,6 +48,7 @@ export async function POST(
     orgId: invoice.org_id,
     invoiceId: id,
     to: client.email,
+    cc: client.cc_emails,
     subject,
     templateName: "overdue-reminder",
     fromEmail: (org as { from_email?: string | null })?.from_email,

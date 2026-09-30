@@ -77,6 +77,12 @@ export default async function ClientDetailPage({ params }: Props) {
           <dl className="space-y-2 text-sm">
             {client.company_name && <div><dt className="text-neutral-500 text-sm">Company</dt><dd className="dark:text-neutral-300">{client.company_name}</dd></div>}
             {client.email && <div><dt className="text-neutral-500 text-sm">Email</dt><dd className="dark:text-neutral-300">{client.email}</dd></div>}
+            {client.cc_emails?.length ? (
+              <div>
+                <dt className="text-neutral-500 text-sm">Also copied</dt>
+                <dd className="dark:text-neutral-300 break-words">{client.cc_emails.join(", ")}</dd>
+              </div>
+            ) : null}
             {client.phone && <div><dt className="text-neutral-500 text-sm">Phone</dt><dd className="dark:text-neutral-300">{client.phone}</dd></div>}
             {client.address_line1 && <div><dt className="text-neutral-500 text-sm">Address</dt><dd className="dark:text-neutral-300">{client.address_line1}, {client.city}</dd></div>}
             {client.vat_number && <div><dt className="text-neutral-500 text-sm">VAT number</dt><dd className="font-mono dark:text-neutral-300">{client.vat_number}</dd></div>}
