@@ -2,8 +2,9 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { createClient } from "./supabase/server";
 import type { Organisation } from "./supabase/types";
+import { ACTIVE_ORG_COOKIE } from "./org-cookie";
 
-export const ACTIVE_ORG_COOKIE = "active_org_id";
+export { ACTIVE_ORG_COOKIE } from "./org-cookie";
 
 export async function getUser() {
   const supabase = await createClient();

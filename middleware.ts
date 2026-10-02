@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { hasActiveComp, isSubscriptionActive } from "@/lib/trial";
+import { ACTIVE_ORG_COOKIE } from "@/lib/org-cookie";
 
 const APP_DOMAIN = "app.invoyr.io";
 const MARKETING_DOMAINS = new Set(["invoyr.io", "www.invoyr.io"]);
@@ -190,12 +191,21 @@ export async function middleware(request: NextRequest) {
       pathname.startsWith("/settings/billing") || pathname.startsWith("/settings/account");
 
     if (profile?.onboarding_completed && !isAlwaysAllowed) {
-      const { data: member } = await supabase
+      // Entitlement has to be judged against the org the user is actually
+      // working in. Taking the first membership row was fine with one org
+      // each, but with several it would let a locked-out org through on a
+      // comped sibling's entitlement — or lock a good org out on a lapsed one.
+      const activeOrgId = request.cookies.get(ACTIVE_ORG_COOKIE)?.value;
+
+      const { data: memberships } = await supabase
         .from("org_members")
         .select("org_id")
-        .eq("user_id", user.id)
-        .limit(1)
-        .single();
+        .eq("user_id", user.id);
+
+      // The cookie is only honoured when it matches a real membership, so it
+      // can't be edited to borrow another org's access.
+      const member =
+        memberships?.find((m) => m.org_id === activeOrgId) ?? memberships?.[0] ?? null;
 
       if (member?.org_id) {
         const [{ data: org }, { data: sub }] = await Promise.all([
