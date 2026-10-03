@@ -10,6 +10,12 @@ export function friendlyAuthError(message: string | undefined): string {
   if (m.includes("email not confirmed")) {
     return "Please confirm your email first — check your inbox for the link.";
   }
+  // Supabase returns this when CAPTCHA protection is enabled but the request
+  // carried no token. It used to fall through to the generic message, which is
+  // how broken password reset and magic links looked like "something went wrong".
+  if (m.includes("captcha")) {
+    return "The anti-bot check didn't complete. Please refresh the page and try again.";
+  }
   if (m.includes("rate limit") || m.includes("too many") || m.includes("for security purposes")) {
     return "Too many attempts. Please wait a moment and try again.";
   }

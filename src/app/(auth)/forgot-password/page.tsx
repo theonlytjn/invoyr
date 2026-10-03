@@ -5,11 +5,15 @@ import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { friendlyAuthError } from "@/lib/auth/friendly-error";
+import TurnstileWidget, { turnstileConfigured } from "@/components/TurnstileWidget";
 
 export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState("");
+  // Single-use tokens: a failed attempt needs the widget remounted for a new one.
+  const [captchaKey, setCaptchaKey] = useState(0);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -20,11 +24,16 @@ export default function ForgotPasswordPage() {
 
     const { error } = await supabase.auth.resetPasswordForEmail(
       form.get("email") as string,
-      { redirectTo: `${window.location.origin}/auth/callback?next=/reset-password` }
+      {
+        redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
+        ...(captchaToken ? { captchaToken } : {}),
+      }
     );
 
     if (error) {
       setError(friendlyAuthError(error.message));
+      setCaptchaToken("");
+      setCaptchaKey((k) => k + 1);
       setLoading(false);
       return;
     }
@@ -85,11 +94,13 @@ export default function ForgotPasswordPage() {
                     />
                   </div>
 
+                  <TurnstileWidget key={captchaKey} onVerify={setCaptchaToken} />
+
                   {error && <p className="text-sm text-red-600">{error}</p>}
 
                   <button
                     type="submit"
-                    disabled={loading}
+                    disabled={loading || (turnstileConfigured && !captchaToken)}
                     className="w-full rounded-lg bg-neutral-950 px-4 py-2.5 text-sm font-medium text-white hover:bg-neutral-800 transition-colors disabled:opacity-50"
                   >
                     {loading ? "Sending…" : "Send reset link"}

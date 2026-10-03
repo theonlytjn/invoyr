@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { friendlyAuthError } from "@/lib/auth/friendly-error";
+import TurnstileWidget, { turnstileConfigured } from "@/components/TurnstileWidget";
 import { EyeIcon, EyeSlashIcon } from "@phosphor-icons/react";
 
 type LoginMode = "password" | "magic-link" | "magic-sent";
@@ -26,6 +27,15 @@ export default function LoginForm() {
   const [password, setPassword] = useState("");
   const [mode, setMode] = useState<LoginMode>("password");
   const [magicEmail, setMagicEmail] = useState("");
+  const [captchaToken, setCaptchaToken] = useState("");
+  // Turnstile tokens are single-use, so a failed attempt needs a fresh one.
+  // Changing the key remounts the widget, which issues one.
+  const [captchaKey, setCaptchaKey] = useState(0);
+
+  function resetCaptcha() {
+    setCaptchaToken("");
+    setCaptchaKey((k) => k + 1);
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -37,10 +47,12 @@ export default function LoginForm() {
     const { error } = await supabase.auth.signInWithPassword({
       email: form.get("email") as string,
       password: form.get("password") as string,
+      ...(captchaToken ? { options: { captchaToken } } : {}),
     });
 
     if (error) {
       setError(friendlyAuthError(error.message));
+      resetCaptcha();
       setLoading(false);
       return;
     }
@@ -57,12 +69,14 @@ export default function LoginForm() {
       email: magicEmail,
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
+        ...(captchaToken ? { captchaToken } : {}),
       },
     });
 
     setLoading(false);
     if (error) {
       setError(friendlyAuthError(error.message));
+      resetCaptcha();
       return;
     }
     setMode("magic-sent");
@@ -157,11 +171,13 @@ export default function LoginForm() {
                   />
                 </div>
 
+                <TurnstileWidget key={captchaKey} onVerify={setCaptchaToken} />
+
                 {error && <p className="text-sm text-red-600">{error}</p>}
 
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || (turnstileConfigured && !captchaToken)}
                   className="w-full rounded-lg bg-neutral-950 px-4 py-2.5 text-sm font-medium text-white hover:bg-neutral-800 transition-colors disabled:opacity-50"
                 >
                   {loading ? "Sending link…" : "Send magic link"}
@@ -227,11 +243,13 @@ export default function LoginForm() {
                   </div>
                 </div>
 
+                <TurnstileWidget key={captchaKey} onVerify={setCaptchaToken} />
+
                 {error && <p className="text-sm text-red-600">{error}</p>}
 
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || (turnstileConfigured && !captchaToken)}
                   className="w-full rounded-lg bg-neutral-950 px-4 py-2.5 text-sm font-medium text-white hover:bg-neutral-800 transition-colors disabled:opacity-50"
                 >
                   {loading ? "Signing in…" : "Sign in"}

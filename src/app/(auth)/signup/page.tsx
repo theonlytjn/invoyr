@@ -17,6 +17,8 @@ export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [captchaToken, setCaptchaToken] = useState("");
+  // Single-use tokens: remount the widget after a failure to get a fresh one.
+  const [captchaKey, setCaptchaKey] = useState(0);
 
   async function handleGoogle() {
     const supabase = createClient();
@@ -45,6 +47,8 @@ export default function SignupPage() {
 
     if (error) {
       setError(friendlyAuthError(error.message));
+      setCaptchaToken("");
+      setCaptchaKey((k) => k + 1);
       setLoading(false);
       return;
     }
@@ -174,7 +178,7 @@ export default function SignupPage() {
                 </div>
               </div>
 
-              <TurnstileWidget onVerify={setCaptchaToken} />
+              <TurnstileWidget key={captchaKey} onVerify={setCaptchaToken} />
 
               {error && <p className="text-sm text-red-600">{error}</p>}
 
