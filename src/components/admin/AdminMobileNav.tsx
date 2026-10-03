@@ -42,7 +42,7 @@ export default function AdminMobileNav() {
 
   return (
     <div className="lg:hidden">
-      <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between gap-3 border-b border-neutral-200 bg-white px-4 py-3 dark:border-neutral-800 dark:bg-neutral-950">
+      <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between gap-3 border-b border-neutral-200 bg-white px-4 py-3 pt-[calc(0.75rem+env(safe-area-inset-top))] dark:border-neutral-800 dark:bg-neutral-950">
         <Link href="/admin" className="flex items-center gap-2 min-w-0">
           <Image src="/main-logo.svg" alt="Invoyr" width={88} height={27} priority className="dark:hidden" />
           <Image src="/main-logo-dark.svg" alt="Invoyr" width={88} height={27} priority className="hidden dark:block" />
@@ -86,7 +86,7 @@ export default function AdminMobileNav() {
           />
           <nav
             id="admin-mobile-menu"
-            className="fixed top-[57px] left-0 right-0 z-50 max-h-[calc(100vh-57px)] overflow-y-auto border-b border-neutral-200 bg-white p-3 shadow-lg dark:border-neutral-800 dark:bg-neutral-950"
+            className="fixed left-0 right-0 top-[calc(57px+env(safe-area-inset-top))] z-50 max-h-[calc(100dvh-57px-env(safe-area-inset-top))] overflow-y-auto border-b border-neutral-200 bg-white p-3 shadow-lg dark:border-neutral-800 dark:bg-neutral-950"
           >
             <ul className="space-y-1">
               {ADMIN_NAV.map(({ href, label, icon }) => {

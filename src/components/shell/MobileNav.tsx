@@ -30,7 +30,7 @@ export default function MobileNav({ isAdmin = false }: { isAdmin?: boolean }) {
     : NAV_ITEMS;
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-neutral-950 border-t border-neutral-200 dark:border-neutral-800 flex items-stretch">
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 flex items-stretch border-t border-neutral-200 bg-white pb-[env(safe-area-inset-bottom)] dark:border-neutral-800 dark:bg-neutral-950">
       {items.map(({ href, label, icon: Icon }) => {
         const active = pathname === href || (href !== "/dashboard" && pathname.startsWith(href));
         return (

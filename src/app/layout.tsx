@@ -56,6 +56,9 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  // Without this, env(safe-area-inset-*) resolves to 0 and the fixed bottom bar
+  // sits under the iPhone home indicator.
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

@@ -69,6 +69,13 @@ Shipped across commits `5a94452`, `ea8cba0`, `70c1f10`, `337cc50`, `3dc4b48`, `4
 - **Fix.** Onboarding now posts to `POST /api/org/create`, which validates with Zod (`src/lib/onboarding/org-input.ts`, unit tested) and writes the row with the service client. That route previously accepted only `name` — it now takes the wizard's full payload (contact details, logo, accent colour) and **deletes the org if the `org_members` insert fails**, since an org with no members is invisible to every RLS policy and unreachable forever. The wizard surfaces the error instead of swallowing it. RLS is unchanged: `organisations` still has no authenticated INSERT policy.
 - **LESSON (third of its kind, after `logos_select` and the PayPal enum): dropping a policy needs proof that every writer of that table is server-side.** A grep for `.from("organisations").insert` in `src/components` would have caught it. Browser writes fail silently wherever the caller only logs to the console.
 
+### Mobile viewport: couldn't reach the top or bottom without over-scrolling (3 Oct 2026)
+Three causes, all in the shell:
+- **`h-screen` (100vh) on iOS is the height with the toolbars hidden**, so the bottom of every page sat behind Safari's bar. Both shells now use `h-dvh` (dynamic viewport height), which tracks the toolbars as they collapse.
+- **`viewport-fit: cover` was missing**, so every `env(safe-area-inset-*)` resolved to 0 — the fixed bottom bar could sit under the iPhone home indicator. Added to the `viewport` export.
+- **`main` had `pb-16` (64px)** for a bar that is taller than that once labels and the home indicator are counted, hiding the last of the content. Now `calc(4.5rem + env(safe-area-inset-bottom))`, with the bar itself padded by the inset. The admin shell gets the same treatment at the top for its fixed header, and `overscroll-contain` stops a scroll at the end of the list dragging the page behind it.
+- **Not verified on a real device** — the browser here will not resize below desktop width.
+
 ### Admin create-user: three bugs stacked (3 Oct 2026)
 Each one hid the next, and each only became visible once the error above it stopped being discarded:
 1. Organisation insert had no `slug` (NOT NULL, no default) and passed a non-existent `currency` column.
