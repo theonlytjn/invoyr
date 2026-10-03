@@ -55,14 +55,22 @@ export async function POST(req: NextRequest) {
     await supabase.auth.admin.deleteUser(userId);
   }
 
-  // 2. Create profile
-  const { error: profileError } = await supabase.from("profiles").insert({
-    id: userId,
-    first_name: firstName,
-    last_name: lastName,
-    full_name: `${firstName} ${lastName}`,
-    onboarding_completed: true,
-  });
+  // 2. Fill in the profile. The `handle_new_user` trigger has ALREADY inserted
+  // a row for this user (deriving a name from the email), so an insert here
+  // collides on the primary key — upsert replaces the trigger's guess with the
+  // names the admin actually typed.
+  const { error: profileError } = await supabase
+    .from("profiles")
+    .upsert(
+      {
+        id: userId,
+        first_name: firstName,
+        last_name: lastName,
+        full_name: `${firstName} ${lastName}`,
+        onboarding_completed: true,
+      },
+      { onConflict: "id" }
+    );
 
   if (profileError) {
     await rollback();

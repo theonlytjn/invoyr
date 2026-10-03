@@ -69,6 +69,13 @@ Shipped across commits `5a94452`, `ea8cba0`, `70c1f10`, `337cc50`, `3dc4b48`, `4
 - **Fix.** Onboarding now posts to `POST /api/org/create`, which validates with Zod (`src/lib/onboarding/org-input.ts`, unit tested) and writes the row with the service client. That route previously accepted only `name` — it now takes the wizard's full payload (contact details, logo, accent colour) and **deletes the org if the `org_members` insert fails**, since an org with no members is invisible to every RLS policy and unreachable forever. The wizard surfaces the error instead of swallowing it. RLS is unchanged: `organisations` still has no authenticated INSERT policy.
 - **LESSON (third of its kind, after `logos_select` and the PayPal enum): dropping a policy needs proof that every writer of that table is server-side.** A grep for `.from("organisations").insert` in `src/components` would have caught it. Browser writes fail silently wherever the caller only logs to the console.
 
+### Admin create-user: three bugs stacked (3 Oct 2026)
+Each one hid the next, and each only became visible once the error above it stopped being discarded:
+1. Organisation insert had no `slug` (NOT NULL, no default) and passed a non-existent `currency` column.
+2. `profiles.first_name` / `last_name` did not exist (see below).
+3. `profiles` insert collided on the primary key — **`handle_new_user` already inserts the row** when the auth user is created. Now an upsert, which also replaces the trigger's email-derived guess with the names the admin typed.
+- **Verified by probe, not by reading:** a throwaway account was driven through the exact sequence (createUser → profile upsert → organisation → membership → audit log) against production, confirmed, then deleted. Worth repeating for any multi-step write that can't be exercised through the UI without making real data.
+
 ### profiles.first_name never existed (3 Oct 2026)
 - Admin create-user failed with "Could not find the 'first_name' column of 'profiles' in the schema cache" — **surfaced only because the error check added earlier that day stopped the route swallowing it.**
 - `first_name`/`last_name` live on `marketing_contacts` and had **never** been on `profiles`, yet **14 code paths read `profiles.first_name`** for email personalisation. Every one used `profile?.first_name ?? "there"`, so each failed select degraded silently: trial, welcome, payment and subscription emails have always greeted people as "there" or by their org name. Nothing ever errored.
