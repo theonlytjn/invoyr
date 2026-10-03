@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import SectionMenu from "@/components/shell/SectionMenu";
 
 const TABS = [
   { href: "/settings", label: "Company" },
@@ -23,7 +24,12 @@ export default function SettingsNav() {
 
   return (
     <div className="border-b border-neutral-200 dark:border-neutral-800">
-      <nav className="flex gap-1 -mb-px overflow-x-auto px-4 sm:px-6">
+      {/* Eleven tabs don't fit a phone: below lg they become one dropdown. */}
+      <div className="lg:hidden">
+        <SectionMenu items={TABS} exactHref="/settings" srLabel="Settings section" id="settings-menu" />
+      </div>
+
+      <nav className="hidden lg:flex gap-1 -mb-px overflow-x-auto px-4 sm:px-6">
         {TABS.map((tab) => {
           const active = tab.href === "/settings"
             ? pathname === "/settings"
