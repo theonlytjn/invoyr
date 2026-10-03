@@ -82,13 +82,13 @@ export default function SectionMenu({ items, exactHref, srLabel, id = "section-m
       {open && (
         <>
           <div
-            className="fixed inset-0 z-40 bg-neutral-950/30"
+            className="fixed inset-0 z-40 bg-neutral-950/20"
             onClick={() => setOpen(false)}
             aria-hidden="true"
           />
           <ul
             id={id}
-            className="absolute left-0 right-0 z-50 max-h-[70vh] overflow-y-auto border-b border-neutral-200 bg-white p-2 shadow-lg dark:border-neutral-800 dark:bg-neutral-950"
+            className="absolute left-2 right-2 z-50 mt-1 max-h-[65vh] overflow-y-auto rounded-xl border border-neutral-200 bg-white p-1.5 shadow-xl dark:border-neutral-800 dark:bg-neutral-900"
           >
             {items.map((item) => {
               const active = isActive(item.href) && item.href === current?.href;
@@ -98,7 +98,7 @@ export default function SectionMenu({ items, exactHref, srLabel, id = "section-m
                     href={item.href}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "block rounded-lg px-4 py-3 text-sm font-medium transition-colors",
+                      "block rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                       active
                         ? "bg-neutral-100 text-neutral-950 dark:bg-neutral-900 dark:text-neutral-50"
                         : "text-neutral-600 dark:text-neutral-400"
