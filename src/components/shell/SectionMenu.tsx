@@ -100,7 +100,7 @@ export default function SectionMenu({ items, exactHref, srLabel, id = "section-m
                     className={cn(
                       "block rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                       active
-                        ? "bg-neutral-100 text-neutral-950 dark:bg-neutral-900 dark:text-neutral-50"
+                        ? "bg-neutral-100 text-neutral-950 dark:bg-neutral-800 dark:text-neutral-50"
                         : "text-neutral-600 dark:text-neutral-400"
                     )}
                   >
