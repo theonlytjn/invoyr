@@ -25,8 +25,8 @@ export default async function AdminEmailLogsPage() {
         <p className="text-neutral-500 mt-1 text-sm">Most recent 200 across all organisations.</p>
       </div>
 
-      <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl overflow-x-auto">
+        <table className="w-full min-w-[44rem] text-sm">
           <thead>
             <tr className="border-b border-neutral-100 dark:border-neutral-800">
               <th className="px-5 py-3 text-left text-xs text-neutral-400 uppercase tracking-wider">To</th>

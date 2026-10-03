@@ -23,7 +23,7 @@ export default async function AdminConnectionsPage() {
         </p>
       </div>
 
-      <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl overflow-hidden mb-8">
+      <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl overflow-x-auto mb-8">
         <div className="px-5 py-3 border-b border-neutral-100 dark:border-neutral-800 flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-green-400 flex-shrink-0" />
           <h2 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">Connected — Stripe ({connected.length})</h2>
@@ -31,7 +31,7 @@ export default async function AdminConnectionsPage() {
         {connected.length === 0 ? (
           <p className="px-5 py-6 text-sm text-neutral-400">No organisations connected yet.</p>
         ) : (
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[44rem] text-sm">
             <thead>
               <tr className="border-b border-neutral-100 dark:border-neutral-800">
                 <th className="px-5 py-3 text-left text-xs text-neutral-400 uppercase tracking-wider">Organisation</th>
@@ -58,7 +58,7 @@ export default async function AdminConnectionsPage() {
         )}
       </div>
 
-      <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl overflow-hidden">
+      <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl overflow-x-auto">
         <div className="px-5 py-3 border-b border-neutral-100 dark:border-neutral-800 flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-neutral-300 dark:bg-neutral-600 flex-shrink-0" />
           <h2 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">Not connected ({unconnected.length})</h2>
@@ -66,7 +66,7 @@ export default async function AdminConnectionsPage() {
         {unconnected.length === 0 ? (
           <p className="px-5 py-6 text-sm text-neutral-400">All organisations are connected.</p>
         ) : (
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[44rem] text-sm">
             <thead>
               <tr className="border-b border-neutral-100 dark:border-neutral-800">
                 <th className="px-5 py-3 text-left text-xs text-neutral-400 uppercase tracking-wider">Organisation</th>

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -41,22 +40,36 @@ export default function EmailSettingsForm({ org, canCustomEmail, canReminderAuto
     e.preventDefault();
     setSaving(true);
     setError(null);
-    const supabase = createClient();
-    const { error: saveErr } = await supabase
-      .from("organisations")
-      .update({
-        from_email: fromEmail || null,
-        reminder_days: reminderDays.length > 0 ? reminderDays : ALL_REMINDER_DAYS,
-        payment_reminder_days: preDueDays,
-      })
-      .eq("id", org.id);
+
+    // Posted to our own origin rather than straight to Supabase: the
+    // cross-origin write failed on mobile with a bare "TypeError: Load failed",
+    // and an admin's update was silently dropped by RLS. See the route.
+    const res = await fetch("/api/settings/email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fromEmail: fromEmail || null,
+        reminderDays,
+        preDueDays,
+      }),
+    }).catch(() => null);
+
     setSaving(false);
-    if (saveErr) {
-      setError(saveErr.message);
-    } else {
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
+
+    if (!res) {
+      setError("We couldn't reach the server. Check your connection and try again.");
+      return;
     }
+
+    const payload = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      setError(payload?.error ?? "Settings were not saved. Please try again.");
+      return;
+    }
+
+    setSaved(true);
+    setTimeout(() => setSaved(false), 3000);
   }
 
   return (
