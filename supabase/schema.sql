@@ -14,6 +14,12 @@ create extension if not exists "pgcrypto";
 create table if not exists public.profiles (
   id                   uuid primary key references auth.users(id) on delete cascade,
   full_name            text,
+  -- Added 3 Oct 2026. Fourteen code paths read profiles.first_name for email
+  -- personalisation and the admin create-user route writes both; neither column
+  -- had ever existed, so those selects errored and every "Hi {name}" silently
+  -- fell back to "there".
+  first_name           text,
+  last_name            text,
   avatar_url           text,
   onboarding_completed boolean not null default false,
   created_at           timestamptz not null default now()
@@ -21,13 +27,20 @@ create table if not exists public.profiles (
 
 create or replace function public.handle_new_user()
 returns trigger language plpgsql security definer set search_path = public as $$
+declare
+  resolved_name text;
 begin
-  insert into public.profiles (id, full_name)
-  values (new.id, coalesce(new.raw_user_meta_data->>'full_name', split_part(new.email,'@',1)))
-  on conflict (id) do nothing;
+  resolved_name := coalesce(new.raw_user_meta_data->>'full_name', split_part(new.email, '@', 1));
+
+  insert into public.profiles (id, full_name, first_name, last_name)
+  values (
+    new.id,
+    resolved_name,
+    nullif(split_part(resolved_name, ' ', 1), ''),
+    nullif(trim(substring(resolved_name from position(' ' in resolved_name) + 1)), '')
+  );
   return new;
-end;
-$$;
+end $$;
 
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created

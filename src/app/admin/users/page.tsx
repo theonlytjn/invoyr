@@ -35,6 +35,7 @@ export default async function AdminUsersPage() {
               <th className="px-5 py-3 text-left text-xs text-neutral-400 uppercase tracking-wider">Name</th>
               <th className="px-5 py-3 text-left text-xs text-neutral-400 uppercase tracking-wider">Organisation</th>
               <th className="px-5 py-3 text-left text-xs text-neutral-400 uppercase tracking-wider">Role</th>
+              <th className="px-5 py-3 text-left text-xs text-neutral-400 uppercase tracking-wider">Sign-in</th>
               <th className="px-5 py-3 text-left text-xs text-neutral-400 uppercase tracking-wider">Signed up</th>
               <th className="px-5 py-3 text-left text-xs text-neutral-400 uppercase tracking-wider"></th>
             </tr>
@@ -51,6 +52,24 @@ export default async function AdminUsersPage() {
                   <td className="px-5 py-3 text-neutral-600 dark:text-neutral-400">{profile?.full_name ?? "—"}</td>
                   <td className="px-5 py-3 text-neutral-600 dark:text-neutral-400">{orgName ?? "—"}</td>
                   <td className="px-5 py-3 text-neutral-400 capitalize">{member?.role ?? "—"}</td>
+                  {/* Which methods this person can actually sign in with — the
+                      first thing worth knowing when someone can't get in. */}
+                  <td className="px-5 py-3">
+                    <div className="flex flex-wrap gap-1">
+                      {(u.identities ?? []).length === 0 ? (
+                        <span className="text-neutral-400">—</span>
+                      ) : (
+                        (u.identities ?? []).map((identity) => (
+                          <span
+                            key={identity.identity_id ?? identity.provider}
+                            className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs capitalize text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300"
+                          >
+                            {identity.provider === "email" ? "Password" : identity.provider}
+                          </span>
+                        ))
+                      )}
+                    </div>
+                  </td>
                   <td className="px-5 py-3 text-neutral-400">
                     {new Date(u.created_at).toLocaleDateString("en-GB")}
                   </td>
