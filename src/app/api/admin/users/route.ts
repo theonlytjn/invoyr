@@ -5,6 +5,7 @@ import { getAdminUser } from "@/lib/admin";
 import { createServiceClient } from "@/lib/supabase/server";
 import { sendTransactionalEmail } from "@/lib/resend/send-transactional-email";
 import { AdminWelcomeEmail } from "@/emails/transactional/AdminWelcomeEmail";
+import { buildOrgRow } from "@/lib/onboarding/org-input";
 
 const schema = z.object({
   email:     z.string().email(),
@@ -48,8 +49,14 @@ export async function POST(req: NextRequest) {
 
   const userId = authData.user.id;
 
+  /** Undo the half-built account rather than leaving a login that goes nowhere. */
+  async function rollback(orgId?: string) {
+    if (orgId) await supabase.from("organisations").delete().eq("id", orgId);
+    await supabase.auth.admin.deleteUser(userId);
+  }
+
   // 2. Create profile
-  await supabase.from("profiles").insert({
+  const { error: profileError } = await supabase.from("profiles").insert({
     id: userId,
     first_name: firstName,
     last_name: lastName,
@@ -57,34 +64,51 @@ export async function POST(req: NextRequest) {
     onboarding_completed: true,
   });
 
-  // 3. Create organisation
-  const { data: org } = await supabase
+  if (profileError) {
+    await rollback();
+    return NextResponse.json({ error: profileError.message }, { status: 500 });
+  }
+
+  // 3. Create organisation. buildOrgRow supplies the slug, which is NOT NULL
+  // with no default — this route used to omit it (and pass a `currency` column
+  // organisations does not have), so admin user creation had never worked.
+  const orgId = crypto.randomUUID();
+  const { data: org, error: orgError } = await supabase
     .from("organisations")
-    .insert({ name: orgName, currency: "GBP" })
+    .insert(buildOrgRow({ name: orgName }, orgId))
     .select("id")
     .single();
 
-  if (!org) {
-    // Roll back user if org creation failed
-    await supabase.auth.admin.deleteUser(userId);
-    return NextResponse.json({ error: "Failed to create organisation" }, { status: 500 });
+  if (orgError || !org) {
+    await rollback();
+    return NextResponse.json(
+      { error: orgError?.message ?? "Failed to create organisation" },
+      { status: 500 }
+    );
   }
 
   // 4. Add user as owner
-  await supabase.from("org_members").insert({
+  const { error: memberError } = await supabase.from("org_members").insert({
     org_id: org.id,
     user_id: userId,
     role: "owner",
   });
 
-  // 5. Audit log
-  await supabase.from("audit_logs").insert({
+  if (memberError) {
+    await rollback(org.id);
+    return NextResponse.json({ error: memberError.message }, { status: 500 });
+  }
+
+  // 5. Audit log — best-effort, but logged rather than discarded.
+  const { error: auditError } = await supabase.from("audit_logs").insert({
     org_id: org.id,
     action: "user.created_by_admin",
     entity_type: "user",
     entity_id: userId,
     meta: { created_by: admin.email, email, org_name: orgName },
   });
+
+  if (auditError) console.error("admin user-create audit log failed", auditError);
 
   // 6. Send welcome email
   await sendTransactionalEmail({
