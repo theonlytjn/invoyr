@@ -19,7 +19,7 @@ export default function AppShell({ org, orgs, userEmail, plan, trialDaysLeft, is
       <main className="flex-1 overflow-y-auto pb-16 lg:pb-0 bg-white dark:bg-neutral-950">
         {children}
       </main>
-      <MobileNav />
+      <MobileNav isAdmin={isAdmin} />
     </div>
   );
 }

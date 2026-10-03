@@ -8,6 +8,7 @@ import {
   UsersIcon,
   ExpenseIcon,
   SettingsIcon,
+  LockIcon,
 } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
@@ -19,19 +20,25 @@ const NAV_ITEMS = [
   { href: "/settings", label: "Settings", icon: SettingsIcon },
 ];
 
-export default function MobileNav() {
+export default function MobileNav({ isAdmin = false }: { isAdmin?: boolean }) {
   const pathname = usePathname();
+
+  // The desktop sidebar has had an "Admin panel" link all along; on a phone
+  // there was no way back to admin short of typing the URL.
+  const items = isAdmin
+    ? [...NAV_ITEMS, { href: "/admin", label: "Admin", icon: LockIcon }]
+    : NAV_ITEMS;
 
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-neutral-950 border-t border-neutral-200 dark:border-neutral-800 flex items-stretch">
-      {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+      {items.map(({ href, label, icon: Icon }) => {
         const active = pathname === href || (href !== "/dashboard" && pathname.startsWith(href));
         return (
           <Link
             key={href}
             href={href}
             className={cn(
-              "flex-1 flex flex-col items-center justify-center gap-1 py-2.5 text-xs font-medium transition-colors",
+              "flex-1 flex flex-col items-center justify-center gap-1 py-2.5 text-[11px] font-medium transition-colors",
               active
                 ? "text-neutral-950 dark:text-neutral-50"
                 : "text-neutral-400 dark:text-neutral-500"
