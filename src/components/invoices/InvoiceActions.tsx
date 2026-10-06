@@ -20,6 +20,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import RecordPaymentModal from "./RecordPaymentModal";
 import CreditNoteModal from "./CreditNoteModal";
 import type { Invoice } from "@/lib/supabase/types";
@@ -37,6 +45,9 @@ export default function InvoiceActions({ invoice, clientEmail }: Props) {
   const [reminding, setReminding] = useState(false);
   const [issuing, setIssuing] = useState(false);
   const [duplicating, setDuplicating] = useState(false);
+  // Set once a send succeeds, so the confirmation can name the recipients
+  // rather than just silently refreshing the page.
+  const [sentTo, setSentTo] = useState<{ to: string; cc: string[] } | null>(null);
 
   async function handleDownloadPdf() {
     window.open(`/api/invoices/${invoice.id}/pdf`, "_blank");
@@ -58,11 +69,13 @@ export default function InvoiceActions({ invoice, clientEmail }: Props) {
     setSending(true);
     const res = await fetch(`/api/invoices/${invoice.id}/send`, { method: "POST" });
     setSending(false);
+    const payload = await res.json().catch(() => ({}));
+
     if (res.ok) {
+      setSentTo({ to: payload?.to ?? clientEmail ?? "", cc: payload?.cc ?? [] });
       router.refresh();
     } else {
-      const { error } = await res.json();
-      alert(error ?? "Failed to send invoice");
+      alert(payload?.error ?? "Failed to send invoice");
     }
   }
 
@@ -173,6 +186,26 @@ export default function InvoiceActions({ invoice, clientEmail }: Props) {
           )}
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <Dialog open={Boolean(sentTo)} onOpenChange={(open) => !open && setSentTo(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Invoice {invoice.invoice_number} sent</DialogTitle>
+            <DialogDescription>
+              {sentTo?.to ? `Emailed to ${sentTo.to}.` : "The invoice has been emailed."}
+              {sentTo?.cc?.length
+                ? ` Copied to ${sentTo.cc.join(", ")}.`
+                : ""}
+            </DialogDescription>
+          </DialogHeader>
+          <p className="text-sm text-neutral-500">
+            You&apos;ll see it in this invoice&apos;s history, along with when your client opens it.
+          </p>
+          <DialogFooter>
+            <Button onClick={() => setSentTo(null)}>Done</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <RecordPaymentModal
         invoice={invoice}

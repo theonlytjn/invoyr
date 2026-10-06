@@ -69,6 +69,9 @@ Shipped across commits `5a94452`, `ea8cba0`, `70c1f10`, `337cc50`, `3dc4b48`, `4
 - **Fix.** Onboarding now posts to `POST /api/org/create`, which validates with Zod (`src/lib/onboarding/org-input.ts`, unit tested) and writes the row with the service client. That route previously accepted only `name` — it now takes the wizard's full payload (contact details, logo, accent colour) and **deletes the org if the `org_members` insert fails**, since an org with no members is invisible to every RLS policy and unreachable forever. The wizard surfaces the error instead of swallowing it. RLS is unchanged: `organisations` still has no authenticated INSERT policy.
 - **LESSON (third of its kind, after `logos_select` and the PayPal enum): dropping a policy needs proof that every writer of that table is server-side.** A grep for `.from("organisations").insert` in `src/components` would have caught it. Browser writes fail silently wherever the caller only logs to the console.
 
+### Sending an invoice now confirms itself (6 Oct 2026)
+- Sending from the invoice page refreshed silently — no way to tell a send from a no-op. `POST /api/invoices/[id]/send` now returns the resolved recipients and the page shows a confirmation naming them, **including the CC list**, so "did accounts get it?" is answered at the moment of sending rather than by digging through history.
+
 ### Accent-colour contrast, linked clients, and first-view tracking (6 Oct 2026)
 - **A white or pale accent erased the pay page header** — white text on a white band. `src/lib/contrast.ts` (WCAG relative luminance, unit tested) now picks near-black or white for any accent, and adds a hairline border when the accent is near-white so the band and logo tile don't vanish into the card.
 - The same problem exists in reverse — accent used as *text* on white — so `accentOnLight` falls back to near-black for pale accents. Used for the new invoice-number link colour.

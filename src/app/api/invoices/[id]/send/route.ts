@@ -6,6 +6,7 @@ import { dispatchWebhook } from "@/lib/webhooks/dispatch";
 import { runAutomations } from "@/lib/automations/execute";
 import { InvoiceSentEmail } from "@/emails/transactional/InvoiceSentEmail";
 import { invoiceEmailAmounts } from "@/lib/invoice-totals";
+import { ccRecipients } from "@/lib/email-recipients";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 export async function POST(
@@ -113,5 +114,9 @@ export async function POST(
     currency: invoice.currency,
   }).catch(() => {});
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({
+    ok: true,
+    to: client.email,
+    cc: ccRecipients(client.email, client.cc_emails),
+  });
 }
