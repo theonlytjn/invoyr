@@ -48,6 +48,15 @@ export const ADMIN_NAV: AdminNavItem[] = [
     ),
   },
   {
+    label: "Emails",
+    href: "/admin/emails",
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="2" y="4" width="20" height="16" rx="2" /><path d="m2 7 10 6 10-6" />
+      </svg>
+    ),
+  },
+  {
     label: "Email logs",
     href: "/admin/email-logs",
     icon: (
