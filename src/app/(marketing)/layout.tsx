@@ -52,6 +52,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
           <div>
             <p className="font-mono text-[0.8125rem] uppercase tracking-[0.14em] text-neutral-500 dark:text-neutral-400 mb-4">Legal</p>
             <ul className="space-y-2.5 text-base text-neutral-600 dark:text-neutral-200">
+              <li><Link href="/help" className="hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors">Help &amp; guides</Link></li>
               <li><Link href="/privacy" className="hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors">Privacy Policy</Link></li>
               <li><Link href="/terms" className="hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors">Terms of Service</Link></li>
               <li><Link href="/dpa" className="hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors">Data Processing Addendum</Link></li>
