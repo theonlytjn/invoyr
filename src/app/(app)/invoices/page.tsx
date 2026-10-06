@@ -39,7 +39,7 @@ export default async function InvoicesPage({
 
   let query = supabase
     .from("invoices")
-    .select("*, clients(name)")
+    .select("*, clients(id, name)")
     .eq("org_id", org.id)
     .order("created_at", { ascending: false });
 
@@ -95,7 +95,7 @@ export default async function InvoicesPage({
           </div>
         </div>
 
-        <InvoicesTable invoices={invoices} canBulk={canBulk} />
+        <InvoicesTable invoices={invoices} canBulk={canBulk} accentColor={org.accent_color} />
       </div>
     </div>
   );

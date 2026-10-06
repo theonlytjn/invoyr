@@ -239,3 +239,19 @@ describe("buildInvoiceHistory — the double-recorded open", () => {
     expect(entries.filter((e) => e.label === "Opened by client")).toHaveLength(2);
   });
 });
+
+describe("pay page opens", () => {
+  it("labels a pay-page open distinctly from an email open", () => {
+    const entries = buildInvoiceHistory(
+      [
+        { action: "invoice.viewed", created_at: "2026-01-05T14:30:00Z" },
+        { action: "invoice.page_viewed", created_at: "2026-01-05T15:00:00Z" },
+      ],
+      []
+    );
+
+    const labels = entries.map((e) => e.label);
+    expect(labels).toContain("Opened by client");
+    expect(labels).toContain("Invoice opened by client");
+  });
+});

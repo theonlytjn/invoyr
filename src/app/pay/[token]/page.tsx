@@ -2,8 +2,9 @@ import { notFound } from "next/navigation";
 import { createServiceClient } from "@/lib/supabase/server";
 import { getOrgPlan } from "@/lib/billing";
 import { canAccess } from "@/config/plans";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { cn, formatCurrency, formatDate } from "@/lib/utils";
 import { computeTotals, discountLabel } from "@/lib/invoice-totals";
+import { needsBorderOnWhite, readableTextColor } from "@/lib/contrast";
 import { resolveDocumentClient } from "@/lib/client-snapshot";
 import PayButton from "./PayButton";
 import PayPalButton from "./PayPalButton";
@@ -49,10 +50,35 @@ export default async function PayPage({ params, searchParams }: Props) {
     }))
   );
 
+  // Record the first time the client opens this invoice, once only: the point
+  // is "they have seen it", and a row per refresh would bury the real history.
+  // Best-effort — a sender must never see an error because logging failed.
+  const { data: alreadyViewed, error: viewLookupError } = await supabase
+    .from("audit_logs")
+    .select("id")
+    .eq("entity_id", invoice.id)
+    .eq("action", "invoice.page_viewed")
+    .limit(1);
+
+  if (!viewLookupError && !alreadyViewed?.length) {
+    const { error: viewLogError } = await supabase.from("audit_logs").insert({
+      org_id: invoice.org_id,
+      action: "invoice.page_viewed",
+      entity_type: "invoice",
+      entity_id: invoice.id,
+      meta: { source: "pay_page" },
+    });
+    if (viewLogError) console.error("invoice.page_viewed not recorded", viewLogError);
+  }
+
   const lateFeeAmount = (invoice as { late_fee_amount?: number }).late_fee_amount ?? 0;
   const creditApplied = (invoice as { credit_applied?: number }).credit_applied ?? 0;
   const amountDue = invoice.total + lateFeeAmount - invoice.amount_paid - creditApplied;
   const accentColor = orgRow?.accent_color ?? "#111827";
+  // A white or pale accent used to erase the header: the business name and
+  // invoice number were white text on a white band.
+  const headerTextColor = readableTextColor(accentColor);
+  const headerNeedsBorder = needsBorderOnWhite(accentColor);
   const isPaid = invoice.status === "paid" || paid === "1";
 
   // Which payment methods are available, in display order. The leading "Or" on
@@ -72,9 +98,15 @@ export default async function PayPage({ params, searchParams }: Props) {
     <div className="min-h-screen bg-gray-50 text-gray-900 flex flex-col items-center justify-center px-4 py-12">
       <div className="w-full max-w-xl bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         {/* Header */}
-        <div className="p-8 text-white" style={{ backgroundColor: accentColor }}>
+        <div
+          className={cn("p-8", headerNeedsBorder && "border-b border-gray-200")}
+          style={{ backgroundColor: accentColor, color: headerTextColor }}
+        >
           {orgRow?.logo_url ? (
-            <div className="inline-flex items-center justify-center bg-white mb-4" style={{ width: 80, height: 80, padding: 1 }}>
+            <div
+              className={cn("inline-flex items-center justify-center bg-white mb-4", headerNeedsBorder && "border border-gray-200")}
+              style={{ width: 80, height: 80, padding: 1 }}
+            >
               <img
                 src={orgRow.logo_url}
                 alt={orgRow.name}

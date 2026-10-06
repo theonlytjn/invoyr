@@ -46,6 +46,9 @@ const ACTION_LABELS: Record<string, string> = {
   "invoice.issued": "Issued",
   "invoice.sent": "Sent to client",
   "invoice.viewed": "Opened by client",
+  // The client followed the link and loaded the invoice itself, as opposed to
+  // merely opening the email. Recorded once, on the first visit.
+  "invoice.page_viewed": "Invoice opened by client",
   "invoice.paid": "Marked as paid",
   "invoice.partial_payment": "Part payment received",
   "invoice.void": "Voided",

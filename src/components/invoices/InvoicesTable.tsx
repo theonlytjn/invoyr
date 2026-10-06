@@ -17,10 +17,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChevronDownIcon } from "@/components/icons";
 import type { InvoiceWithClient } from "@/lib/supabase/types";
+import { accentOnLight } from "@/lib/contrast";
 
 interface Props {
   invoices: InvoiceWithClient[];
   canBulk?: boolean;
+  /** The org's brand colour, used to mark the invoice number as a link. */
+  accentColor?: string | null;
 }
 
 const SENDABLE = new Set(["draft", "issued", "sent"]);
@@ -96,8 +99,10 @@ function buildCsv(rows: InvoiceWithClient[]): string {
   return [headers.join(","), ...lines].join("\n");
 }
 
-export default function InvoicesTable({ invoices, canBulk = false }: Props) {
+export default function InvoicesTable({ invoices, canBulk = false, accentColor }: Props) {
   const router = useRouter();
+  // Falls back to near-black when the brand colour is too pale to read on white.
+  const linkColor = accentOnLight(accentColor);
   const [query, setQuery] = useState("");
   const selection = useRowSelection();
   const [action, setAction] = useState<BulkAction | null>(null);
@@ -362,12 +367,25 @@ export default function InvoicesTable({ invoices, canBulk = false }: Props) {
                       />
                     </td>
                     <td className="py-3 px-3">
-                      <Link href={`/invoices/${invoice.id}`} className="font-medium text-neutral-950 dark:text-neutral-50 hover:underline">
+                      <Link
+                        href={`/invoices/${invoice.id}`}
+                        className="font-medium underline-offset-4 hover:underline dark:text-neutral-50"
+                        style={{ color: linkColor }}
+                      >
                         {invoice.invoice_number}
                       </Link>
                     </td>
                     <td className="py-3 px-4 text-neutral-600 dark:text-neutral-400 max-w-[120px] truncate">
-                      {invoice.clients?.name ?? <span className="text-neutral-400 italic">No client</span>}
+                      {invoice.clients?.id ? (
+                        <Link
+                          href={`/clients/${invoice.clients.id}`}
+                          className="underline-offset-4 hover:underline hover:text-neutral-950 dark:hover:text-neutral-50"
+                        >
+                          {invoice.clients.name}
+                        </Link>
+                      ) : (
+                        invoice.clients?.name ?? <span className="text-neutral-400 italic">No client</span>
+                      )}
                     </td>
                     <td className="py-3 px-4">
                       <InvoiceStatusBadge status={invoice.status} />

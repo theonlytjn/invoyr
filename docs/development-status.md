@@ -69,6 +69,13 @@ Shipped across commits `5a94452`, `ea8cba0`, `70c1f10`, `337cc50`, `3dc4b48`, `4
 - **Fix.** Onboarding now posts to `POST /api/org/create`, which validates with Zod (`src/lib/onboarding/org-input.ts`, unit tested) and writes the row with the service client. That route previously accepted only `name` — it now takes the wizard's full payload (contact details, logo, accent colour) and **deletes the org if the `org_members` insert fails**, since an org with no members is invisible to every RLS policy and unreachable forever. The wizard surfaces the error instead of swallowing it. RLS is unchanged: `organisations` still has no authenticated INSERT policy.
 - **LESSON (third of its kind, after `logos_select` and the PayPal enum): dropping a policy needs proof that every writer of that table is server-side.** A grep for `.from("organisations").insert` in `src/components` would have caught it. Browser writes fail silently wherever the caller only logs to the console.
 
+### Accent-colour contrast, linked clients, and first-view tracking (6 Oct 2026)
+- **A white or pale accent erased the pay page header** — white text on a white band. `src/lib/contrast.ts` (WCAG relative luminance, unit tested) now picks near-black or white for any accent, and adds a hairline border when the accent is near-white so the band and logo tile don't vanish into the card.
+- The same problem exists in reverse — accent used as *text* on white — so `accentOnLight` falls back to near-black for pale accents. Used for the new invoice-number link colour.
+- **Invoice list:** invoice numbers now render in the org's accent as an obvious link, and client names link through to the client record (`clients(id, name)` added to the query, which previously fetched only the name).
+- **First view of the pay page is recorded** as `invoice.page_viewed`, once per invoice, labelled "Invoice opened by client" — distinct from `invoice.viewed`, which the Resend webhook writes when the *email* is opened. Both now appear in the invoice history. Best-effort: a logging failure never breaks the page for a paying client.
+- **Caveat:** the sender opening their own pay link counts as a view; there is no way to tell them apart without a cookie or token.
+
 ### Mobile viewport: couldn't reach the top or bottom without over-scrolling (3 Oct 2026)
 Three causes, all in the shell:
 - **`h-screen` (100vh) on iOS is the height with the toolbars hidden**, so the bottom of every page sat behind Safari's bar. Both shells now use `h-dvh` (dynamic viewport height), which tracks the toolbars as they collapse.
