@@ -6,11 +6,16 @@
  * the documents omit the clause rather than printing an empty placeholder.
  */
 export const LEGAL_ENTITY = {
-  name: "Invoyr Ltd",
+  name: "Invoyr Limited",
   tradingAs: "Invoyr",
+  /**
+   * The REGISTERED office, which is what the law requires to be published —
+   * deliberately not a trading or home address.
+   */
   address: "128 City Road, London, United Kingdom, EC1V 2NX",
-  /** TODO: set once Invoyr Ltd is registered (expected 28 Sep 2026). */
-  companyNumber: null as string | null,
+  placeOfRegistration: "England and Wales",
+  /** Companies House, registered 7 Oct 2026. */
+  companyNumber: "17502051" as string | null,
   supportEmail: "support@invoyr.io",
   jurisdiction: "England and Wales",
 } as const;

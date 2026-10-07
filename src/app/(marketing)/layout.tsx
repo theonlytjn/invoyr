@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LEGAL_ENTITY } from "@/config/legal";
 import MarketingHeader from "./MarketingHeader";
 import ScrollReveal from "./ScrollReveal";
 import ScrollToTop from "@/components/ScrollToTop";
@@ -68,8 +69,17 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
           </div>
         </div>
         <div className="border-t border-neutral-200 dark:border-neutral-900">
-          <div className="max-w-[1600px] mx-auto px-6 lg:px-12 py-6 font-mono text-[0.8125rem] uppercase tracking-[0.14em] text-neutral-500 dark:text-neutral-400">
-            © {new Date().getFullYear()} Invoyr. All rights reserved.
+          <div className="max-w-[1600px] mx-auto px-6 lg:px-12 py-6 space-y-2 text-neutral-500 dark:text-neutral-400">
+            <p className="font-mono text-[0.8125rem] uppercase tracking-[0.14em]">
+              © {new Date().getFullYear()} {LEGAL_ENTITY.tradingAs}. All rights reserved.
+            </p>
+            {/* Companies House trading disclosure: a UK company must publish its
+                registered name, number, place of registration and registered
+                office on its website. */}
+            <p className="text-sm normal-case tracking-normal">
+              {LEGAL_ENTITY.name} is registered in {LEGAL_ENTITY.placeOfRegistration}, company
+              number {LEGAL_ENTITY.companyNumber}. Registered office: {LEGAL_ENTITY.address}.
+            </p>
           </div>
         </div>
       </footer>
