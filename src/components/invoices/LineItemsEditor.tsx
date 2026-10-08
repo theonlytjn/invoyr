@@ -48,7 +48,7 @@ export default function LineItemsEditor({ items, currency = "GBP", onChange }: P
         <span />
       </div>
 
-      {items.map((item) => {
+      {items.map((item, index) => {
         const lineTotal = item.quantity * item.unit_price;
         return (
           <div key={item.id} className="rounded-lg border border-neutral-200 dark:border-neutral-700 p-3 sm:p-0 sm:border-0 sm:rounded-none space-y-2 sm:space-y-0 sm:grid sm:grid-cols-[1fr_80px_100px_80px_90px_36px] sm:gap-2 sm:items-center">
@@ -57,6 +57,7 @@ export default function LineItemsEditor({ items, currency = "GBP", onChange }: P
               onChange={(e) => update(item.id, { description: e.target.value })}
               placeholder="Service description"
               className="h-8 text-sm"
+              aria-label={`Line ${index + 1} description`}
             />
             <div className="grid grid-cols-3 gap-2 sm:contents">
               <div className="sm:contents">
@@ -68,6 +69,7 @@ export default function LineItemsEditor({ items, currency = "GBP", onChange }: P
                   value={item.quantity}
                   onChange={(e) => update(item.id, { quantity: parseFloat(e.target.value) || 0 })}
                   className="h-8 text-sm text-right"
+                  aria-label={`Line ${index + 1} quantity`}
                 />
               </div>
               <div className="sm:contents">
@@ -79,6 +81,7 @@ export default function LineItemsEditor({ items, currency = "GBP", onChange }: P
                   value={item.unit_price}
                   onChange={(e) => update(item.id, { unit_price: parseFloat(e.target.value) || 0 })}
                   className="h-8 text-sm text-right"
+                  aria-label={`Line ${index + 1} unit price`}
                 />
               </div>
               <div className="sm:contents">
@@ -91,6 +94,7 @@ export default function LineItemsEditor({ items, currency = "GBP", onChange }: P
                   value={item.vat_rate}
                   onChange={(e) => update(item.id, { vat_rate: parseFloat(e.target.value) || 0 })}
                   className="h-8 text-sm text-right"
+                  aria-label={`Line ${index + 1} VAT rate`}
                 />
               </div>
             </div>
@@ -103,6 +107,7 @@ export default function LineItemsEditor({ items, currency = "GBP", onChange }: P
                 onClick={() => remove(item.id)}
                 className="text-neutral-400 hover:text-red-500 transition-colors"
                 disabled={items.length === 1}
+                aria-label={`Remove line ${index + 1}${item.description ? `: ${item.description}` : ""}`}
               >
                 <TrashIcon size={16} />
               </button>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { readableTextColor } from "@/lib/contrast";
 
 interface Props {
   token: string;
@@ -29,8 +30,8 @@ export default function PayButton({ token, accentColor }: Props) {
       <button
         onClick={handlePay}
         disabled={loading}
-        className="w-full py-3 rounded-xl font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
-        style={{ backgroundColor: accentColor }}
+        className="w-full py-3 rounded-xl font-semibold transition-opacity hover:opacity-90 disabled:opacity-60"
+        style={{ backgroundColor: accentColor, color: readableTextColor(accentColor) }}
       >
         {loading ? "Redirecting to payment…" : "Pay now"}
       </button>

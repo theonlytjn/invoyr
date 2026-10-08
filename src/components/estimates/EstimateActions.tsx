@@ -65,7 +65,7 @@ export default function EstimateActions({ estimate }: Props) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" aria-label="Estimate actions">
           <MoreHorizontalIcon size={16} />
         </Button>
       </DropdownMenuTrigger>

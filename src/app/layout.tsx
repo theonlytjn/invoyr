@@ -54,8 +54,8 @@ export const viewport: Viewport = {
   ],
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  // maximumScale/userScalable deliberately NOT set: locking zoom fails WCAG
+  // 1.4.4 and stops low-vision users enlarging anything on a phone.
   // Without this, env(safe-area-inset-*) resolves to 0 and the fixed bottom bar
   // sits under the iPhone home indicator.
   viewportFit: "cover",

@@ -109,12 +109,12 @@ export default async function PayPage({ params, searchParams }: Props) {
             >
               <img
                 src={orgRow.logo_url}
-                alt={orgRow.name}
+                alt=""
                 className="w-full h-full object-contain"
               />
             </div>
           ) : null}
-          <p className="text-2xl font-bold">{orgRow?.name ?? "Invoice"}</p>
+          <h1 className="text-2xl font-bold">{orgRow?.name ?? "Invoice"}</h1>
           <p className="text-base opacity-75 mt-1">#{invoice.invoice_number}</p>
         </div>
 
@@ -207,9 +207,9 @@ export default async function PayPage({ params, searchParams }: Props) {
 
               {showPaypal && (
                 <div className="border-t border-gray-100 pt-5">
-                  <p className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-3">
+                  <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
                     {paypalHeading}
-                  </p>
+                  </h2>
                   <PayPalButton
                     token={token}
                     currency={invoice.currency}
@@ -220,48 +220,48 @@ export default async function PayPage({ params, searchParams }: Props) {
 
               {showBank && (
                 <div className="border-t border-gray-100 pt-5 space-y-3">
-                  <p className="text-sm font-semibold text-gray-400 uppercase tracking-wide">
+                  <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
                     {bankHeading}
-                  </p>
+                  </h2>
                   <div className="grid grid-cols-2 gap-x-4 gap-y-3">
                     {orgRow?.bank_account_name && (
                       <div>
-                        <p className="text-sm text-gray-400">Account name</p>
+                        <p className="text-sm text-gray-500">Account name</p>
                         <p className="text-base font-medium text-gray-900">{orgRow.bank_account_name}</p>
                       </div>
                     )}
                     {orgRow?.bank_name && (
                       <div>
-                        <p className="text-sm text-gray-400">Bank</p>
+                        <p className="text-sm text-gray-500">Bank</p>
                         <p className="text-base font-medium text-gray-900">{orgRow.bank_name}</p>
                       </div>
                     )}
                     {orgRow?.bank_account_number && (
                       <div>
-                        <p className="text-sm text-gray-400">Account number</p>
+                        <p className="text-sm text-gray-500">Account number</p>
                         <p className="text-base font-medium text-gray-900">{orgRow.bank_account_number}</p>
                       </div>
                     )}
                     {orgRow?.bank_sort_code && (
                       <div>
-                        <p className="text-sm text-gray-400">Sort code</p>
+                        <p className="text-sm text-gray-500">Sort code</p>
                         <p className="text-base font-medium text-gray-900">{orgRow.bank_sort_code}</p>
                       </div>
                     )}
                     {orgRow?.bank_iban && (
                       <div className="col-span-2">
-                        <p className="text-sm text-gray-400">IBAN</p>
+                        <p className="text-sm text-gray-500">IBAN</p>
                         <p className="text-base font-medium text-gray-900">{orgRow.bank_iban}</p>
                       </div>
                     )}
                     {orgRow?.bank_bic && (
                       <div>
-                        <p className="text-sm text-gray-400">BIC / SWIFT</p>
+                        <p className="text-sm text-gray-500">BIC / SWIFT</p>
                         <p className="text-base font-medium text-gray-900">{orgRow.bank_bic}</p>
                       </div>
                     )}
                   </div>
-                  <p className="text-sm text-gray-400">
+                  <p className="text-sm text-gray-500">
                     Reference: <span className="font-medium text-gray-600">{invoice.invoice_number}</span>
                   </p>
                 </div>
@@ -275,7 +275,7 @@ export default async function PayPage({ params, searchParams }: Props) {
             <p className="text-sm text-gray-500">{orgRow.portal_tagline}</p>
           )}
           {orgRow?.portal_support_email && (
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-gray-500">
               Need help?{" "}
               <a
                 href={`mailto:${orgRow.portal_support_email}`}
@@ -287,7 +287,7 @@ export default async function PayPage({ params, searchParams }: Props) {
             </p>
           )}
           {showBranding && (
-            <p className="text-sm text-gray-400">Powered by Invoyr</p>
+            <p className="text-sm text-gray-500">Powered by Invoyr</p>
           )}
         </div>
       </div>

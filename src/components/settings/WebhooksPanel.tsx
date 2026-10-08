@@ -122,9 +122,17 @@ export default function WebhooksPanel({ initialEndpoints }: Props) {
                   <p className="text-xs font-semibold text-neutral-400 uppercase tracking-wide mt-2 mb-1">{group}</p>
                   {ALL_EVENTS.filter((e) => e.group === group).map((ev) => (
                     <label key={ev.value} className="flex items-center gap-2.5 py-1 cursor-pointer">
-                      <div
-                        onClick={() => toggleEvent(ev.value)}
-                        className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors cursor-pointer ${
+                      {/* A real checkbox, visually replaced: the previous div
+                          could not be reached or toggled by keyboard at all. */}
+                      <input
+                        type="checkbox"
+                        checked={selectedEvents.includes(ev.value)}
+                        onChange={() => toggleEvent(ev.value)}
+                        className="peer sr-only"
+                      />
+                      <span
+                        aria-hidden="true"
+                        className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-neutral-950 dark:peer-focus-visible:ring-neutral-50 ${
                           selectedEvents.includes(ev.value)
                             ? "bg-neutral-950 dark:bg-neutral-50 border-neutral-950 dark:border-neutral-50"
                             : "border-neutral-300 dark:border-neutral-600"
@@ -133,7 +141,7 @@ export default function WebhooksPanel({ initialEndpoints }: Props) {
                         {selectedEvents.includes(ev.value) && (
                           <CheckIcon size={10} className="text-white dark:text-neutral-950" />
                         )}
-                      </div>
+                      </span>
                       <span className="text-sm text-neutral-700 dark:text-neutral-300">{ev.label}</span>
                       <code className="text-xs text-neutral-400 ml-auto">{ev.value}</code>
                     </label>

@@ -123,7 +123,7 @@ export default function InvoiceActions({ invoice, clientEmail }: Props) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="icon">
+          <Button variant="outline" size="icon" aria-label="Invoice actions">
             <MoreHorizontalIcon size={16} />
           </Button>
         </DropdownMenuTrigger>

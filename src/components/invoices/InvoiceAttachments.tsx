@@ -137,16 +137,25 @@ export default function InvoiceAttachments({ invoiceId, orgId, initialAttachment
     <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5 space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="font-semibold text-neutral-950 dark:text-neutral-50 text-base">Attachments</h3>
-        <label className={`cursor-pointer text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-50 transition-colors ${uploading ? "opacity-50 pointer-events-none" : ""}`}>
+        {/* `display:none` on the input makes it unfocusable, so the button —
+            not a wrapping label — is what keyboard users reach. */}
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading}
+          className="text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-50 transition-colors disabled:opacity-50"
+        >
           {uploading ? "Uploading…" : "+ Add file"}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept={ALLOWED_TYPES.join(",")}
-            onChange={handleUpload}
-            className="hidden"
-          />
-        </label>
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept={ALLOWED_TYPES.join(",")}
+          onChange={handleUpload}
+          className="hidden"
+          tabIndex={-1}
+          aria-hidden="true"
+        />
       </div>
 
       {error && (
