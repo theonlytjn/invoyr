@@ -25,6 +25,8 @@ export type OnboardingData = {
   postcode: string;
   country: string;
   vatNumber: string;
+  companyNumber: string;
+  website: string;
   accentColor: string;
   plan: string;
   marketingConsent: boolean;
@@ -56,6 +58,8 @@ export default function OnboardingWizard({ userId, userName }: Props) {
     postcode: "",
     country: "GB",
     vatNumber: "",
+    companyNumber: "",
+    website: "",
     accentColor: "#111827",
     plan: "starter",
     marketingConsent: false,
@@ -88,6 +92,8 @@ export default function OnboardingWizard({ userId, userName }: Props) {
           postcode: data.postcode,
           country: data.country,
           vatNumber: data.vatNumber,
+          companyNumber: data.companyNumber,
+          website: data.website,
           accentColor: data.accentColor,
           plan: data.plan,
         }),

@@ -712,6 +712,10 @@ alter table public.organisations add column if not exists from_email    text;
 alter table public.organisations add column if not exists reminder_days integer[];
 alter table public.organisations add column if not exists payment_reminder_days integer[];
 
+-- organisations: company registration number, collected at onboarding. A UK
+-- limited company must show it on its business correspondence.
+alter table public.organisations add column if not exists company_number text;
+
 -- clients: additional invoice recipients (CC), e.g. a client's accounts inbox
 alter table public.clients add column if not exists cc_emails text[];
 alter table public.clients drop constraint if exists clients_cc_emails_max;

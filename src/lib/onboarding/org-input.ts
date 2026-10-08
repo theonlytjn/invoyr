@@ -15,6 +15,15 @@ export const orgCreateSchema = z.object({
   postcode: z.string().trim().max(20).optional(),
   country: z.string().trim().length(2).optional(),
   vatNumber: z.string().trim().max(50).optional(),
+  companyNumber: z.string().trim().max(20).optional(),
+  website: z
+    .string()
+    .trim()
+    .max(200)
+    .optional()
+    // Lenient like logoUrl: a malformed address is dropped rather than failing
+    // a signup over a detail that can be fixed in settings.
+    .transform((value) => (value && /^(https?:\/\/)?\S+\.\S+$/i.test(value) ? value : undefined)),
   // Lenient on purpose: onboarding asks for a logo URL as free text, and a typo
   // there must never block the final step. An unusable value is dropped rather
   // than rejected — the logo is editable in settings afterwards.
@@ -45,6 +54,13 @@ export function buildOrgSlug(input: Pick<OrgCreateFields, "name" | "slug">, orgI
 
 /** Maps validated input onto the `organisations` columns, blanks becoming null. */
 export function buildOrgRow(input: OrgCreateFields, orgId: string) {
+  /** Adds a scheme if they typed a bare domain, so the stored URL is usable. */
+  const normaliseWebsite = (value?: string) => {
+    const trimmed = value?.trim();
+    if (!trimmed) return null;
+    return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+  };
+
   const blankToNull = (value?: string) => {
     const trimmed = value?.trim();
     return trimmed ? trimmed : null;
@@ -61,6 +77,8 @@ export function buildOrgRow(input: OrgCreateFields, orgId: string) {
     postcode: blankToNull(input.postcode),
     country: blankToNull(input.country) ?? "GB",
     vat_number: blankToNull(input.vatNumber),
+    company_number: blankToNull(input.companyNumber),
+    website: normaliseWebsite(input.website),
     logo_url: blankToNull(input.logoUrl),
     accent_color: blankToNull(input.accentColor) ?? "#111827",
   };

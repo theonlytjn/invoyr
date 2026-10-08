@@ -24,6 +24,7 @@ export default function BrandingForm({ org, canUploadLogo = false }: Props) {
   const [name, setName] = useState(org.name);
   const [companyRegNumber, setCompanyRegNumber] = useState(org.company_registration_number ?? "");
   const [vatNumber, setVatNumber] = useState(org.vat_number ?? "");
+  const [companyNumber, setCompanyNumber] = useState(org.company_number ?? "");
   const [vatRegistered, setVatRegistered] = useState(org.vat_registered);
   const [email, setEmail] = useState(org.email ?? "");
   const [phone, setPhone] = useState(org.phone ?? "");
@@ -90,6 +91,7 @@ export default function BrandingForm({ org, canUploadLogo = false }: Props) {
         name,
         company_registration_number: companyRegNumber || null,
         vat_number: vatNumber || null,
+        company_number: companyNumber || null,
         vat_registered: vatRegistered,
         email: email || null,
         phone: phone || null,
@@ -178,6 +180,15 @@ export default function BrandingForm({ org, canUploadLogo = false }: Props) {
         <div className="space-y-1.5">
           <Label htmlFor="vatNumber">VAT number</Label>
           <Input id="vatNumber" value={vatNumber} onChange={(e) => setVatNumber(e.target.value)} placeholder="GB123456789" />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="companyNumber">Company number</Label>
+          <Input
+            id="companyNumber"
+            value={companyNumber}
+            onChange={(e) => setCompanyNumber(e.target.value)}
+            placeholder="12345678"
+          />
         </div>
       </div>
 

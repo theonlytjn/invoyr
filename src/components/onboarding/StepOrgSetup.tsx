@@ -77,7 +77,28 @@ export default function StepOrgSetup({ data, update, onNext }: Props) {
           </div>
         </div>
 
+        <div>
+          <label htmlFor="website" className={labelClass}>Website</label>
+          <input
+            id="website"
+            value={data.website}
+            onChange={(e) => update({ website: e.target.value })}
+            placeholder="invoyr.io"
+            className={inputClass}
+          />
+        </div>
+
         <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label htmlFor="companyNumber" className={labelClass}>Company number</label>
+            <input
+              id="companyNumber"
+              value={data.companyNumber}
+              onChange={(e) => update({ companyNumber: e.target.value })}
+              placeholder="12345678"
+              className={inputClass}
+            />
+          </div>
           <div>
             <label htmlFor="postcode" className={labelClass}>Postcode</label>
             <input
@@ -88,16 +109,17 @@ export default function StepOrgSetup({ data, update, onNext }: Props) {
               className={inputClass}
             />
           </div>
-          <div>
-            <label htmlFor="vatNumber" className={labelClass}>VAT number</label>
-            <input
-              id="vatNumber"
-              value={data.vatNumber}
-              onChange={(e) => update({ vatNumber: e.target.value })}
-              placeholder="GB123456789"
-              className={inputClass}
-            />
-          </div>
+        </div>
+
+        <div>
+          <label htmlFor="vatNumber" className={labelClass}>VAT number</label>
+          <input
+            id="vatNumber"
+            value={data.vatNumber}
+            onChange={(e) => update({ vatNumber: e.target.value })}
+            placeholder="GB123456789"
+            className={inputClass}
+          />
         </div>
       </div>
 
