@@ -1,5 +1,5 @@
 import { Heading, Text } from "@react-email/components";
-import { MarketingLayout } from "../layouts/MarketingLayout";
+import { TransactionalLayout } from "../layouts/TransactionalLayout";
 import { EmailButton } from "../components/EmailButton";
 import { EmailCallout } from "../components/EmailCallout";
 
@@ -10,7 +10,7 @@ export interface PaymentFailedEmailProps {
 
 export function PaymentFailedEmail({ firstName, ctaUrl }: PaymentFailedEmailProps) {
   return (
-    <MarketingLayout preview="Please update your billing details to keep your account active.">
+    <TransactionalLayout preview="Please update your billing details to keep your account active.">
       <Heading
         style={{ fontSize: 22, fontWeight: 700, color: "#111827", margin: "0 0 8px" }}
       >
@@ -26,7 +26,7 @@ export function PaymentFailedEmail({ firstName, ctaUrl }: PaymentFailedEmailProp
         Please update your billing details to avoid interruption to your account.
       </Text>
       <EmailButton href={ctaUrl}>Update billing details</EmailButton>
-    </MarketingLayout>
+    </TransactionalLayout>
   );
 }
 

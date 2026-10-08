@@ -1,5 +1,5 @@
 import { Heading, Text } from "@react-email/components";
-import { MarketingLayout } from "../layouts/MarketingLayout";
+import { TransactionalLayout } from "../layouts/TransactionalLayout";
 import { EmailButton } from "../components/EmailButton";
 
 export interface TeamInviteEmailProps {
@@ -10,7 +10,7 @@ export interface TeamInviteEmailProps {
 
 export function TeamInviteEmail({ inviterName, orgName, inviteUrl }: TeamInviteEmailProps) {
   return (
-    <MarketingLayout preview="Join your team workspace on Invoyr.">
+    <TransactionalLayout preview="Join your team workspace on Invoyr.">
       <Heading
         style={{ fontSize: 22, fontWeight: 700, color: "#111827", margin: "0 0 8px" }}
       >
@@ -24,7 +24,7 @@ export function TeamInviteEmail({ inviterName, orgName, inviteUrl }: TeamInviteE
         Use the link below to accept the invite and access the workspace.
       </Text>
       <EmailButton href={inviteUrl}>Accept invite</EmailButton>
-    </MarketingLayout>
+    </TransactionalLayout>
   );
 }
 

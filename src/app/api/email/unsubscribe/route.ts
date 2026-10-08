@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { syncContactToAudience } from "@/lib/resend/sync-audience";
 
-export async function GET(req: NextRequest) {
-  const token = req.nextUrl.searchParams.get("token");
-
-  if (!token) {
-    return NextResponse.redirect(new URL("/", req.url));
-  }
+/**
+ * Applies the opt-out. Shared by the link in the email (GET) and the one-click
+ * header that mail clients POST to (RFC 8058) — the same URL must answer both.
+ */
+async function unsubscribe(token: string | null) {
+  if (!token) return "missing";
 
   const supabase = await createServiceClient();
 
@@ -17,13 +17,8 @@ export async function GET(req: NextRequest) {
     .eq("unsubscribe_token", token)
     .single();
 
-  if (!prefs) {
-    return NextResponse.redirect(new URL("/unsubscribed?status=not_found", req.url));
-  }
-
-  if (prefs.unsubscribed_at) {
-    return NextResponse.redirect(new URL("/unsubscribed?status=already", req.url));
-  }
+  if (!prefs) return "not_found";
+  if (prefs.unsubscribed_at) return "already";
 
   await supabase
     .from("email_preferences")
@@ -39,5 +34,17 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  return NextResponse.redirect(new URL("/unsubscribed?status=success", req.url));
+  return "success";
+}
+
+export async function GET(req: NextRequest) {
+  const status = await unsubscribe(req.nextUrl.searchParams.get("token"));
+  if (status === "missing") return NextResponse.redirect(new URL("/", req.url));
+  return NextResponse.redirect(new URL(`/unsubscribed?status=${status}`, req.url));
+}
+
+/** One-click unsubscribe from the mail client. No redirect, just 200. */
+export async function POST(req: NextRequest) {
+  const status = await unsubscribe(req.nextUrl.searchParams.get("token"));
+  return NextResponse.json({ status }, { status: status === "not_found" ? 404 : 200 });
 }

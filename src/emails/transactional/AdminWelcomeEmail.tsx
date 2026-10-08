@@ -1,5 +1,5 @@
 import { Heading, Text, Section } from "@react-email/components";
-import { MarketingLayout } from "../layouts/MarketingLayout";
+import { TransactionalLayout } from "../layouts/TransactionalLayout";
 import { EmailButton } from "../components/EmailButton";
 
 export interface AdminWelcomeEmailProps {
@@ -12,7 +12,7 @@ export interface AdminWelcomeEmailProps {
 
 export function AdminWelcomeEmail({ firstName, orgName, email, tempPassword, loginUrl }: AdminWelcomeEmailProps) {
   return (
-    <MarketingLayout preview={`Your Invoyr account is ready — ${orgName}`}>
+    <TransactionalLayout preview={`Your Invoyr account is ready — ${orgName}`}>
       <Heading style={{ fontSize: 22, fontWeight: 700, color: "#111827", margin: "0 0 8px" }}>
         Your Invoyr account is ready
       </Heading>
@@ -42,7 +42,7 @@ export function AdminWelcomeEmail({ firstName, orgName, email, tempPassword, log
         For your security, please change your password after logging in for the first time.
         You can do this from Settings → Account.
       </Text>
-    </MarketingLayout>
+    </TransactionalLayout>
   );
 }
 

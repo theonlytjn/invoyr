@@ -1,5 +1,5 @@
 import { Heading, Text } from "@react-email/components";
-import { MarketingLayout } from "../layouts/MarketingLayout";
+import { TransactionalLayout } from "../layouts/TransactionalLayout";
 import { EmailButton } from "../components/EmailButton";
 
 export interface WelcomeEmailProps {
@@ -9,7 +9,7 @@ export interface WelcomeEmailProps {
 
 export function WelcomeEmail({ firstName, ctaUrl }: WelcomeEmailProps) {
   return (
-    <MarketingLayout preview="Your invoicing workspace is ready.">
+    <TransactionalLayout preview="Your invoicing workspace is ready.">
       <Heading
         style={{ fontSize: 22, fontWeight: 700, color: "#111827", margin: "0 0 8px" }}
       >
@@ -26,7 +26,7 @@ export function WelcomeEmail({ firstName, ctaUrl }: WelcomeEmailProps) {
         Start by adding your business details, uploading your logo and creating your first client.
       </Text>
       <EmailButton href={ctaUrl}>Set up my workspace</EmailButton>
-    </MarketingLayout>
+    </TransactionalLayout>
   );
 }
 

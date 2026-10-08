@@ -40,9 +40,9 @@ function buildCsp(nonce: string): string {
   return [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' https://www.paypal.com https://www.paypalobjects.com https://challenges.cloudflare.com`,
-    "style-src 'self' 'unsafe-inline' https://cdn.hugeicons.com",
+    "style-src 'self' 'unsafe-inline' https://cdn.hugeicons.com https://api.fontshare.com",
     "img-src 'self' data: blob: https:",
-    "font-src 'self' data: https://cdn.hugeicons.com",
+    "font-src 'self' data: https://cdn.hugeicons.com https://api.fontshare.com https://cdn.fontshare.com",
     "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com https://www.paypal.com https://api.paypal.com https://api-m.paypal.com https://api.sandbox.paypal.com https://api-m.sandbox.paypal.com",
     "frame-src 'self' https://challenges.cloudflare.com https://www.paypal.com https://*.paypal.com",
     "worker-src 'self' blob:",

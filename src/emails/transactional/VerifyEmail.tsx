@@ -1,5 +1,5 @@
 import { Heading, Text } from "@react-email/components";
-import { MarketingLayout } from "../layouts/MarketingLayout";
+import { TransactionalLayout } from "../layouts/TransactionalLayout";
 import { EmailButton } from "../components/EmailButton";
 
 export interface VerifyEmailProps {
@@ -9,7 +9,7 @@ export interface VerifyEmailProps {
 
 export function VerifyEmail({ firstName, verifyUrl }: VerifyEmailProps) {
   return (
-    <MarketingLayout preview="Confirm your email to finish setting up Invoyr.">
+    <TransactionalLayout preview="Confirm your email to finish setting up Invoyr.">
       <Heading
         style={{ fontSize: 22, fontWeight: 700, color: "#111827", margin: "0 0 8px" }}
       >
@@ -23,7 +23,7 @@ export function VerifyEmail({ firstName, verifyUrl }: VerifyEmailProps) {
         your setup.
       </Text>
       <EmailButton href={verifyUrl}>Verify email</EmailButton>
-    </MarketingLayout>
+    </TransactionalLayout>
   );
 }
 

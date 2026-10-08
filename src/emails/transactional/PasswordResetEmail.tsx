@@ -1,5 +1,5 @@
 import { Heading, Text } from "@react-email/components";
-import { MarketingLayout } from "../layouts/MarketingLayout";
+import { TransactionalLayout } from "../layouts/TransactionalLayout";
 import { EmailButton } from "../components/EmailButton";
 
 export interface PasswordResetEmailProps {
@@ -9,7 +9,7 @@ export interface PasswordResetEmailProps {
 
 export function PasswordResetEmail({ firstName, resetUrl }: PasswordResetEmailProps) {
   return (
-    <MarketingLayout preview="Use this secure link to reset your password.">
+    <TransactionalLayout preview="Use this secure link to reset your password.">
       <Heading
         style={{ fontSize: 22, fontWeight: 700, color: "#111827", margin: "0 0 8px" }}
       >
@@ -26,7 +26,7 @@ export function PasswordResetEmail({ firstName, resetUrl }: PasswordResetEmailPr
         If this was not you, you can ignore this email.
       </Text>
       <EmailButton href={resetUrl}>Reset password</EmailButton>
-    </MarketingLayout>
+    </TransactionalLayout>
   );
 }
 

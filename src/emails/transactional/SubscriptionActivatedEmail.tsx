@@ -1,5 +1,5 @@
 import { Heading, Text } from "@react-email/components";
-import { MarketingLayout } from "../layouts/MarketingLayout";
+import { TransactionalLayout } from "../layouts/TransactionalLayout";
 import { EmailButton } from "../components/EmailButton";
 import { EmailCallout } from "../components/EmailCallout";
 
@@ -11,7 +11,7 @@ export interface SubscriptionActivatedEmailProps {
 
 export function SubscriptionActivatedEmail({ firstName, planName, ctaUrl }: SubscriptionActivatedEmailProps) {
   return (
-    <MarketingLayout preview={`You're now on the ${planName} plan — let's get started.`}>
+    <TransactionalLayout preview={`You're now on the ${planName} plan — let's get started.`}>
       <Heading style={{ fontSize: 22, fontWeight: 700, color: "#111827", margin: "0 0 8px" }}>
         You're on {planName}
       </Heading>
@@ -28,7 +28,7 @@ export function SubscriptionActivatedEmail({ firstName, planName, ctaUrl }: Subs
         Head to your dashboard to make the most of your workspace.
       </Text>
       <EmailButton href={ctaUrl}>Go to my dashboard</EmailButton>
-    </MarketingLayout>
+    </TransactionalLayout>
   );
 }
 
