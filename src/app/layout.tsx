@@ -1,14 +1,28 @@
 import type { Metadata, Viewport } from "next";
-import { Instrument_Serif, Geist_Mono } from "next/font/google";
+import { Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { ThemeProvider } from "@/components/shell/ThemeProvider";
 import { PwaRegistration } from "@/components/shell/PwaRegistration";
 
-const instrumentSerif = Instrument_Serif({
-  variable: "--font-instrument-serif",
-  subsets: ["latin"],
-  weight: ["400"],
-  style: ["normal", "italic"],
+/**
+ * Geom, self-hosted. Licensed via Envato, which covers web embedding — hosting
+ * it ourselves also keeps visitor IPs away from a third-party font CDN.
+ *
+ * Only Regular and Italic were supplied, so `font-bold` on a heading is
+ * synthesised by the browser rather than a real bold cut.
+ */
+const geom = localFont({
+  src: [
+    { path: "./fonts/Geom-Regular.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/Geom-Regular.woff", weight: "400", style: "normal" },
+    { path: "./fonts/Geom-Italic.woff2", weight: "400", style: "italic" },
+    { path: "./fonts/Geom-Italic.woff", weight: "400", style: "italic" },
+  ],
+  variable: "--font-geom",
+  display: "swap",
+  // Arial is the email fallback too, so a missing font looks the same everywhere.
+  fallback: ["Avenir Next", "Arial", "Helvetica", "sans-serif"],
 });
 
 const geistMono = Geist_Mono({
@@ -69,7 +83,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${instrumentSerif.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geom.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>
