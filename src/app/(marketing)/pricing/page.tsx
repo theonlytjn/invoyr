@@ -98,12 +98,14 @@ export default function PricingPage() {
     <div className="bg-white dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100">
       <div className="max-w-[1600px] mx-auto px-6 lg:px-12 py-24 sm:py-32">
         {/* Header */}
-        <div className="max-w-4xl mx-auto text-center">
+        <div className="max-w-5xl mx-auto text-center">
           <p className={`${KICKER} mb-8`}>Pricing</p>
-          <h1 className="font-serif text-[clamp(2.6rem,6vw,5rem)] leading-[0.95] tracking-tight text-neutral-900 dark:text-neutral-50">
+          {/* Two lines, not three: the second line was wrapping on its own, so
+              the container is wider and the type a touch smaller. */}
+          <h1 className="font-serif text-[clamp(2.4rem,5.2vw,4.5rem)] leading-[0.95] tracking-tight text-balance text-neutral-900 dark:text-neutral-50">
             One price a year.
             <br />
-            <span className="text-neutral-500 dark:text-neutral-400">No per-invoice fees, ever.</span>
+            <span className="text-brand-ink">No per-invoice fees, ever.</span>
           </h1>
           <p className="mt-6 mx-auto max-w-2xl text-xl text-neutral-600 dark:text-neutral-200 leading-relaxed">
             Every plan is billed annually and includes a 14-day free trial — cancel any time before it ends.

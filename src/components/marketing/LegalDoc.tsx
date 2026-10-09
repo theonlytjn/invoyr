@@ -12,7 +12,7 @@ export default function LegalDoc({
   children: ReactNode;
 }) {
   return (
-    <article className="mx-auto max-w-3xl px-6 py-20 lg:py-28">
+    <article className="mx-auto max-w-[1140px] px-6 py-20 lg:py-28">
       <p className="font-mono text-[13px] uppercase tracking-widest text-neutral-500 dark:text-neutral-400">
         Legal
       </p>

@@ -1,4 +1,6 @@
-const CACHE_NAME = "invoyr-v1";
+// Bump this whenever assets in /public change. The activate handler deletes
+// every cache that isn't the current name, so old logos cannot survive a deploy.
+const CACHE_NAME = "invoyr-v3-brand";
 const PRECACHE_URLS = ["/offline", "/main-logo.svg", "/main-logo-dark.svg", "/favicon.png"];
 
 // Install: precache the offline page and key static assets
@@ -45,19 +47,23 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Static public assets: cache-first
+  // Static public assets: stale-while-revalidate. These filenames are NOT
+  // content-hashed (main-logo.svg stays main-logo.svg), so cache-first served a
+  // stale logo indefinitely. Serve the cached copy for speed, but always
+  // refresh it in the background so the next load is current.
   const staticExts = [".svg", ".png", ".ico", ".jpg", ".webp", ".woff2", ".woff", ".ttf"];
   if (staticExts.some((ext) => url.pathname.endsWith(ext))) {
     event.respondWith(
-      caches.match(request).then(
-        (cached) => cached ?? fetch(request).then((res) => {
+      caches.match(request).then((cached) => {
+        const fresh = fetch(request).then((res) => {
           if (res.ok) {
             const clone = res.clone();
             caches.open(CACHE_NAME).then((c) => c.put(request, clone));
           }
           return res;
-        })
-      )
+        });
+        return cached ?? fresh;
+      })
     );
     return;
   }

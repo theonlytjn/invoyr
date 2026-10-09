@@ -1,16 +1,24 @@
 @import "tailwindcss";
 
 :root {
-  /* Pulse design system — Neutral scale */
-  --n-50:  #fafafa;
-  --n-100: #f5f5f5;
-  --n-200: #e5e5e5;
-  --n-300: #d4d4d4;
-  --n-400: #a3a3a3;
-  --n-500: #737373;
-  --n-700: #404040;
-  --n-900: #171717;
-  --n-950: #0a0a0a;
+  /* Invoyr brand palette (Oct 2026). The neutral ramp is the brand's own
+     navy-tinted grey, not Tailwind's warm neutral — so every surface and
+     border carries a hint of the navy rather than reading as flat grey. */
+  --n-50:  #FAFAFA;  /* light page background */
+  --n-100: #E2E8F0;  /* dividers, borders */
+  --n-200: #E2E8F0;
+  --n-300: #94A3B8;  /* muted text */
+  --n-400: #94A3B8;
+  --n-500: #475569;  /* secondary-muted text */
+  --n-700: #1F2A44;  /* secondary text */
+  --n-900: #081026;  /* primary text, brand navy */
+  --n-950: #081026;
+
+  /* Light surfaces */
+  --surface-page:     #FAFAFA;
+  --surface-card:     #FFFFFF;
+  --surface-elevated: #F8FAFC;
+  --surface-hover:    #F1F5F9;
 
   /* Semantic tokens */
   --background: #ffffff;
@@ -27,7 +35,7 @@
   --muted-foreground: var(--n-500);
   --accent: var(--n-100);
   --accent-foreground: var(--n-900);
-  --destructive: #ef4444;
+  --destructive: #EF4444;
   --destructive-foreground: #ffffff;
 
   /* Brand accent — Invoyr lime. Fine as a fill (with dark text on it), but as
@@ -43,13 +51,21 @@
   --ring: var(--n-950);
   --radius: 0.5rem;
 
+  /* Semantic status, from the brand palette */
+  --success: #16A34A;
+  --warning: #F59E08;
+  --danger:  #EF4444;
+  --success-surface: #ECFDF5;
+  --warning-surface: #FFFBEB;
+  --danger-surface:  #FEF2F2;
+
   /* Status colors */
-  --status-draft:   #737373;
-  --status-issued:  #f59e0b;
-  --status-sent:    #3b82f6;
-  --status-paid:    #00c950;
-  --status-overdue: #ef4444;
-  --status-void:    #a3a3a3;
+  --status-draft:   #94A3B8;
+  --status-issued:  var(--warning);
+  --status-sent:    #3B82F6;
+  --status-paid:    var(--success);
+  --status-overdue: var(--danger);
+  --status-void:    #94A3B8;
 }
 
 @theme inline {
@@ -72,6 +88,16 @@
   --color-brand: var(--brand);
   --color-brand-foreground: var(--brand-foreground);
   --color-brand-ink: var(--brand-ink);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-success-surface: var(--success-surface);
+  --color-warning-surface: var(--warning-surface);
+  --color-danger-surface: var(--danger-surface);
+  --color-surface-page: var(--surface-page);
+  --color-surface-card: var(--surface-card);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-surface-hover: var(--surface-hover);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -86,21 +112,32 @@
 }
 
 .dark {
-  --background: #0a0a0a;
-  --foreground: #fafafa;
-  --card: #0a0a0a;
-  --card-foreground: #fafafa;
-  --popover: #171717;
-  --popover-foreground: #fafafa;
-  --secondary: #171717;
-  --secondary-foreground: #fafafa;
-  --muted: #171717;
-  --muted-foreground: #a3a3a3;
-  --accent: #171717;
-  --accent-foreground: #fafafa;
-  --border: #262626;
-  --input: #262626;
-  --ring: #fafafa;
+  /* Dark surfaces are navy, not black — page, card, elevated, hover, border. */
+  --surface-page:     #030A17;
+  --surface-card:     #0E1628;
+  --surface-elevated: #131E36;
+  --surface-hover:    #1A2947;
+
+  --background: #030A17;
+  --foreground: #FAFAFA;
+  --card: #0E1628;
+  --card-foreground: #FAFAFA;
+  --popover: #131E36;
+  --popover-foreground: #FAFAFA;
+  --secondary: #1F2A44;
+  --secondary-foreground: #FAFAFA;
+  --muted: #131E36;
+  /* #94A3B8 on the #0E1628 card is 7.3:1 — the old #a3a3a3 was failing. */
+  --muted-foreground: #94A3B8;
+  --accent: #1A2947;
+  --accent-foreground: #FAFAFA;
+  --border: #24324F;
+  --input: #24324F;
+  --ring: #8CD600;
+
+  --success-surface: #064E3B;
+  --warning-surface: #78350F;
+  --danger-surface:  #7F1D1D;
 
   /* The lime reads at 11:1 on the dark surfaces, so no darkening needed. */
   --brand-ink: #8CD600;
