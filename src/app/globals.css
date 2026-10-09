@@ -131,8 +131,11 @@
   --muted-foreground: #94A3B8;
   --accent: #1A2947;
   --accent-foreground: #FAFAFA;
-  --border: #24324F;
-  --input: #24324F;
+  /* The palette's #24324F read as visibly blue on every card edge and grid
+     divider, because `*` falls back to this token. Kept barely cool so it sits
+     with the navy surfaces, but grey to the eye. */
+  --border: #242A33;
+  --input: #242A33;
   --ring: #8CD600;
 
   --success-surface: #064E3B;
