@@ -97,10 +97,9 @@ export default function PricingPage() {
 
   return (
     <div className="bg-white dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100">
-      <div className="max-w-[1600px] mx-auto px-6 lg:px-12 py-24 sm:py-32">
-        {/* Header */}
+      <section className="relative isolate flex min-h-[100svh] items-center overflow-hidden lg:min-h-[70svh]">
         <HeroBackdrop images={["/hero/hero-pricing.jpg"]} />
-        <div className="relative max-w-5xl mx-auto text-center">
+        <div className="relative mx-auto w-full max-w-5xl px-6 py-24 text-center lg:px-12">
           <p className={`${KICKER} mb-8`}>Pricing</p>
           {/* Two lines, not three: the second line was wrapping on its own, so
               the container is wider and the type a touch smaller. */}
@@ -114,7 +113,9 @@ export default function PricingPage() {
             Start on Starter, move up when your business does.
           </p>
         </div>
+      </section>
 
+      <div className="max-w-[1600px] mx-auto px-6 lg:px-12 pb-24 sm:pb-32">
         {/* Plan headers */}
         <div data-reveal className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-px bg-neutral-200 dark:bg-neutral-800/60 border border-neutral-200 dark:border-neutral-800/60 rounded-2xl overflow-hidden">
           {plans.map((plan) => {

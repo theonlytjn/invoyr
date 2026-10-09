@@ -58,9 +58,9 @@ export default function UseCasesPage() {
   return (
     <div>
       {/* HERO */}
-      <section className="relative isolate overflow-hidden">
+      <section className="relative isolate flex min-h-[100svh] items-center overflow-hidden lg:min-h-[70svh]">
         <HeroBackdrop images={["/hero/hero-use-cases.jpg"]} />
-        <div className="relative max-w-4xl mx-auto px-6 pt-24 pb-8 text-center">
+        <div className="relative mx-auto w-full max-w-4xl px-6 py-24 text-center">
         <p className={`${KICKER} mb-8`}>Use cases</p>
         <h1 className="font-serif text-[clamp(2.6rem,6vw,5rem)] leading-[0.95] tracking-tight text-neutral-900 dark:text-neutral-50">
           Made for anyone who
