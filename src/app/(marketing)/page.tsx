@@ -78,7 +78,7 @@ export default function HomePage() {
             <h1 className="reveal font-serif text-[clamp(3rem,8vw,6.5rem)] leading-[0.9] tracking-tight text-neutral-900 dark:text-neutral-50">
               Get paid faster.
               <br />
-              <span className="text-neutral-500 dark:text-neutral-400">Invoicing that runs itself.</span>
+              <span className="text-brand-ink">Invoicing that runs itself.</span>
             </h1>
             <p className="reveal mt-8 mx-auto max-w-xl text-xl text-neutral-600 dark:text-neutral-200 leading-relaxed">
               Send invoices that look the part, take card payments with Stripe, and let reminders chase for you — so you get paid without the admin.

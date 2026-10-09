@@ -30,9 +30,13 @@
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
 
-  /* Marketing accent — green. (The Invoyr logo itself is orange: #f24e23.) */
-  --brand: #34d399;
-  --brand-foreground: #052e16;
+  /* Brand accent — Invoyr lime. Fine as a fill (with dark text on it), but as
+     TEXT it only reaches 1.7:1 on a light page, so `--brand-ink` carries a
+     darkened lime for light mode and the pure brand colour in dark mode, where
+     it reaches 11:1. */
+  --brand: #8CD600;
+  --brand-foreground: #081026;
+  --brand-ink: #5F9400;
 
   --border: var(--n-200);
   --input: var(--n-200);
@@ -67,6 +71,7 @@
   --color-destructive-foreground: var(--destructive-foreground);
   --color-brand: var(--brand);
   --color-brand-foreground: var(--brand-foreground);
+  --color-brand-ink: var(--brand-ink);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -96,6 +101,9 @@
   --border: #262626;
   --input: #262626;
   --ring: #fafafa;
+
+  /* The lime reads at 11:1 on the dark surfaces, so no darkening needed. */
+  --brand-ink: #8CD600;
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
