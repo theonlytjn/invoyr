@@ -115,11 +115,11 @@ export default function HomePage() {
           <div className="reveal">
             <p className={`${KICKER} text-center`}>Trusted by freelancers, agencies &amp; service businesses</p>
             <div className="marquee-viewport relative mt-8 overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_12%,black_88%,transparent)]">
-              <div className="flex w-max animate-marquee items-center gap-14">
+              <div className="flex w-max animate-marquee items-center gap-20">
                 {[...TRUST_LOGOS, ...TRUST_LOGOS].map((logo, i) => (
                   <span
                     key={`${logo.name}-${i}`}
-                    className="flex h-10 shrink-0 items-center"
+                    className="flex h-20 shrink-0 items-center"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
