@@ -2,24 +2,25 @@ import { Document, Page, Text, View, Image, StyleSheet } from "@react-pdf/render
 import type { InvoiceTemplateProps } from "../types";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { discountLabel } from "@/lib/invoice-totals";
+import { PDF_FONT_FAMILY } from "@/lib/pdf-fonts";
 
 const styles = StyleSheet.create({
-  page: { fontFamily: "Helvetica", fontSize: 10, padding: 48, color: "#111827", backgroundColor: "#ffffff" },
+  page: { fontFamily: PDF_FONT_FAMILY, fontSize: 10, padding: 48, color: "#111827", backgroundColor: "#ffffff" },
   accentBar: { height: 3, borderRadius: 2, marginBottom: 28 },
   header: { flexDirection: "row", justifyContent: "space-between", marginBottom: 28 },
   logo: { height: 36, marginBottom: 6, objectFit: "contain" },
-  orgName: { fontSize: 16, fontFamily: "Helvetica-Bold", marginBottom: 4 },
+  orgName: { fontSize: 16, fontFamily: PDF_FONT_FAMILY, fontWeight: 700, marginBottom: 4 },
   orgDetail: { color: "#9ca3af", fontSize: 9, marginBottom: 2 },
   invoiceLabel: { fontSize: 8, color: "#9ca3af", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 4, textAlign: "right" },
-  invoiceNumber: { fontSize: 20, fontFamily: "Helvetica-Bold", textAlign: "right", marginBottom: 8 },
+  invoiceNumber: { fontSize: 20, fontFamily: PDF_FONT_FAMILY, fontWeight: 700, textAlign: "right", marginBottom: 8 },
   metaRow: { flexDirection: "row", justifyContent: "flex-end", marginBottom: 2 },
   metaText: { color: "#6b7280", fontSize: 9 },
   billTo: { marginBottom: 24 },
   sectionLabel: { fontSize: 8, color: "#9ca3af", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 6 },
-  clientName: { fontFamily: "Helvetica-Bold", marginBottom: 2 },
+  clientName: { fontFamily: PDF_FONT_FAMILY, fontWeight: 700, marginBottom: 2 },
   clientDetail: { color: "#6b7280", fontSize: 9, marginBottom: 2 },
   tableHeader: { flexDirection: "row", borderBottomWidth: 0.5, borderBottomColor: "#e5e7eb", paddingBottom: 6, marginBottom: 4 },
-  tableHeaderCell: { fontSize: 9, color: "#9ca3af", fontFamily: "Helvetica" },
+  tableHeaderCell: { fontSize: 9, color: "#9ca3af", fontFamily: PDF_FONT_FAMILY },
   tableRow: { flexDirection: "row", borderBottomWidth: 0.5, borderBottomColor: "#f9fafb", paddingVertical: 7 },
   tableCell: { fontSize: 9 },
   col1: { flex: 3 },
@@ -29,8 +30,8 @@ const styles = StyleSheet.create({
   totalsRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 4 },
   totalsLabel: { color: "#6b7280" },
   totalRow: { flexDirection: "row", justifyContent: "space-between", paddingTop: 6, marginTop: 4, borderTopWidth: 0.5, borderTopColor: "#e5e7eb" },
-  totalLabel: { fontFamily: "Helvetica-Bold", fontSize: 11 },
-  totalValue: { fontFamily: "Helvetica-Bold", fontSize: 11 },
+  totalLabel: { fontFamily: PDF_FONT_FAMILY, fontWeight: 700, fontSize: 11 },
+  totalValue: { fontFamily: PDF_FONT_FAMILY, fontWeight: 700, fontSize: 11 },
   notes: { marginTop: 24, paddingTop: 14, borderTopWidth: 0.5, borderTopColor: "#f3f4f6" },
   notesLabel: { fontSize: 8, color: "#9ca3af", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 },
   bankSection: { borderTopWidth: 0.5, borderTopColor: "#e5e7eb", marginTop: 20, paddingTop: 14 },
@@ -152,7 +153,7 @@ export default function CleanMinimalPdf({ invoice, items, client, org, totals, w
 
         {watermark ? (
           <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, alignItems: "center", justifyContent: "center" }}>
-            <Text style={{ fontSize: 96, fontFamily: "Helvetica-Bold", color: "#e5e7eb", opacity: 0.35, transform: "rotate(-45deg)" }}>
+            <Text style={{ fontSize: 96, fontFamily: PDF_FONT_FAMILY, fontWeight: 700, color: "#e5e7eb", opacity: 0.35, transform: "rotate(-45deg)" }}>
               {watermark}
             </Text>
           </View>

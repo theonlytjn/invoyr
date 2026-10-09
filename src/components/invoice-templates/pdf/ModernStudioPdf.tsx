@@ -2,19 +2,20 @@ import { Document, Page, Text, View, Image, StyleSheet } from "@react-pdf/render
 import type { InvoiceTemplateProps } from "../types";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { discountLabel } from "@/lib/invoice-totals";
+import { PDF_FONT_FAMILY } from "@/lib/pdf-fonts";
 
 const styles = StyleSheet.create({
-  page: { fontFamily: "Helvetica", fontSize: 10, padding: 48, color: "#111827", backgroundColor: "#ffffff" },
+  page: { fontFamily: PDF_FONT_FAMILY, fontSize: 10, padding: 48, color: "#111827", backgroundColor: "#ffffff" },
   header: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 36 },
   logo: { height: 36, marginBottom: 4, objectFit: "contain" },
-  orgNameAccent: { fontSize: 20, fontFamily: "Helvetica-Bold", marginBottom: 4 },
+  orgNameAccent: { fontSize: 20, fontFamily: PDF_FONT_FAMILY, fontWeight: 700, marginBottom: 4 },
   vatNote: { fontSize: 8, color: "#9ca3af", marginTop: 2 },
   invoiceLabel: { fontSize: 8, color: "#9ca3af", textTransform: "uppercase", letterSpacing: 1.5, textAlign: "right", marginBottom: 4 },
-  invoiceNumber: { fontSize: 24, fontFamily: "Helvetica-Bold", textAlign: "right" },
+  invoiceNumber: { fontSize: 24, fontFamily: PDF_FONT_FAMILY, fontWeight: 700, textAlign: "right" },
   grid: { flexDirection: "row", marginBottom: 28, gap: 32 },
   gridCol: { flex: 1 },
   colLabel: { fontSize: 8, color: "#9ca3af", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 6 },
-  clientName: { fontFamily: "Helvetica-Bold", marginBottom: 2 },
+  clientName: { fontFamily: PDF_FONT_FAMILY, fontWeight: 700, marginBottom: 2 },
   detail: { color: "#6b7280", fontSize: 9, marginBottom: 2 },
   divider: { height: 1, backgroundColor: "#111827", marginBottom: 16 },
   tableHeader: { flexDirection: "row", paddingBottom: 8, marginBottom: 4 },
@@ -32,13 +33,13 @@ const styles = StyleSheet.create({
   subLabel: { color: "#6b7280", fontSize: 9 },
   subValue: { fontSize: 9, color: "#6b7280" },
   totalRowFinal: { flexDirection: "row", justifyContent: "space-between", borderTopWidth: 2, borderTopColor: "#111827", paddingTop: 6, marginTop: 4 },
-  totalLabel: { fontFamily: "Helvetica-Bold", fontSize: 13 },
-  totalValue: { fontFamily: "Helvetica-Bold", fontSize: 13 },
+  totalLabel: { fontFamily: PDF_FONT_FAMILY, fontWeight: 700, fontSize: 13 },
+  totalValue: { fontFamily: PDF_FONT_FAMILY, fontWeight: 700, fontSize: 13 },
   bankSection: { borderTopWidth: 0.5, borderTopColor: "#f3f4f6", marginTop: 24, paddingTop: 14 },
   bankGrid: { flexDirection: "row", flexWrap: "wrap", gap: 16 },
   bankField: { minWidth: 110, marginBottom: 6 },
   bankLabel: { fontSize: 7, color: "#9ca3af", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 2 },
-  bankValue: { fontSize: 9, fontFamily: "Helvetica-Bold", color: "#111827" },
+  bankValue: { fontSize: 9, fontFamily: PDF_FONT_FAMILY, fontWeight: 700, color: "#111827" },
   footer: { flexDirection: "row", justifyContent: "space-between", marginTop: 24, paddingTop: 10, borderTopWidth: 0.5, borderTopColor: "#f3f4f6" },
   footerText: { fontSize: 8, color: "#9ca3af" },
 });
@@ -112,11 +113,11 @@ export default function ModernStudioPdf({ invoice, items, client, org, totals, w
 
         {items.map((item) => (
           <View key={item.id} style={styles.tableRow}>
-            <Text style={[styles.tableCell, styles.col1, { fontFamily: "Helvetica-Bold" }]}>{item.description}</Text>
+            <Text style={[styles.tableCell, styles.col1, { fontFamily: PDF_FONT_FAMILY, fontWeight: 700 }]}>{item.description}</Text>
             <Text style={[styles.tableCell, styles.col2, { textAlign: "right", color: "#9ca3af" }]}>{item.quantity}</Text>
             <Text style={[styles.tableCell, styles.col2, { textAlign: "right", color: "#9ca3af" }]}>{formatCurrency(item.unit_price, invoice.currency)}</Text>
             <Text style={[styles.tableCell, styles.col2, { textAlign: "right", color: "#9ca3af" }]}>{item.vat_rate}%</Text>
-            <Text style={[styles.tableCell, styles.col2, { textAlign: "right", fontFamily: "Helvetica-Bold" }]}>{formatCurrency(item.line_total, invoice.currency)}</Text>
+            <Text style={[styles.tableCell, styles.col2, { textAlign: "right", fontFamily: PDF_FONT_FAMILY, fontWeight: 700 }]}>{formatCurrency(item.line_total, invoice.currency)}</Text>
           </View>
         ))}
 
@@ -176,7 +177,7 @@ export default function ModernStudioPdf({ invoice, items, client, org, totals, w
 
         {watermark ? (
           <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, alignItems: "center", justifyContent: "center" }}>
-            <Text style={{ fontSize: 96, fontFamily: "Helvetica-Bold", color: "#e5e7eb", opacity: 0.35, transform: "rotate(-45deg)" }}>
+            <Text style={{ fontSize: 96, fontFamily: PDF_FONT_FAMILY, fontWeight: 700, color: "#e5e7eb", opacity: 0.35, transform: "rotate(-45deg)" }}>
               {watermark}
             </Text>
           </View>

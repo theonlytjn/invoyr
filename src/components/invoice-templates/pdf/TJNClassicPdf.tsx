@@ -2,23 +2,24 @@ import { Document, Page, Text, View, Image, StyleSheet } from "@react-pdf/render
 import type { InvoiceTemplateProps } from "../types";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { discountLabel } from "@/lib/invoice-totals";
+import { PDF_FONT_FAMILY } from "@/lib/pdf-fonts";
 
 const styles = StyleSheet.create({
-  page: { fontFamily: "Helvetica", fontSize: 10, padding: 48, color: "#111827", backgroundColor: "#ffffff" },
+  page: { fontFamily: PDF_FONT_FAMILY, fontSize: 10, padding: 48, color: "#111827", backgroundColor: "#ffffff" },
   header: { flexDirection: "row", justifyContent: "space-between", marginBottom: 32 },
   logo: { height: 40, marginBottom: 8, objectFit: "contain" },
-  orgName: { fontSize: 16, fontFamily: "Helvetica-Bold", marginBottom: 4 },
+  orgName: { fontSize: 16, fontFamily: PDF_FONT_FAMILY, fontWeight: 700, marginBottom: 4 },
   orgDetail: { color: "#6b7280", fontSize: 9, marginBottom: 2 },
-  invoiceLabel: { fontSize: 20, fontFamily: "Helvetica-Bold", textAlign: "right" },
-  invoiceNumber: { fontSize: 13, fontFamily: "Helvetica-Bold", textAlign: "right", marginBottom: 8 },
+  invoiceLabel: { fontSize: 20, fontFamily: PDF_FONT_FAMILY, fontWeight: 700, textAlign: "right" },
+  invoiceNumber: { fontSize: 13, fontFamily: PDF_FONT_FAMILY, fontWeight: 700, textAlign: "right", marginBottom: 8 },
   metaRow: { flexDirection: "row", justifyContent: "flex-end", marginBottom: 2 },
   metaLabel: { color: "#6b7280", marginRight: 4 },
   billTo: { backgroundColor: "#f9fafb", padding: 12, borderRadius: 6, marginBottom: 24 },
   sectionLabel: { fontSize: 8, color: "#9ca3af", textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 },
-  clientName: { fontFamily: "Helvetica-Bold", marginBottom: 2 },
+  clientName: { fontFamily: PDF_FONT_FAMILY, fontWeight: 700, marginBottom: 2 },
   clientDetail: { color: "#6b7280", fontSize: 9, marginBottom: 2 },
   tableHeader: { flexDirection: "row", paddingBottom: 6, marginBottom: 4 },
-  tableHeaderCell: { fontFamily: "Helvetica-Bold", fontSize: 9, color: "#374151" },
+  tableHeaderCell: { fontFamily: PDF_FONT_FAMILY, fontWeight: 700, fontSize: 9, color: "#374151" },
   tableRow: { flexDirection: "row", borderBottomWidth: 0.5, borderBottomColor: "#f3f4f6", paddingVertical: 7 },
   tableCell: { fontSize: 9 },
   col1: { flex: 3 },
@@ -28,15 +29,15 @@ const styles = StyleSheet.create({
   totalsRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 4 },
   totalsLabel: { color: "#6b7280" },
   totalRow: { flexDirection: "row", justifyContent: "space-between", paddingTop: 6, marginTop: 4 },
-  totalLabel: { fontFamily: "Helvetica-Bold", fontSize: 12 },
-  totalValue: { fontFamily: "Helvetica-Bold", fontSize: 12 },
+  totalLabel: { fontFamily: PDF_FONT_FAMILY, fontWeight: 700, fontSize: 12 },
+  totalValue: { fontFamily: PDF_FONT_FAMILY, fontWeight: 700, fontSize: 12 },
   notes: { borderTopWidth: 0.5, borderTopColor: "#e5e7eb", marginTop: 32, paddingTop: 16 },
   notesLabel: { fontSize: 8, color: "#9ca3af", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 },
   bankSection: { borderTopWidth: 0.5, borderTopColor: "#e5e7eb", marginTop: 24, paddingTop: 14 },
   bankGrid: { flexDirection: "row", flexWrap: "wrap", gap: 16 },
   bankField: { minWidth: 120, marginBottom: 6 },
   bankLabel: { fontSize: 7, color: "#9ca3af", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 2 },
-  bankValue: { fontSize: 9, color: "#111827", fontFamily: "Helvetica-Bold" },
+  bankValue: { fontSize: 9, color: "#111827", fontFamily: PDF_FONT_FAMILY, fontWeight: 700 },
   footer: { flexDirection: "row", justifyContent: "space-between", marginTop: 32, paddingTop: 12, borderTopWidth: 0.5, borderTopColor: "#f3f4f6" },
   footerText: { fontSize: 8, color: "#9ca3af" },
 });
@@ -110,7 +111,7 @@ export default function TJNClassicPdf({ invoice, items, client, org, totals, wat
             <Text style={[styles.tableCell, styles.col2, { textAlign: "right", color: "#6b7280" }]}>{item.quantity}</Text>
             <Text style={[styles.tableCell, styles.col2, { textAlign: "right", color: "#6b7280" }]}>{formatCurrency(item.unit_price, invoice.currency)}</Text>
             <Text style={[styles.tableCell, styles.col2, { textAlign: "right", color: "#6b7280" }]}>{item.vat_rate}%</Text>
-            <Text style={[styles.tableCell, styles.col2, { textAlign: "right", fontFamily: "Helvetica-Bold" }]}>{formatCurrency(item.line_total, invoice.currency)}</Text>
+            <Text style={[styles.tableCell, styles.col2, { textAlign: "right", fontFamily: PDF_FONT_FAMILY, fontWeight: 700 }]}>{formatCurrency(item.line_total, invoice.currency)}</Text>
           </View>
         ))}
 
@@ -220,7 +221,7 @@ export default function TJNClassicPdf({ invoice, items, client, org, totals, wat
 
         {watermark ? (
           <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, alignItems: "center", justifyContent: "center" }}>
-            <Text style={{ fontSize: 96, fontFamily: "Helvetica-Bold", color: "#e5e7eb", opacity: 0.35, transform: "rotate(-45deg)" }}>
+            <Text style={{ fontSize: 96, fontFamily: PDF_FONT_FAMILY, fontWeight: 700, color: "#e5e7eb", opacity: 0.35, transform: "rotate(-45deg)" }}>
               {watermark}
             </Text>
           </View>

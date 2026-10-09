@@ -2,6 +2,7 @@ import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 import type { InvoiceTemplateProps } from "../types";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { discountLabel } from "@/lib/invoice-totals";
+import { PDF_FONT_FAMILY } from "@/lib/pdf-fonts";
 
 const STATUS_LABEL: Record<string, string> = {
   draft: "DRAFT",
@@ -13,23 +14,23 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 const styles = StyleSheet.create({
-  page: { fontFamily: "Helvetica", fontSize: 10, color: "#111827", backgroundColor: "#ffffff" },
+  page: { fontFamily: PDF_FONT_FAMILY, fontSize: 10, color: "#111827", backgroundColor: "#ffffff" },
   headerBand: { padding: 40, paddingBottom: 32 },
   headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" },
-  orgName: { fontSize: 18, fontFamily: "Helvetica-Bold", color: "#ffffff", marginBottom: 4 },
+  orgName: { fontSize: 18, fontFamily: PDF_FONT_FAMILY, fontWeight: 700, color: "#ffffff", marginBottom: 4 },
   orgDetail: { fontSize: 9, color: "rgba(255,255,255,0.7)", marginBottom: 2 },
-  invBig: { fontSize: 36, fontFamily: "Helvetica-Bold", color: "rgba(255,255,255,0.2)", textAlign: "right", lineHeight: 1 },
-  invNumber: { fontSize: 14, fontFamily: "Helvetica-Bold", color: "#ffffff", textAlign: "right", marginTop: 4 },
+  invBig: { fontSize: 36, fontFamily: PDF_FONT_FAMILY, fontWeight: 700, color: "rgba(255,255,255,0.2)", textAlign: "right", lineHeight: 1 },
+  invNumber: { fontSize: 14, fontFamily: PDF_FONT_FAMILY, fontWeight: 700, color: "#ffffff", textAlign: "right", marginTop: 4 },
   statusBadge: { marginTop: 16, flexDirection: "row", gap: 8 },
-  badge: { fontSize: 8, fontFamily: "Helvetica-Bold", color: "#ffffff", backgroundColor: "rgba(255,255,255,0.2)", paddingHorizontal: 10, paddingVertical: 3, borderRadius: 12 },
+  badge: { fontSize: 8, fontFamily: PDF_FONT_FAMILY, fontWeight: 700, color: "#ffffff", backgroundColor: "rgba(255,255,255,0.2)", paddingHorizontal: 10, paddingVertical: 3, borderRadius: 12 },
   dueText: { fontSize: 8, color: "rgba(255,255,255,0.7)", paddingTop: 3 },
   body: { padding: 40 },
   billTo: { marginBottom: 24 },
-  sectionLabel: { fontSize: 8, color: "#9ca3af", textTransform: "uppercase", letterSpacing: 1.5, fontFamily: "Helvetica-Bold", marginBottom: 6 },
-  clientName: { fontSize: 13, fontFamily: "Helvetica-Bold", marginBottom: 2 },
+  sectionLabel: { fontSize: 8, color: "#9ca3af", textTransform: "uppercase", letterSpacing: 1.5, fontFamily: PDF_FONT_FAMILY, fontWeight: 700, marginBottom: 6 },
+  clientName: { fontSize: 13, fontFamily: PDF_FONT_FAMILY, fontWeight: 700, marginBottom: 2 },
   clientDetail: { color: "#6b7280", fontSize: 9, marginBottom: 2 },
   tableHeader: { flexDirection: "row", backgroundColor: "#f9fafb", paddingVertical: 8, paddingHorizontal: 6, borderRadius: 4, marginBottom: 4 },
-  tableHeaderCell: { fontSize: 9, fontFamily: "Helvetica-Bold", color: "#374151" },
+  tableHeaderCell: { fontSize: 9, fontFamily: PDF_FONT_FAMILY, fontWeight: 700, color: "#374151" },
   tableRow: { flexDirection: "row", borderBottomWidth: 0.5, borderBottomColor: "#f3f4f6", paddingVertical: 7, paddingHorizontal: 6 },
   tableCell: { fontSize: 9 },
   col1: { flex: 3 },
@@ -40,15 +41,15 @@ const styles = StyleSheet.create({
   totalsLabel: { color: "rgba(255,255,255,0.8)", fontSize: 9 },
   totalsValue: { color: "rgba(255,255,255,0.8)", fontSize: 9 },
   totalRow: { flexDirection: "row", justifyContent: "space-between", marginTop: 6, paddingTop: 6, borderTopWidth: 0.5, borderTopColor: "rgba(255,255,255,0.3)" },
-  totalLabel: { fontFamily: "Helvetica-Bold", fontSize: 11, color: "#ffffff" },
-  totalValue: { fontFamily: "Helvetica-Bold", fontSize: 11, color: "#ffffff" },
+  totalLabel: { fontFamily: PDF_FONT_FAMILY, fontWeight: 700, fontSize: 11, color: "#ffffff" },
+  totalValue: { fontFamily: PDF_FONT_FAMILY, fontWeight: 700, fontSize: 11, color: "#ffffff" },
   notes: { marginTop: 20, paddingTop: 12, borderTopWidth: 0.5, borderTopColor: "#f3f4f6" },
   notesText: { color: "#6b7280", fontSize: 9 },
   bankSection: { borderTopWidth: 0.5, borderTopColor: "#f3f4f6", marginTop: 20, paddingTop: 14 },
   bankGrid: { flexDirection: "row", flexWrap: "wrap", gap: 14 },
   bankField: { minWidth: 110, marginBottom: 6 },
-  bankLabel: { fontSize: 7, color: "#9ca3af", textTransform: "uppercase", letterSpacing: 0.8, fontFamily: "Helvetica-Bold", marginBottom: 2 },
-  bankValue: { fontSize: 9, fontFamily: "Helvetica-Bold", color: "#111827" },
+  bankLabel: { fontSize: 7, color: "#9ca3af", textTransform: "uppercase", letterSpacing: 0.8, fontFamily: PDF_FONT_FAMILY, fontWeight: 700, marginBottom: 2 },
+  bankValue: { fontSize: 9, fontFamily: PDF_FONT_FAMILY, fontWeight: 700, color: "#111827" },
   footer: { flexDirection: "row", justifyContent: "space-between", marginTop: 20, paddingTop: 10, borderTopWidth: 0.5, borderTopColor: "#f9fafb" },
   footerText: { fontSize: 8, color: "#9ca3af" },
 });
@@ -102,7 +103,7 @@ export default function BoldSplitPdf({ invoice, items, client, org, totals, wate
               <Text style={[styles.tableCell, styles.col2, { textAlign: "right", color: "#9ca3af" }]}>{item.quantity}</Text>
               <Text style={[styles.tableCell, styles.col2, { textAlign: "right", color: "#9ca3af" }]}>{formatCurrency(item.unit_price, invoice.currency)}</Text>
               <Text style={[styles.tableCell, styles.col2, { textAlign: "right", color: "#9ca3af" }]}>{item.vat_rate}%</Text>
-              <Text style={[styles.tableCell, styles.col2, { textAlign: "right", fontFamily: "Helvetica-Bold" }]}>{formatCurrency(item.line_total, invoice.currency)}</Text>
+              <Text style={[styles.tableCell, styles.col2, { textAlign: "right", fontFamily: PDF_FONT_FAMILY, fontWeight: 700 }]}>{formatCurrency(item.line_total, invoice.currency)}</Text>
             </View>
           ))}
 
@@ -165,7 +166,7 @@ export default function BoldSplitPdf({ invoice, items, client, org, totals, wate
 
         {watermark ? (
           <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, alignItems: "center", justifyContent: "center" }}>
-            <Text style={{ fontSize: 96, fontFamily: "Helvetica-Bold", color: "#e5e7eb", opacity: 0.35, transform: "rotate(-45deg)" }}>
+            <Text style={{ fontSize: 96, fontFamily: PDF_FONT_FAMILY, fontWeight: 700, color: "#e5e7eb", opacity: 0.35, transform: "rotate(-45deg)" }}>
               {watermark}
             </Text>
           </View>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { LEGAL_ENTITY } from "@/config/legal";
 
 export const metadata: Metadata = {
   title: "About — Invoyr",
@@ -76,6 +77,67 @@ export default function AboutPage() {
                 <span className="font-serif text-2xl text-neutral-900 dark:text-neutral-50">£6,000.00</span>
               </div>
               <div className="mt-4 rounded-lg bg-neutral-950 dark:bg-neutral-50 py-2.5 text-center text-xs font-medium text-white dark:text-neutral-950">Pay now</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FOUNDER'S NOTE — first person, because a one-person company selling to
+          one-person companies is the actual differentiator against Xero. */}
+      <section className="border-t border-neutral-200 dark:border-neutral-900">
+        <div className={`${CONTAINER} py-20`}>
+          <div className="mx-auto grid max-w-5xl gap-10 lg:grid-cols-[minmax(0,320px)_1fr] lg:gap-16 lg:items-start">
+            <div>
+              {/* Replace with a real photo: public/founder.jpg, 640×800 or
+                  thereabouts. Until then this holds the space rather than
+                  showing a broken image. */}
+              <div className="aspect-[4/5] w-full overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-100 dark:border-neutral-800 dark:bg-neutral-900" />
+              <p className="mt-4 font-medium text-neutral-900 dark:text-neutral-50">Tony Nwachi</p>
+              <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                Founder, Invoyr
+              </p>
+            </div>
+
+            <div className="space-y-5 text-lg leading-relaxed text-neutral-600 dark:text-neutral-200">
+              <p className={KICKER}>From the founder</p>
+              <h2 className="font-serif text-4xl leading-tight text-neutral-900 dark:text-neutral-50">
+                I built this because I was tired of chasing my own invoices.
+              </h2>
+              <p>
+                I run a design and development studio. For years the worst part of the job
+                wasn&apos;t the work — it was everything around it. Building an invoice in a Word
+                template. Exporting a PDF. Attaching it to an email and hoping it looked right.
+                Then waiting, wondering whether the client had even opened it, and writing the
+                awkward follow-up that starts &ldquo;just circling back on the below&rdquo;.
+              </p>
+              <p>
+                I tried the big accounting packages. They&apos;re built for businesses with a
+                finance team, and they price like it. I didn&apos;t need a general ledger or a
+                chart of accounts. I needed to send a professional invoice, take a card payment,
+                and have something chase politely on my behalf so I didn&apos;t have to.
+              </p>
+              <p>
+                So I built it. Invoyr does the invoicing part properly and leaves the rest alone.
+                Your payments land straight in your own Stripe account — we never hold your money
+                or take a cut. Reminders go out in your name, on your schedule. And you can see
+                the moment a client opens an invoice, which turns an awkward chase into a simple
+                one.
+              </p>
+              <p>
+                I use it every week to invoice my own clients, as does my partner for her bakery.
+                If something is slow or confusing, it annoys me before it annoys you — and it gets
+                fixed.
+              </p>
+
+              {/* Signature: drop a transparent PNG at public/founder-signature.png
+                  (around 360×120) and swap this for an <Image>. */}
+              <p className="pt-2 text-neutral-900 dark:text-neutral-50">
+                <span className="font-serif text-2xl">Tony Nwachi</span>
+                <br />
+                <span className="text-sm text-neutral-500 dark:text-neutral-400">
+                  Founder, Invoyr — {LEGAL_ENTITY.name}
+                </span>
+              </p>
             </div>
           </div>
         </div>

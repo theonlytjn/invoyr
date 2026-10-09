@@ -4,6 +4,7 @@ import { canAccess } from "@/config/plans";
 import { computeTotals } from "@/lib/invoice-totals";
 import { resolveDocumentClient } from "@/lib/client-snapshot";
 import type { Invoice, InvoiceItem, Client, Organisation } from "@/lib/supabase/types";
+import { registerPdfFonts } from "./pdf-fonts";
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
@@ -112,6 +113,10 @@ export async function renderInvoicePdf(
   const templateName: string = invoice.template ?? "tjn_classic";
 
   const { renderToBuffer } = await import("@react-pdf/renderer");
+
+  // Must happen before the template renders, or the first invoice of a cold
+  // start would come out in Helvetica.
+  registerPdfFonts();
 
   let pdfModule;
   switch (templateName) {
