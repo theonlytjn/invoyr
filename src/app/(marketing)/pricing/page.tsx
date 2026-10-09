@@ -2,6 +2,7 @@ import { Fragment } from "react";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { PLANS, type PlanId } from "@/config/plans";
+import HeroBackdrop from "@/components/marketing/HeroBackdrop";
 
 export const metadata: Metadata = { title: "Pricing" };
 
@@ -98,7 +99,8 @@ export default function PricingPage() {
     <div className="bg-white dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100">
       <div className="max-w-[1600px] mx-auto px-6 lg:px-12 py-24 sm:py-32">
         {/* Header */}
-        <div className="max-w-5xl mx-auto text-center">
+        <HeroBackdrop images={["/hero/hero-pricing.jpg"]} />
+        <div className="relative max-w-5xl mx-auto text-center">
           <p className={`${KICKER} mb-8`}>Pricing</p>
           {/* Two lines, not three: the second line was wrapping on its own, so
               the container is wider and the type a touch smaller. */}

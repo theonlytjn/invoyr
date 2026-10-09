@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import HeroBackdrop from "@/components/marketing/HeroBackdrop";
 
 export const metadata: Metadata = {
   title: "Use Cases — Invoyr",
@@ -57,7 +58,9 @@ export default function UseCasesPage() {
   return (
     <div>
       {/* HERO */}
-      <section className="max-w-4xl mx-auto px-6 pt-24 pb-8 text-center">
+      <section className="relative isolate overflow-hidden">
+        <HeroBackdrop images={["/hero/hero-use-cases.jpg"]} />
+        <div className="relative max-w-4xl mx-auto px-6 pt-24 pb-8 text-center">
         <p className={`${KICKER} mb-8`}>Use cases</p>
         <h1 className="font-serif text-[clamp(2.6rem,6vw,5rem)] leading-[0.95] tracking-tight text-neutral-900 dark:text-neutral-50">
           Made for anyone who
@@ -74,6 +77,7 @@ export default function UseCasesPage() {
           <Link href="/features" className="text-base text-neutral-600 dark:text-neutral-200 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors">
             Explore features →
           </Link>
+        </div>
         </div>
       </section>
 

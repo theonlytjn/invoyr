@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { LEGAL_ENTITY } from "@/config/legal";
+import HeroBackdrop from "@/components/marketing/HeroBackdrop";
 
 export const metadata: Metadata = {
   title: "About — Invoyr",
@@ -28,7 +29,9 @@ export default function AboutPage() {
   return (
     <div>
       {/* HERO */}
-      <section className="max-w-4xl mx-auto px-6 pt-24 pb-8 text-center">
+      <section className="relative isolate overflow-hidden">
+        <HeroBackdrop images={["/hero/hero-about.jpg"]} />
+        <div className="relative max-w-4xl mx-auto px-6 pt-24 pb-8 text-center">
         <p className={`${KICKER} mb-8`}>About Invoyr</p>
         <h1 className="font-serif text-[clamp(2.6rem,6vw,5rem)] leading-[0.95] tracking-tight text-neutral-900 dark:text-neutral-50">
           We built the tool we wished we had
@@ -36,6 +39,7 @@ export default function AboutPage() {
         <p className="mt-6 mx-auto max-w-2xl text-xl text-neutral-600 dark:text-neutral-200 leading-relaxed">
           A focused invoicing tool for freelancers and small agencies — send a professional invoice, take card payments, and get paid, all without the admin.
         </p>
+        </div>
       </section>
 
       {/* STORY + product panel */}

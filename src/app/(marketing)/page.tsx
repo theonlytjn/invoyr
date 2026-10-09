@@ -1,4 +1,5 @@
 import Link from "next/link";
+import HeroBackdrop from "@/components/marketing/HeroBackdrop";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -10,14 +11,23 @@ export const metadata: Metadata = {
 const KICKER = "font-mono text-[0.8125rem] uppercase tracking-[0.14em] text-neutral-500 dark:text-neutral-400";
 const CONTAINER = "max-w-[1600px] mx-auto px-6 lg:px-12";
 
+/**
+ * Real customers. Each has a dark mark for light mode and a white one for dark.
+ * `scale` evens them out optically: a circular mark at the same pixel height as
+ * a wordmark reads much larger, because the eye compares area, not height.
+ */
 const TRUST_LOGOS = [
-  "/scroll-logos/imgi_29_ZmlFdgHmuu7gfT6zg4q9mfz9pes.png",
-  "/scroll-logos/imgi_30_AVyrr7uVWe2GLaTTJezwa0k8UW0.png",
-  "/scroll-logos/imgi_31_114rWgMR70jq21kOoQqs1B03Ws.png",
-  "/scroll-logos/imgi_32_ge6mYzyMHQjA1jBP7XFP1BKOKgI.png",
-  "/scroll-logos/imgi_33_SdMXdJWeCzEzCDhNgnWwERY.png",
-  "/scroll-logos/imgi_34_OruCoiwuzQE8nrhoIt1Z11Ycg.png",
+  { name: "TJN Agency", src: "/clients/tjn.svg", dark: "/clients/tjn-white.svg", scale: 1 },
+  { name: "Cakes By Kels", src: "/clients/cbk.svg", dark: "/clients/cbk-white.svg", scale: 0.78 },
+  { name: "Love Rooted", src: "/clients/love-rooted.svg", dark: "/clients/love-rooted-white.svg", scale: 0.78 },
+  { name: "Chop Life Music", src: "/clients/clm.svg", dark: "/clients/clm-white.svg", scale: 0.85 },
+  { name: "Lucid Partners", src: "/clients/lucid-partners.svg", dark: "/clients/lucid-partners-white.svg", scale: 1 },
+  { name: "One Africa", src: "/clients/one-africa.svg", dark: "/clients/one-africa-white.svg", scale: 0.85 },
+  { name: "Finer Fleet", src: "/clients/ff.svg", dark: "/clients/ff-white.svg", scale: 1 },
+  { name: "Black 7", src: "/clients/black-7.svg", dark: "/clients/black-7-white.svg", scale: 1 },
 ];
+
+const HERO_IMAGES = ["/hero/hero-1.jpg", "/hero/hero-2.jpg", "/hero/hero-3.jpg", "/hero/hero-4.jpg"];
 
 const FEATURES = [
   { title: "Invoices & estimates", body: "Send quotes, convert to invoices, set recurring bills for retainers." },
@@ -70,8 +80,9 @@ export default function HomePage() {
   return (
     <div>
       {/* HERO */}
-      <section className="relative" style={glow}>
-        <div className="mx-auto flex min-h-[calc(100svh-98px)] max-w-4xl flex-col px-6 pt-16 pb-12 text-center">
+      <section className="relative isolate overflow-hidden" style={glow}>
+        <HeroBackdrop images={HERO_IMAGES} />
+        <div className="relative mx-auto flex min-h-[calc(100svh-98px)] max-w-4xl flex-col px-6 pt-16 pb-12 text-center">
           {/* Primary hero content — centred, nudged slightly above centre */}
           <div className="flex flex-1 flex-col justify-center pb-16 sm:pb-24">
             <p className={`reveal ${KICKER} mb-8`}>Invoicing for service businesses</p>
@@ -101,9 +112,27 @@ export default function HomePage() {
             <p className={`${KICKER} text-center`}>Trusted by freelancers, agencies &amp; service businesses</p>
             <div className="relative mt-8 overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_12%,black_88%,transparent)]">
               <div className="flex w-max animate-marquee items-center gap-14">
-                {[...TRUST_LOGOS, ...TRUST_LOGOS].map((src, i) => (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img key={i} src={src} alt="" className="h-6 w-auto shrink-0 object-contain opacity-70 invert dark:invert-0" />
+                {[...TRUST_LOGOS, ...TRUST_LOGOS].map((logo, i) => (
+                  <span
+                    key={`${logo.name}-${i}`}
+                    className="flex h-10 shrink-0 items-center"
+                    style={{ height: `${2.5 * logo.scale}rem` }}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={logo.src}
+                      alt={i < TRUST_LOGOS.length ? logo.name : ""}
+                      aria-hidden={i >= TRUST_LOGOS.length}
+                      className="h-full w-auto object-contain opacity-70 dark:hidden"
+                    />
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={logo.dark}
+                      alt=""
+                      aria-hidden="true"
+                      className="hidden h-full w-auto object-contain opacity-70 dark:block"
+                    />
+                  </span>
                 ))}
               </div>
             </div>
