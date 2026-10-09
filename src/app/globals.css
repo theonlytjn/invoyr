@@ -205,6 +205,18 @@
 @media (prefers-reduced-motion: reduce) {
   .reveal,
   .animate-marquee { animation: none; }
+  /* With the animation stopped, the logos past the fold would be unreachable —
+     so the strip becomes swipeable instead of simply frozen. */
+  .marquee-viewport { overflow-x: auto; }
+}
+
+/* iOS pauses animations on an element it considers offscreen or in a
+   compositing layer it has discarded. Promoting the row keeps it running on a
+   phone, where this previously stalled. */
+.animate-marquee {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 body {

@@ -110,7 +110,7 @@ export default function HomePage() {
           {/* Trust marquee — anchored toward the bottom of the viewport */}
           <div className="reveal pt-12">
             <p className={`${KICKER} text-center`}>Trusted by freelancers, agencies &amp; service businesses</p>
-            <div className="relative mt-8 overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_12%,black_88%,transparent)]">
+            <div className="marquee-viewport relative mt-8 overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_12%,black_88%,transparent)]">
               <div className="flex w-max animate-marquee items-center gap-14">
                 {[...TRUST_LOGOS, ...TRUST_LOGOS].map((logo, i) => (
                   <span
