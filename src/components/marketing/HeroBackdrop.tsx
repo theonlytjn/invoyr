@@ -23,7 +23,7 @@ interface Props {
 export default function HeroBackdrop({
   images,
   intervalSeconds = 7,
-  opacityClassName = "opacity-[0.18] dark:opacity-[0.22]",
+  opacityClassName = "opacity-50",
 }: Props) {
   const [index, setIndex] = useState(0);
 
@@ -57,9 +57,12 @@ export default function HeroBackdrop({
         />
       ))}
 
-      {/* Scrim: keeps text at full contrast over any photo, and fades the image
-          into the page rather than ending on a hard edge. */}
-      <div className="absolute inset-0 bg-gradient-to-b from-white/70 via-white/80 to-white dark:from-[#030A17]/70 dark:via-[#030A17]/85 dark:to-[#030A17]" />
+      {/* Two scrims rather than one flat wash. The radial sits behind the
+          headline so the type keeps its contrast at 50% image opacity, while
+          the edges of the photo stay visible; the vertical one fades the image
+          into the page instead of ending on a hard edge. */}
+      <div className="absolute inset-0 bg-[radial-gradient(60%_55%_at_50%_45%,var(--hero-scrim-core),transparent_75%)]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[var(--hero-scrim-edge)]" />
     </div>
   );
 }

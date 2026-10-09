@@ -14,6 +14,10 @@
   --n-900: #081026;  /* primary text, brand navy */
   --n-950: #081026;
 
+  /* Hero scrims — tuned so a 50% photo still leaves headline contrast intact. */
+  --hero-scrim-core: rgba(250, 250, 250, 0.82);
+  --hero-scrim-edge: #FAFAFA;
+
   /* Light surfaces */
   --surface-page:     #FAFAFA;
   --surface-card:     #FFFFFF;
@@ -137,6 +141,9 @@
   --border: #242A33;
   --input: #242A33;
   --ring: #8CD600;
+
+  --hero-scrim-core: rgba(3, 10, 23, 0.78);
+  --hero-scrim-edge: #030A17;
 
   --success-surface: #064E3B;
   --warning-surface: #78350F;

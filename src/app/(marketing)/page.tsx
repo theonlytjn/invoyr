@@ -82,9 +82,8 @@ export default function HomePage() {
       {/* HERO */}
       <section className="relative isolate overflow-hidden" style={glow}>
         <HeroBackdrop images={HERO_IMAGES} />
-        <div className="relative mx-auto flex min-h-[calc(100svh-98px)] max-w-4xl flex-col px-6 pt-16 pb-12 text-center">
-          {/* Primary hero content — centred, nudged slightly above centre */}
-          <div className="flex flex-1 flex-col justify-center pb-16 sm:pb-24">
+        <div className="relative mx-auto flex min-h-[100svh] max-w-4xl flex-col justify-center px-6 py-24 text-center">
+          <div className="flex flex-col justify-center">
             <p className={`reveal ${KICKER} mb-8`}>Invoicing for service businesses</p>
             <h1 className="reveal font-serif text-[clamp(3rem,8vw,6.5rem)] leading-[0.9] tracking-tight text-neutral-900 dark:text-neutral-50">
               Get paid faster.
@@ -107,8 +106,13 @@ export default function HomePage() {
               <span className="inline-flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-brand" />14-day free trial</span>
             </div>
           </div>
-          {/* Trust marquee — anchored toward the bottom of the viewport */}
-          <div className="reveal pt-12">
+        </div>
+      </section>
+
+      {/* Trust strip — its own band, so the hero above can centre properly */}
+      <section className="relative border-t border-neutral-200 dark:border-neutral-900">
+        <div className="mx-auto max-w-[1600px] px-6 py-14 lg:px-12">
+          <div className="reveal">
             <p className={`${KICKER} text-center`}>Trusted by freelancers, agencies &amp; service businesses</p>
             <div className="marquee-viewport relative mt-8 overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_12%,black_88%,transparent)]">
               <div className="flex w-max animate-marquee items-center gap-14">
