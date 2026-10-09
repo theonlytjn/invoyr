@@ -415,9 +415,13 @@ export default function HomePage() {
             <h2 className="font-serif text-3xl md:text-4xl text-neutral-900 dark:text-neutral-50">Works with the tools you already use</h2>
             <p className="text-lg text-neutral-500 dark:text-neutral-400">Get paid and keep the books in sync.</p>
           </div>
-          <div className="mt-10 grid grid-cols-2 md:grid-cols-4 divide-x divide-neutral-200 dark:divide-neutral-900 border-y border-neutral-200 dark:border-neutral-900">
+          {/* Closed on all four edges: `divide-x` alone drew a line between
+              columns but left the outside open, and at two columns it also put
+              a stray edge mid-row. Container owns the top and left; each cell
+              owns its right and bottom. */}
+          <div className="mt-10 grid grid-cols-2 md:grid-cols-4 border-l border-t border-neutral-200 dark:border-neutral-900">
             {INTEGRATIONS.map((it, i) => (
-              <div key={it.name} className="flex flex-col items-start gap-6 px-6 py-10 sm:px-8 md:flex-row md:items-center md:justify-between md:gap-4 md:py-14">
+              <div key={it.name} className="flex flex-col items-start gap-6 border-r border-b border-neutral-200 px-6 py-10 dark:border-neutral-900 sm:px-8 md:flex-row md:items-center md:justify-between md:gap-4 md:py-14">
                 <div>
                   <span className={KICKER}>/{String(i + 1).padStart(2, "0")}</span>
                   <p className="mt-3 font-serif text-2xl text-neutral-900 dark:text-neutral-100">{it.name}</p>
