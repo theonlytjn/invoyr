@@ -17,14 +17,14 @@ const CONTAINER = "max-w-[1600px] mx-auto px-6 lg:px-12";
  * a wordmark reads much larger, because the eye compares area, not height.
  */
 const TRUST_LOGOS = [
-  { name: "TJN Agency", src: "/clients/tjn.svg", dark: "/clients/tjn-white.svg", scale: 1 },
-  { name: "Cakes By Kels", src: "/clients/cbk.svg", dark: "/clients/cbk-white.svg", scale: 0.78 },
-  { name: "Love Rooted", src: "/clients/love-rooted.svg", dark: "/clients/love-rooted-white.svg", scale: 0.78 },
-  { name: "Chop Life Music", src: "/clients/clm.svg", dark: "/clients/clm-white.svg", scale: 0.85 },
-  { name: "Lucid Partners", src: "/clients/lucid-partners.svg", dark: "/clients/lucid-partners-white.svg", scale: 1 },
-  { name: "One Africa", src: "/clients/one-africa.svg", dark: "/clients/one-africa-white.svg", scale: 0.85 },
-  { name: "Finer Fleet", src: "/clients/ff.svg", dark: "/clients/ff-white.svg", scale: 1 },
-  { name: "Black 7", src: "/clients/black-7.svg", dark: "/clients/black-7-white.svg", scale: 1 },
+  { name: "TJN Agency", src: "/clients/tjn.svg", dark: "/clients/tjn-white.svg" },
+  { name: "Cakes By Kels", src: "/clients/cbk.svg", dark: "/clients/cbk-white.svg" },
+  { name: "Love Rooted", src: "/clients/love-rooted.svg", dark: "/clients/love-rooted-white.svg" },
+  { name: "Chop Life Music", src: "/clients/clm.svg", dark: "/clients/clm-white.svg" },
+  { name: "Lucid Partners", src: "/clients/lucid-partners.svg", dark: "/clients/lucid-partners-white.svg" },
+  { name: "One Africa", src: "/clients/one-africa.svg", dark: "/clients/one-africa-white.svg" },
+  { name: "Finer Fleet", src: "/clients/ff.svg", dark: "/clients/ff-white.svg" },
+  { name: "B7", src: "/clients/b7.svg", dark: "/clients/b7-white.svg" },
 ];
 
 const HERO_IMAGES = ["/hero/hero-1.jpg", "/hero/hero-2.jpg", "/hero/hero-3.jpg", "/hero/hero-4.jpg"];
@@ -120,7 +120,6 @@ export default function HomePage() {
                   <span
                     key={`${logo.name}-${i}`}
                     className="flex h-10 shrink-0 items-center"
-                    style={{ height: `${2.5 * logo.scale}rem` }}
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
