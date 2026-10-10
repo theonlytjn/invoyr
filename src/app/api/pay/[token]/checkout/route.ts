@@ -44,6 +44,16 @@ export async function POST(
   const client = Array.isArray(invoice.clients) ? invoice.clients[0] : invoice.clients;
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.invoyr.io";
 
+  /**
+   * A DIRECT charge: the session is created ON the business's own Stripe
+   * account, not on Invoyr's.
+   *
+   * This previously used a destination charge — the payment landed on the
+   * platform and was transferred onward — which made Invoyr the merchant of
+   * record and therefore liable for chargebacks on invoices it had nothing to
+   * do with. Now the business is the merchant: their name on the statement,
+   * Stripe's fees from their balance, and their dispute to answer.
+   */
   const session = await getStripe().checkout.sessions.create({
     mode: "payment",
     payment_method_types: ["card"],
@@ -61,17 +71,15 @@ export async function POST(
       },
     ],
     customer_email: client?.email ?? undefined,
-    payment_intent_data: {
-      transfer_data: {
-        destination: org.stripe_account_id,
-      },
-    },
+
     metadata: {
       invoice_id: invoice.id,
       org_id: invoice.org_id,
     },
     success_url: `${appUrl}/pay/${token}?paid=1`,
     cancel_url: `${appUrl}/pay/${token}`,
+  }, {
+    stripeAccount: org.stripe_account_id,
   });
 
   return NextResponse.json({ url: session.url });

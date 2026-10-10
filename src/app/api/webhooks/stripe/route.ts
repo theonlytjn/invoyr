@@ -30,6 +30,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
+  // Invoice payments are direct charges on the business's own account, so those
+  // events arrive with `event.account` set and are delivered only because the
+  // endpoint listens to connected accounts. Subscription events for Invoyr's
+  // own billing arrive without it.
   switch (event.type) {
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
