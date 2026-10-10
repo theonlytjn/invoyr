@@ -25,7 +25,7 @@
   --surface-hover:    #F1F5F9;
 
   /* Semantic tokens */
-  --background: #ffffff;
+  --background: #FAFAFA;
   --foreground: var(--n-950);
   --card: #ffffff;
   --card-foreground: var(--n-900);
@@ -73,6 +73,23 @@
 }
 
 @theme inline {
+  /* The neutral ramp IS the brand's navy-tinted grey, overriding Tailwind's
+     warm neutral everywhere at once. Every `neutral-*` utility across the site
+     and app therefore carries the navy, instead of the flat black the design
+     started from — and no page needs editing to get it.
+     900/700/500/300/100 are the brand's own values; the rest interpolate. */
+  --color-neutral-50:  #F8FAFC;
+  --color-neutral-100: #E2E8F0;
+  --color-neutral-200: #CBD5E1;
+  --color-neutral-300: #94A3B8;
+  --color-neutral-400: #64748B;
+  --color-neutral-500: #475569;
+  --color-neutral-600: #334155;
+  --color-neutral-700: #1F2A44;
+  --color-neutral-800: #131E36;
+  --color-neutral-900: #081026;
+  --color-neutral-950: #030A17;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
