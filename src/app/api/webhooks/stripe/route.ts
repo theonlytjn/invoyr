@@ -21,12 +21,37 @@ export async function POST(req: NextRequest) {
 
   if (!sig) return NextResponse.json({ error: "No signature" }, { status: 400 });
 
-  let event: Stripe.Event;
-  try {
-    event = getStripe().webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!);
-  } catch (err) {
+  /**
+   * Stripe fixes a destination's source (your account vs connected accounts) at
+   * creation, so covering both needs two destinations pointing here — and each
+   * destination has its OWN signing secret. Verifying against a single secret
+   * would silently reject every event from the other one.
+   */
+  const secrets = [
+    process.env.STRIPE_WEBHOOK_SECRET,
+    process.env.STRIPE_WEBHOOK_SECRET_CONNECT,
+  ].filter((value): value is string => Boolean(value));
+
+  if (secrets.length === 0) {
+    console.error("[api] stripe webhook: no signing secret configured");
+    return NextResponse.json({ error: "Not configured" }, { status: 500 });
+  }
+
+  let event: Stripe.Event | null = null;
+  let lastError: unknown = null;
+
+  for (const secret of secrets) {
+    try {
+      event = getStripe().webhooks.constructEvent(body, sig, secret);
+      break;
+    } catch (err) {
+      lastError = err;
+    }
+  }
+
+  if (!event) {
     // Log the detail server-side; never echo signature/verification internals back.
-    console.error("[api] stripe webhook: signature verification failed:", err);
+    console.error("[api] stripe webhook: signature verification failed:", lastError);
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
