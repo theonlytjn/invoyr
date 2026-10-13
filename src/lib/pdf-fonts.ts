@@ -1,19 +1,18 @@
 import { Font } from "@react-pdf/renderer";
 
 /**
- * Registers Geom for PDF rendering.
+ * Registers Satoshi for PDF rendering.
  *
- * The PDF renderer needs TTF/OTF — it cannot read the WOFF2 the website uses —
- * and resolves a URL rather than a bundled import, so the files are served from
- * /public/fonts. Only a regular weight was licensed, so headings use the same
- * file; `fontWeight: "bold"` would otherwise fall back to Helvetica mid-document
- * and mix two typefaces on one invoice.
+ * Invoices use the site's BODY face, not its heading face: Geom is a display
+ * font and looked heavy-handed across a dense invoice table. Satoshi has real
+ * weights (400/500/700), so headings are genuinely bold rather than synthesised.
+ *
+ * The renderer needs TTF — it cannot read WOFF2 — and resolves fonts by URL, so
+ * the files are served from /public/fonts rather than imported.
  */
 let registered = false;
 
-export const PDF_FONT_FAMILY = "Geom";
-/** Headings previously used "Helvetica-Bold"; with one weight this is the same face. */
-export const PDF_FONT_FAMILY_BOLD = "Geom";
+export const PDF_FONT_FAMILY = "Satoshi";
 
 export function registerPdfFonts() {
   if (registered) return;
@@ -24,18 +23,18 @@ export function registerPdfFonts() {
     Font.register({
       family: PDF_FONT_FAMILY,
       fonts: [
-        { src: `${appUrl}/fonts/Geom-Regular.ttf`, fontWeight: 400 },
-        { src: `${appUrl}/fonts/Geom-Regular.ttf`, fontWeight: 700 },
-        { src: `${appUrl}/fonts/Geom-Italic.ttf`, fontWeight: 400, fontStyle: "italic" },
+        { src: `${appUrl}/fonts/Satoshi-400.ttf`, fontWeight: 400 },
+        { src: `${appUrl}/fonts/Satoshi-500.ttf`, fontWeight: 500 },
+        { src: `${appUrl}/fonts/Satoshi-700.ttf`, fontWeight: 700 },
       ],
     });
-    // Geom has no hyphenation dictionary; without this the renderer breaks words
-    // mid-syllable in narrow table cells.
+    // No hyphenation dictionary for Satoshi; without this the renderer breaks
+    // words mid-syllable inside narrow table cells.
     Font.registerHyphenationCallback((word) => [word]);
     registered = true;
   } catch (error) {
     // A failed registration must not stop an invoice rendering — the templates
     // fall back to Helvetica, which is built in.
-    console.error("[pdf] Geom registration failed, falling back to Helvetica", error);
+    console.error("[pdf] Satoshi registration failed, falling back to Helvetica", error);
   }
 }
