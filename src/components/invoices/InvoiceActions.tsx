@@ -31,6 +31,7 @@ import {
 import RecordPaymentModal from "./RecordPaymentModal";
 import CreditNoteModal from "./CreditNoteModal";
 import type { Invoice } from "@/lib/supabase/types";
+import { EyeIcon } from "@phosphor-icons/react";
 
 interface Props {
   invoice: Invoice;
@@ -49,8 +50,12 @@ export default function InvoiceActions({ invoice, clientEmail }: Props) {
   // rather than just silently refreshing the page.
   const [sentTo, setSentTo] = useState<{ to: string; cc: string[] } | null>(null);
 
-  async function handleDownloadPdf() {
+  function handleDownloadPdf() {
     window.open(`/api/invoices/${invoice.id}/pdf`, "_blank");
+  }
+
+  function handleViewPdf() {
+    window.open(`/api/invoices/${invoice.id}/pdf?view=1`, "_blank", "noopener");
   }
 
   async function handleIssue() {
@@ -128,6 +133,10 @@ export default function InvoiceActions({ invoice, clientEmail }: Props) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuItem onClick={handleViewPdf}>
+            <EyeIcon size={16} className="mr-2" />
+            View PDF
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={handleDownloadPdf}>
             <DownloadIcon size={16} className="mr-2" />
             Download PDF

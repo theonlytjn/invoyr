@@ -4,7 +4,7 @@ import { getOrg } from "@/lib/auth";
 import { buildInvoicePdfContext, renderInvoicePdf } from "@/lib/invoice-pdf";
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
@@ -38,10 +38,14 @@ export async function GET(
   const rendered = await renderInvoicePdf(id, ctx);
   if (!rendered) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
+  // `?view=1` renders in the browser's PDF viewer instead of downloading —
+  // the same bytes, only the disposition differs.
+  const inline = req.nextUrl.searchParams.get("view") === "1";
+
   return new NextResponse(Buffer.from(rendered.buffer), {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="invoice-${rendered.invoiceNumber}.pdf"`,
+      "Content-Disposition": `${inline ? "inline" : "attachment"}; filename="invoice-${rendered.invoiceNumber}.pdf"`,
     },
   });
 }
