@@ -9,6 +9,8 @@ export const metadata: Metadata = {
 };
 
 const KICKER = "font-mono text-[0.8125rem] uppercase tracking-[0.14em] text-neutral-500 dark:text-neutral-400";
+// Over the hero photo the grey kicker loses contrast in dark mode, so it goes white there.
+const HERO_KICKER = "font-mono text-[0.8125rem] uppercase tracking-[0.14em] text-neutral-500 dark:text-white";
 const CONTAINER = "max-w-[1600px] mx-auto px-6 lg:px-12";
 
 /**
@@ -85,7 +87,7 @@ export default function HomePage() {
         <HeroBackdrop images={HERO_IMAGES} />
         <div className="relative mx-auto flex min-h-[100svh] max-w-4xl flex-col justify-center px-6 py-24 text-center">
           <div className="flex flex-col justify-center">
-            <p className={`reveal ${KICKER} mb-8`}>Invoicing for service businesses</p>
+            <p className={`reveal ${HERO_KICKER} mb-8`}>Invoicing for service businesses</p>
             <h1 className="reveal font-serif text-[clamp(3rem,8vw,6.5rem)] leading-[0.9] tracking-tight text-neutral-900 dark:text-neutral-50">
               Get paid faster.
               <br />

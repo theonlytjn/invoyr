@@ -7,6 +7,8 @@ import HeroBackdrop from "@/components/marketing/HeroBackdrop";
 export const metadata: Metadata = { title: "Pricing" };
 
 const KICKER = "font-mono text-[0.8125rem] uppercase tracking-[0.14em] text-neutral-500 dark:text-neutral-400";
+// Over the hero photo the grey kicker loses contrast in dark mode, so it goes white there.
+const HERO_KICKER = "font-mono text-[0.8125rem] uppercase tracking-[0.14em] text-neutral-500 dark:text-white";
 
 // Marketing-facing comparison. Kept in step with PLAN_FEATURES in config/plans.ts.
 // `true` = included; a string = the value shown for that plan (e.g. user count).
@@ -100,7 +102,7 @@ export default function PricingPage() {
       <section className="relative isolate flex min-h-[100svh] items-center overflow-hidden lg:min-h-[70svh]">
         <HeroBackdrop images={["/hero/hero-pricing.jpg"]} />
         <div className="relative mx-auto w-full max-w-5xl px-6 py-24 text-center lg:px-12">
-          <p className={`${KICKER} mb-8`}>Pricing</p>
+          <p className={`${HERO_KICKER} mb-8`}>Pricing</p>
           {/* Two lines, not three: the second line was wrapping on its own, so
               the container is wider and the type a touch smaller. */}
           <h1 className="font-serif text-[clamp(2.4rem,5.2vw,4.5rem)] leading-[0.95] tracking-tight text-balance text-neutral-900 dark:text-neutral-50">

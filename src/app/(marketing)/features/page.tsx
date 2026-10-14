@@ -8,6 +8,8 @@ export const metadata: Metadata = {
 };
 
 const KICKER = "font-mono text-[0.8125rem] uppercase tracking-[0.14em] text-neutral-500 dark:text-neutral-400";
+// Over the hero photo the grey kicker loses contrast in dark mode, so it goes white there.
+const HERO_KICKER = "font-mono text-[0.8125rem] uppercase tracking-[0.14em] text-neutral-500 dark:text-white";
 const CONTAINER = "max-w-[1600px] mx-auto px-6 lg:px-12";
 const CARD = "rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-gradient-to-br from-emerald-50/70 dark:from-emerald-800/20 via-white dark:via-neutral-900 to-white dark:to-neutral-950";
 
@@ -18,7 +20,7 @@ export default function FeaturesPage() {
       <section className="relative isolate flex min-h-[100svh] items-center overflow-hidden lg:min-h-[70svh]">
         <HeroBackdrop images={["/hero/hero-features.jpg"]} />
         <div className="relative mx-auto w-full max-w-4xl px-6 py-24 text-center">
-        <p className={`${KICKER} mb-8`}>Features</p>
+        <p className={`${HERO_KICKER} mb-8`}>Features</p>
         <h1 className="font-serif text-[clamp(2.6rem,6vw,5rem)] leading-[0.95] tracking-tight text-neutral-900 dark:text-neutral-50">
           Built for the way you work
         </h1>
