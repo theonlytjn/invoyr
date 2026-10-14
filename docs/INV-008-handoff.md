@@ -44,7 +44,7 @@ page.
 | 4 | **Founder photo + signature** → `public/founder.jpg` (~640×800), `public/founder-signature.png` (transparent, ~360×120) | The about page holds the space; the note is written and live. |
 | 5 | **Re-export the Cakes By Kels logo** | Light version is 92×75, white version 200×75 — different aspect, so it jumps between light and dark mode. |
 | 6 | **Lawyer review** of `/terms`, `/privacy`, `/dpa` | Drafted and live, never reviewed. Flag the DPA audit clause, liability cap, and whether SCC/IDTA reliance is actually papered with each provider. |
-| 7 | **TrueLayer production approval** | Chased; still "Testing mode active" as of 26 Sep. Open Banking stays developer-only until granted. |
+| 7 | **TrueLayer production approval** | Chased; still "Testing mode active" as of 26 Sep. Open Banking stays developer-only until granted. Customers see a "Coming soon" preview on Settings → Banking; set `OPEN_BANKING_LIVE=true` in Vercel when approved. |
 | 8 | **Rate limiting** — Upstash is live and verified enforcing | Done 28 Sep. Nothing outstanding; listed so it isn't re-checked. |
 
 ---

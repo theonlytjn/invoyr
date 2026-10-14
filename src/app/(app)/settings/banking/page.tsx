@@ -3,6 +3,8 @@ import { requireOrg } from "@/lib/auth";
 import { getOrgPlan } from "@/lib/billing";
 import { canAccess } from "@/config/plans";
 import BankConnectionsPanel from "@/components/settings/BankConnectionsPanel";
+import OpenBankingPreview from "@/components/settings/OpenBankingPreview";
+import { isOpenBankingAvailable } from "@/lib/open-banking";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Banking — Settings" };
@@ -11,6 +13,7 @@ export default async function BankingSettingsPage() {
   const org = await requireOrg();
   const plan = await getOrgPlan(org.id);
   const canBank = canAccess(plan, "open_banking");
+  const available = await isOpenBankingAvailable();
 
   return (
     <div className="space-y-6">
@@ -21,7 +24,9 @@ export default async function BankingSettingsPage() {
         </p>
       </div>
 
-      {canBank ? (
+      {!available ? (
+        <OpenBankingPreview />
+      ) : canBank ? (
         <>
           <BankConnectionsPanel />
 

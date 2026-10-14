@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
 import { getOrgPlan } from "@/lib/billing";
 import { canAccess } from "@/config/plans";
+import { isOpenBankingAvailable } from "@/lib/open-banking";
 import Topbar from "@/components/shell/Topbar";
 import ExpensesList from "@/components/expenses/ExpensesList";
 import type { ExpenseWithClient, Client } from "@/lib/supabase/types";
@@ -14,7 +15,7 @@ export default async function ExpensesPage() {
   const supabase = await createClient();
 
   const plan = await getOrgPlan(org.id);
-  const canImportBank = canAccess(plan, "open_banking");
+  const canImportBank = canAccess(plan, "open_banking") && (await isOpenBankingAvailable());
 
   const now = new Date();
   const from = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);

@@ -3,10 +3,15 @@ import { requireOrg } from "@/lib/auth";
 import { getOrgPlan } from "@/lib/billing";
 import { canAccess } from "@/config/plans";
 import { buildAuthUrl } from "@/lib/truelayer/client";
+import { isOpenBankingAvailable } from "@/lib/open-banking";
 import { cookies } from "next/headers";
 
 export async function GET(req: Request) {
   const org = await requireOrg();
+
+  if (!(await isOpenBankingAvailable())) {
+    return NextResponse.redirect(new URL("/settings/banking", req.url));
+  }
 
   const plan = await getOrgPlan(org.id);
   if (!canAccess(plan, "open_banking")) {

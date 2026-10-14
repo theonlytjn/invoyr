@@ -93,6 +93,14 @@ entry point:
 Gating banking also protects against per-connection TrueLayer costs on lower
 tiers.
 
+## 6a. Coming-soon gate (14 Oct 2026)
+
+Until TrueLayer grants production access, `isOpenBankingAvailable()` (`src/lib/open-banking.ts`)
+hides bank sync from customers: Settings → Banking shows `OpenBankingPreview` (a non-interactive
+mock with a "Coming soon" badge), Expenses hides "Import from bank", and `/api/bank/connect`
+redirects back. The admin account keeps full access for testing. Set `OPEN_BANKING_LIVE=true`
+in Vercel and redeploy to switch it on for everyone.
+
 ## 7. TrueLayer environment setup (required before use)
 
 The integration is built but needs credentials from `console.truelayer.com`. Set
