@@ -1,6 +1,6 @@
 # Invoyr — Handoff
 
-_Last updated: 14 October 2026._
+_Last updated: 14 October 2026 (evening)._
 _Where the product stands, what is blocked on whom, and what to pick up next._
 
 Working agreement: **every change is committed and pushed immediately**; pushing `main`
@@ -38,8 +38,8 @@ page.
 
 | # | Task | Why it matters |
 |---|---|---|
-| 1 | **Test a real card payment end to end** — connect your own Stripe, invoice yourself, pay, confirm it flips to paid | Never run on the new account or the new charge model. The single most important untested path. |
-| 2 | **Second Stripe webhook destination** for **connected accounts**, same URL, same 5 events; put its signing secret in Vercel as `STRIPE_WEBHOOK_SECRET_CONNECT` | Without it a customer pays, the money arrives, and the invoice silently stays unpaid. Stripe fixes a destination's source at creation, so this needs a *second* destination. |
+| 1 | ~~Test a real card payment end to end~~ | **Done 14 Oct.** TJN Agency connected (`acct_1K34uu…`); INV-0016 paid £1.20 by card as a direct charge on TJN's account, marked paid by the `invoyr-connect` webhook, payment row and both emails logged. |
+| 2 | ~~Second Stripe webhook destination for connected accounts~~ | **Done.** `invoyr-app` (your account) and `invoyr-connect` (connected accounts) on Invoyr Limited, both → `/api/webhooks/stripe`, secrets in `STRIPE_WEBHOOK_SECRET` / `STRIPE_WEBHOOK_SECRET_CONNECT`. |
 | 3 | **Confirm the Chop Life subscription is cancelled** in the *old* Stripe account | Our record is deleted, which does not touch Stripe. It was last seen `active`, so their card may still be charged. |
 | 4 | **Founder photo + signature** → `public/founder.jpg` (~640×800), `public/founder-signature.png` (transparent, ~360×120) | The about page holds the space; the note is written and live. |
 | 5 | **Re-export the Cakes By Kels logo** | Light version is 92×75, white version 200×75 — different aspect, so it jumps between light and dark mode. |
@@ -136,6 +136,13 @@ admins. `EmailSettingsForm` has already been moved server-side as the pattern to
 - **Edge middleware must not import `lib/auth` or `lib/billing`** — they pull in
   `next/headers` and the Supabase server client. `lib/trial.ts` and `lib/org-cookie.ts`
   exist precisely to keep the middleware's imports pure.
+- **`STRIPE_SECRET_KEY` must be a full `sk_live_` key from Invoyr Limited.** A restricted
+  (`rk_live_`) key fails the Connect OAuth exchange with "Unable to authenticate the
+  request" — that was the 14 Oct "Stripe connection failed". Local `.env.local` still held
+  an old TJN Agency key at that point; swap in an Invoyr Limited key before local Stripe work.
+- **Supabase is on `auth.invoyr.io`** (custom domain). It's in the CSP `connect-src` in
+  `middleware.ts`, and both it and the old `…supabase.co` callback are on the Google OAuth
+  client. Local `.env.local` still pointed at the old host on 14 Oct.
 - **Check which Stripe account production is actually talking to**, rather than assuming.
   It pointed at Tony's personal TJN Agency account for weeks, and the only way that
   surfaced was reading the account ID back from Stripe.
