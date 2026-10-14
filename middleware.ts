@@ -43,7 +43,8 @@ function buildCsp(nonce: string): string {
     "style-src 'self' 'unsafe-inline' https://cdn.hugeicons.com https://api.fontshare.com",
     "img-src 'self' data: blob: https:",
     "font-src 'self' data: https://cdn.hugeicons.com https://api.fontshare.com https://cdn.fontshare.com",
-    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com https://www.paypal.com https://api.paypal.com https://api-m.paypal.com https://api.sandbox.paypal.com https://api-m.sandbox.paypal.com",
+    // auth.invoyr.io is Supabase's custom domain; *.supabase.co stays for anything still on the default host.
+    "connect-src 'self' https://auth.invoyr.io wss://auth.invoyr.io https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com https://www.paypal.com https://api.paypal.com https://api-m.paypal.com https://api.sandbox.paypal.com https://api-m.sandbox.paypal.com",
     "frame-src 'self' https://challenges.cloudflare.com https://www.paypal.com https://*.paypal.com",
     "worker-src 'self' blob:",
     "manifest-src 'self'",
