@@ -13,6 +13,14 @@ export async function GET(req: NextRequest) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.invoyr.io";
 
   if (error || !code || !state) {
+    // Stripe explains a refusal in error_description; without logging it a
+    // failed connection leaves nothing to diagnose.
+    console.error("[api] stripe connect callback: no code returned", {
+      error,
+      description: searchParams.get("error_description"),
+      hasCode: Boolean(code),
+      hasState: Boolean(state),
+    });
     return NextResponse.redirect(
       `${appUrl}/settings/payments?connect=error`
     );
@@ -32,6 +40,7 @@ export async function GET(req: NextRequest) {
   }
   const denied = await requireOrgPermission(state, "manage_settings");
   if (denied) {
+    console.error("[api] stripe connect callback: permission denied", { userId: user.id, orgId: state, denied });
     return NextResponse.redirect(`${appUrl}/settings/payments?connect=error`);
   }
 
@@ -42,7 +51,10 @@ export async function GET(req: NextRequest) {
       code,
     });
     stripeAccountId = response.stripe_user_id!;
-  } catch {
+  } catch (err) {
+    // The usual causes are a client id from a different Stripe account than the
+    // secret key, or connecting the platform account to itself.
+    console.error("[api] stripe connect callback: token exchange failed:", err instanceof Error ? err.message : err);
     return NextResponse.redirect(`${appUrl}/settings/payments?connect=error`);
   }
 
