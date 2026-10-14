@@ -39,7 +39,7 @@ export function PwaRegistration() {
         <div className="flex items-start gap-3">
           <div className="w-10 h-10 rounded-xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center shrink-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/favicon.png" alt="" className="w-6 h-6" />
+            <img src="/favicon.png?v=2" alt="" className="w-6 h-6" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100">

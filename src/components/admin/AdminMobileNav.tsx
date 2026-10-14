@@ -44,8 +44,8 @@ export default function AdminMobileNav() {
     <div className="lg:hidden">
       <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between gap-3 border-b border-neutral-200 bg-white px-4 py-3 pt-[calc(0.75rem+env(safe-area-inset-top))] dark:border-neutral-800 dark:bg-neutral-950">
         <Link href="/admin" className="flex items-center gap-2 min-w-0">
-          <Image src="/main-logo.svg" alt="Invoyr" width={88} height={27} priority className="dark:hidden" />
-          <Image src="/main-logo-dark.svg" alt="Invoyr" width={88} height={27} priority className="hidden dark:block" />
+          <Image src="/brand/invoyr-logo.svg" alt="Invoyr" width={88} height={27} priority className="dark:hidden" />
+          <Image src="/brand/invoyr-logo-dark.svg" alt="Invoyr" width={88} height={27} priority className="hidden dark:block" />
           <span className="rounded-md bg-neutral-950 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-white dark:bg-neutral-50 dark:text-neutral-950">
             Admin
           </span>

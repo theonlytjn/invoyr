@@ -1,7 +1,7 @@
 // Bump this whenever assets in /public change. The activate handler deletes
 // every cache that isn't the current name, so old logos cannot survive a deploy.
-const CACHE_NAME = "invoyr-v4-logos";
-const PRECACHE_URLS = ["/offline", "/main-logo.svg", "/main-logo-dark.svg", "/favicon.png"];
+const CACHE_NAME = "invoyr-v5-brand";
+const PRECACHE_URLS = ["/offline", "/brand/invoyr-logo.svg", "/brand/invoyr-logo-dark.svg", "/favicon.png?v=2"];
 
 // Install: precache the offline page and key static assets
 self.addEventListener("install", (event) => {

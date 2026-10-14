@@ -26,9 +26,9 @@ export default function MarketingHeader() {
       <div className="max-w-[1600px] mx-auto px-6 lg:px-12 py-[25px] flex items-center justify-between">
         <Link href="/" className="flex items-center" aria-label="Invoyr home" onClick={close}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/main-logo-flat-black.svg" alt="Invoyr" className="h-12 w-auto dark:hidden" />
+          <img src="/brand/invoyr-logo-flat-black.svg" alt="Invoyr" className="h-12 w-auto dark:hidden" />
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/main-logo-flat-white.svg" alt="Invoyr" className="h-12 w-auto hidden dark:block" />
+          <img src="/brand/invoyr-logo-flat-white.svg" alt="Invoyr" className="h-12 w-auto hidden dark:block" />
         </Link>
 
         {/* Desktop nav */}

@@ -37,8 +37,8 @@ export default function NewOrgPage() {
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
         <div className="flex justify-center mb-8">
-          <Image src="/main-logo.svg" alt="Invoyr" width={120} height={36} className="dark:hidden" />
-          <Image src="/main-logo-dark.svg" alt="Invoyr" width={120} height={36} className="hidden dark:block" />
+          <Image src="/brand/invoyr-logo.svg" alt="Invoyr" width={120} height={36} className="dark:hidden" />
+          <Image src="/brand/invoyr-logo-dark.svg" alt="Invoyr" width={120} height={36} className="hidden dark:block" />
         </div>
 
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-8">

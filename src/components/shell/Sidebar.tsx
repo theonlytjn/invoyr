@@ -70,8 +70,8 @@ export default function Sidebar({ org, orgs, userEmail, plan, trialDaysLeft, isA
           </button>
         ) : (
           <>
-            <Image src="/main-logo.svg" alt="Invoyr" width={110} height={34} priority className="dark:hidden" />
-            <Image src="/main-logo-dark.svg" alt="Invoyr" width={110} height={34} priority className="hidden dark:block" />
+            <Image src="/brand/invoyr-logo.svg" alt="Invoyr" width={110} height={34} priority className="dark:hidden" />
+            <Image src="/brand/invoyr-logo-dark.svg" alt="Invoyr" width={110} height={34} priority className="hidden dark:block" />
             <button
               onClick={() => setCollapsed(true)}
               className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-neutral-200 dark:hover:bg-neutral-800"

@@ -180,7 +180,7 @@ export default function OnboardingWizard({ userId, userName }: Props) {
       <div className="flex w-full flex-col lg:w-1/2">
         <header className="flex items-center justify-between px-8 py-6 shrink-0">
           <Link href="/">
-            <Image src="/main-logo.svg" alt="Invoyr" width={110} height={34} priority />
+            <Image src="/brand/invoyr-logo.svg" alt="Invoyr" width={110} height={34} priority />
           </Link>
           <span className="text-sm text-neutral-500">
             {userName ? `Hi, ${userName.split(" ")[0]}` : "Welcome"}

@@ -35,9 +35,9 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
         <div className="max-w-[1600px] mx-auto px-6 lg:px-12 py-14 grid grid-cols-2 md:grid-cols-4 gap-8">
           <div className="col-span-2 md:col-span-1">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/main-logo-flat-black.svg" alt="Invoyr" className="h-12 w-auto dark:hidden" />
+            <img src="/brand/invoyr-logo-flat-black.svg" alt="Invoyr" className="h-12 w-auto dark:hidden" />
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/main-logo-flat-white.svg" alt="Invoyr" className="h-12 w-auto hidden dark:block" />
+            <img src="/brand/invoyr-logo-flat-white.svg" alt="Invoyr" className="h-12 w-auto hidden dark:block" />
             <p className="mt-4 text-base text-neutral-500 dark:text-neutral-400 max-w-[15rem]">Invoicing that gets you paid.</p>
           </div>
           <div>

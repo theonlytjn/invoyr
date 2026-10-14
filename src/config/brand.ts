@@ -8,6 +8,6 @@ export const BRAND = {
   supportEmail: "support@invoyr.io",
   accentColor: "#111827",
   /** Absolute URL to the Invoyr wordmark (SVG, works in Gmail/Apple Mail/Outlook.com) */
-  logoUrl: `${_appUrl}/main-logo.svg`,
-  faviconUrl: `${_appUrl}/favicon.png`,
+  logoUrl: `${_appUrl}/brand/invoyr-logo.svg`,
+  faviconUrl: `${_appUrl}/favicon.png?v=2`,
 };

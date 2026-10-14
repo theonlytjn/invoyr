@@ -14,13 +14,13 @@ export default function manifest(): MetadataRoute.Manifest {
     categories: ["business", "finance", "productivity"],
     icons: [
       {
-        src: "/icon-192.png",
+        src: "/icon-192.png?v=2",
         sizes: "192x192",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/icon-512.png",
+        src: "/icon-512.png?v=2",
         sizes: "512x512",
         type: "image/png",
         purpose: "any",
@@ -28,7 +28,7 @@ export default function manifest(): MetadataRoute.Manifest {
       {
         // Maskable: needs safe-zone padding (logo centred in inner 80% of canvas).
         // Add /icon-maskable.png when ready; until then this falls back to the above.
-        src: "/favicon.png",
+        src: "/favicon.png?v=2",
         sizes: "512x512",
         type: "image/png",
         purpose: "maskable",

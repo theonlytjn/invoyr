@@ -52,7 +52,7 @@ export default function ResetPasswordPage() {
       <div className="flex w-full flex-col lg:w-1/2">
         <header className="flex items-center justify-between px-8 py-6">
           <Link href="/">
-            <Image src="/main-logo.svg" alt="Invoyr" width={110} height={34} priority />
+            <Image src="/brand/invoyr-logo.svg" alt="Invoyr" width={110} height={34} priority />
           </Link>
           <Link href="mailto:hello@invoyr.io" className="text-sm text-neutral-500 hover:text-neutral-950 transition-colors">
             Need help?
