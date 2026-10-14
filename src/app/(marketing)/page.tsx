@@ -25,6 +25,7 @@ const TRUST_LOGOS = [
   { name: "One Africa", src: "/clients/one-africa.svg", dark: "/clients/one-africa-white.svg" },
   { name: "Finer Fleet", src: "/clients/ff.svg", dark: "/clients/ff-white.svg" },
   { name: "B7", src: "/clients/b7.svg", dark: "/clients/b7-white.svg" },
+  { name: "Nokha", src: "/clients/nokha.svg", dark: "/clients/nokha-white.svg" },
 ];
 
 const HERO_IMAGES = ["/hero/hero-1.jpg", "/hero/hero-2.jpg", "/hero/hero-3.jpg", "/hero/hero-4.jpg"];
@@ -115,11 +116,11 @@ export default function HomePage() {
           <div className="reveal">
             <p className={`${KICKER} text-center`}>Trusted by freelancers, agencies &amp; service businesses</p>
             <div className="marquee-viewport relative mt-8 overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_12%,black_88%,transparent)]">
-              <div className="flex w-max animate-marquee items-center gap-40">
+              <div className="flex w-max animate-marquee items-center gap-20">
                 {[...TRUST_LOGOS, ...TRUST_LOGOS].map((logo, i) => (
                   <span
                     key={`${logo.name}-${i}`}
-                    className="flex h-10 shrink-0 items-center"
+                    className="flex h-[50px] shrink-0 items-center"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
