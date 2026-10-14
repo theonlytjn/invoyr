@@ -2,6 +2,7 @@ import { Document, Page, Text, View, Image, StyleSheet } from "@react-pdf/render
 import type { InvoiceTemplateProps } from "../types";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { discountLabel } from "@/lib/invoice-totals";
+import { companyLegalLine } from "../legal-line";
 import { PDF_FONT_FAMILY } from "@/lib/pdf-fonts";
 
 const styles = StyleSheet.create({
@@ -45,6 +46,7 @@ const styles = StyleSheet.create({
 });
 
 export default function ModernStudioPdf({ invoice, items, client, org, totals, watermark, showInvoyrBranding = true }: InvoiceTemplateProps) {
+  const legalLine = companyLegalLine(org);
   const accent = org.accent_color ?? "#111827";
   const logoSrc = (org as { logoDataUrl?: string | null }).logoDataUrl ?? org.logo_url;
 
@@ -174,6 +176,7 @@ export default function ModernStudioPdf({ invoice, items, client, org, totals, w
           <Text style={styles.footerText}>{org.website ?? org.email ?? org.name}</Text>
           {showInvoyrBranding ? <Text style={styles.footerText}>Powered by invoyr</Text> : null}
         </View>
+        {legalLine ? <Text style={[styles.footerText, { marginTop: 6, textAlign: "left" }]}>{legalLine}</Text> : null}
 
         {watermark ? (
           <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, alignItems: "center", justifyContent: "center" }}>

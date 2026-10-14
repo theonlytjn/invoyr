@@ -2,6 +2,7 @@ import { Document, Page, Text, View, Image, StyleSheet } from "@react-pdf/render
 import type { InvoiceTemplateProps } from "../types";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { discountLabel } from "@/lib/invoice-totals";
+import { companyLegalLine } from "../legal-line";
 import { PDF_FONT_FAMILY } from "@/lib/pdf-fonts";
 
 const styles = StyleSheet.create({
@@ -44,6 +45,7 @@ const styles = StyleSheet.create({
 });
 
 export default function CleanMinimalPdf({ invoice, items, client, org, totals, watermark, showInvoyrBranding = true }: InvoiceTemplateProps & { logoDataUrl?: string | null }) {
+  const legalLine = companyLegalLine(org);
   const accent = org.accent_color ?? "#111827";
   const logoSrc = (org as { logoDataUrl?: string | null }).logoDataUrl ?? org.logo_url;
 
@@ -150,6 +152,7 @@ export default function CleanMinimalPdf({ invoice, items, client, org, totals, w
         <View style={styles.footer}>
           <Text style={styles.footerText}>{org.name}{showInvoyrBranding ? " · Powered by invoyr" : ""}</Text>
         </View>
+        {legalLine ? <Text style={[styles.footerText, { marginTop: 6, textAlign: "center", color: "#9ca3af" }]}>{legalLine}</Text> : null}
 
         {watermark ? (
           <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, alignItems: "center", justifyContent: "center" }}>

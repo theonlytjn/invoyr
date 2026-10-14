@@ -716,6 +716,14 @@ alter table public.organisations add column if not exists payment_reminder_days 
 -- limited company must show it on its business correspondence.
 alter table public.organisations add column if not exists company_number text;
 
+-- organisations: registered office, for the invoice footer when it differs from
+-- the trading address. company_number is the one company-number field; the older
+-- company_registration_number was folded into it on 14 Oct 2026 and is unused.
+alter table public.organisations add column if not exists registered_address text;
+update public.organisations
+   set company_number = company_registration_number
+ where company_number is null and company_registration_number is not null;
+
 -- clients: additional invoice recipients (CC), e.g. a client's accounts inbox
 alter table public.clients add column if not exists cc_emails text[];
 alter table public.clients drop constraint if exists clients_cc_emails_max;

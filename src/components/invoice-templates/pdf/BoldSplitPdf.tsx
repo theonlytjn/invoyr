@@ -1,7 +1,8 @@
-import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
+import { Document, Page, Text, View, Image, StyleSheet } from "@react-pdf/renderer";
 import type { InvoiceTemplateProps } from "../types";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { discountLabel } from "@/lib/invoice-totals";
+import { companyLegalLine } from "../legal-line";
 import { PDF_FONT_FAMILY } from "@/lib/pdf-fonts";
 
 const STATUS_LABEL: Record<string, string> = {
@@ -17,6 +18,9 @@ const styles = StyleSheet.create({
   page: { fontFamily: PDF_FONT_FAMILY, fontSize: 10, color: "#111827", backgroundColor: "#ffffff" },
   headerBand: { padding: 40, paddingBottom: 32 },
   headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" },
+  // The header band is the brand colour, so the logo sits on a white tile to stay legible whatever its colours.
+  logoTile: { backgroundColor: "#ffffff", borderRadius: 4, padding: 4, marginBottom: 8, alignSelf: "flex-start" },
+  logo: { height: 32, objectFit: "contain" },
   orgName: { fontSize: 18, fontFamily: PDF_FONT_FAMILY, fontWeight: 700, color: "#ffffff", marginBottom: 4 },
   orgDetail: { fontSize: 9, color: "rgba(255,255,255,0.7)", marginBottom: 2 },
   invBig: { fontSize: 36, fontFamily: PDF_FONT_FAMILY, fontWeight: 700, color: "rgba(255,255,255,0.2)", textAlign: "right", lineHeight: 1 },
@@ -55,6 +59,8 @@ const styles = StyleSheet.create({
 });
 
 export default function BoldSplitPdf({ invoice, items, client, org, totals, watermark, showInvoyrBranding = true }: InvoiceTemplateProps) {
+  const legalLine = companyLegalLine(org);
+  const logoSrc = (org as { logoDataUrl?: string | null }).logoDataUrl ?? org.logo_url;
   const accent = org.accent_color ?? "#111827";
 
   return (
@@ -63,6 +69,11 @@ export default function BoldSplitPdf({ invoice, items, client, org, totals, wate
         <View style={[styles.headerBand, { backgroundColor: accent }]}>
           <View style={styles.headerRow}>
             <View>
+              {logoSrc ? (
+                <View style={styles.logoTile}>
+                  <Image src={logoSrc} style={styles.logo} />
+                </View>
+              ) : null}
               <Text style={styles.orgName}>{org.name}</Text>
               {org.address_line1 ? <Text style={styles.orgDetail}>{org.address_line1}</Text> : null}
               {org.city ? <Text style={styles.orgDetail}>{org.city}</Text> : null}
@@ -162,6 +173,7 @@ export default function BoldSplitPdf({ invoice, items, client, org, totals, wate
             <Text style={styles.footerText}>{org.name}</Text>
             {showInvoyrBranding ? <Text style={styles.footerText}>Powered by invoyr</Text> : null}
           </View>
+          {legalLine ? <Text style={[styles.footerText, { marginTop: 6, textAlign: "left" }]}>{legalLine}</Text> : null}
         </View>
 
         {watermark ? (

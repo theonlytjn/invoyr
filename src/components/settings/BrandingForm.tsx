@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import type { Organisation } from "@/lib/supabase/types";
 
 const schema = z.object({
@@ -22,9 +23,10 @@ export default function BrandingForm({ org, canUploadLogo = false }: Props) {
   const [error, setError] = useState<string | null>(null);
 
   const [name, setName] = useState(org.name);
-  const [companyRegNumber, setCompanyRegNumber] = useState(org.company_registration_number ?? "");
   const [vatNumber, setVatNumber] = useState(org.vat_number ?? "");
-  const [companyNumber, setCompanyNumber] = useState(org.company_number ?? "");
+  // company_registration_number was a duplicate of company_number; fall back to it for any org not yet migrated.
+  const [companyNumber, setCompanyNumber] = useState(org.company_number ?? org.company_registration_number ?? "");
+  const [registeredAddress, setRegisteredAddress] = useState(org.registered_address ?? "");
   const [vatRegistered, setVatRegistered] = useState(org.vat_registered);
   const [email, setEmail] = useState(org.email ?? "");
   const [phone, setPhone] = useState(org.phone ?? "");
@@ -89,9 +91,9 @@ export default function BrandingForm({ org, canUploadLogo = false }: Props) {
       .from("organisations")
       .update({
         name,
-        company_registration_number: companyRegNumber || null,
         vat_number: vatNumber || null,
-        company_number: companyNumber || null,
+        company_number: companyNumber.trim() || null,
+        registered_address: registeredAddress.trim() || null,
         vat_registered: vatRegistered,
         email: email || null,
         phone: phone || null,
@@ -174,14 +176,6 @@ export default function BrandingForm({ org, canUploadLogo = false }: Props) {
       {/* Registration + VAT */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1.5">
-          <Label htmlFor="companyRegNumber">Company reg. number</Label>
-          <Input id="companyRegNumber" value={companyRegNumber} onChange={(e) => setCompanyRegNumber(e.target.value)} placeholder="12345678" />
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="vatNumber">VAT number</Label>
-          <Input id="vatNumber" value={vatNumber} onChange={(e) => setVatNumber(e.target.value)} placeholder="GB123456789" />
-        </div>
-        <div className="space-y-1.5">
           <Label htmlFor="companyNumber">Company number</Label>
           <Input
             id="companyNumber"
@@ -190,6 +184,25 @@ export default function BrandingForm({ org, canUploadLogo = false }: Props) {
             placeholder="12345678"
           />
         </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="vatNumber">VAT number</Label>
+          <Input id="vatNumber" value={vatNumber} onChange={(e) => setVatNumber(e.target.value)} placeholder="GB123456789" />
+        </div>
+      </div>
+
+      <div className="space-y-1.5">
+        <Label htmlFor="registeredAddress">Registered office address</Label>
+        <Textarea
+          id="registeredAddress"
+          value={registeredAddress}
+          onChange={(e) => setRegisteredAddress(e.target.value)}
+          rows={3}
+          placeholder={"128 City Road\nLondon\nEC1V 2NX"}
+          aria-describedby="registeredAddressHint"
+        />
+        <p id="registeredAddressHint" className="text-xs text-neutral-500 dark:text-neutral-400">
+          Optional. With your company number, it&apos;s printed in the footer of your invoice PDFs.
+        </p>
       </div>
 
       {/* VAT registered toggle */}

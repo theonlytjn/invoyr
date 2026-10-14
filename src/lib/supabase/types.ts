@@ -72,6 +72,7 @@ export interface Organisation {
   country: string;
   vat_number: string | null;
   company_number: string | null;
+  registered_address: string | null;
   email: string | null;
   phone: string | null;
   website: string | null;
