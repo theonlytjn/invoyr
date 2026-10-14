@@ -24,7 +24,13 @@ export default function SignupPage() {
     const supabase = createClient();
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        // Always show Google's account chooser. Without it Google silently reuses
+        // whichever account is signed in, so switching accounts after signing out
+        // of Invoyr was impossible.
+        queryParams: { prompt: "select_account" },
+      },
     });
   }
 
