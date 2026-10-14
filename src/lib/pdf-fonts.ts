@@ -26,6 +26,12 @@ export function registerPdfFonts() {
         { src: `${appUrl}/fonts/Satoshi-400.ttf`, fontWeight: 400 },
         { src: `${appUrl}/fonts/Satoshi-500.ttf`, fontWeight: 500 },
         { src: `${appUrl}/fonts/Satoshi-700.ttf`, fontWeight: 700 },
+        // There is no Satoshi italic file, and react-pdf throws rather than
+        // falling back when a style is missing — which failed every Modern
+        // Studio invoice with notes. Italic text renders upright instead.
+        { src: `${appUrl}/fonts/Satoshi-400.ttf`, fontWeight: 400, fontStyle: "italic" },
+        { src: `${appUrl}/fonts/Satoshi-500.ttf`, fontWeight: 500, fontStyle: "italic" },
+        { src: `${appUrl}/fonts/Satoshi-700.ttf`, fontWeight: 700, fontStyle: "italic" },
       ],
     });
     // No hyphenation dictionary for Satoshi; without this the renderer breaks
