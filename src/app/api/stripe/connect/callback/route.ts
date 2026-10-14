@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getStripe } from "@/lib/stripe/client";
+import { requireOrgPermission } from "@/lib/permissions";
+import { z } from "zod";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
@@ -22,6 +24,17 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(`${appUrl}/login`);
   }
 
+  // `state` is just the org id echoed back by Stripe, so it is attacker-controlled.
+  // Without this check any signed-in user could attach their own Stripe account
+  // to someone else's organisation and receive that business's invoice payments.
+  if (!z.string().uuid().safeParse(state).success) {
+    return NextResponse.redirect(`${appUrl}/settings/payments?connect=error`);
+  }
+  const denied = await requireOrgPermission(state, "manage_settings");
+  if (denied) {
+    return NextResponse.redirect(`${appUrl}/settings/payments?connect=error`);
+  }
+
   let stripeAccountId: string;
   try {
     const response = await getStripe().oauth.token({
@@ -34,10 +47,15 @@ export async function GET(req: NextRequest) {
   }
 
   const serviceClient = await createServiceClient();
-  await serviceClient
+  const { error: updateError } = await serviceClient
     .from("organisations")
     .update({ stripe_account_id: stripeAccountId })
     .eq("id", state);
+
+  if (updateError) {
+    console.error("[api] stripe connect callback: failed to store account:", updateError);
+    return NextResponse.redirect(`${appUrl}/settings/payments?connect=error`);
+  }
 
   await serviceClient.from("audit_logs").insert({
     org_id: state,

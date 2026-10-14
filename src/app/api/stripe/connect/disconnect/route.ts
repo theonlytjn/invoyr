@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getStripe } from "@/lib/stripe/client";
 import { requireOrg } from "@/lib/auth";
+import { requireOrgPermission } from "@/lib/permissions";
 
 export async function POST() {
   const supabase = await createClient();
@@ -9,6 +10,8 @@ export async function POST() {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const org = await requireOrg();
+  const denied = await requireOrgPermission(org.id, "manage_settings");
+  if (denied) return NextResponse.json({ error: denied.error }, { status: denied.status });
   if (!org.stripe_account_id) {
     return NextResponse.json({ error: "No connected account" }, { status: 400 });
   }

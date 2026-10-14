@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
+import { requireOrgPermission } from "@/lib/permissions";
 
 export async function GET() {
   const supabase = await createClient();
@@ -8,6 +9,8 @@ export async function GET() {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const org = await requireOrg();
+  const denied = await requireOrgPermission(org.id, "manage_settings");
+  if (denied) return NextResponse.json({ error: denied.error }, { status: denied.status });
   const clientId = process.env.STRIPE_CONNECT_CLIENT_ID;
 
   if (!clientId) {
