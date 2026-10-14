@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import ThemeToggle from "@/components/marketing/ThemeToggle";
+import { useMarketingSession } from "@/hooks/useMarketingSession";
+import AccountMenu, { ACCOUNT_LINKS, AccountAvatar, SignOutForm } from "./AccountMenu";
 
 // About lives in the footer only — not in the top nav.
 const NAV = [
@@ -14,6 +16,10 @@ const NAV = [
 export default function MarketingHeader() {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
+  // Until the app answers, show the signed-out header (most visitors); a returning
+  // signed-in visitor is shown their account straight away from the cached hint.
+  const { session, appOrigin } = useMarketingSession();
+  const account = session.status === "signed-in" ? session : null;
 
   return (
     <header className="sticky top-0 z-30 border-b border-neutral-200 dark:border-neutral-900/80 bg-white dark:bg-neutral-950/70 backdrop-blur">
@@ -41,18 +47,24 @@ export default function MarketingHeader() {
         {/* Desktop CTAs */}
         <div className="hidden md:flex items-center gap-4">
           <ThemeToggle className="-mr-1" />
-          <Link
-            href="/login"
-            className="rounded px-1 py-2 text-[1.15rem] text-neutral-600 dark:text-neutral-200 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-950"
-          >
-            Sign in
-          </Link>
-          <Link
-            href="/signup"
-            className="text-[1.15rem] font-medium text-white dark:text-neutral-950 bg-neutral-950 dark:bg-neutral-50 hover:bg-neutral-800 dark:hover:bg-white px-4 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-950"
-          >
-            Get started
-          </Link>
+          {account ? (
+            <AccountMenu name={account.name} email={account.email} appOrigin={appOrigin} />
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="rounded px-1 py-2 text-[1.15rem] text-neutral-600 dark:text-neutral-200 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-950"
+              >
+                Sign in
+              </Link>
+              <Link
+                href="/signup"
+                className="text-[1.15rem] font-medium text-white dark:text-neutral-950 bg-neutral-950 dark:bg-neutral-50 hover:bg-neutral-800 dark:hover:bg-white px-4 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-950"
+              >
+                Get started
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile: theme toggle + hamburger */}
@@ -89,16 +101,38 @@ export default function MarketingHeader() {
             ))}
           </nav>
           <div className="mt-4 flex flex-col gap-3 border-t border-neutral-200 dark:border-neutral-900 pt-5">
-            <Link href="/login" onClick={close} className="rounded py-2.5 text-base text-neutral-600 dark:text-neutral-200 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-950">
-              Sign in
-            </Link>
-            <Link
-              href="/signup"
-              onClick={close}
-              className="rounded-lg bg-neutral-950 dark:bg-neutral-50 py-3 text-center text-base font-medium text-white dark:text-neutral-950 hover:bg-neutral-800 dark:hover:bg-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-950"
-            >
-              Get started
-            </Link>
+            {account ? (
+              <>
+                <div className="flex items-center gap-3 py-1">
+                  <AccountAvatar name={account.name} email={account.email} />
+                  <div className="min-w-0">
+                    <p className="font-medium text-neutral-950 dark:text-neutral-50">My account</p>
+                    {account.email && <p className="truncate text-sm text-neutral-600 dark:text-neutral-300">{account.email}</p>}
+                  </div>
+                </div>
+                {ACCOUNT_LINKS.map((link) => (
+                  <a key={link.href} href={`${appOrigin}${link.href}`} onClick={close} className="rounded py-2.5 text-base text-neutral-600 dark:text-neutral-200 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-950">
+                    {link.label}
+                  </a>
+                ))}
+                <SignOutForm appOrigin={appOrigin} className="w-full text-left rounded py-2.5 text-base text-neutral-600 dark:text-neutral-200 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-950">
+                  Sign out
+                </SignOutForm>
+              </>
+            ) : (
+              <>
+                <Link href="/login" onClick={close} className="rounded py-2.5 text-base text-neutral-600 dark:text-neutral-200 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-950">
+                  Sign in
+                </Link>
+                <Link
+                  href="/signup"
+                  onClick={close}
+                  className="rounded-lg bg-neutral-950 dark:bg-neutral-50 py-3 text-center text-base font-medium text-white dark:text-neutral-950 hover:bg-neutral-800 dark:hover:bg-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-950"
+                >
+                  Get started
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}
