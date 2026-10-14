@@ -9,7 +9,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { clearMarketingSessionHint } from "@/hooks/useMarketingSession";
+import { clearMarketingSessionHint, type AccountDetails } from "@/hooks/useMarketingSession";
 
 // The app's main destinations, in sidebar order.
 export const ACCOUNT_LINKS = [
@@ -23,8 +23,20 @@ export const ACCOUNT_LINKS = [
 const FOCUS_RING =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-950";
 
-export function AccountAvatar({ name, email, size = "h-9 w-9" }: { name: string | null; email: string | null; size?: string }) {
-  const initial = (name || email || "U")[0].toUpperCase();
+/** The active company's logo on a white tile (logos are drawn for light backgrounds), else the user's initial. */
+export function AccountAvatar({ account, size = "h-9 w-9" }: { account: AccountDetails; size?: string }) {
+  if (account.orgLogoUrl) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={account.orgLogoUrl}
+        alt=""
+        aria-hidden="true"
+        className={`${size} shrink-0 rounded-full border border-neutral-200 bg-white object-contain p-0.5 dark:border-neutral-700`}
+      />
+    );
+  }
+  const initial = (account.name || account.email || "U")[0].toUpperCase();
   return (
     <span
       aria-hidden="true"
@@ -54,7 +66,8 @@ export function SignOutForm({
   );
 }
 
-export default function AccountMenu({ name, email, appOrigin }: { name: string | null; email: string | null; appOrigin: string }) {
+export default function AccountMenu({ account, appOrigin }: { account: AccountDetails; appOrigin: string }) {
+  const { name, email, orgName } = account;
   const signOutRef = useRef<HTMLFormElement>(null);
   const itemClass =
     "cursor-pointer rounded-md px-3 py-2 text-base text-neutral-700 dark:text-neutral-200 focus:bg-neutral-100 focus:text-neutral-950 dark:focus:bg-neutral-800 dark:focus:text-neutral-50";
@@ -66,7 +79,7 @@ export default function AccountMenu({ name, email, appOrigin }: { name: string |
       <DropdownMenuTrigger
         className={`group inline-flex items-center gap-2.5 rounded-full py-1 pl-1 pr-3 text-[1.15rem] text-neutral-700 dark:text-neutral-200 hover:text-neutral-950 dark:hover:text-neutral-50 transition-colors ${FOCUS_RING}`}
       >
-        <AccountAvatar name={name} email={email} />
+        <AccountAvatar account={account} />
         My account
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="transition-transform group-data-[state=open]:rotate-180">
           <path d="M6 9l6 6 6-6" />
@@ -80,6 +93,7 @@ export default function AccountMenu({ name, email, appOrigin }: { name: string |
         <DropdownMenuLabel className="px-3 py-2 font-normal">
           {name && <p className="truncate font-medium text-neutral-950 dark:text-neutral-50">{name}</p>}
           {email && <p className="truncate text-sm text-neutral-600 dark:text-neutral-300">{email}</p>}
+          {orgName && <p className="mt-1 truncate text-sm text-neutral-600 dark:text-neutral-300">{orgName}</p>}
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-neutral-200 dark:bg-neutral-800" />
         {ACCOUNT_LINKS.map((link) => (

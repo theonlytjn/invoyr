@@ -6,7 +6,9 @@ import { appOriginFor } from "@/config/domains";
 export type MarketingSession =
   | { status: "loading" }
   | { status: "signed-out" }
-  | { status: "signed-in"; name: string | null; email: string | null };
+  | ({ status: "signed-in" } & AccountDetails);
+
+export type AccountDetails = { name: string | null; email: string | null; orgName: string | null; orgLogoUrl: string | null };
 
 // Last answer, so a signed-in visitor doesn't see "Sign in" flash on every page
 // load. Holds display details only; the request below always has the final say.
@@ -26,16 +28,21 @@ export function useMarketingSession() {
 
     try {
       const hint = localStorage.getItem(HINT_KEY);
-      if (hint) setSession({ status: "signed-in", ...JSON.parse(hint) });
+      if (hint) setSession({ status: "signed-in", orgName: null, orgLogoUrl: null, ...JSON.parse(hint) });
     } catch {}
 
     let cancelled = false;
     fetch(`${origin}/api/session`, { credentials: "include", cache: "no-store" })
       .then((res) => (res.ok ? res.json() : { signedIn: false }))
-      .then((data: { signedIn: boolean; name?: string | null; email?: string | null }) => {
+      .then((data: { signedIn: boolean } & Partial<AccountDetails>) => {
         if (cancelled) return;
         if (data.signedIn) {
-          const details = { name: data.name ?? null, email: data.email ?? null };
+          const details: AccountDetails = {
+            name: data.name ?? null,
+            email: data.email ?? null,
+            orgName: data.orgName ?? null,
+            orgLogoUrl: data.orgLogoUrl ?? null,
+          };
           setSession({ status: "signed-in", ...details });
           try { localStorage.setItem(HINT_KEY, JSON.stringify(details)); } catch {}
         } else {

@@ -48,7 +48,7 @@ export default function MarketingHeader() {
         <div className="hidden md:flex items-center gap-4">
           <ThemeToggle className="-mr-1" />
           {account ? (
-            <AccountMenu name={account.name} email={account.email} appOrigin={appOrigin} />
+            <AccountMenu account={account} appOrigin={appOrigin} />
           ) : (
             <>
               <Link
@@ -104,7 +104,7 @@ export default function MarketingHeader() {
             {account ? (
               <>
                 <div className="flex items-center gap-3 py-1">
-                  <AccountAvatar name={account.name} email={account.email} />
+                  <AccountAvatar account={account} />
                   <div className="min-w-0">
                     <p className="font-medium text-neutral-950 dark:text-neutral-50">My account</p>
                     {account.email && <p className="truncate text-sm text-neutral-600 dark:text-neutral-300">{account.email}</p>}
