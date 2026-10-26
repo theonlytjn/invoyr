@@ -2,6 +2,7 @@
 
 _Last updated: 14 October 2026 (evening)._
 _Where the product stands, what is blocked on whom, and what to pick up next._
+_Launch plan and checklist for 1 December: `docs/LAUNCH-1-DECEMBER.md`._
 
 Working agreement: **every change is committed and pushed immediately**; pushing `main`
 deploys to production via Vercel. Verify with typecheck, `npx vitest run` and
