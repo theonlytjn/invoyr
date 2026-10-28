@@ -10,6 +10,7 @@ const NAV = [
   { href: "/features", label: "Features" },
   { href: "/use-cases", label: "Use cases" },
   { href: "/pricing", label: "Pricing" },
+  { href: "/about", label: "About" },
 ];
 
 export default function MarketingHeader() {
