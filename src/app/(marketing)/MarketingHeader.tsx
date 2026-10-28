@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import ThemeToggle from "@/components/marketing/ThemeToggle";
 import { useMarketingSession } from "@/hooks/useMarketingSession";
 import AccountMenu, { ACCOUNT_LINKS, AccountAvatar, SignOutForm } from "./AccountMenu";
 
@@ -46,7 +45,6 @@ export default function MarketingHeader() {
 
         {/* Desktop CTAs */}
         <div className="hidden md:flex items-center gap-4">
-          <ThemeToggle className="-mr-1" />
           {account ? (
             <AccountMenu account={account} appOrigin={appOrigin} />
           ) : (
@@ -67,9 +65,8 @@ export default function MarketingHeader() {
           )}
         </div>
 
-        {/* Mobile: theme toggle + hamburger */}
+        {/* Mobile: hamburger */}
         <div className="flex items-center gap-1 md:hidden -mr-1">
-          <ThemeToggle />
         <button
           type="button"
           className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-neutral-600 dark:text-neutral-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-950"

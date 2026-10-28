@@ -15,13 +15,13 @@ const NAV = [
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="marketing min-h-screen flex flex-col bg-white dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100">
-      {/* No-flash theme. Only the homepage is dual-theme for now; other marketing
-          pages stay dark. On the homepage: user override wins, else default by
-          local clock (dark 7pm–7am). Theme is the `dark` class on <html>. */}
+      {/* No-flash theme. The marketing site is dark-only, so the `dark` class
+          goes on <html> before first paint. The light-mode classes stay in the
+          markup so a light theme can be brought back without a rewrite. */}
       <script
         dangerouslySetInnerHTML={{
           __html:
-            "(function(){try{var d,t=localStorage.getItem('invoyr-theme');if(t==='dark'){d=true}else if(t==='light'){d=false}else{var h=new Date().getHours();d=(h>=19||h<7)}document.documentElement.classList.toggle('dark',d)}catch(e){}})();",
+            "(function(){var r=document.documentElement;r.classList.remove('light');r.classList.add('dark');r.style.colorScheme='dark'})();",
         }}
       />
       <MarketingTheme />
