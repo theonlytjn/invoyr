@@ -1203,3 +1203,94 @@ using (
       and org_members.user_id = auth.uid()
   )
 );
+
+-- ----------------------------------------------------------------
+-- 21. DOCUMENT NUMBERING
+-- ----------------------------------------------------------------
+-- Claims the next document number for an organisation in one statement.
+-- The app used to read the counter, then write counter + 1 as a separate
+-- unchecked UPDATE. Two saves at once got the same number, and because
+-- orgs_update is owner-only, RLS silently dropped the increment for every
+-- admin or member, so their next invoice reused the number too.
+-- security definer so members can claim; the membership check stands in for RLS.
+create or replace function public.claim_document_number(p_org_id uuid, p_kind text)
+returns integer
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_number integer;
+begin
+  if coalesce(auth.role(), '') <> 'service_role' and not public.is_org_member(p_org_id) then
+    raise exception 'Not a member of this organisation' using errcode = '42501';
+  end if;
+
+  if p_kind = 'invoice' then
+    update public.organisations set next_invoice_number = next_invoice_number + 1
+      where id = p_org_id returning next_invoice_number - 1 into v_number;
+  elsif p_kind = 'estimate' then
+    update public.organisations set next_estimate_number = next_estimate_number + 1
+      where id = p_org_id returning next_estimate_number - 1 into v_number;
+  elsif p_kind = 'credit_note' then
+    update public.organisations set next_credit_note_number = next_credit_note_number + 1
+      where id = p_org_id returning next_credit_note_number - 1 into v_number;
+  else
+    raise exception 'Unknown document kind: %', p_kind;
+  end if;
+
+  if v_number is null then
+    raise exception 'Organisation not found';
+  end if;
+
+  return v_number;
+end;
+$$;
+
+revoke execute on function public.claim_document_number(uuid, text) from public, anon;
+grant execute on function public.claim_document_number(uuid, text) to authenticated, service_role;
+
+-- ----------------------------------------------------------------
+-- 22. OWNERSHIP TRANSFER
+-- ----------------------------------------------------------------
+-- Both role changes in one statement. The route used to make two separate,
+-- unchecked updates, so a failure between them left an org with two owners,
+-- or, had the order been reversed, none.
+create or replace function public.transfer_org_ownership(p_org_id uuid, p_to_member_id bigint)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_from_member_id bigint;
+  v_target_role text;
+  v_updated integer;
+begin
+  select id into v_from_member_id from public.org_members
+    where org_id = p_org_id and user_id = auth.uid() and role = 'owner';
+  if v_from_member_id is null then
+    raise exception 'Only the owner can transfer ownership' using errcode = '42501';
+  end if;
+
+  select role into v_target_role from public.org_members
+    where id = p_to_member_id and org_id = p_org_id;
+  if v_target_role is null then
+    raise exception 'Member not found' using errcode = 'P0002';
+  end if;
+  if v_target_role = 'owner' then
+    raise exception 'Already owner' using errcode = '22023';
+  end if;
+
+  update public.org_members
+    set role = case when id = p_to_member_id then 'owner' else 'admin' end
+    where org_id = p_org_id and id in (p_to_member_id, v_from_member_id);
+  get diagnostics v_updated = row_count;
+  if v_updated <> 2 then
+    raise exception 'Ownership transfer did not complete';
+  end if;
+end;
+$$;
+
+revoke execute on function public.transfer_org_ownership(uuid, bigint) from public, anon;
+grant execute on function public.transfer_org_ownership(uuid, bigint) to authenticated;

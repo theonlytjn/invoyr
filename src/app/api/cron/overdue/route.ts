@@ -7,6 +7,7 @@ import { OverdueReminderEmail } from "@/emails/transactional/OverdueReminderEmai
 import { dispatchWebhook } from "@/lib/webhooks/dispatch";
 import { runAutomations } from "@/lib/automations/execute";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { outstandingBalance } from "@/lib/bulk-actions";
 
 const DEFAULT_REMINDER_DAYS = [3, 7, 14, 21, 30];
 
@@ -130,7 +131,7 @@ export async function GET(req: NextRequest) {
   const { data: overdueInvoices } = await supabase
     .from("invoices")
     .select(
-      "id, org_id, invoice_number, total, currency, due_date, public_token, clients(name, email), organisations(name, accent_color, logo_url, reminder_days)"
+      "id, org_id, invoice_number, total, amount_paid, late_fee_amount, credit_applied, currency, due_date, public_token, clients(name, email), organisations(name, accent_color, logo_url, reminder_days)"
     )
     .eq("status", "overdue")
     .in("org_id", [...proOrgIds])
@@ -186,7 +187,9 @@ export async function GET(req: NextRequest) {
           accentColor: org?.accent_color ?? "#111827",
           invoiceNumber: inv.invoice_number,
           dueDate: inv.due_date ? formatDate(inv.due_date) : "—",
-          balanceDue: formatCurrency(inv.total, inv.currency),
+          // What is actually still owed, not the invoice total: a part-paid or
+          // late-fee'd invoice was being chased for the wrong amount.
+          balanceDue: formatCurrency(outstandingBalance(inv), inv.currency),
           payUrl,
         }),
       });

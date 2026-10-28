@@ -5,6 +5,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import type { TransactionalTemplateName } from "@/emails/registry";
 import { sendViaSmtp } from "@/lib/smtp/send";
 import { ccRecipients } from "@/lib/email-recipients";
+import { writeEmailLog } from "./email-log";
 
 interface SendTransactionalEmailOptions {
   orgId: string;
@@ -75,7 +76,7 @@ export async function sendTransactionalEmail({
       { to, cc: ccList.length ? ccList : undefined, subject, html }
     );
 
-    await supabase.from("email_logs").insert({
+    await writeEmailLog(supabase, {
       org_id: orgId,
       invoice_id: invoiceId ?? null,
       resend_id: null,
@@ -100,7 +101,7 @@ export async function sendTransactionalEmail({
     html,
   });
 
-  await supabase.from("email_logs").insert({
+  await writeEmailLog(supabase, {
     org_id: orgId,
     invoice_id: invoiceId ?? null,
     resend_id: data?.id ?? null,

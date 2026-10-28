@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
 import { computeTotals } from "@/lib/invoice-totals";
+import { claimDocumentNumber, formatDocumentNumber } from "@/lib/document-number";
 import { z } from "zod";
 
 const schema = z.object({
@@ -47,21 +48,12 @@ export async function POST(req: Request) {
 
   const { items, discount, ...fields } = parsed.data;
 
-  // Atomic number increment
-  const { data: orgData, error: orgErr } = await supabase
-    .from("organisations")
-    .select("next_estimate_number, invoice_prefix")
-    .eq("id", org.id)
-    .single();
-
-  if (orgErr || !orgData) return NextResponse.json({ error: "Could not fetch org" }, { status: 500 });
-
-  const estimateNumber = `EST-${String(orgData.next_estimate_number).padStart(4, "0")}`;
-
-  await supabase
-    .from("organisations")
-    .update({ next_estimate_number: orgData.next_estimate_number + 1 })
-    .eq("id", org.id);
+  let estimateNumber: string;
+  try {
+    estimateNumber = formatDocumentNumber("EST", await claimDocumentNumber(supabase, org.id, "estimate"));
+  } catch (err) {
+    return NextResponse.json({ error: err instanceof Error ? err.message : "Could not reserve an estimate number" }, { status: 500 });
+  }
 
   const totals = computeTotals(items, discount);
 
@@ -81,7 +73,7 @@ export async function POST(req: Request) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  await supabase.from("estimate_items").insert(
+  const { error: itemsError } = await supabase.from("estimate_items").insert(
     items.map((item, i) => ({
       estimate_id: estimate.id,
       description: item.description,
@@ -91,6 +83,13 @@ export async function POST(req: Request) {
       sort_order: i,
     }))
   );
+
+  // An estimate with a total and no lines is worse than none. Undo the header
+  // (its number stays used; a gap is better than a duplicate).
+  if (itemsError) {
+    await supabase.from("estimates").delete().eq("id", estimate.id);
+    return NextResponse.json({ error: itemsError.message }, { status: 500 });
+  }
 
   await supabase.from("audit_logs").insert({
     org_id: org.id,

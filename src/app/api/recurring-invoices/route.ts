@@ -71,9 +71,15 @@ export async function POST(req: Request) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  await supabase.from("recurring_invoice_items").insert(
+  const { error: itemsError } = await supabase.from("recurring_invoice_items").insert(
     items.map((item, i) => ({ ...item, recurring_invoice_id: rec.id, sort_order: i }))
   );
+
+  // A schedule with no lines would generate empty invoices. Undo it.
+  if (itemsError) {
+    await supabase.from("recurring_invoices").delete().eq("id", rec.id);
+    return NextResponse.json({ error: itemsError.message }, { status: 500 });
+  }
 
   return NextResponse.json({ data: rec }, { status: 201 });
 }

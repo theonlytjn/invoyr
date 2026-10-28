@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { computeTotals, DISCOUNT_REASON_MAX_LENGTH } from "@/lib/invoice-totals";
+import { claimDocumentNumber, formatDocumentNumber } from "@/lib/document-number";
 import { formatDateInput } from "@/lib/utils";
 import LineItemsEditor, { type LineItemRow } from "./LineItemsEditor";
 import { TEMPLATE_MAP, TEMPLATE_LABELS } from "@/components/invoice-templates";
@@ -105,9 +106,22 @@ export default function InvoiceForm({ org, clients, invoice, existingItems, invo
     };
 
     if (mode === "create") {
+      // The number shown on the form is only a preview. The real one is
+      // claimed here, at save time, so an abandoned form doesn't burn a number
+      // and two people saving at once can't get the same one.
+      let claimedNumber: string;
+      try {
+        const n = await claimDocumentNumber(supabase, org.id, "invoice");
+        claimedNumber = formatDocumentNumber(org.invoice_prefix ?? "INV", n);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Couldn't reserve an invoice number. Please try again.");
+        setSaving(false);
+        return;
+      }
+
       const { data: inv, error: invErr } = await supabase
         .from("invoices")
-        .insert(payload)
+        .insert({ ...payload, invoice_number: claimedNumber })
         .select()
         .single();
 

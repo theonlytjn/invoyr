@@ -3,6 +3,7 @@ import { cloneElement, type ReactElement } from "react";
 import { getResend } from "./client";
 import { createServiceClient } from "@/lib/supabase/server";
 import type { MarketingTemplateName } from "@/emails/registry";
+import { writeEmailLog } from "./email-log";
 
 interface SendMarketingEmailOptions {
   userId: string;
@@ -70,7 +71,7 @@ export async function sendMarketingEmail({
     },
   });
 
-  await supabase.from("email_logs").insert({
+  await writeEmailLog(supabase, {
     user_id: userId,
     org_id: null,
     resend_id: data?.id ?? null,

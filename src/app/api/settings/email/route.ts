@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { requireOrg } from "@/lib/auth";
-import { roleCanDo } from "@/lib/permissions";
+import { createServiceClient } from "@/lib/supabase/server";
+import { requireSettingsAccess } from "@/lib/settings/require-settings-access";
 
 /**
  * Saving email settings used to be a PATCH straight from the browser to
@@ -15,8 +14,9 @@ import { roleCanDo } from "@/lib/permissions";
  *    and an UPDATE filtered out by RLS returns no error — so an admin saw
  *    "Saved!" having saved nothing.
  *
- * Both go away here: same origin, Zod-validated, permission checked explicitly,
- * and the write is made with the service client once that check passes.
+ * Both go away here: same origin, Zod-validated, permission checked explicitly
+ * (requireSettingsAccess), and the write is made with the service client once
+ * that check passes. The branding and invoice settings routes follow suit.
  */
 const REMINDER_DAYS = [3, 7, 14, 21, 30] as const;
 const PRE_DUE_DAYS = [1, 3, 7] as const;
@@ -28,22 +28,9 @@ const schema = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const org = await requireOrg();
-
-  const { data: membership } = await supabase
-    .from("org_members")
-    .select("role")
-    .eq("org_id", org.id)
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  if (!membership?.role || !roleCanDo(membership.role, "manage_settings")) {
-    return NextResponse.json({ error: "You don't have permission to change these settings." }, { status: 403 });
-  }
+  const access = await requireSettingsAccess();
+  if (access.response) return access.response;
+  const { org } = access;
 
   const parsed = schema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) {

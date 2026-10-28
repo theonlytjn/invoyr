@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/client";
+import { postSettings } from "@/lib/settings/post-settings";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -76,26 +76,24 @@ export default function InvoiceSettingsForm({ org }: Props) {
     }
 
     setSaving(true);
-    const supabase = createClient();
-    const { error: saveErr } = await supabase
-      .from("organisations")
-      .update({
-        invoice_prefix: prefix,
-        next_invoice_number: result.data.nextNumber,
-        currency,
-        default_vat_rate: result.data.defaultVatRate,
-        default_template: defaultTemplate,
-        default_terms: defaultTerms || null,
-        default_notes: defaultNotes || null,
-        late_fee_type: lateFeeType,
-        late_fee_value: lateFeeType === 'none' ? 0 : result.data.lateFeeValue,
-        late_fee_grace_days: result.data.lateFeeGraceDays,
-      })
-      .eq("id", org.id);
+    // Saved through our own route: a direct Supabase write was dropped by RLS
+    // for admins (while showing "Saved!") and was fragile on mobile.
+    const saveErr = await postSettings("/api/settings/invoices", {
+      prefix,
+      nextNumber: result.data.nextNumber,
+      currency,
+      defaultVatRate: result.data.defaultVatRate,
+      defaultTemplate,
+      defaultTerms: defaultTerms || null,
+      defaultNotes: defaultNotes || null,
+      lateFeeType,
+      lateFeeValue: result.data.lateFeeValue,
+      lateFeeGraceDays: result.data.lateFeeGraceDays,
+    });
 
     setSaving(false);
     if (saveErr) {
-      setError(saveErr.message);
+      setError(saveErr);
     } else {
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
@@ -264,7 +262,7 @@ export default function InvoiceSettingsForm({ org }: Props) {
         )}
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
 
       <div className="flex items-center gap-3 pt-2">
         <Button type="submit" disabled={saving}>

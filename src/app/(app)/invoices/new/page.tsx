@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
-import { generateInvoiceNumber } from "@/lib/invoice-number";
+import { previewInvoiceNumber } from "@/lib/invoice-number";
 import Topbar from "@/components/shell/Topbar";
 import InvoiceForm from "@/components/invoices/InvoiceForm";
 import type { Metadata } from "next";
@@ -13,7 +13,7 @@ export default async function NewInvoicePage() {
 
   const [{ data: clients }, invoiceNumber] = await Promise.all([
     supabase.from("clients").select("*").eq("org_id", org.id).order("name"),
-    generateInvoiceNumber(org.id),
+    previewInvoiceNumber(org.id),
   ]);
 
   return (

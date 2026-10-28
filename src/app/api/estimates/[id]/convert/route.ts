@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
+import { generateInvoiceNumber } from "@/lib/invoice-number";
 
 interface Params { params: Promise<{ id: string }> }
 
@@ -21,22 +22,12 @@ export async function POST(_req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: "Already converted" }, { status: 400 });
   }
 
-  // Get next invoice number
-  const { data: orgData } = await supabase
-    .from("organisations")
-    .select("next_invoice_number, invoice_prefix")
-    .eq("id", org.id)
-    .single();
-
-  if (!orgData) return NextResponse.json({ error: "Could not fetch org" }, { status: 500 });
-
-  const prefix = orgData.invoice_prefix ?? "INV";
-  const invoiceNumber = `${prefix}-${String(orgData.next_invoice_number).padStart(4, "0")}`;
-
-  await supabase
-    .from("organisations")
-    .update({ next_invoice_number: orgData.next_invoice_number + 1 })
-    .eq("id", org.id);
+  let invoiceNumber: string;
+  try {
+    invoiceNumber = await generateInvoiceNumber(org.id);
+  } catch (err) {
+    return NextResponse.json({ error: err instanceof Error ? err.message : "Could not reserve an invoice number" }, { status: 500 });
+  }
 
   // Create the invoice from the estimate
   const { data: invoice, error: invErr } = await supabase
@@ -65,7 +56,7 @@ export async function POST(_req: NextRequest, { params }: Params) {
 
   const items = estimate.estimate_items ?? [];
   if (items.length > 0) {
-    await supabase.from("invoice_items").insert(
+    const { error: itemsErr } = await supabase.from("invoice_items").insert(
       items.map((item: { description: string; quantity: number; unit_price: number; vat_rate: number }, i: number) => ({
         invoice_id: invoice.id,
         description: item.description,
@@ -75,10 +66,17 @@ export async function POST(_req: NextRequest, { params }: Params) {
         sort_order: i,
       }))
     );
+
+    // Without its lines the invoice would carry a total and nothing else. Undo
+    // it and leave the estimate unconverted so it can be tried again.
+    if (itemsErr) {
+      await supabase.from("invoices").delete().eq("id", invoice.id);
+      return NextResponse.json({ error: itemsErr.message }, { status: 500 });
+    }
   }
 
   // Mark estimate as converted
-  await supabase
+  const { error: markErr } = await supabase
     .from("estimates")
     .update({
       status: "converted",
@@ -86,6 +84,9 @@ export async function POST(_req: NextRequest, { params }: Params) {
       converted_invoice_id: invoice.id,
     })
     .eq("id", id);
+
+  // The invoice exists either way; report it so the estimate isn't converted twice unnoticed.
+  if (markErr) console.error("estimate convert: marking estimate converted failed", { estimate_id: id, error: markErr.message });
 
   await supabase.from("audit_logs").insert([
     {

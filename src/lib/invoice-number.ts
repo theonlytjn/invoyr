@@ -1,6 +1,27 @@
 import { createClient } from "./supabase/server";
+import { claimDocumentNumber, formatDocumentNumber } from "./document-number";
 
 export async function generateInvoiceNumber(orgId: string): Promise<string> {
+  const supabase = await createClient();
+
+  const { data: org } = await supabase
+    .from("organisations")
+    .select("invoice_prefix")
+    .eq("id", orgId)
+    .single();
+
+  if (!org) throw new Error("Organisation not found");
+
+  const n = await claimDocumentNumber(supabase, orgId, "invoice");
+  return formatDocumentNumber(org.invoice_prefix ?? "INV", n);
+}
+
+/**
+ * The number the next invoice will most likely get, for display only. Nothing
+ * is reserved: the real number is claimed when the invoice is saved, so
+ * opening "New invoice" and walking away no longer burns a number.
+ */
+export async function previewInvoiceNumber(orgId: string): Promise<string> {
   const supabase = await createClient();
 
   const { data: org } = await supabase
@@ -11,14 +32,5 @@ export async function generateInvoiceNumber(orgId: string): Promise<string> {
 
   if (!org) throw new Error("Organisation not found");
 
-  const { invoice_prefix, next_invoice_number } = org;
-  const padded = String(next_invoice_number).padStart(4, "0");
-  const invoiceNumber = `${invoice_prefix}-${padded}`;
-
-  await supabase
-    .from("organisations")
-    .update({ next_invoice_number: next_invoice_number + 1 })
-    .eq("id", orgId);
-
-  return invoiceNumber;
+  return formatDocumentNumber(org.invoice_prefix ?? "INV", org.next_invoice_number);
 }

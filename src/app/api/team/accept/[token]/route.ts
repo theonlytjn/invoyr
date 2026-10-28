@@ -36,17 +36,27 @@ export async function POST(_req: Request, { params }: Params) {
     .maybeSingle();
 
   if (!existing) {
-    await service.from("org_members").insert({
+    const { error: memberError } = await service.from("org_members").insert({
       org_id: invite.org_id,
       user_id: user.id,
       role: invite.role,
     });
+
+    // Leave the invite unused so the link still works on a retry. It used to be
+    // marked accepted regardless, which burned it without adding the member.
+    if (memberError) {
+      console.error("team accept: membership insert failed", { invite_id: invite.id, error: memberError.message });
+      return NextResponse.json({ error: "We couldn't add you to the team. Please try the link again." }, { status: 500 });
+    }
   }
 
-  await service
+  // Membership exists at this point, so a failure here only leaves the invite
+  // reusable by the same person, which is harmless. Logged, not fatal.
+  const { error: markError } = await service
     .from("org_invites")
     .update({ accepted_at: new Date().toISOString() })
     .eq("id", invite.id);
+  if (markError) console.error("team accept: marking invite accepted failed", { invite_id: invite.id, error: markError.message });
 
   return NextResponse.json({ ok: true, org_id: invite.org_id });
 }

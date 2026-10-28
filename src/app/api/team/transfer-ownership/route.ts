@@ -39,15 +39,17 @@ export async function POST(req: Request) {
   if (!target) return NextResponse.json({ error: "Member not found" }, { status: 404 });
   if (target.role === "owner") return NextResponse.json({ error: "Already owner" }, { status: 400 });
 
-  await supabase
-    .from("org_members")
-    .update({ role: "owner" })
-    .eq("id", member_id);
+  // One transaction in Postgres. This used to be two separate, unchecked
+  // updates, so a failure between them left the org with two owners.
+  const { error: transferError } = await supabase.rpc("transfer_org_ownership", {
+    p_org_id: org.id,
+    p_to_member_id: member_id,
+  });
 
-  await supabase
-    .from("org_members")
-    .update({ role: "admin" })
-    .eq("id", currentMember.id);
+  if (transferError) {
+    console.error("transfer ownership failed", { org_id: org.id, member_id, error: transferError.message });
+    return NextResponse.json({ error: "Ownership wasn't transferred. Please try again." }, { status: 500 });
+  }
 
   await supabase.from("audit_logs").insert({
     org_id: org.id,

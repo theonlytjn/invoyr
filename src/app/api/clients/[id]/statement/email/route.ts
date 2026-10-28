@@ -10,6 +10,7 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import { ClientStatementEmail } from "@/emails/transactional/ClientStatementEmail";
 import type { Organisation, Client, Invoice } from "@/lib/supabase/types";
 import { ccRecipients } from "@/lib/email-recipients";
+import { writeEmailLog } from "@/lib/resend/email-log";
 
 const STATEMENT_STATUSES = ["issued", "sent", "overdue", "paid", "partial"];
 
@@ -123,7 +124,7 @@ export async function POST(
   });
 
   const serviceClient = await createServiceClient();
-  await serviceClient.from("email_logs").insert({
+  await writeEmailLog(serviceClient, {
     org_id: org.id,
     resend_id: data?.id ?? null,
     to_email: client.email,

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
+import { replaceLineItems } from "@/lib/line-items";
 import { z } from "zod";
 
 const schema = z.object({
@@ -34,20 +35,37 @@ export async function PATCH(req: Request, { params }: Params) {
 
   const { items, ...fields } = parsed.data;
 
+  // Confirm the schedule belongs to this org before touching it or its lines.
+  const { data: existing } = await supabase
+    .from("recurring_invoices")
+    .select("id")
+    .eq("id", id)
+    .eq("org_id", org.id)
+    .maybeSingle();
+  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
   if (Object.keys(fields).length > 0) {
-    const { error } = await supabase
+    const { data: updated, error } = await supabase
       .from("recurring_invoices")
       .update(fields)
       .eq("id", id)
-      .eq("org_id", org.id);
+      .eq("org_id", org.id)
+      .select("id");
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (!updated?.length) {
+      return NextResponse.json({ error: "This schedule couldn't be saved. Please reload and try again." }, { status: 500 });
+    }
   }
 
   if (items) {
-    await supabase.from("recurring_invoice_items").delete().eq("recurring_invoice_id", id);
-    await supabase.from("recurring_invoice_items").insert(
-      items.map((item, i) => ({ ...item, recurring_invoice_id: id, sort_order: i }))
+    const itemsError = await replaceLineItems(
+      supabase,
+      "recurring_invoice_items",
+      "recurring_invoice_id",
+      id,
+      items.map(({ sort_order: _sortOrder, ...item }) => item)
     );
+    if (itemsError) return NextResponse.json({ error: itemsError }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true });

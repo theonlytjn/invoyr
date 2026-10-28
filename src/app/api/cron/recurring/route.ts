@@ -4,6 +4,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { sendTransactionalEmail } from "@/lib/resend/send-transactional-email";
 import { InvoiceSentEmail } from "@/emails/transactional/InvoiceSentEmail";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { claimDocumentNumber, formatDocumentNumber } from "@/lib/document-number";
 
 function calcNextRun(frequency: string, from: Date): string {
   const d = new Date(from);
@@ -25,7 +26,7 @@ export async function GET(req: Request) {
 
   const { data: due, error } = await supabase
     .from("recurring_invoices")
-    .select("*, recurring_invoice_items(*), organisations(invoice_prefix, next_invoice_number, name, accent_color, logo_url, bank_account_name, bank_name, bank_account_number, bank_sort_code, bank_iban, bank_bic)")
+    .select("*, recurring_invoice_items(*), organisations(invoice_prefix, name, accent_color, logo_url, bank_account_name, bank_name, bank_account_number, bank_sort_code, bank_iban, bank_bic)")
     .eq("status", "active")
     .lte("next_run_at", today);
 
@@ -38,7 +39,18 @@ export async function GET(req: Request) {
     const org = Array.isArray(rec.organisations) ? rec.organisations[0] : rec.organisations;
     if (!org) continue;
 
-    const invoiceNumber = `${org.invoice_prefix}-${String(org.next_invoice_number).padStart(4, "0")}`;
+    // Claimed per invoice, not read once from the org row above: two schedules
+    // for the same org due on the same day used to get the same number.
+    let invoiceNumber: string;
+    try {
+      invoiceNumber = formatDocumentNumber(
+        org.invoice_prefix ?? "INV",
+        await claimDocumentNumber(supabase, rec.org_id, "invoice")
+      );
+    } catch (err) {
+      console.error("recurring: invoice number claim failed", { recurring_id: rec.id, err });
+      continue;
+    }
     const items: { description: string; quantity: number; unit_price: number; vat_rate: number }[] =
       rec.recurring_invoice_items ?? [];
 
@@ -54,7 +66,7 @@ export async function GET(req: Request) {
     const total = Math.round((subtotal + vatAmount) * 100) / 100;
 
     const shouldAutoSend = rec.auto_send && rec.client_id;
-    const { data: invoice } = await supabase
+    const { data: invoice, error: invoiceError } = await supabase
       .from("invoices")
       .insert({
         org_id: rec.org_id,
@@ -73,10 +85,13 @@ export async function GET(req: Request) {
       .select()
       .single();
 
-    if (!invoice) continue;
+    if (!invoice) {
+      console.error("recurring: invoice insert failed", { recurring_id: rec.id, error: invoiceError?.message });
+      continue;
+    }
 
     if (items.length > 0) {
-      await supabase.from("invoice_items").insert(
+      const { error: itemsError } = await supabase.from("invoice_items").insert(
         items.map((item, i) => ({
           invoice_id: invoice.id,
           description: item.description,
@@ -86,12 +101,15 @@ export async function GET(req: Request) {
           sort_order: i,
         }))
       );
-    }
 
-    await supabase
-      .from("organisations")
-      .update({ next_invoice_number: org.next_invoice_number + 1 })
-      .eq("id", rec.org_id);
+      // An invoice with a total and no lines must not be sent. Remove it and
+      // leave the schedule untouched so tomorrow's run tries again.
+      if (itemsError) {
+        console.error("recurring: line items insert failed", { recurring_id: rec.id, error: itemsError.message });
+        await supabase.from("invoices").delete().eq("id", invoice.id);
+        continue;
+      }
+    }
 
     await supabase.from("audit_logs").insert({
       org_id: rec.org_id,

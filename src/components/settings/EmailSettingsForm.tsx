@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { postSettings } from "@/lib/settings/post-settings";
 import type { Organisation } from "@/lib/supabase/types";
 
 const ALL_REMINDER_DAYS = [3, 7, 14, 21, 30];
@@ -44,27 +45,16 @@ export default function EmailSettingsForm({ org, canCustomEmail, canReminderAuto
     // Posted to our own origin rather than straight to Supabase: the
     // cross-origin write failed on mobile with a bare "TypeError: Load failed",
     // and an admin's update was silently dropped by RLS. See the route.
-    const res = await fetch("/api/settings/email", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        fromEmail: fromEmail || null,
-        reminderDays,
-        preDueDays,
-      }),
-    }).catch(() => null);
+    const saveError = await postSettings("/api/settings/email", {
+      fromEmail: fromEmail || null,
+      reminderDays,
+      preDueDays,
+    });
 
     setSaving(false);
 
-    if (!res) {
-      setError("We couldn't reach the server. Check your connection and try again.");
-      return;
-    }
-
-    const payload = await res.json().catch(() => ({}));
-
-    if (!res.ok) {
-      setError(payload?.error ?? "Settings were not saved. Please try again.");
+    if (saveError) {
+      setError(saveError);
       return;
     }
 

@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { outstandingBalance } from "@/lib/bulk-actions";
+import { claimDocumentNumber, formatDocumentNumber } from "@/lib/document-number";
 import type { CreditNote, Invoice, Organisation } from "@/lib/supabase/types";
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
@@ -34,7 +35,7 @@ export type CreateCreditNoteResult =
 
 /**
  * Creates a credit note against an invoice: numbers it from the org's
- * `credit_note_prefix`/`next_credit_note_number`, increments that counter,
+ * `credit_note_prefix` and a number claimed atomically from the org's counter,
  * accumulates `credit_applied` on the invoice, recomputes its paid/partial
  * status, and writes the audit row.
  *
@@ -62,9 +63,15 @@ export async function createCreditNote({
   const lateFee = Number(invoice.late_fee_amount ?? 0);
   const creditAlready = Number(invoice.credit_applied ?? 0);
 
-  const prefix = org.credit_note_prefix ?? "CN";
-  const nextNum = org.next_credit_note_number ?? 1;
-  const creditNoteNumber = `${prefix}-${String(nextNum).padStart(4, "0")}`;
+  let creditNoteNumber: string;
+  try {
+    creditNoteNumber = formatDocumentNumber(
+      org.credit_note_prefix ?? "CN",
+      await claimDocumentNumber(supabase, invoice.org_id, "credit_note")
+    );
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Couldn't reserve a credit note number" };
+  }
 
   const { data: creditNote, error: insertError } = await supabase
     .from("credit_notes")
@@ -89,23 +96,6 @@ export async function createCreditNote({
       error: insertError?.message,
     });
     return { error: insertError?.message ?? "Failed to create credit note" };
-  }
-
-  // The counter is best-effort: a failure here would mean the *next* credit note
-  // might reuse a number, not that this one is wrong, so it's logged rather than
-  // failing a credit note that has already been issued.
-  const { error: counterError } = await supabase
-    .from("organisations")
-    .update({ next_credit_note_number: nextNum + 1 })
-    .eq("id", invoice.org_id);
-
-  if (counterError) {
-    console.error("credit note counter update failed", {
-      invoice_id: invoice.id,
-      org_id: invoice.org_id,
-      credit_note_number: creditNoteNumber,
-      error: counterError.message,
-    });
   }
 
   const newCreditApplied = creditAlready + amount;

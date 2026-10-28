@@ -50,10 +50,9 @@ export async function POST(req: NextRequest) {
   const duplicatedIds: string[] = [];
   let failed = 0;
 
-  // Sequential by design — do not parallelise (Promise.all, .map + await, etc).
-  // generateInvoiceNumber reads current state to pick the next number, and
-  // invoices has a unique (org_id, invoice_number) constraint; concurrent calls
-  // would race and collide.
+  // Sequential so the copies are numbered in the same order as their sources.
+  // Numbers are claimed atomically (claim_document_number), so this is about
+  // ordering, not collisions.
   for (const source of partition.deletable) {
     try {
       const newNumber = await generateInvoiceNumber(org.id);

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
 import { computeTotals } from "@/lib/invoice-totals";
+import { replaceLineItems } from "@/lib/line-items";
 import { partitionEstimates } from "@/lib/bulk-actions";
 import { z } from "zod";
 
@@ -55,24 +56,30 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
   if (items !== undefined) {
     const totals = computeTotals(items, discount ?? 0);
-    const { error } = await supabase
+    // `.select("id")` so an estimate outside this org (or hidden by RLS) is a
+    // 404, not a silent no-op followed by rewriting its lines.
+    const { data: updated, error } = await supabase
       .from("estimates")
       .update({ ...fields, discount: totals.discount, subtotal: totals.subtotal, vat_amount: totals.vat_amount, total: totals.total })
       .eq("id", id)
-      .eq("org_id", org.id);
+      .eq("org_id", org.id)
+      .select("id");
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (!updated?.length) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-    await supabase.from("estimate_items").delete().eq("estimate_id", id);
-    await supabase.from("estimate_items").insert(
-      items.map((item, i) => ({
-        estimate_id: id,
+    const itemsError = await replaceLineItems(
+      supabase,
+      "estimate_items",
+      "estimate_id",
+      id,
+      items.map((item) => ({
         description: item.description,
         quantity: item.quantity,
         unit_price: item.unit_price,
         vat_rate: item.vat_rate,
-        sort_order: i,
       }))
     );
+    if (itemsError) return NextResponse.json({ error: itemsError }, { status: 500 });
   } else {
     const updateFields = { ...fields, ...(discount !== undefined ? { discount } : {}) };
     if (Object.keys(updateFields).length > 0) {

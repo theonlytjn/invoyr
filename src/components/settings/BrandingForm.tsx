@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/client";
+import { postSettings } from "@/lib/settings/post-settings";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -64,14 +65,24 @@ export default function BrandingForm({ org, canUploadLogo = false }: Props) {
     }
     const { data } = supabase.storage.from("logos").getPublicUrl(path);
     const url = `${data.publicUrl}?t=${Date.now()}`;
-    await supabase.from("organisations").update({ logo_url: url }).eq("id", org.id);
-    setLogoUrl(url);
+    // The file is uploaded; recording it on the org goes through our route so
+    // an admin's change isn't silently dropped by the owner-only RLS policy.
+    const saveError = await postSettings("/api/settings/branding/logo", { logoUrl: url });
     setLogoUploading(false);
+    if (saveError) {
+      setLogoError(saveError);
+      return;
+    }
+    setLogoUrl(url);
   }
 
   async function handleRemoveLogo() {
-    const supabase = createClient();
-    await supabase.from("organisations").update({ logo_url: null }).eq("id", org.id);
+    setLogoError(null);
+    const saveError = await postSettings("/api/settings/branding/logo", { logoUrl: null });
+    if (saveError) {
+      setLogoError(saveError);
+      return;
+    }
     setLogoUrl("");
   }
 
@@ -86,34 +97,32 @@ export default function BrandingForm({ org, canUploadLogo = false }: Props) {
     }
 
     setSaving(true);
-    const supabase = createClient();
-    const { error: saveErr } = await supabase
-      .from("organisations")
-      .update({
-        name,
-        vat_number: vatNumber || null,
-        company_number: companyNumber.trim() || null,
-        registered_address: registeredAddress.trim() || null,
-        vat_registered: vatRegistered,
-        email: email || null,
-        phone: phone || null,
-        website: website || null,
-        address_line1: address || null,
-        city: city || null,
-        postcode: postcode || null,
-        accent_color: accentColor,
-        bank_name: bankName || null,
-        bank_account_name: bankAccountName || null,
-        bank_account_number: bankAccountNumber || null,
-        bank_sort_code: bankSortCode || null,
-        bank_iban: bankIban || null,
-        bank_bic: bankBic || null,
-      })
-      .eq("id", org.id);
+    // Saved through our own route: a direct Supabase write was dropped by RLS
+    // for admins (while showing "Saved!") and was fragile on mobile.
+    const saveErr = await postSettings("/api/settings/branding", {
+      name,
+      vatNumber,
+      companyNumber,
+      registeredAddress,
+      vatRegistered,
+      email,
+      phone,
+      website,
+      address,
+      city,
+      postcode,
+      accentColor,
+      bankName,
+      bankAccountName,
+      bankAccountNumber,
+      bankSortCode,
+      bankIban,
+      bankBic,
+    });
 
     setSaving(false);
     if (saveErr) {
-      setError(saveErr.message);
+      setError(saveErr);
     } else {
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
@@ -153,7 +162,7 @@ export default function BrandingForm({ org, canUploadLogo = false }: Props) {
               </div>
               <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleLogoChange} />
             </div>
-            {logoError && <p className="text-xs text-red-600">{logoError}</p>}
+            {logoError && <p role="alert" className="text-xs text-red-600">{logoError}</p>}
           </>
         ) : (
           <div className="flex items-center gap-3 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/50 px-4 py-3">
@@ -306,7 +315,7 @@ export default function BrandingForm({ org, canUploadLogo = false }: Props) {
         </div>
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
 
       <div className="flex items-center gap-3 pt-2">
         <Button type="submit" disabled={saving}>
