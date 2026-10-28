@@ -12,10 +12,13 @@ export const metadata: Metadata = {
 // processor split, trial auto-conversion, the 7-day deletion window, and the
 // sub-processor list from @/config/legal (verified against the live system).
 //
+// 28 Oct 2026: added the email open tracking disclosure (section 5) and
+// renumbered the sections after it.
+//
 // DRAFT FOR LEGAL REVIEW — not reviewed by counsel.
 export default function PrivacyPage() {
   return (
-    <LegalDoc title="Privacy Policy" lastUpdated="28 September 2026">
+    <LegalDoc title="Privacy Policy" lastUpdated="28 October 2026">
       <p>
         This Privacy Policy explains how <strong>{LEGAL_ENTITY.name}</strong>, trading as{" "}
         {LEGAL_ENTITY.tradingAs}, of {LEGAL_ENTITY.address}
@@ -67,7 +70,8 @@ export default function PrivacyPage() {
         </li>
         <li>
           <strong>Email delivery data:</strong> records of the transactional emails we send on your
-          behalf, including whether they were delivered and opened.
+          behalf, including whether they were delivered and when they were first opened (see
+          section 5).
         </li>
         <li>
           <strong>Communications:</strong> messages you send us through the contact form or support
@@ -127,7 +131,35 @@ export default function PrivacyPage() {
         the Terms.
       </p>
 
-      <h2>5. Sub-processors and sharing</h2>
+      <h2>5. Email open tracking</h2>
+      <p>
+        Emails that Invoyr sends on your behalf — invoices, estimates, payment reminders,
+        receipts and statements — contain a small, invisible image. When the recipient&rsquo;s
+        email program loads that image, our email provider, Resend, records that the email was
+        opened. To load it, the recipient&rsquo;s device makes a request to Resend, which, like any
+        web request, includes their IP address and details of their email program.
+      </p>
+      <p>
+        Invoyr keeps only the date and time an email was <strong>first</strong> opened. We show it
+        in the invoice&rsquo;s history, so you can see that your client has seen your invoice before
+        you follow up. We do not store the recipient&rsquo;s IP address or device details, we do not
+        track which links they click, and we do not use open data to profile anyone, to advertise or
+        for any other purpose.
+      </p>
+      <p>
+        Open records are not always accurate. Many email programs block images or load them in
+        advance for privacy reasons, so an email can be read without being recorded as opened, or
+        recorded as opened when it has not been read. Recipients can prevent open tracking by
+        turning off automatic image loading in their email program.
+      </p>
+      <p>
+        This is Customer Data, which we process for you as your processor. Because your clients
+        receive these emails from your business, you should tell them about open tracking in your
+        own privacy notice. If a client objects, contact us at{" "}
+        <a href={`mailto:${LEGAL_ENTITY.supportEmail}`}>{LEGAL_ENTITY.supportEmail}</a>.
+      </p>
+
+      <h2>6. Sub-processors and sharing</h2>
       <p>
         We use a small number of providers to run the Service. Each is bound by contract to protect
         the data it handles and to use it only for the purpose below.
@@ -145,7 +177,7 @@ export default function PrivacyPage() {
         may transfer to the acquiring party, and we will notify you before that happens.
       </p>
 
-      <h2>6. International transfers</h2>
+      <h2>7. International transfers</h2>
       <p>
         Customer Data is stored at rest in the European Union (Frankfurt). Some of our providers,
         including our hosting and email providers, process data in the United States or across a
@@ -157,7 +189,7 @@ export default function PrivacyPage() {
         Clauses — together with the provider&rsquo;s own technical protections.
       </p>
 
-      <h2>7. How long we keep it</h2>
+      <h2>8. How long we keep it</h2>
       <ul>
         <li>
           <strong>Customer Data:</strong> for as long as your account is active. Following
@@ -182,7 +214,7 @@ export default function PrivacyPage() {
         this from Account settings, which stays available even if your subscription has lapsed.
       </p>
 
-      <h2>8. Your rights</h2>
+      <h2>9. Your rights</h2>
       <p>
         Under UK and EU data protection law you have the right to access your personal data, to have
         it corrected or erased, to restrict or object to processing, to data portability, and to
@@ -206,10 +238,11 @@ export default function PrivacyPage() {
         , or to your local supervisory authority.
       </p>
 
-      <h2>9. Cookies</h2>
+      <h2>10. Cookies</h2>
       <p>
         Invoyr uses only the cookies it needs to work. We do not use advertising cookies and we do
-        not run third-party analytics.
+        not run third-party analytics on our website or app. (Email open tracking, described in
+        section 5, does not use cookies.)
       </p>
       <ul>
         <li>
@@ -229,7 +262,7 @@ export default function PrivacyPage() {
         will prevent the Service from working.
       </p>
 
-      <h2>10. Security</h2>
+      <h2>11. Security</h2>
       <p>
         We apply technical and organisational measures appropriate to the risk, including encryption
         in transit, row-level database access controls that isolate each business&rsquo;s data,
@@ -242,26 +275,26 @@ export default function PrivacyPage() {
         72 hours where required, and notify you without undue delay where the risk is high.
       </p>
 
-      <h2>11. Automated decision-making</h2>
+      <h2>12. Automated decision-making</h2>
       <p>
         We do not make decisions producing legal or similarly significant effects about you by
         automated means alone.
       </p>
 
-      <h2>12. Children</h2>
+      <h2>13. Children</h2>
       <p>
         Invoyr is a business service and is not directed at children. We do not knowingly collect
         personal data from anyone under 18.
       </p>
 
-      <h2>13. Changes to this policy</h2>
+      <h2>14. Changes to this policy</h2>
       <p>
         We may update this policy as the Service, our providers or the law change. Where a change
         materially affects you we will give reasonable notice before it takes effect. The date at the
         top of this page shows when it was last updated.
       </p>
 
-      <h2>14. Contact</h2>
+      <h2>15. Contact</h2>
       <p>
         Questions, requests or complaints about privacy can be sent to:
         <br />

@@ -52,7 +52,8 @@ page.
 
 ## 3. Decisions waiting on Tony
 
-- **Email open tracking.** Invoyr records when an invoice email is opened and shows it in
+- **Email open tracking — DECIDED 28 Oct: disclosed** in Privacy Policy §5. Original note:
+  Invoyr records when an invoice email is opened and shows it in
   the invoice history. The person tracked is the *customer's client* — a third party with
   no relationship to Invoyr — and it is not disclosed in the Privacy Policy or DPA, while
   the policy says "we do not run third-party analytics". Disclose it, make it opt-in per
@@ -86,7 +87,7 @@ page.
   trap. Four others already use the Radix primitive correctly.
 - Consider `eslint-plugin-jsx-a11y` (`label-has-associated-control`) to stop regressions.
 
-**Silently-swallowed write failures** (swept 25 Sep; top tier fixed, these remain):
+**Silently-swallowed write failures — DONE 28 Oct (7aa75cb), with the settings-forms item below. Kept for history:**
 - `team/accept` burns the invite even if membership fails; `team/transfer-ownership` can
   leave two owners or none; `account/delete` deletes the login regardless of what else
   failed.
@@ -96,7 +97,7 @@ page.
   cron *reads* that table to avoid double-chasing.
 - Document-number counters (`next_invoice_number`) increment unchecked.
 
-**Settings forms still writing straight from the browser** — `BrandingForm` and
+**Settings forms still writing straight from the browser (DONE 28 Oct)** — `BrandingForm` and
 `InvoiceSettingsForm`. Both carry the mobile fragility that broke the email settings save
 ("TypeError: Load failed") and the silent no-op where an **admin** sees "Saved!" while
 RLS drops the update, because `orgs_update` is owner-only but `manage_settings` allows

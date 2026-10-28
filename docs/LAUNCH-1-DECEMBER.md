@@ -33,13 +33,34 @@ Detail behind every item lives in `docs/INV-008-handoff.md` (sections in bracket
 | ☐ | **Book a lawyer** to review `/terms`, `/privacy` and `/dpa`. Ask them to focus on the DPA audit clause, the liability cap, and international transfers (SCC/IDTA with each provider). This has the longest lead time, so start now. | Book 31 Oct · done 21 Nov |
 | ☐ | **Chase TrueLayer** at sales@truelayer.com for production approval. In parallel, sign up for **Enable Banking** as a backup. | This week |
 | ☐ | **Founder signature**: `public/founder-signature.png` (transparent, ~360×120). The photo is done (`public/founder.jpg`, added 28 Oct). | 7 Nov |
-| ☐ | **Decide on email open tracking** (handoff §3). Options: disclose it in the Privacy Policy, make it opt-in, or turn it off in Resend. Do this before the lawyer review, so they review the final wording. | 31 Oct |
+| ✓ | **Email open tracking: decided 28 Oct — disclose it.** New section 5 of the Privacy Policy. The lawyer should still check it (see the solicitor brief below). | Done |
 | ☐ | **Decide on the "preference centre" sentence** in the Privacy Policy. Either build a marketing-emails toggle or reword the sentence. | 31 Oct |
 | ☐ | **Register a DMCA agent** ($6, US Copyright Office). | Nov |
 | ☐ | **Add the registered office address** in Settings → Company for each real org, so it prints on PDFs. | Any time |
 | ☐ | **Local `.env.local`**: swap in the Invoyr Limited `sk_live_`/`sk_test_` key and set `NEXT_PUBLIC_SUPABASE_URL=https://auth.invoyr.io`. | Before local work |
 | ☐ | **Stripe housekeeping:** refund the £1.20 test (INV-0016) if wanted, and re-add the WHMCS webhook if you still use it. You can also roll the unused "Invoyr Keys" key on TJN's account. | Any time |
 | ☐ | **Comped orgs:** make sure none of the four comped orgs also has a live Stripe subscription. A comp does not stop Stripe billing. | Before launch |
+
+### Solicitor brief (what to ask them to confirm)
+
+Send them `/terms`, `/privacy` and `/dpa` and ask for sign-off on these six points:
+
+1. **Liability cap** in the Terms: is it enforceable and pitched right for a B2B SaaS?
+2. **DPA audit clause:** is it reasonable for a one-person company to honour?
+3. **International transfers:** is there a valid mechanism (IDTA, Addendum or SCCs) for
+   each US provider (Vercel, Resend, Stripe, PayPal, Cloudflare, Upstash)? The policy
+   says data is stored in Frankfurt.
+4. **Email open tracking** (Privacy §5, added 28 Oct). Invoyr stores only the first-open
+   time; Resend sees the IP address and email client. Questions for them:
+   - Is the processor framing right?
+   - Does PECR regulation 6 (which the ICO applies to tracking pixels) mean recipients
+     must consent, or that customers must collect that consent?
+   - Should the DPA's processing description mention it too?
+5. **"Preference centre" sentence** (Privacy §3) says consent can be withdrawn "in your
+   settings", but no such setting exists. Agree new wording, or we build the toggle.
+6. **Trial auto-renewal:** onboarding has no renewal disclosure beside Invoyr's own
+   button (Stripe Checkout shows one). Is that enough under the new UK subscription
+   rules (DMCC Act 2024)?
 
 Already done: Chop Life subscription cancelled ✓ · Cakes By Kels logo re-uploaded ✓ ·
 Stripe webhooks ✓ · Supabase custom domain ✓ · Rate limiting ✓
@@ -48,25 +69,25 @@ Stripe webhooks ✓ · Supabase custom domain ✓ · Rate limiting ✓
 
 ## 2. Code to finish (Claude can do these; say "do section 2")
 
-### Must fix before launch
-These lose data or mislead users.
+### Must fix before launch — ✓ all done 28 Oct (commit 7aa75cb)
 
-- ☐ **Settings forms saving from the browser** (`BrandingForm`, `InvoiceSettingsForm`).
-  - An **admin** sees "Saved!" while the database silently refuses the update.
-  - Saving is also flaky on mobile.
-  - Fix: move both server-side, copying `EmailSettingsForm`.
-- ☐ **Estimates and recurring invoices can lose their line items** when edited. Their save
-  deletes the old lines and inserts the new ones without checking, which is the same bug
-  already fixed on invoices.
-- ☐ **Team flows:**
-  - `team/accept` uses up the invite even when joining fails.
-  - `team/transfer-ownership` can leave an org with two owners or none.
-  - `account/delete` deletes the login even when other steps failed.
-- ☐ **`email_logs` inserts are unchecked.** The overdue-reminder cron reads that table to
-  avoid chasing twice, so a failed insert means duplicate reminders.
-  - Related: 12 of 16 recent rows had no `resend_id` on 14 Oct. Investigate why.
-- ☐ **Invoice number counters increment unchecked**, which risks duplicate or skipped
-  numbers.
+- ✓ **Settings forms** (`BrandingForm`, `InvoiceSettingsForm`, logo) now save through
+  `/api/settings/branding`, `/branding/logo` and `/invoices`, with Zod and the shared
+  `requireSettingsAccess` gate.
+- ✓ **Estimates and recurring invoices** write new lines before removing old ones
+  (`src/lib/line-items.ts`). Create and convert undo the header if lines fail.
+- ✓ **Team flows:** the invite stays usable if joining fails; ownership transfer is one
+  transaction (`transfer_org_ownership`); account delete checks every step, cancels any
+  Stripe subscription, removes stored files, and deletes the login last.
+- ✓ **`email_logs` inserts** are checked and retried (`src/lib/resend/email-log.ts`).
+  - The missing `resend_id`s were not a bug: every one came from an org that sends
+    through its own SMTP server, which has no Resend id.
+- ✓ **Document numbers** are claimed atomically (`claim_document_number`). This was worse
+  than listed: a non-owner's invoice never moved the counter on (owner-only RLS), and the
+  recurring job gave two schedules due on the same day the same number. New invoices now
+  take their number at save, so an abandoned form doesn't burn one.
+- ✓ Found along the way: overdue reminders quoted the invoice total rather than the
+  outstanding balance. Fixed.
 
 ### Should fix before launch (accessibility and polish)
 - ☐ ~41 form fields with no label, mostly in `src/components/settings/*`.
