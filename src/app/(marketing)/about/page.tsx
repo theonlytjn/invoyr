@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { LEGAL_ENTITY } from "@/config/legal";
@@ -92,12 +93,19 @@ export default function AboutPage() {
           one-person companies is the actual differentiator against Xero. */}
       <section className="border-t border-neutral-200 dark:border-neutral-900">
         <div className={`${CONTAINER} py-20`}>
-          <div className="mx-auto grid max-w-5xl gap-10 lg:grid-cols-[minmax(0,320px)_1fr] lg:gap-16 lg:items-start">
-            <div>
-              {/* Replace with a real photo: public/founder.jpg, 640×800 or
-                  thereabouts. Until then this holds the space rather than
-                  showing a broken image. */}
-              <div className="aspect-[4/5] w-full overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-100 dark:border-neutral-800 dark:bg-neutral-900" />
+          <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 lg:items-start">
+            {/* The letter runs much longer than the photo, so the photo sticks
+                alongside it on desktop rather than leaving a hole below. */}
+            <div className="lg:sticky lg:top-28">
+              <div className="relative aspect-[3/2] w-full overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-100 dark:border-neutral-800 dark:bg-neutral-900">
+                <Image
+                  src="/founder.jpg"
+                  alt="Tony Nwachi working at his desk"
+                  fill
+                  sizes="(min-width: 1024px) 50vw, 100vw"
+                  className="object-cover object-center"
+                />
+              </div>
               <p className="mt-4 font-medium text-neutral-900 dark:text-neutral-50">Tony Nwachi</p>
               <p className="text-sm text-neutral-500 dark:text-neutral-400">
                 Founder, Invoyr
