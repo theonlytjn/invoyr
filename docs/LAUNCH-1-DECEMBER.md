@@ -32,7 +32,7 @@ Detail behind every item lives in `docs/INV-008-handoff.md` (sections in bracket
 |---|---|---|
 | ☐ | **Book a lawyer** to review `/terms`, `/privacy` and `/dpa`. Ask them to focus on the DPA audit clause, the liability cap, and international transfers (SCC/IDTA with each provider). This has the longest lead time, so start now. | Book 31 Oct · done 21 Nov |
 | ☐ | **Chase TrueLayer** at sales@truelayer.com for production approval. In parallel, sign up for **Enable Banking** as a backup. | This week |
-| ☐ | **Founder photo and signature**: `public/founder.jpg` (~640×800) and `public/founder-signature.png` (transparent, ~360×120). Drop them in or send them over. | 7 Nov |
+| ☐ | **Founder signature**: `public/founder-signature.png` (transparent, ~360×120). The photo is done (`public/founder.jpg`, added 28 Oct). | 7 Nov |
 | ☐ | **Decide on email open tracking** (handoff §3). Options: disclose it in the Privacy Policy, make it opt-in, or turn it off in Resend. Do this before the lawyer review, so they review the final wording. | 31 Oct |
 | ☐ | **Decide on the "preference centre" sentence** in the Privacy Policy. Either build a marketing-emails toggle or reword the sentence. | 31 Oct |
 | ☐ | **Register a DMCA agent** ($6, US Copyright Office). | Nov |
@@ -124,8 +124,8 @@ It is already gated and nothing else depends on it.
 - ☐ Trial expiry: the org locks to Billing, subscribing unlocks it, and Account
   (exporting) stays reachable.
 - ☐ Invite a team member as admin, check what they can and can't do, then remove them.
-- ☐ Marketing site in light and dark mode: logos, the "My account" menu when signed in,
-  and every page loads.
+- ☐ Marketing site (dark only since 28 Oct, no theme toggle): logos, the "My account"
+  menu when signed in, About in the header menu, and every page loads.
 - ☐ Install the PWA on iPhone: new icon, and the new logo shows after one refresh.
 - ☐ Delete a test account fully: files, org and login.
 
