@@ -5,6 +5,7 @@ import { sendTransactionalEmail } from "@/lib/resend/send-transactional-email";
 import { TrialEndingEmail } from "@/emails/transactional/TrialEndingEmail";
 import { TRIAL_EMAIL_COPY, type TrialEmailState } from "@/config/email-copy";
 import { trialDaysRemaining } from "@/lib/trial";
+import { getEarlyOffer } from "@/lib/early-offer";
 
 /**
  * The trial lifecycle mailer, run daily.
@@ -120,11 +121,19 @@ export async function GET(req: NextRequest) {
     if (!owner) return false;
 
     const org = Array.isArray(row.organisations) ? row.organisations[0] : row.organisations;
+    // Only while the trial runs: an unconverted, ended trial has no subscription to discount.
+    const offer = state === "ending" ? await getEarlyOffer(row.org_id).catch(() => null) : null;
     const context = {
       state,
       daysLeft,
       endsOn: new Date(row.trial_ends_at).toLocaleDateString("en-GB", { day: "numeric", month: "long" }),
       willBeCharged: Boolean(row.stripe_subscription_id),
+      ...(offer?.claimable && {
+        yearlyOffer: {
+          percent: offer.percent,
+          claimBy: new Date(offer.closesAt).toLocaleDateString("en-GB", { day: "numeric", month: "long" }),
+        },
+      }),
     };
 
     const result = await sendTransactionalEmail({

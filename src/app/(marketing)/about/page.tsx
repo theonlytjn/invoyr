@@ -143,10 +143,11 @@ export default function AboutPage() {
                 fixed.
               </p>
 
-              {/* Signature: drop a transparent PNG at public/founder-signature.png
-                  (around 360×120) and swap this for an <Image>. */}
-              <p className="pt-2 text-neutral-900 dark:text-neutral-50">
-                <span className="font-serif text-2xl">Tony Nwachi</span>
+              {/* The signature is drawn in black; it is inverted to white on the dark site. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/brand/tn-signature.svg" alt="Tony Nwachi's signature" className="h-20 w-auto pt-2 dark:invert" />
+              <p className="text-neutral-900 dark:text-neutral-50">
+                <span className="font-medium">Tony Nwachi</span>
                 <br />
                 <span className="text-sm text-neutral-500 dark:text-neutral-400">
                   Founder, Invoyr — {LEGAL_ENTITY.name}

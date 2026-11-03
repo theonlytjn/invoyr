@@ -1,5 +1,3 @@
-import { TRIAL_DAYS } from "./plans";
-
 export type TrialEmailState = "ending" | "ended";
 
 export interface TrialEmailContext {
@@ -10,6 +8,8 @@ export interface TrialEmailContext {
   endsOn: string;
   /** True when a card is on file and Stripe charges it automatically. */
   willBeCharged: boolean;
+  /** An early adopter's unclaimed yearly discount, when there is one. */
+  yearlyOffer?: { percent: number; claimBy: string };
 }
 
 /**
@@ -42,16 +42,24 @@ export const TRIAL_EMAIL_COPY = {
   },
 
   body({ state, daysLeft, endsOn, willBeCharged }: TrialEmailContext): string {
+    // No trial length here: early-access codes give longer trials than the standard one.
     if (state === "ended") {
-      return `Your ${TRIAL_DAYS}-day trial ended on ${endsOn}, so your account is paused until you choose a plan. Nothing has been deleted — your invoices, clients and payment history are exactly as you left them, and you can still download your data from Account settings at any time.`;
+      return `Your free trial ended on ${endsOn}, so your account is paused until you choose a plan. Nothing has been deleted — your invoices, clients and payment history are exactly as you left them, and you can still download your data from Account settings at any time.`;
     }
     const when = (daysLeft ?? 0) <= 1 ? "tomorrow" : `in ${daysLeft} days`;
     return willBeCharged
-      ? `Your ${TRIAL_DAYS}-day trial ends ${when}, on ${endsOn}, and your card will be charged for the plan you chose. Nothing is needed from you — cancel before then if you'd rather not continue.`
-      : `Your ${TRIAL_DAYS}-day trial ends ${when}, on ${endsOn}. Choose a plan before then to keep creating invoices, managing clients and collecting payments without interruption.`;
+      ? `Your free trial ends ${when}, on ${endsOn}, and your card will be charged for the plan you chose. Nothing is needed from you — cancel before then if you'd rather not continue.`
+      : `Your free trial ends ${when}, on ${endsOn}. Choose a plan before then to keep creating invoices, managing clients and collecting payments without interruption.`;
   },
 
-  cta({ state, willBeCharged }: TrialEmailContext): string {
+  /** A second paragraph for early adopters who haven't claimed their discount. */
+  offer({ yearlyOffer }: TrialEmailContext): string | null {
+    if (!yearlyOffer) return null;
+    return `As an early adopter, you can also take ${yearlyOffer.percent}% off your first year by switching to yearly billing. It's in Billing, and open until ${yearlyOffer.claimBy}.`;
+  },
+
+  cta({ state, willBeCharged, yearlyOffer }: TrialEmailContext): string {
+    if (yearlyOffer) return `Claim ${yearlyOffer.percent}% off yearly`;
     if (state === "ended") return "Choose a plan";
     return willBeCharged ? "View billing" : "Choose my plan";
   },

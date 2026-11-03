@@ -1311,13 +1311,17 @@ create table if not exists public.trial_codes (
   expires_at       timestamptz,
   active           boolean not null default true,
   note             text,
+  -- Optional follow-up offer: this much off the first yearly payment, claimable
+  -- in Billing from a week before the trial ends until two weeks after.
+  yearly_offer_percent integer check (yearly_offer_percent between 1 and 90),
   created_at       timestamptz not null default now()
 );
 
 create table if not exists public.trial_code_redemptions (
-  org_id       uuid primary key references public.organisations(id) on delete cascade,
-  code         text not null references public.trial_codes(code) on update cascade,
-  redeemed_at  timestamptz not null default now()
+  org_id            uuid primary key references public.organisations(id) on delete cascade,
+  code              text not null references public.trial_codes(code) on update cascade,
+  redeemed_at       timestamptz not null default now(),
+  offer_claimed_at  timestamptz
 );
 create index if not exists trial_code_redemptions_code_idx on public.trial_code_redemptions(code);
 
@@ -1365,6 +1369,6 @@ $$;
 revoke all on function public.redeem_trial_code(text, uuid) from public, anon, authenticated;
 grant execute on function public.redeem_trial_code(text, uuid) to service_role;
 
-insert into public.trial_codes (code, trial_days, max_redemptions, note)
-values ('FOUNDING', 90, 50, 'Early adopters: 3 months free, launch Dec 2026')
+insert into public.trial_codes (code, trial_days, max_redemptions, yearly_offer_percent, note)
+values ('FOUNDING', 30, 50, 25, 'Early adopters: 30-day trial, then 25% off the first yearly payment')
 on conflict (code) do nothing;

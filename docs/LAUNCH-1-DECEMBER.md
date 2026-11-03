@@ -32,7 +32,7 @@ Detail behind every item lives in `docs/INV-008-handoff.md` (sections in bracket
 |---|---|---|
 | ☐ | **Book a lawyer** to review `/terms`, `/privacy` and `/dpa`. Ask them to focus on the DPA audit clause, the liability cap, and international transfers (SCC/IDTA with each provider). This has the longest lead time, so start now. | Book 31 Oct · done 21 Nov |
 | ☐ | **Chase TrueLayer** at sales@truelayer.com for production approval. In parallel, sign up for **Enable Banking** as a backup. | This week |
-| ☐ | **Founder signature**: `public/founder-signature.png` (transparent, ~360×120). The photo is done (`public/founder.jpg`, added 28 Oct). | 7 Nov |
+| ✓ | **Founder signature** and photo: done (`public/brand/tn-signature.svg`, `public/founder.jpg`). | Done |
 | ✓ | **Email open tracking: decided 28 Oct — disclose it.** New section 5 of the Privacy Policy. The lawyer should still check it (see the solicitor brief below). | Done |
 | ☐ | **Decide on the "preference centre" sentence** in the Privacy Policy. Either build a marketing-emails toggle or reword the sentence. | 31 Oct |
 | ☐ | **Register a DMCA agent** ($6, US Copyright Office). | Nov |
@@ -44,19 +44,26 @@ Detail behind every item lives in `docs/INV-008-handoff.md` (sections in bracket
 | ☐ | **Monthly prices:** create a monthly GBP price on each Stripe product (Starter £8, Business £15, Pro £25, VAT-inclusive) and add `STRIPE_PRICE_ID_STARTER_MONTHLY`, `STRIPE_PRICE_ID_BUSINESS_MONTHLY` and `STRIPE_PRICE_ID_PRO_MONTHLY` in Vercel, then redeploy. Until all three are set, the toggle shows monthly prices but monthly signup says "coming soon". | Before launch |
 | ☐ | **Stripe customer portal:** check plan switching is off in the portal settings, so plan changes only go through Billing in the app (which avoids a second subscription). | Before launch |
 
-### Early access (added 3 Nov)
+### Early Adopter programme (updated 3 Nov)
 
-- Page: `invoyr.io/early-access` (not in the menu or search engines; share the link).
-- Code `FOUNDING` gives a 90-day trial instead of 14 days, for up to 50 businesses. A card is
-  still taken and Stripe bills when the trial ends.
-- Codes live in Supabase → Table editor → `trial_codes`. Add a row for a new code (CAPITALS,
-  `trial_days`, optional `max_redemptions` and `expires_at`); untick `active` to switch one off.
-  Who used which code is in `trial_code_redemptions`.
-- If you change the offer, update `src/config/early-access.ts` too (the page copy).
+- Page: `invoyr.io/early-access`: your letter, signature, the offer, the product bentos and
+  plans. Not in the menu or search engines; share the link.
+- Code `FOUNDING` (added automatically by the page's buttons): **30-day trial**, card taken,
+  up to 50 businesses.
+- **25% off the first yearly payment**, offered in Billing from 7 days before the trial ends
+  until 14 days after. One click moves them to the yearly price of their plan with a Stripe
+  coupon (`EARLY-YEARLY-25`, created on first claim, applies once). The trial reminder
+  emails (3 days and 1 day out) mention it. If they don't claim it, they pay the normal
+  price for the plan they picked.
+- Codes live in Supabase → Table editor → `trial_codes` (`trial_days`, `max_redemptions`,
+  `expires_at`, `active`, `yearly_offer_percent`). Who used which code, and who claimed the
+  offer, is in `trial_code_redemptions`.
+- If you change the offer, update `src/config/early-access.ts` too (page copy and window).
+- Founder signature: done (`public/brand/tn-signature.svg`, also on About).
 
 ### Solicitor brief (what to ask them to confirm)
 
-Send them `/terms`, `/privacy` and `/dpa` and ask for sign-off on these six points:
+Send them `/terms`, `/privacy` and `/dpa` and ask for sign-off on these seven points:
 
 1. **Liability cap** in the Terms: is it enforceable and pitched right for a B2B SaaS?
 2. **DPA audit clause:** is it reasonable for a one-person company to honour?
@@ -73,7 +80,10 @@ Send them `/terms`, `/privacy` and `/dpa` and ask for sign-off on these six poin
    settings", but no such setting exists. Agree new wording, or we build the toggle.
 6. **Trial auto-renewal:** the last onboarding step now says the price and that it renews
    automatically until cancelled, and Stripe Checkout shows its own notice. The 90-day
-   early-access trial is the same mechanism. Is that enough under the new UK subscription
+   early-access trial is the same mechanism.
+7. **Early adopter offer:** the 25% yearly offer is mentioned inside the trial reminder
+   emails (treated as billing notices, not marketing). Is that fine under PECR, or does it
+   need marketing consent? Is that enough under the new UK subscription
    rules (DMCC Act 2024)?
 
 Already done: Chop Life subscription cancelled ✓ · Cakes By Kels logo re-uploaded ✓ ·

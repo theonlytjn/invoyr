@@ -1,7 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
 import { isSubscriptionActive, getCompPlan } from "@/lib/billing";
-import { PLAN_MAP, isMonthlyBillingAvailable } from "@/config/plans";
+import { PLAN_MAP, formatPounds, isMonthlyBillingAvailable } from "@/config/plans";
+import { getEarlyOffer } from "@/lib/early-offer";
+import { discountedYearly } from "@/lib/early-offer-window";
+import { EarlyOfferCard } from "./EarlyOfferCard";
 import Topbar from "@/components/shell/Topbar";
 import { BillingActions } from "./BillingActions";
 import type { Metadata } from "next";
@@ -48,6 +51,11 @@ export default async function BillingPage({
   const trialDaysLeft = subscription?.trial_ends_at
     ? Math.max(0, Math.ceil((new Date(subscription.trial_ends_at).getTime() - Date.now()) / 86_400_000))
     : null;
+
+  // Early adopters get a yearly discount near the end of their trial.
+  const earlyOffer = comp ? null : await getEarlyOffer(org.id);
+  const fmtDate = (iso: string) =>
+    new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 
   const periodEnd = subscription?.current_period_end
     ? new Date(subscription.current_period_end).toLocaleDateString("en-GB", {
@@ -113,6 +121,27 @@ export default async function BillingPage({
             </span>
           </div>
         </div>
+
+        {earlyOffer?.claimable && planInfo && (
+          <EarlyOfferCard
+            percent={earlyOffer.percent}
+            planName={planInfo.name}
+            yearly={formatPounds(planInfo.amounts.yearly)}
+            discounted={formatPounds(discountedYearly(planInfo.amounts.yearly, earlyOffer.percent))}
+            closesOn={fmtDate(earlyOffer.closesAt)}
+            trialing={status === "trialing"}
+          />
+        )}
+        {earlyOffer?.claimedAt && (
+          <div role="status" className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800 dark:border-green-900 dark:bg-green-950/30 dark:text-green-400">
+            Early adopter offer applied: {earlyOffer.percent}% off your first yearly payment.
+          </div>
+        )}
+        {earlyOffer && !earlyOffer.claimedAt && !earlyOffer.claimable && new Date(earlyOffer.opensAt) > new Date() && (
+          <p className="text-sm text-neutral-500 dark:text-neutral-400">
+            Early adopter: from {fmtDate(earlyOffer.opensAt)} you can claim {earlyOffer.percent}% off your first year on the yearly plan.
+          </p>
+        )}
 
         {/* Plan selection / upgrade */}
         {comp ? (

@@ -1,40 +1,51 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { EARLY_ACCESS } from "@/config/early-access";
+import { EARLY_ACCESS, OFFER_OPENS_DAYS_BEFORE_TRIAL_END } from "@/config/early-access";
 import { BRAND } from "@/config/brand";
-import { isMonthlyBillingAvailable } from "@/config/plans";
+import { PLAN_MAP, formatPounds, isMonthlyBillingAvailable } from "@/config/plans";
+import { discountedYearly } from "@/lib/early-offer-window";
 import PricingCards from "@/components/pricing/PricingCards";
+import BenefitsBento from "@/components/marketing/BenefitsBento";
+import AutomationBento from "@/components/marketing/AutomationBento";
 
-// Shared by link with the people being invited, so it stays out of search.
+// Shared by link with the businesses being invited, so it stays out of search.
 export const metadata: Metadata = {
-  title: "Early access",
-  description: `Join Invoyr early: ${EARLY_ACCESS.trialDays} days free on any plan.`,
+  title: "Early Adopter programme",
+  description: `Join Invoyr's Early Adopter programme: ${EARLY_ACCESS.trialDays} days free, then ${EARLY_ACCESS.yearlyOfferPercent}% off your first year.`,
   robots: { index: false, follow: false },
 };
 
 const KICKER = "font-mono text-[0.8125rem] uppercase tracking-[0.14em] text-neutral-500 dark:text-neutral-400";
 const CONTAINER = "max-w-[1600px] mx-auto px-6 lg:px-12";
-const MONTHS = Math.round(EARLY_ACCESS.trialDays / 30);
+const PERCENT = EARLY_ACCESS.yearlyOfferPercent;
+const DAYS = EARLY_ACCESS.trialDays;
 
-const PERKS = [
+const business = PLAN_MAP.business;
+const EXAMPLE = `${formatPounds(discountedYearly(business.amounts.yearly, PERCENT))} instead of ${formatPounds(business.amounts.yearly)} on ${business.name}`;
+
+const OFFER = [
   {
-    heading: `${MONTHS} months free`,
-    body: `A ${EARLY_ACCESS.trialDays}-day trial on any plan, instead of the usual 14 days. Send real invoices and take real payments the whole time.`,
+    heading: `${DAYS} days free`,
+    body: `Full access to every feature on the plan you choose. Nothing is charged for ${DAYS} days, and you can cancel any time before then.`,
+  },
+  {
+    heading: `${PERCENT}% off your first year`,
+    body: `In the last week of your trial you'll be offered ${PERCENT}% off a year on the yearly plan (${EXAMPLE}). Take it or leave it.`,
   },
   {
     heading: "A direct line to me",
-    body: `Email ${BRAND.supportEmail} and it comes straight to me. If something's broken or confusing, I'll fix it.`,
-  },
-  {
-    heading: "Shape what comes next",
-    body: "Early users decide what gets built. Tell me what you need and it goes to the top of the list.",
+    body: `Email ${BRAND.supportEmail} and it comes straight to me. Your feedback decides what gets improved and built next.`,
   },
 ];
 
 const STEPS = [
-  { n: "1", heading: "Create your account", body: `Your code, ${EARLY_ACCESS.code}, is added for you when you use the button on this page.` },
-  { n: "2", heading: "Pick a plan and add a card", body: `Nothing is charged for ${EARLY_ACCESS.trialDays} days. Monthly or yearly, any plan.` },
-  { n: "3", heading: "Get paid", body: "Send your first invoice in a couple of minutes. We'll email you before the trial ends, and you can cancel any time before then." },
+  { n: "1", heading: "Create your account", body: `Use the button on this page and your early adopter code, ${EARLY_ACCESS.code}, is added for you.` },
+  { n: "2", heading: "Pick a plan and add a card", body: `Monthly or yearly, any plan. Nothing is charged for ${DAYS} days.` },
+  {
+    n: "3",
+    heading: "Use it properly",
+    body: `Put real invoices through it. ${OFFER_OPENS_DAYS_BEFORE_TRIAL_END} days before the trial ends, your ${PERCENT}% yearly offer appears in Billing.`,
+  },
 ];
 
 export default function EarlyAccessPage() {
@@ -52,79 +63,154 @@ export default function EarlyAccessPage() {
               "radial-gradient(55% 60% at 50% 0%, color-mix(in oklab, var(--brand) 16%, transparent), transparent 70%)",
           }}
         />
-        <div className="mx-auto w-full max-w-4xl px-6 pt-32 pb-24 text-center">
+        <div className="mx-auto w-full max-w-4xl px-6 pt-32 pb-20 text-center">
           <p className="mb-8 inline-flex items-center gap-2 rounded-full bg-brand px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-brand-foreground">
-            Early access · {EARLY_ACCESS.spots} places
+            Early Adopter programme · {EARLY_ACCESS.spots} places
           </p>
           <h1 className="font-serif text-[clamp(2.6rem,6vw,5rem)] leading-[0.95] tracking-tight text-neutral-900 dark:text-neutral-50">
-            Be one of the first
+            Less financial admin.
             <br />
-            to get paid with Invoyr.
+            More visibility.
           </h1>
           <p className="mt-6 mx-auto max-w-2xl text-xl leading-relaxed text-neutral-600 dark:text-neutral-200">
-            Invoyr launches on 1 December. Join before then and you get {MONTHS} months free on any
-            plan, plus a say in what we build next.
+            I&apos;m looking for a small group of businesses to use Invoyr day to day and help shape
+            it. {DAYS} days free, then {PERCENT}% off your first year if you&apos;d like to stay.
           </p>
           <div className="mt-10 flex flex-col items-center gap-4">
             <Link
               href={signupHref}
               className="px-6 py-3.5 rounded-xl bg-neutral-950 dark:bg-neutral-50 text-white dark:text-neutral-950 font-medium text-base hover:bg-neutral-800 dark:hover:bg-white transition-colors"
             >
-              Claim {MONTHS} months free
+              Join the Early Adopter programme
             </Link>
-            <p className="text-sm text-neutral-500 dark:text-neutral-400">
-              Or enter code{" "}
-              <span className="font-mono font-semibold tracking-wider text-neutral-900 dark:text-neutral-50">{EARLY_ACCESS.code}</span>{" "}
-              when you choose your plan.
-            </p>
+            <a href="#letter" className="text-sm text-neutral-500 dark:text-neutral-400 underline underline-offset-4 hover:text-neutral-900 dark:hover:text-neutral-100">
+              Read my note first
+            </a>
           </div>
         </div>
       </section>
 
-      {/* INTRODUCTION */}
-      <section className="border-t border-neutral-200 dark:border-neutral-900">
-        <div className={`${CONTAINER} py-20 grid gap-12 lg:grid-cols-2 lg:gap-16`}>
-          <div>
+      {/* THE LETTER */}
+      <section id="letter" className="scroll-mt-24 border-t border-neutral-200 dark:border-neutral-900">
+        <div className={`${CONTAINER} py-20`}>
+          <article className="mx-auto max-w-3xl rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-8 sm:p-12">
             <p className={KICKER}>A note from the founder</p>
-            <h2 className="mt-6 font-serif text-4xl leading-tight text-neutral-900 dark:text-neutral-50">
-              Thanks for being early.
-            </h2>
-          </div>
-          <div className="space-y-5 text-lg leading-relaxed text-neutral-600 dark:text-neutral-200">
-            <p>
-              I&apos;m Tony. I built Invoyr because I was tired of chasing my own invoices: Word
-              templates, PDFs attached to emails, and awkward follow-ups weeks later.
-            </p>
-            <p>
-              Invoyr does one job properly. You send a professional invoice, your client pays by
-              card, PayPal or bank transfer, and the money lands straight in your own account.
-              Reminders go out on your behalf, and you can see the moment an invoice is opened.
-            </p>
-            <p>
-              You&apos;re getting in before the public launch, so you&apos;ll find the odd rough
-              edge. When you do, tell me. Early users are the reason it gets better.
-            </p>
-            <p className="pt-2 text-neutral-900 dark:text-neutral-50">
-              <span className="font-serif text-2xl">Tony Nwachi</span>
-              <br />
-              <span className="text-sm text-neutral-500 dark:text-neutral-400">Founder, Invoyr</span>
-            </p>
-          </div>
+            <div className="mt-8 space-y-5 text-lg leading-relaxed text-neutral-600 dark:text-neutral-200">
+              <p className="text-neutral-900 dark:text-neutral-50">Hi,</p>
+              <p>
+                I wanted to reach out because I&apos;ve been working on something for a while now
+                called <strong className="text-neutral-900 dark:text-neutral-50">Invoyr</strong>: an
+                invoicing platform I&apos;ve built to make the financial admin side of running a
+                business much simpler.
+              </p>
+              <p>
+                From my own experience working with different businesses, I&apos;ve seen how something
+                as straightforward as getting paid can quickly become another layer of admin.
+              </p>
+              <p>
+                Creating invoices manually, keeping track of what&apos;s outstanding, chasing late
+                payments, managing recurring work and trying to understand what&apos;s actually coming
+                into the business all take time, often far more time than they should.
+              </p>
+              <p className="text-neutral-900 dark:text-neutral-50 font-medium">
+                That&apos;s what I&apos;ve built Invoyr to simplify.
+              </p>
+              <p>
+                Rather than manually creating invoices or relying on several different tools, Invoyr
+                gives you one place to create and send professional branded invoices and estimates,
+                accept payments, manage recurring invoices, track expenses and see exactly what&apos;s
+                been paid, what&apos;s outstanding and what needs your attention.
+              </p>
+              <p>
+                It can also take care of some of the repetitive work for you, including automatically
+                reminding customers about overdue invoices, so you don&apos;t have to spend your time
+                constantly chasing payments.
+              </p>
+              <p>
+                Ultimately, the idea is simple:{" "}
+                <strong className="text-neutral-900 dark:text-neutral-50">
+                  less time spent on financial admin and more visibility over your business.
+                </strong>
+              </p>
+              <p>
+                I&apos;m now at the stage where I&apos;m looking for a small group of businesses to use
+                Invoyr properly day to day, and I&apos;d really like you to be one of them.
+              </p>
+              <p>
+                I&apos;d like to give you{" "}
+                <strong className="text-neutral-900 dark:text-neutral-50">
+                  full access to Invoyr free for {DAYS} days
+                </strong>
+                . Nothing is charged during that time and you can cancel before it ends. I want you
+                to put real invoices through it and see whether it genuinely makes managing this side
+                of your business easier.
+              </p>
+              <p>
+                If it has, then towards the end of your trial I&apos;ll offer you{" "}
+                <strong className="text-neutral-900 dark:text-neutral-50">
+                  {PERCENT}% off your first year
+                </strong>{" "}
+                as a thank you for being early.
+              </p>
+              <p>All I&apos;d ask in return is some honest feedback every month or so.</p>
+              <p>
+                Tell me what works, what could be easier, what you think is missing and, most
+                importantly, what would make Invoyr more useful to you and your business.
+              </p>
+              <p>
+                Your feedback will help shape what I improve and build next, while hopefully giving
+                you a platform that saves you time, reduces the amount of manual admin you&apos;re
+                doing and makes getting paid that little bit easier.
+              </p>
+              <p>
+                And if Invoyr becomes something you genuinely want to keep using, then I&apos;ll know
+                I&apos;ve built something worthwhile.
+              </p>
+              <p>If you&apos;d like to be involved, I&apos;d love to have you as one of our Early Adopters.</p>
+            </div>
+
+            <div className="mt-10">
+              {/* The signature is drawn in black; it is inverted to white on the dark site. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/brand/tn-signature.svg" alt="Tony's signature" className="h-20 w-auto dark:invert" />
+              <p className="mt-2 font-medium text-neutral-900 dark:text-neutral-50">Tony</p>
+              <p className="text-sm text-neutral-500 dark:text-neutral-400">Founder, Invoyr</p>
+            </div>
+
+            <Link
+              href={signupHref}
+              className="mt-10 inline-flex items-center gap-2 rounded-xl bg-neutral-950 dark:bg-neutral-50 px-6 py-3.5 font-medium text-white dark:text-neutral-950 hover:bg-neutral-800 dark:hover:bg-white transition-colors"
+            >
+              Take a look at Invoyr &amp; join the Early Adopter programme →
+            </Link>
+          </article>
         </div>
       </section>
 
-      {/* WHAT YOU GET */}
+      {/* THE OFFER */}
       <section className="border-t border-neutral-200 dark:border-neutral-900">
         <div className={`${CONTAINER} py-20`}>
-          <p className={`${KICKER} text-center`}>What you get</p>
+          <p className={`${KICKER} text-center`}>What early adopters get</p>
           <div className="mt-12 grid gap-4 md:grid-cols-3">
-            {PERKS.map((perk) => (
-              <div key={perk.heading} className="rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-8">
-                <h3 className="font-serif text-2xl text-neutral-900 dark:text-neutral-50">{perk.heading}</h3>
-                <p className="mt-3 text-lg leading-relaxed text-neutral-600 dark:text-neutral-200">{perk.body}</p>
+            {OFFER.map((item) => (
+              <div key={item.heading} className="rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-8">
+                <h3 className="font-serif text-2xl text-neutral-900 dark:text-neutral-50">{item.heading}</h3>
+                <p className="mt-3 text-lg leading-relaxed text-neutral-600 dark:text-neutral-200">{item.body}</p>
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* WHAT YOU'LL BE USING */}
+      <section className="border-t border-neutral-200 dark:border-neutral-900">
+        <div className={`${CONTAINER} py-20`}>
+          <p className={`${KICKER} text-center`}>What you&apos;ll be using</p>
+          <h2 className="mx-auto mt-6 max-w-3xl text-center font-serif text-4xl sm:text-5xl lg:text-6xl leading-[1.05] tracking-tight text-neutral-900 dark:text-neutral-50">
+            One place for getting paid.
+          </h2>
+          <BenefitsBento className="mt-16" />
+          <AutomationBento className="mt-4" />
         </div>
       </section>
 
@@ -148,16 +234,17 @@ export default function EarlyAccessPage() {
       <section className="border-t border-neutral-200 dark:border-neutral-900">
         <div className={`${CONTAINER} py-20`}>
           <h2 className="text-center font-serif text-4xl md:text-5xl leading-[1.05] text-neutral-900 dark:text-neutral-50">
-            Pick any plan. The first {MONTHS} months are on us.
+            Pick a plan. The first {DAYS} days are on me.
           </h2>
           <p className="mt-4 mb-12 text-center text-lg text-neutral-600 dark:text-neutral-200">
-            After the trial you pay the normal price, unless you cancel before it ends.
+            After the trial you pay the price below, or {PERCENT}% less for your first year if you
+            take the yearly offer. Cancel before the trial ends and you pay nothing.
           </p>
           <PricingCards
             monthlyAvailable={isMonthlyBillingAvailable()}
             showHighlights
             signupParams={{ code: EARLY_ACCESS.code }}
-            footnote={`Prices include VAT. Cancel anytime. ${EARLY_ACCESS.trialDays}-day free trial with code ${EARLY_ACCESS.code}.`}
+            footnote={`Prices include VAT. Cancel anytime. ${DAYS}-day free trial with code ${EARLY_ACCESS.code}; ${PERCENT}% off the first yearly payment when claimed before the offer closes.`}
           />
         </div>
       </section>

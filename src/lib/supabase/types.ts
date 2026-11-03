@@ -505,6 +505,24 @@ export interface WebhookDelivery {
   created_at: string;
 }
 
+export interface TrialCode {
+  code: string;
+  trial_days: number;
+  max_redemptions: number | null;
+  expires_at: string | null;
+  active: boolean;
+  note: string | null;
+  yearly_offer_percent: number | null;
+  created_at: string;
+}
+
+export interface TrialCodeRedemption {
+  org_id: string;
+  code: string;
+  redeemed_at: string;
+  offer_claimed_at: string | null;
+}
+
 // Supabase Database type — matches the format expected by createClient<Database>
 type TableDef<T> = {
   Row: T;
@@ -536,6 +554,8 @@ export type Database = {
       api_keys: TableDef<ApiKey>;
       webhook_endpoints: TableDef<WebhookEndpoint>;
       webhook_deliveries: TableDef<WebhookDelivery>;
+      trial_codes: TableDef<TrialCode>;
+      trial_code_redemptions: TableDef<TrialCodeRedemption>;
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

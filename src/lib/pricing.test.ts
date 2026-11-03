@@ -42,3 +42,24 @@ describe("signup intent", () => {
     expect(parseSignupIntent(encodeURIComponent(JSON.stringify({ plan: "starter" })))).toEqual({ plan: "starter" });
   });
 });
+
+describe("early adopter offer", async () => {
+  const { offerWindow, isOfferOpen, discountedYearly } = await import("@/lib/early-offer-window");
+
+  it("opens a week before the trial ends and closes two weeks after", () => {
+    const end = new Date("2026-12-31T12:00:00Z");
+    const { opensAt, closesAt } = offerWindow(end);
+    expect(opensAt.toISOString()).toBe("2026-12-24T12:00:00.000Z");
+    expect(closesAt.toISOString()).toBe("2027-01-14T12:00:00.000Z");
+    expect(isOfferOpen(end, new Date("2026-12-20T12:00:00Z"))).toBe(false);
+    expect(isOfferOpen(end, new Date("2026-12-28T12:00:00Z"))).toBe(true);
+    expect(isOfferOpen(end, new Date("2027-01-10T12:00:00Z"))).toBe(true);
+    expect(isOfferOpen(end, new Date("2027-01-20T12:00:00Z"))).toBe(false);
+  });
+
+  it("takes 25% off each yearly price", () => {
+    expect(discountedYearly(79, 25)).toBe(59.25);
+    expect(discountedYearly(149, 25)).toBe(111.75);
+    expect(discountedYearly(249, 25)).toBe(186.75);
+  });
+});

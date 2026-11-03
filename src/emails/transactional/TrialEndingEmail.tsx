@@ -43,6 +43,11 @@ export function TrialEndingEmail({
       <Text style={{ fontSize: 15, color: "#374151", lineHeight: "1.6", margin: 0 }}>
         {TRIAL_EMAIL_COPY.body(context)}
       </Text>
+      {TRIAL_EMAIL_COPY.offer(context) && (
+        <Text style={{ fontSize: 15, color: "#374151", lineHeight: "1.6", margin: "16px 0 0" }}>
+          {TRIAL_EMAIL_COPY.offer(context)}
+        </Text>
+      )}
       <EmailButton href={ctaUrl} accentColor={accentColor}>
         {TRIAL_EMAIL_COPY.cta(context)}
       </EmailButton>
