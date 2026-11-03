@@ -41,7 +41,7 @@ Detail behind every item lives in `docs/INV-008-handoff.md` (sections in bracket
 | ☐ | **Stripe housekeeping:** refund the £1.20 test (INV-0016) if wanted, and re-add the WHMCS webhook if you still use it. You can also roll the unused "Invoyr Keys" key on TJN's account. | Any time |
 | ☐ | **Comped orgs:** make sure none of the four comped orgs also has a live Stripe subscription. A comp does not stop Stripe billing. | Before launch |
 
-| ☐ | **Monthly prices:** create a monthly GBP price on each Stripe product (Starter £8, Business £15, Pro £25; no VAT while unregistered) and add `STRIPE_PRICE_ID_STARTER_MONTHLY`, `STRIPE_PRICE_ID_BUSINESS_MONTHLY` and `STRIPE_PRICE_ID_PRO_MONTHLY` in Vercel, then redeploy. Until all three are set, the toggle shows monthly prices but monthly signup says "coming soon". | Before launch |
+| ✓ | **Monthly prices:** live 3 Nov. `STRIPE_PRICE_ID_{STARTER,BUSINESS,PRO}_MONTHLY` set in Vercel (production only; add to preview if preview deploys need monthly checkout). | Done |
 | ☐ | **Stripe customer portal:** check plan switching is off in the portal settings, so plan changes only go through Billing in the app (which avoids a second subscription). | Before launch |
 
 ### VAT (decided 3 Nov)
