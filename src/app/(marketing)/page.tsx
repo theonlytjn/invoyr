@@ -22,13 +22,13 @@ const CONTAINER = "max-w-[1600px] mx-auto px-6 lg:px-12";
  * a wordmark reads much larger, because the eye compares area, not height.
  */
 const TRUST_LOGOS = [
-  { name: "TJN Agency", src: "/clients/tjn.svg", dark: "/clients/tjn-white.svg" },
-  { name: "Cakes By Kels", src: "/clients/cbk.svg", dark: "/clients/cbk-white.svg" },
+  { name: "Cakes By Kels", src: "/clients/tjn.svg", dark: "/clients/tjn-white.svg" },
+  { name: "TJN Agency", src: "/clients/cbk.svg", dark: "/clients/cbk-white.svg" },
   { name: "Love Rooted", src: "/clients/love-rooted.svg", dark: "/clients/love-rooted-white.svg" },
-  { name: "Chop Life Music", src: "/clients/clm.svg", dark: "/clients/clm-white.svg" },
+  { name: "Finer Fleet", src: "/clients/clm.svg", dark: "/clients/clm-white.svg" },
   { name: "Lucid Partners", src: "/clients/lucid-partners.svg", dark: "/clients/lucid-partners-white.svg" },
   { name: "One Africa", src: "/clients/one-africa.svg", dark: "/clients/one-africa-white.svg" },
-  { name: "Finer Fleet", src: "/clients/ff.svg", dark: "/clients/ff-white.svg" },
+  { name: "Chop Life Music", src: "/clients/ff.svg", dark: "/clients/ff-white.svg" },
   { name: "B7", src: "/clients/b7.svg", dark: "/clients/b7-white.svg" },
   { name: "Nokha", src: "/clients/nokha.svg", dark: "/clients/nokha-white.svg" },
 ];
@@ -181,12 +181,12 @@ export default function HomePage() {
               <div aria-hidden="true" className="flex h-96 items-center overflow-hidden rounded-2xl border border-neutral-200 dark:border-neutral-900 bg-gradient-to-br from-slate-100 dark:from-slate-600/30 via-white dark:via-neutral-900 to-white dark:to-neutral-950 p-6 sm:p-10">
                 <div className="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-950 p-6 shadow-2xl shadow-black/50">
                   <div className="flex items-center justify-between">
-                    <span className="font-serif text-xl text-neutral-900 dark:text-neutral-50">INV-0042 · Chop Life Music</span>
+                    <span className="font-serif text-xl text-neutral-900 dark:text-neutral-50">INV-0042 · Finer Fleet</span>
                     <span className="rounded-full bg-red-50 dark:bg-red-500/15 px-2.5 py-1 font-mono text-[10px] text-red-600 dark:text-red-400">7 DAYS OVERDUE</span>
                   </div>
                   <div className="mt-5 rounded-lg border border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-900/50 p-4">
                     <p className="font-mono text-[10px] uppercase tracking-wide text-neutral-500 dark:text-neutral-400">Auto-reminder · sent in your name</p>
-                    <p className="mt-2 text-sm leading-relaxed text-neutral-700 dark:text-neutral-300">Hi Steven — a friendly reminder that invoice INV-0042 for £11,520 is now 7 days overdue. You can pay securely below. Thank you!</p>
+                    <p className="mt-2 text-sm leading-relaxed text-neutral-700 dark:text-neutral-300">Hi Andrew — a friendly reminder that invoice INV-0042 for £11,520 is now 7 days overdue. You can pay securely below. Thank you!</p>
                     <span className="mt-3 inline-block rounded-md bg-neutral-950 dark:bg-neutral-50 px-3 py-1.5 text-xs font-medium text-white dark:text-neutral-950">Pay now</span>
                   </div>
                   <div className="mt-5 flex items-center gap-2.5 border-t border-neutral-200 dark:border-neutral-900 pt-5 font-mono text-[11px] text-neutral-500 dark:text-neutral-400">
@@ -257,7 +257,7 @@ export default function HomePage() {
               <span className="px-1 font-serif text-lg text-neutral-900 dark:text-neutral-50">Invoyr</span>
               <div className="mt-4 flex items-center gap-2 rounded-lg border border-neutral-200 dark:border-neutral-800 p-2.5">
                 <span className="grid h-7 w-7 place-items-center rounded bg-neutral-200 dark:bg-neutral-800 text-xs text-neutral-600 dark:text-neutral-200">N</span>
-                <div><p className="text-xs text-neutral-900 dark:text-neutral-100">Cakes By Kels</p><p className="text-[10px] text-neutral-500 dark:text-neutral-400">Pro Plan</p></div>
+                <div><p className="text-xs text-neutral-900 dark:text-neutral-100">TJN Agency</p><p className="text-[10px] text-neutral-500 dark:text-neutral-400">Pro Plan</p></div>
               </div>
               <div className="mt-3 rounded-lg bg-neutral-950 dark:bg-neutral-50 py-2 text-center text-xs font-medium text-white dark:text-neutral-950">+ New invoice</div>
               <nav className="mt-4 space-y-0.5 text-xs">
@@ -272,8 +272,8 @@ export default function HomePage() {
                 <span className="text-sm text-neutral-700 dark:text-neutral-300">Dashboard</span>
                 <span className="rounded-lg bg-neutral-950 dark:bg-neutral-50 px-3 py-1.5 text-xs font-medium text-white dark:text-neutral-950">+ New invoice</span>
               </div>
-              <p className="mt-5 font-serif text-2xl text-neutral-900 dark:text-neutral-50">Welcome back, Keri</p>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">Here&apos;s what&apos;s happening with Cakes By Kels.</p>
+              <p className="mt-5 font-serif text-2xl text-neutral-900 dark:text-neutral-50">Welcome back, Tony</p>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">Here&apos;s what&apos;s happening with TJN Agency.</p>
               <div className="mt-5 grid grid-cols-4 gap-3">
                 {[
                   ["Revenue this month", "£2,520.00", "£2,700.00 all time"],
@@ -294,9 +294,9 @@ export default function HomePage() {
                   <span className="text-[10px] text-neutral-500 dark:text-neutral-400">View all →</span>
                 </div>
                 {[
-                  ["INV-0006", "Chop Life Music", "Issued", "#eab308", "£5,040.00"],
-                  ["INV-0004", "TJN Agency", "Paid", "#34d399", "£2,520.00"],
-                  ["INV-0003", "Finer Fleet", "Paid", "#34d399", "£180.00"],
+                  ["INV-0006", "Finer Fleet", "Issued", "#eab308", "£5,040.00"],
+                  ["INV-0004", "Cakes By Kels", "Paid", "#34d399", "£2,520.00"],
+                  ["INV-0003", "Chop Life Music", "Paid", "#34d399", "£180.00"],
                 ].map(([num, client, status, color, amount]) => (
                   <div key={num} className="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-900 px-4 py-3 text-xs last:border-b-0">
                     <span className="w-24 text-neutral-900 dark:text-neutral-100">{num}</span>

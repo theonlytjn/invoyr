@@ -20,7 +20,7 @@ export default function BenefitsBento({ className }: { className?: string }) {
             </div>
             <div className="px-5 pb-8 pt-2">
               <div className="rounded-lg bg-neutral-100 dark:bg-neutral-900 px-4 py-3">
-                <p className="font-serif text-base text-neutral-900 dark:text-neutral-50">Cakes By Kels</p>
+                <p className="font-serif text-base text-neutral-900 dark:text-neutral-50">TJN Agency</p>
                 <p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400">#INV-0042</p>
               </div>
               <div className="mt-4 flex items-baseline justify-between">
@@ -31,7 +31,7 @@ export default function BenefitsBento({ className }: { className?: string }) {
               <div className="mt-2 rounded-lg border border-neutral-200 dark:border-neutral-800 py-2.5 text-center text-xs text-neutral-700 dark:text-neutral-300">Pay with PayPal</div>
               <p className="mt-4 text-center font-mono text-[9px] uppercase tracking-[0.12em] text-neutral-500 dark:text-neutral-400">Or pay by bank transfer</p>
               <div className="mt-3 grid grid-cols-2 gap-2 text-[10px]">
-                <div><p className="text-neutral-500 dark:text-neutral-400">Account</p><p className="text-neutral-600 dark:text-neutral-200">Cakes By Kels</p></div>
+                <div><p className="text-neutral-500 dark:text-neutral-400">Account</p><p className="text-neutral-600 dark:text-neutral-200">TJN Agency</p></div>
                 <div><p className="text-neutral-500 dark:text-neutral-400">Sort code</p><p className="text-neutral-600 dark:text-neutral-200">04-00-35</p></div>
               </div>
             </div>
@@ -74,13 +74,13 @@ export default function BenefitsBento({ className }: { className?: string }) {
           <div className="rounded-t-xl border border-b-0 border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-950 p-6 shadow-2xl shadow-black/60">
             <div className="flex items-start justify-between">
               <div>
-                <p className="font-serif text-lg text-neutral-900 dark:text-neutral-50">Cakes By Kels</p>
+                <p className="font-serif text-lg text-neutral-900 dark:text-neutral-50">TJN Agency</p>
                 <p className="mt-0.5 font-mono text-[10px] text-neutral-500 dark:text-neutral-400">Invoice · INV-0042</p>
               </div>
               <span className="h-8 w-8 rounded" style={{ backgroundColor: "rgba(52, 211, 153, 0.9)" }} />
             </div>
             <div className="mt-5 flex justify-between border-t border-neutral-200 dark:border-neutral-900 pt-4 text-[11px]">
-              <div><p className="text-neutral-500 dark:text-neutral-400">Billed to</p><p className="mt-0.5 text-neutral-600 dark:text-neutral-200">Chop Life Music</p></div>
+              <div><p className="text-neutral-500 dark:text-neutral-400">Billed to</p><p className="mt-0.5 text-neutral-600 dark:text-neutral-200">Finer Fleet</p></div>
               <div className="text-right"><p className="text-neutral-500 dark:text-neutral-400">Due</p><p className="mt-0.5 text-neutral-600 dark:text-neutral-200">07 Jul 2026</p></div>
             </div>
             <div className="mt-5 space-y-3 border-t border-neutral-200 dark:border-neutral-900 pt-4 text-xs">
