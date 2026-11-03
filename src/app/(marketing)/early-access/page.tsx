@@ -244,7 +244,7 @@ export default function EarlyAccessPage() {
             monthlyAvailable={isMonthlyBillingAvailable()}
             showHighlights
             signupParams={{ code: EARLY_ACCESS.code }}
-            footnote={`Prices include VAT. Cancel anytime. ${DAYS}-day free trial with code ${EARLY_ACCESS.code}; ${PERCENT}% off the first yearly payment when claimed before the offer closes.`}
+            footnote={`Prices exclude VAT. Cancel anytime. ${DAYS}-day free trial with code ${EARLY_ACCESS.code}; ${PERCENT}% off the first yearly payment when claimed before the offer closes.`}
           />
         </div>
       </section>

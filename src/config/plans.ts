@@ -8,8 +8,8 @@ export type BillingPeriod = "monthly" | "yearly";
 /** Yearly is the default everywhere: it is the better deal and the one we lead with. */
 export const DEFAULT_BILLING: BillingPeriod = "yearly";
 
-/** What the pricing footnote says about VAT. Prices are VAT-inclusive. */
-export const PRICING_FOOTNOTE = "Prices include VAT. Cancel anytime. 14-day free trial on every plan.";
+/** What the pricing footnote says about VAT. Prices exclude VAT (confirmed against Stripe, 3 Nov). */
+export const PRICING_FOOTNOTE = "Prices exclude VAT. Cancel anytime. 14-day free trial on every plan.";
 
 export type Feature =
   | "custom_branding"
@@ -32,7 +32,7 @@ export type Feature =
 export interface Plan {
   id: PlanId;
   name: string;
-  /** Whole pounds, VAT included. Change prices here and nowhere else. */
+  /** Whole pounds, excluding VAT. Change prices here and nowhere else. */
   amounts: Record<BillingPeriod, number>;
   users: string;
   popular?: boolean;
