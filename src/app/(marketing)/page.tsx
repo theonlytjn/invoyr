@@ -181,16 +181,16 @@ export default function HomePage() {
               <div aria-hidden="true" className="flex h-96 items-center overflow-hidden rounded-2xl border border-neutral-200 dark:border-neutral-900 bg-gradient-to-br from-slate-100 dark:from-slate-600/30 via-white dark:via-neutral-900 to-white dark:to-neutral-950 p-6 sm:p-10">
                 <div className="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-950 p-6 shadow-2xl shadow-black/50">
                   <div className="flex items-center justify-between">
-                    <span className="font-serif text-xl text-neutral-900 dark:text-neutral-50">INV-0006 · Atlas Digital Studio</span>
+                    <span className="font-serif text-xl text-neutral-900 dark:text-neutral-50">INV-0042 · Chop Life Music</span>
                     <span className="rounded-full bg-red-50 dark:bg-red-500/15 px-2.5 py-1 font-mono text-[10px] text-red-600 dark:text-red-400">7 DAYS OVERDUE</span>
                   </div>
                   <div className="mt-5 rounded-lg border border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-900/50 p-4">
                     <p className="font-mono text-[10px] uppercase tracking-wide text-neutral-500 dark:text-neutral-400">Auto-reminder · sent in your name</p>
-                    <p className="mt-2 text-sm leading-relaxed text-neutral-700 dark:text-neutral-300">Hi Sarah — a friendly reminder that invoice INV-0042 for £6,000 is now 7 days overdue. You can pay securely below. Thank you!</p>
+                    <p className="mt-2 text-sm leading-relaxed text-neutral-700 dark:text-neutral-300">Hi Steven — a friendly reminder that invoice INV-0042 for £11,520 is now 7 days overdue. You can pay securely below. Thank you!</p>
                     <span className="mt-3 inline-block rounded-md bg-neutral-950 dark:bg-neutral-50 px-3 py-1.5 text-xs font-medium text-white dark:text-neutral-950">Pay now</span>
                   </div>
                   <div className="mt-5 flex items-center gap-2.5 border-t border-neutral-200 dark:border-neutral-900 pt-5 font-mono text-[11px] text-neutral-500 dark:text-neutral-400">
-                    <span className="inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />14 days</span>
+                    <span className="inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />7 days</span>
                     <span>→</span><span>14 days</span><span>→</span><span>30 days</span>
                   </div>
                 </div>
@@ -257,7 +257,7 @@ export default function HomePage() {
               <span className="px-1 font-serif text-lg text-neutral-900 dark:text-neutral-50">Invoyr</span>
               <div className="mt-4 flex items-center gap-2 rounded-lg border border-neutral-200 dark:border-neutral-800 p-2.5">
                 <span className="grid h-7 w-7 place-items-center rounded bg-neutral-200 dark:bg-neutral-800 text-xs text-neutral-600 dark:text-neutral-200">N</span>
-                <div><p className="text-xs text-neutral-900 dark:text-neutral-100">Northbridge Creative Ltd</p><p className="text-[10px] text-neutral-500 dark:text-neutral-400">Pro Plan</p></div>
+                <div><p className="text-xs text-neutral-900 dark:text-neutral-100">Cakes By Kels</p><p className="text-[10px] text-neutral-500 dark:text-neutral-400">Pro Plan</p></div>
               </div>
               <div className="mt-3 rounded-lg bg-neutral-950 dark:bg-neutral-50 py-2 text-center text-xs font-medium text-white dark:text-neutral-950">+ New invoice</div>
               <nav className="mt-4 space-y-0.5 text-xs">
@@ -272,8 +272,8 @@ export default function HomePage() {
                 <span className="text-sm text-neutral-700 dark:text-neutral-300">Dashboard</span>
                 <span className="rounded-lg bg-neutral-950 dark:bg-neutral-50 px-3 py-1.5 text-xs font-medium text-white dark:text-neutral-950">+ New invoice</span>
               </div>
-              <p className="mt-5 font-serif text-2xl text-neutral-900 dark:text-neutral-50">Welcome back, Adam</p>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">Here&apos;s what&apos;s happening with Northbridge Creative Ltd.</p>
+              <p className="mt-5 font-serif text-2xl text-neutral-900 dark:text-neutral-50">Welcome back, Keri</p>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">Here&apos;s what&apos;s happening with Cakes By Kels.</p>
               <div className="mt-5 grid grid-cols-4 gap-3">
                 {[
                   ["Revenue this month", "£2,520.00", "£2,700.00 all time"],
@@ -294,9 +294,9 @@ export default function HomePage() {
                   <span className="text-[10px] text-neutral-500 dark:text-neutral-400">View all →</span>
                 </div>
                 {[
-                  ["INV-0006", "Atlas Digital Studio Ltd", "Issued", "#eab308", "£5,040.00"],
-                  ["INV-0004", "Oakstone Developments Ltd", "Paid", "#34d399", "£2,520.00"],
-                  ["INV-0003", "Elevate Tech Solutions Ltd", "Paid", "#34d399", "£180.00"],
+                  ["INV-0006", "Chop Life Music", "Issued", "#eab308", "£5,040.00"],
+                  ["INV-0004", "TJN Agency", "Paid", "#34d399", "£2,520.00"],
+                  ["INV-0003", "Finer Fleet", "Paid", "#34d399", "£180.00"],
                 ].map(([num, client, status, color, amount]) => (
                   <div key={num} className="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-900 px-4 py-3 text-xs last:border-b-0">
                     <span className="w-24 text-neutral-900 dark:text-neutral-100">{num}</span>

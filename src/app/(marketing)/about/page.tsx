@@ -68,20 +68,20 @@ export default function AboutPage() {
           <div className={`${CARD} overflow-hidden p-8 sm:p-10`} aria-hidden="true">
             <div className="rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-950 p-6 shadow-2xl shadow-neutral-900/10 dark:shadow-black/50">
               <div className="flex items-start justify-between">
-                <div><p className="font-serif text-lg text-neutral-900 dark:text-neutral-50">Northbridge Creative Ltd</p><p className="mt-0.5 font-mono text-[10px] text-neutral-500 dark:text-neutral-400">Invoice · INV-0042</p></div>
+                <div><p className="font-serif text-lg text-neutral-900 dark:text-neutral-50">Cakes By Kels</p><p className="mt-0.5 font-mono text-[10px] text-neutral-500 dark:text-neutral-400">Invoice · INV-0041</p></div>
                 <span className="h-8 w-8 rounded" style={{ backgroundColor: "rgba(52, 211, 153, 0.9)" }} />
               </div>
               <div className="mt-5 flex justify-between border-t border-neutral-200 dark:border-neutral-900 pt-4 text-[11px]">
-                <div><p className="text-neutral-500 dark:text-neutral-400">Billed to</p><p className="mt-0.5 text-neutral-600 dark:text-neutral-200">Atlas Digital Studio Ltd</p></div>
+                <div><p className="text-neutral-500 dark:text-neutral-400">Billed to</p><p className="mt-0.5 text-neutral-600 dark:text-neutral-200">Chop Life Music</p></div>
                 <div className="text-right"><p className="text-neutral-500 dark:text-neutral-400">Due</p><p className="mt-0.5 text-neutral-600 dark:text-neutral-200">07 Jul 2026</p></div>
               </div>
               <div className="mt-5 space-y-3 border-t border-neutral-200 dark:border-neutral-900 pt-4 text-xs">
-                <div className="flex justify-between text-neutral-600 dark:text-neutral-200"><span>Brand identity — phase 2</span><span className="text-neutral-600 dark:text-neutral-200">£4,200.00</span></div>
+                <div className="flex justify-between text-neutral-600 dark:text-neutral-200"><span>CRM Development — phase 2</span><span className="text-neutral-600 dark:text-neutral-200">£7,200.00</span></div>
                 <div className="flex justify-between text-neutral-600 dark:text-neutral-200"><span>Web design retainer</span><span className="text-neutral-600 dark:text-neutral-200">£1,800.00</span></div>
               </div>
               <div className="mt-4 flex items-baseline justify-between border-t border-neutral-200 dark:border-neutral-900 pt-4">
                 <span className="text-xs text-neutral-500 dark:text-neutral-400">Total due</span>
-                <span className="font-serif text-2xl text-neutral-900 dark:text-neutral-50">£6,000.00</span>
+                <span className="font-serif text-2xl text-neutral-900 dark:text-neutral-50">£9,000.00</span>
               </div>
               <div className="mt-4 rounded-lg bg-neutral-950 dark:bg-neutral-50 py-2.5 text-center text-xs font-medium text-white dark:text-neutral-950">Pay now</div>
             </div>
