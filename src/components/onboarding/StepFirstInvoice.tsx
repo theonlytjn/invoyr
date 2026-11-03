@@ -63,7 +63,7 @@ export default function StepFirstInvoice({ data, onBack, onComplete, onConsentCh
         <h2 className="text-3xl font-serif text-neutral-950 mb-1">You&apos;re almost ready!</h2>
         <p className="text-sm text-neutral-500">
           Add a card to start your {data.trialDays}-day trial. Nothing is charged until it ends
-          {price ? `; then it's ${price} + VAT, renewing automatically until you cancel` : ""}.
+          {price ? `; then it's ${price}, renewing automatically until you cancel` : ""}.
         </p>
       </div>
 

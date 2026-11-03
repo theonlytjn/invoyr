@@ -8,8 +8,12 @@ export type BillingPeriod = "monthly" | "yearly";
 /** Yearly is the default everywhere: it is the better deal and the one we lead with. */
 export const DEFAULT_BILLING: BillingPeriod = "yearly";
 
-/** What the pricing footnote says about VAT. Prices exclude VAT (confirmed against Stripe, 3 Nov). */
-export const PRICING_FOOTNOTE = "Prices exclude VAT. Cancel anytime. 14-day free trial on every plan.";
+/**
+ * The line under the plan cards. No VAT wording: Invoyr Limited is not VAT
+ * registered, so no VAT is charged. Once registered, say "Prices exclude VAT"
+ * here and turn on automatic tax in the checkout route.
+ */
+export const PRICING_FOOTNOTE = "Cancel anytime. 14-day free trial on every plan.";
 
 export type Feature =
   | "custom_branding"

@@ -41,8 +41,16 @@ Detail behind every item lives in `docs/INV-008-handoff.md` (sections in bracket
 | ☐ | **Stripe housekeeping:** refund the £1.20 test (INV-0016) if wanted, and re-add the WHMCS webhook if you still use it. You can also roll the unused "Invoyr Keys" key on TJN's account. | Any time |
 | ☐ | **Comped orgs:** make sure none of the four comped orgs also has a live Stripe subscription. A comp does not stop Stripe billing. | Before launch |
 
-| ☐ | **Monthly prices:** create a monthly GBP price on each Stripe product (Starter £8, Business £15, Pro £25, excluding VAT) and add `STRIPE_PRICE_ID_STARTER_MONTHLY`, `STRIPE_PRICE_ID_BUSINESS_MONTHLY` and `STRIPE_PRICE_ID_PRO_MONTHLY` in Vercel, then redeploy. Until all three are set, the toggle shows monthly prices but monthly signup says "coming soon". | Before launch |
+| ☐ | **Monthly prices:** create a monthly GBP price on each Stripe product (Starter £8, Business £15, Pro £25; no VAT while unregistered) and add `STRIPE_PRICE_ID_STARTER_MONTHLY`, `STRIPE_PRICE_ID_BUSINESS_MONTHLY` and `STRIPE_PRICE_ID_PRO_MONTHLY` in Vercel, then redeploy. Until all three are set, the toggle shows monthly prices but monthly signup says "coming soon". | Before launch |
 | ☐ | **Stripe customer portal:** check plan switching is off in the portal settings, so plan changes only go through Billing in the app (which avoids a second subscription). | Before launch |
+
+### VAT (decided 3 Nov)
+
+Invoyr Limited is not VAT registered, so no VAT is charged and the pricing pages say
+nothing about VAT. Registration becomes compulsory once taxable turnover passes £90,000 in
+any rolling 12 months. When registering: add the VAT number in Stripe Tax, set prices to
+tax-exclusive, ask Claude to turn on `automatic_tax` in checkout and change
+`PRICING_FOOTNOTE` in `src/config/plans.ts` to "Prices exclude VAT".
 
 ### Early Adopter programme (updated 3 Nov)
 

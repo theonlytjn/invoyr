@@ -172,8 +172,8 @@ export default function EarlyAccessPage() {
             <div className="mt-10">
               {/* The signature is drawn in black; it is inverted to white on the dark site. */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/brand/tn-signature.svg" alt="Tony's signature" className="h-20 w-auto dark:invert" />
-              <p className="mt-2 font-medium text-neutral-900 dark:text-neutral-50">Tony</p>
+              <img src="/brand/tn-signature.svg" alt="Tony Nwachi's signature" className="h-20 w-auto dark:invert" />
+              <p className="mt-2 font-medium text-neutral-900 dark:text-neutral-50">Tony Nwachi</p>
               <p className="text-sm text-neutral-500 dark:text-neutral-400">Founder, Invoyr</p>
             </div>
 
@@ -244,7 +244,7 @@ export default function EarlyAccessPage() {
             monthlyAvailable={isMonthlyBillingAvailable()}
             showHighlights
             signupParams={{ code: EARLY_ACCESS.code }}
-            footnote={`Prices exclude VAT. Cancel anytime. ${DAYS}-day free trial with code ${EARLY_ACCESS.code}; ${PERCENT}% off the first yearly payment when claimed before the offer closes.`}
+            footnote={`Cancel anytime. ${DAYS}-day free trial with code ${EARLY_ACCESS.code}; ${PERCENT}% off the first yearly payment when claimed before the offer closes.`}
           />
         </div>
       </section>
