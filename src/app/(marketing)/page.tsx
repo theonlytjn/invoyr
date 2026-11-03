@@ -1,5 +1,7 @@
 import Link from "next/link";
 import HeroBackdrop from "@/components/marketing/HeroBackdrop";
+import PricingCards from "@/components/pricing/PricingCards";
+import { isMonthlyBillingAvailable } from "@/config/plans";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -51,25 +53,10 @@ const INTEGRATIONS = [
   { name: "Xero", src: "/xero.svg" },
 ];
 
-const PLANS = [
-  {
-    name: "Starter", price: "£79", users: "1 user", popular: false, cta: "Start free trial",
-    features: ["Unlimited invoices & estimates", "Stripe card payments", "Bank transfer & 4 templates", "Expenses & multi-currency"],
-  },
-  {
-    name: "Business", price: "£149", users: "Up to 5 users", popular: true, cta: "Start free trial",
-    features: ["Everything in Starter", "PayPal payments", "Remove “Powered by Invoyr”", "Recurring invoices & reports"],
-  },
-  {
-    name: "Pro", price: "£249", users: "Unlimited users", popular: false, cta: "Start free trial",
-    features: ["Everything in Business", "Open Banking sync & import", "Automated reminders", "API access & webhooks"],
-  },
-];
-
 const FAQS = [
   { q: "Is there a free trial?", a: "Yes — every plan starts with a 14-day free trial. You add a card when you pick your plan, nothing is charged until the trial ends, and you can cancel any time before then." },
   { q: "What payment methods can my clients use?", a: "Stripe card payments on every plan, plus PayPal (Business+) and bank transfer." },
-  { q: "Are there per-invoice fees?", a: "No. One price a year — send as many invoices as you like." },
+  { q: "Are there per-invoice fees?", a: "No. One flat subscription — send as many invoices as you like." },
   { q: "Can I change plan later?", a: "Any time. Start on Starter and move up as your business grows." },
   { q: "Does the money go straight to me?", a: "Yes — payments settle directly to your own Stripe or PayPal account." },
 ];
@@ -80,6 +67,7 @@ const glow = {
 };
 
 export default function HomePage() {
+  const monthlyAvailable = isMonthlyBillingAvailable();
   return (
     <div>
       {/* HERO */}
@@ -462,39 +450,18 @@ export default function HomePage() {
         <div className={`${CONTAINER} py-24`}>
           <div className="max-w-2xl">
             <h2 className="font-serif text-4xl md:text-5xl leading-[1.05] text-neutral-900 dark:text-neutral-50">
-              One price a year.
+              {monthlyAvailable ? "Simple pricing." : "One price a year."}
               <br />
               <span className="text-neutral-500 dark:text-neutral-400">No per-invoice fees, ever.</span>
             </h2>
-            <p className="mt-5 text-lg text-neutral-600 dark:text-neutral-200">Every plan is billed annually and includes a 14-day free trial — cancel any time before it ends.</p>
+            <p className="mt-5 text-lg text-neutral-600 dark:text-neutral-200">
+              {monthlyAvailable
+                ? "Pay monthly, or pay yearly and get 2 months free. Every plan includes a 14-day free trial — cancel any time before it ends."
+                : "Every plan is billed annually and includes a 14-day free trial — cancel any time before it ends."}
+            </p>
           </div>
-          <div className="mt-14 grid md:grid-cols-3 gap-px bg-neutral-200 dark:bg-neutral-800/60 border border-neutral-200 dark:border-neutral-800/60 rounded-2xl overflow-hidden">
-            {PLANS.map((plan) => (
-              <div key={plan.name} className={`p-8 flex flex-col ${plan.popular ? "bg-neutral-100 dark:bg-neutral-900" : "bg-white dark:bg-neutral-950"}`}>
-                <div className="flex items-baseline justify-between">
-                  <h3 className="font-serif text-2xl text-neutral-900 dark:text-neutral-50">{plan.name}</h3>
-                  {plan.popular && <span className="font-mono text-xs uppercase tracking-[0.14em] text-brand">Popular</span>}
-                </div>
-                <div className="mt-5 flex items-baseline gap-1">
-                  <span className="font-serif text-5xl text-neutral-900 dark:text-neutral-50">{plan.price}</span>
-                  <span className="text-base text-neutral-500 dark:text-neutral-400">/year</span>
-                </div>
-                <p className="mt-1 text-base text-neutral-500 dark:text-neutral-400">{plan.users}</p>
-                <ul className="mt-7 space-y-3 text-base text-neutral-700 dark:text-neutral-300 flex-1">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex gap-2.5"><span className="text-brand" aria-hidden>✓</span>{f}</li>
-                  ))}
-                </ul>
-                <Link
-                  href="/signup"
-                  className={`mt-8 block text-center py-3 rounded-lg text-base font-medium transition-colors ${
-                    plan.popular ? "bg-neutral-950 dark:bg-neutral-50 text-white dark:text-neutral-950 hover:bg-neutral-800 dark:hover:bg-white" : "border border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-900"
-                  }`}
-                >
-                  {plan.cta}
-                </Link>
-              </div>
-            ))}
+          <div className="mt-14">
+            <PricingCards monthlyAvailable={monthlyAvailable} showHighlights />
           </div>
         </div>
       </section>

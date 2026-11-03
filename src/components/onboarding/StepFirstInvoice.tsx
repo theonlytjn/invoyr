@@ -1,6 +1,6 @@
 "use client";
 
-import { TRIAL_DAYS } from "@/config/plans";
+import { PLAN_MAP, formatPounds, type PlanId } from "@/config/plans";
 import type { OnboardingData } from "./OnboardingWizard";
 
 interface Props {
@@ -52,12 +52,18 @@ const FEATURES = [
 ];
 
 export default function StepFirstInvoice({ data, onBack, onComplete, onConsentChange, saving, error, onSkip }: Props) {
+  const plan = PLAN_MAP[data.plan as PlanId];
+  const price = plan
+    ? `${formatPounds(plan.amounts[data.billing])}${data.billing === "yearly" ? "/year" : "/month"}`
+    : null;
+
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-3xl font-serif text-neutral-950 mb-1">You&apos;re almost ready!</h2>
         <p className="text-sm text-neutral-500">
-          Add a card to start your {TRIAL_DAYS}-day trial. Nothing is charged until it ends.
+          Add a card to start your {data.trialDays}-day trial. Nothing is charged until it ends
+          {price ? `; then it's ${price}, renewing automatically until you cancel` : ""}.
         </p>
       </div>
 
@@ -82,7 +88,9 @@ export default function StepFirstInvoice({ data, onBack, onComplete, onConsentCh
         </div>
         <div className="mt-2 flex items-center justify-between">
           <span className="text-neutral-500">Plan</span>
-          <span className="font-medium text-neutral-950 capitalize">{data.plan} · {TRIAL_DAYS}-day trial</span>
+          <span className="font-medium text-neutral-950">
+            {plan?.name ?? data.plan} · {data.billing === "yearly" ? "Yearly" : "Monthly"} · {data.trialDays}-day trial
+          </span>
         </div>
       </div>
 

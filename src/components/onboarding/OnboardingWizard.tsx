@@ -9,10 +9,16 @@ import StepOrgSetup from "./StepOrgSetup";
 import StepBranding from "./StepBranding";
 import StepPlanSelection from "./StepPlanSelection";
 import StepFirstInvoice from "./StepFirstInvoice";
+import { DEFAULT_BILLING, TRIAL_DAYS, type BillingPeriod, type PlanId } from "@/config/plans";
+import { SIGNUP_INTENT_COOKIE } from "@/lib/onboarding/signup-intent";
 
 interface Props {
   userId: string;
   userName: string;
+  initialPlan?: PlanId;
+  initialBilling?: BillingPeriod;
+  initialTrialCode?: string;
+  monthlyAvailable: boolean;
 }
 
 export type OnboardingData = {
@@ -29,6 +35,11 @@ export type OnboardingData = {
   website: string;
   accentColor: string;
   plan: string;
+  billing: BillingPeriod;
+  /** Early-access code, already checked on the plan step. Empty when none. */
+  trialCode: string;
+  /** TRIAL_DAYS, or the longer trial the early-access code gives. */
+  trialDays: number;
   marketingConsent: boolean;
 };
 
@@ -39,7 +50,14 @@ const STEPS = [
   { label: "All set" },
 ];
 
-export default function OnboardingWizard({ userId, userName }: Props) {
+export default function OnboardingWizard({
+  userId,
+  userName,
+  initialPlan,
+  initialBilling,
+  initialTrialCode,
+  monthlyAvailable,
+}: Props) {
   const [step, setStep] = useState(1);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,7 +79,11 @@ export default function OnboardingWizard({ userId, userName }: Props) {
     companyNumber: "",
     website: "",
     accentColor: "#111827",
-    plan: "starter",
+    plan: initialPlan ?? "starter",
+    billing: initialBilling ?? DEFAULT_BILLING,
+    // Checked on the plan step before it counts.
+    trialCode: "",
+    trialDays: TRIAL_DAYS,
     marketingConsent: false,
   });
 
@@ -156,7 +178,12 @@ export default function OnboardingWizard({ userId, userName }: Props) {
     const checkoutRes = await fetch("/api/billing/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ planId: data.plan, origin: "onboarding" }),
+      body: JSON.stringify({
+        planId: data.plan,
+        billing: data.billing,
+        origin: "onboarding",
+        ...(data.trialCode ? { trialCode: data.trialCode } : {}),
+      }),
     }).catch(() => null);
 
     const checkout = checkoutRes ? await checkoutRes.json().catch(() => ({})) : {};
@@ -171,6 +198,8 @@ export default function OnboardingWizard({ userId, userName }: Props) {
       return;
     }
 
+    // The choices from the pricing page have been used; don't carry them further.
+    document.cookie = `${SIGNUP_INTENT_COOKIE}=; path=/; max-age=0`;
     window.location.href = checkout.url;
   }
 
@@ -241,7 +270,7 @@ export default function OnboardingWizard({ userId, userName }: Props) {
             {/* Step content */}
             {step === 1 && <StepOrgSetup data={data} update={update} onNext={() => setStep(2)} />}
             {step === 2 && <StepBranding data={data} update={update} logoFile={logoFile} onLogoChange={setLogoFile} onBack={() => setStep(1)} onNext={() => setStep(3)} />}
-            {step === 3 && <StepPlanSelection data={data} update={update} onBack={() => setStep(2)} onNext={() => setStep(4)} />}
+            {step === 3 && <StepPlanSelection data={data} update={update} monthlyAvailable={monthlyAvailable} initialTrialCode={initialTrialCode} onBack={() => setStep(2)} onNext={() => setStep(4)} />}
             {step === 4 && <StepFirstInvoice data={data} onBack={() => setStep(3)} onComplete={complete} onConsentChange={(v) => update({ marketingConsent: v })} saving={saving} error={error} onSkip={createdOrgId ? () => { window.location.href = "/dashboard"; } : undefined} />}
           </div>
         </div>

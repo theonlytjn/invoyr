@@ -1,8 +1,9 @@
 import { Fragment } from "react";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { PLANS, type PlanId } from "@/config/plans";
+import { PLANS, isMonthlyBillingAvailable } from "@/config/plans";
 import HeroBackdrop from "@/components/marketing/HeroBackdrop";
+import PricingCards from "@/components/pricing/PricingCards";
 
 export const metadata: Metadata = { title: "Pricing" };
 
@@ -94,8 +95,8 @@ function Cell({ value, emphasis }: { value: Cell; emphasis?: boolean }) {
 }
 
 export default function PricingPage() {
-  const planOrder: PlanId[] = ["starter", "business", "pro"];
-  const plans = planOrder.map((id) => PLANS.find((p) => p.id === id)!);
+  const plans = PLANS;
+  const monthlyAvailable = isMonthlyBillingAvailable();
 
   return (
     <div className="bg-white dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100">
@@ -106,51 +107,23 @@ export default function PricingPage() {
           {/* Two lines, not three: the second line was wrapping on its own, so
               the container is wider and the type a touch smaller. */}
           <h1 className="font-serif text-[clamp(2.4rem,5.2vw,4.5rem)] leading-[0.95] tracking-tight text-balance text-neutral-900 dark:text-neutral-50">
-            One price a year.
+            {monthlyAvailable ? "Simple pricing." : "One price a year."}
             <br />
             <span className="text-brand-ink">No per-invoice fees, ever.</span>
           </h1>
           <p className="mt-6 mx-auto max-w-2xl text-xl text-neutral-600 dark:text-neutral-200 leading-relaxed">
-            Every plan is billed annually and includes a 14-day free trial — cancel any time before it ends.
+            {monthlyAvailable
+              ? "Pay monthly, or pay yearly and get 2 months free. Every plan includes a 14-day free trial — cancel any time before it ends."
+              : "Every plan is billed annually and includes a 14-day free trial — cancel any time before it ends."}{" "}
             Start on Starter, move up when your business does.
           </p>
         </div>
       </section>
 
       <div className="max-w-[1600px] mx-auto px-6 lg:px-12 pb-24 sm:pb-32">
-        {/* Plan headers */}
-        <div data-reveal className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-px bg-neutral-200 dark:bg-neutral-800/60 border border-neutral-200 dark:border-neutral-800/60 rounded-2xl overflow-hidden">
-          {plans.map((plan) => {
-            const popular = plan.popular;
-            return (
-              <div
-                key={plan.id}
-                className={`p-8 flex flex-col ${popular ? "bg-neutral-100 dark:bg-neutral-900" : "bg-white dark:bg-neutral-950"}`}
-              >
-                <div className="flex items-baseline justify-between">
-                  <h2 className="font-serif text-2xl text-neutral-900 dark:text-neutral-50">{plan.name}</h2>
-                  {popular && (
-                    <span className="text-[11px] uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Popular</span>
-                  )}
-                </div>
-                <div className="mt-5 flex items-baseline gap-1">
-                  <span className="font-serif text-4xl text-neutral-900 dark:text-neutral-50">{plan.price}</span>
-                  <span className="text-sm text-neutral-500 dark:text-neutral-400">{plan.period}</span>
-                </div>
-                <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">{plan.users}</p>
-                <Link
-                  href="/signup"
-                  className={`mt-8 block text-center py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                    popular
-                      ? "bg-neutral-950 dark:bg-neutral-50 text-white dark:text-neutral-950 hover:bg-neutral-800 dark:hover:bg-white"
-                      : "border border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-900"
-                  }`}
-                >
-                  Start free trial
-                </Link>
-              </div>
-            );
-          })}
+        {/* Plan cards + Monthly | Yearly toggle */}
+        <div data-reveal className="mt-16">
+          <PricingCards monthlyAvailable={monthlyAvailable} />
         </div>
 
         {/* Comparison matrix */}

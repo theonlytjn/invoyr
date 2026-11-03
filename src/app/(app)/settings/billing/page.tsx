@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
 import { isSubscriptionActive, getCompPlan } from "@/lib/billing";
-import { PLAN_MAP } from "@/config/plans";
+import { PLAN_MAP, isMonthlyBillingAvailable } from "@/config/plans";
 import Topbar from "@/components/shell/Topbar";
 import { BillingActions } from "./BillingActions";
 import type { Metadata } from "next";
@@ -95,7 +95,9 @@ export default async function BillingPage({
                 </p>
               )}
               {status === "active" && periodEnd && (
-                <p className="text-sm text-neutral-500">Renews {periodEnd}</p>
+                <p className="text-sm text-neutral-500">
+                  {subscription?.billing_interval === "month" ? "Billed monthly" : "Billed yearly"} · Renews {periodEnd}
+                </p>
               )}
               {status === "comp" && (
                 <p className="text-sm text-neutral-500">Complimentary access — no billing required.</p>
@@ -125,8 +127,14 @@ export default async function BillingPage({
             </h2>
             <BillingActions
               currentPlan={plan}
+              currentInterval={subscription?.billing_interval ?? null}
               status={status}
+              hasLiveSubscription={
+                !!subscription?.stripe_subscription_id &&
+                ["active", "trialing", "past_due"].includes(subscription.status)
+              }
               hasActiveSubscription={!!subscription?.stripe_subscription_id}
+              monthlyAvailable={isMonthlyBillingAvailable()}
             />
           </div>
         )}

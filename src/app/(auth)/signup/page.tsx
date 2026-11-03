@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import { friendlyAuthError } from "@/lib/auth/friendly-error";
 import TurnstileWidget, { turnstileConfigured } from "@/components/TurnstileWidget";
 import { EyeIcon, EyeSlashIcon } from "@phosphor-icons/react";
+import { SIGNUP_INTENT_COOKIE, signupIntentFromSearch } from "@/lib/onboarding/signup-intent";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -19,6 +20,17 @@ export default function SignupPage() {
   const [captchaToken, setCaptchaToken] = useState("");
   // Single-use tokens: remount the widget after a failure to get a fresh one.
   const [captchaKey, setCaptchaKey] = useState(0);
+  const [earlyAccessCode, setEarlyAccessCode] = useState<string | null>(null);
+
+  // Keep the plan, billing period and early-access code from the link, so
+  // onboarding starts where the visitor left off on the pricing page.
+  useEffect(() => {
+    const intent = signupIntentFromSearch(window.location.search);
+    if (!intent.plan && !intent.billing && !intent.code) return;
+    const value = encodeURIComponent(JSON.stringify(intent));
+    document.cookie = `${SIGNUP_INTENT_COOKIE}=${value}; path=/; max-age=${60 * 60 * 24 * 30}; samesite=lax; secure`;
+    if (intent.code) setEarlyAccessCode(intent.code);
+  }, []);
 
   async function handleGoogle() {
     const supabase = createClient();
@@ -99,6 +111,11 @@ export default function SignupPage() {
         <div className="flex flex-1 items-center justify-center px-8">
           <div className="w-full max-w-sm">
             <div className="mb-8">
+              {earlyAccessCode && (
+                <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-brand px-3 py-1 text-xs font-semibold text-brand-foreground">
+                  Early access code: {earlyAccessCode}
+                </p>
+              )}
               <h1 className="text-3xl font-serif text-neutral-950 mb-2">Create your account</h1>
               <p className="text-sm text-neutral-500">
                 Already have an account?{" "}

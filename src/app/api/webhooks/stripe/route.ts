@@ -9,7 +9,7 @@ import { PaymentFailedEmail } from "@/emails/transactional/PaymentFailedEmail";
 import { PaymentReceivedEmail } from "@/emails/transactional/PaymentReceivedEmail";
 import { SubscriptionActivatedEmail } from "@/emails/transactional/SubscriptionActivatedEmail";
 import { InvoicePaidOwnerEmail } from "@/emails/transactional/InvoicePaidOwnerEmail";
-import { getPlanByPriceId } from "@/config/plans";
+import { billingIntervalOf, getPlanByPriceId } from "@/config/plans";
 import { formatDate } from "@/lib/utils";
 import { recordPaymentRow } from "@/lib/payments/record-payment-row";
 import { applyInvoicePaymentState } from "@/lib/payments/apply-invoice-payment-state";
@@ -454,6 +454,7 @@ async function upsertSubscription(
         ? new Date(firstItem.current_period_end * 1000).toISOString()
         : null,
       cancel_at_period_end: stripeSub.cancel_at_period_end,
+      billing_interval: billingIntervalOf(firstItem?.price?.recurring?.interval),
     },
     { onConflict: "org_id" }
   );

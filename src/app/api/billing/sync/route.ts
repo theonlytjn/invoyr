@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getStripe } from "@/lib/stripe/client";
 import { requireOrg } from "@/lib/auth";
-import { getPlanByPriceId } from "@/config/plans";
+import { billingIntervalOf, getPlanByPriceId } from "@/config/plans";
 
 export async function POST() {
   const supabase = await createClient();
@@ -71,6 +71,7 @@ export async function POST() {
         ? new Date(firstItem.current_period_end * 1000).toISOString()
         : null,
       cancel_at_period_end: activeSub.cancel_at_period_end,
+      billing_interval: billingIntervalOf(firstItem?.price?.recurring?.interval),
     },
     { onConflict: "org_id" }
   );

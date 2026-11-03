@@ -396,6 +396,7 @@ create table if not exists public.subscriptions (
   current_period_start    timestamptz,
   current_period_end      timestamptz,
   cancel_at_period_end    boolean not null default false,
+  billing_interval        text check (billing_interval in ('month', 'year')),
   created_at              timestamptz not null default now(),
   updated_at              timestamptz not null default now()
 );
@@ -1294,3 +1295,76 @@ $$;
 
 revoke execute on function public.transfer_org_ownership(uuid, bigint) from public, anon;
 grant execute on function public.transfer_org_ownership(uuid, bigint) to authenticated;
+
+-- ----------------------------------------------------------------
+-- 23. TRIAL CODES (early access)
+-- ----------------------------------------------------------------
+-- A code typed at onboarding (or carried in /signup?code=…) swaps the standard
+-- 14-day trial for trial_days. A card is still taken and Stripe bills when the
+-- longer trial ends. Codes are managed by hand in the Supabase dashboard: add a
+-- row to create one, set active = false to switch it off. Both tables are
+-- service-role only (RLS on, no policies).
+create table if not exists public.trial_codes (
+  code             text primary key check (code = upper(code) and code ~ '^[A-Z0-9-]{3,32}$'),
+  trial_days       integer not null check (trial_days between 1 and 365),
+  max_redemptions  integer check (max_redemptions > 0),
+  expires_at       timestamptz,
+  active           boolean not null default true,
+  note             text,
+  created_at       timestamptz not null default now()
+);
+
+create table if not exists public.trial_code_redemptions (
+  org_id       uuid primary key references public.organisations(id) on delete cascade,
+  code         text not null references public.trial_codes(code) on update cascade,
+  redeemed_at  timestamptz not null default now()
+);
+create index if not exists trial_code_redemptions_code_idx on public.trial_code_redemptions(code);
+
+alter table public.trial_codes enable row level security;
+alter table public.trial_code_redemptions enable row level security;
+
+-- Checks a code, and when p_org_id is given also reserves it for that org.
+-- Returns the trial length in days, or null when the code can't be used.
+-- An org keeps the first code it redeemed, so retrying checkout is free.
+create or replace function public.redeem_trial_code(p_code text, p_org_id uuid default null)
+returns integer
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_code public.trial_codes%rowtype;
+  v_used integer;
+  v_existing text;
+begin
+  if p_org_id is not null then
+    select code into v_existing from public.trial_code_redemptions where org_id = p_org_id;
+    if v_existing is not null then
+      return (select trial_days from public.trial_codes where code = v_existing);
+    end if;
+  end if;
+
+  select * into v_code from public.trial_codes where code = upper(trim(p_code)) for update;
+  if not found or not v_code.active then return null; end if;
+  if v_code.expires_at is not null and v_code.expires_at <= now() then return null; end if;
+
+  if v_code.max_redemptions is not null then
+    select count(*) into v_used from public.trial_code_redemptions where code = v_code.code;
+    if v_used >= v_code.max_redemptions then return null; end if;
+  end if;
+
+  if p_org_id is not null then
+    insert into public.trial_code_redemptions (org_id, code) values (p_org_id, v_code.code);
+  end if;
+
+  return v_code.trial_days;
+end;
+$$;
+
+revoke all on function public.redeem_trial_code(text, uuid) from public, anon, authenticated;
+grant execute on function public.redeem_trial_code(text, uuid) to service_role;
+
+insert into public.trial_codes (code, trial_days, max_redemptions, note)
+values ('FOUNDING', 90, 50, 'Early adopters: 3 months free, launch Dec 2026')
+on conflict (code) do nothing;

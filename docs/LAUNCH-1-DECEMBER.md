@@ -41,6 +41,19 @@ Detail behind every item lives in `docs/INV-008-handoff.md` (sections in bracket
 | ☐ | **Stripe housekeeping:** refund the £1.20 test (INV-0016) if wanted, and re-add the WHMCS webhook if you still use it. You can also roll the unused "Invoyr Keys" key on TJN's account. | Any time |
 | ☐ | **Comped orgs:** make sure none of the four comped orgs also has a live Stripe subscription. A comp does not stop Stripe billing. | Before launch |
 
+| ☐ | **Monthly prices:** create a monthly GBP price on each Stripe product (Starter £8, Business £15, Pro £25, VAT-inclusive) and add `STRIPE_PRICE_ID_STARTER_MONTHLY`, `STRIPE_PRICE_ID_BUSINESS_MONTHLY` and `STRIPE_PRICE_ID_PRO_MONTHLY` in Vercel, then redeploy. Until all three are set, the toggle shows monthly prices but monthly signup says "coming soon". | Before launch |
+| ☐ | **Stripe customer portal:** check plan switching is off in the portal settings, so plan changes only go through Billing in the app (which avoids a second subscription). | Before launch |
+
+### Early access (added 3 Nov)
+
+- Page: `invoyr.io/early-access` (not in the menu or search engines; share the link).
+- Code `FOUNDING` gives a 90-day trial instead of 14 days, for up to 50 businesses. A card is
+  still taken and Stripe bills when the trial ends.
+- Codes live in Supabase → Table editor → `trial_codes`. Add a row for a new code (CAPITALS,
+  `trial_days`, optional `max_redemptions` and `expires_at`); untick `active` to switch one off.
+  Who used which code is in `trial_code_redemptions`.
+- If you change the offer, update `src/config/early-access.ts` too (the page copy).
+
 ### Solicitor brief (what to ask them to confirm)
 
 Send them `/terms`, `/privacy` and `/dpa` and ask for sign-off on these six points:
@@ -58,8 +71,9 @@ Send them `/terms`, `/privacy` and `/dpa` and ask for sign-off on these six poin
    - Should the DPA's processing description mention it too?
 5. **"Preference centre" sentence** (Privacy §3) says consent can be withdrawn "in your
    settings", but no such setting exists. Agree new wording, or we build the toggle.
-6. **Trial auto-renewal:** onboarding has no renewal disclosure beside Invoyr's own
-   button (Stripe Checkout shows one). Is that enough under the new UK subscription
+6. **Trial auto-renewal:** the last onboarding step now says the price and that it renews
+   automatically until cancelled, and Stripe Checkout shows its own notice. The 90-day
+   early-access trial is the same mechanism. Is that enough under the new UK subscription
    rules (DMCC Act 2024)?
 
 Already done: Chop Life subscription cancelled ✓ · Cakes By Kels logo re-uploaded ✓ ·

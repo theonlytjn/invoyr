@@ -13,6 +13,7 @@ const MARKETING_PATHS = [
   "/use-cases",
   "/pricing",
   "/about",
+  "/early-access",
   "/contact",
   "/privacy",
   "/terms",
