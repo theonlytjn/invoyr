@@ -60,7 +60,7 @@ export default function FeaturesPage() {
                 <div className="w-72 rounded-t-3xl border-8 border-b-0 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 shadow-2xl shadow-neutral-900/10 dark:shadow-black/60">
                   <div className="flex items-center justify-between px-5 pb-1 pt-3 font-mono text-[10px] text-neutral-600 dark:text-neutral-200"><span>9:41</span><span>5G ▬▬▬</span></div>
                   <div className="px-5 pb-8 pt-2">
-                    <div className="rounded-lg bg-neutral-100 dark:bg-neutral-900 px-4 py-3"><p className="font-serif text-base text-neutral-900 dark:text-neutral-50">TJN Agency</p><p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400">#INV-0042</p></div>
+                    <div className="flex items-center gap-3 rounded-lg bg-neutral-100 dark:bg-neutral-900 px-4 py-3"><span className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full bg-neutral-950 ring-1 ring-white/10">{/* eslint-disable-next-line @next/next/no-img-element */}<img src="/clients/tjn-agency-badge-white.svg" alt="" className="h-full w-full" /></span><div><p className="font-serif text-base text-neutral-900 dark:text-neutral-50">TJN Agency</p><p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400">#INV-0042</p></div></div>
                     <div className="mt-4 flex items-baseline justify-between"><span className="text-xs text-neutral-500 dark:text-neutral-400">Amount due</span><span className="font-serif text-2xl text-neutral-900 dark:text-neutral-50">£11,520</span></div>
                     <div className="mt-4 rounded-lg bg-neutral-950 dark:bg-neutral-50 py-2.5 text-center text-xs font-medium text-white dark:text-neutral-950">Pay now</div>
                     <div className="mt-2 rounded-lg border border-neutral-200 dark:border-neutral-800 py-2.5 text-center text-xs text-neutral-700 dark:text-neutral-300">Pay with PayPal</div>
@@ -104,7 +104,7 @@ export default function FeaturesPage() {
                 <div className="rounded-t-xl border border-b-0 border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-950 p-6 shadow-2xl shadow-neutral-900/10 dark:shadow-black/60">
                   <div className="flex items-start justify-between">
                     <div><p className="font-serif text-lg text-neutral-900 dark:text-neutral-50">TJN Agency</p><p className="mt-0.5 font-mono text-[10px] text-neutral-500 dark:text-neutral-400">Invoice · INV-0041</p></div>
-                    <span className="h-8 w-8 rounded" style={{ backgroundColor: "rgba(52, 211, 153, 0.9)" }} />
+                    <span className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-full bg-neutral-950 ring-1 ring-white/10">{/* eslint-disable-next-line @next/next/no-img-element */}<img src="/clients/tjn-agency-badge-white.svg" alt="" className="h-full w-full" /></span>
                   </div>
                   <div className="mt-5 flex justify-between border-t border-neutral-200 dark:border-neutral-900 pt-4 text-[11px]">
                     <div><p className="text-neutral-500 dark:text-neutral-400">Billed to</p><p className="mt-0.5 text-neutral-600 dark:text-neutral-200">Finer Fleet</p></div>
@@ -159,7 +159,7 @@ export default function FeaturesPage() {
               <div className="w-52 shrink-0 border-r border-neutral-200 dark:border-neutral-900 p-4">
                 <span className="px-1 font-serif text-lg text-neutral-900 dark:text-neutral-50">Invoyr</span>
                 <div className="mt-4 flex items-center gap-2 rounded-lg border border-neutral-200 dark:border-neutral-800 p-2.5">
-                  <span className="grid h-7 w-7 place-items-center rounded bg-neutral-200 dark:bg-neutral-800 text-xs text-neutral-600 dark:text-neutral-200">N</span>
+                  <span className="grid h-7 w-7 shrink-0 place-items-center overflow-hidden rounded-full bg-neutral-950 ring-1 ring-white/10">{/* eslint-disable-next-line @next/next/no-img-element */}<img src="/clients/tjn-agency-badge-white.svg" alt="" className="h-full w-full" /></span>
                   <div><p className="text-xs text-neutral-900 dark:text-neutral-100">TJN Agency</p><p className="text-[10px] text-neutral-500 dark:text-neutral-400">Pro Plan</p></div>
                 </div>
                 <div className="mt-3 rounded-lg bg-neutral-950 dark:bg-neutral-50 py-2 text-center text-xs font-medium text-white dark:text-neutral-950">+ New invoice</div>

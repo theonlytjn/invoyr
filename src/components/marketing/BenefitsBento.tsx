@@ -19,9 +19,12 @@ export default function BenefitsBento({ className }: { className?: string }) {
               <span>9:41</span><span>5G ▬▬▬</span>
             </div>
             <div className="px-5 pb-8 pt-2">
-              <div className="rounded-lg bg-neutral-100 dark:bg-neutral-900 px-4 py-3">
-                <p className="font-serif text-base text-neutral-900 dark:text-neutral-50">TJN Agency</p>
-                <p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400">#INV-0042</p>
+              <div className="flex items-center gap-3 rounded-lg bg-neutral-100 dark:bg-neutral-900 px-4 py-3">
+                <span className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full bg-neutral-950 ring-1 ring-white/10">{/* eslint-disable-next-line @next/next/no-img-element */}<img src="/clients/tjn-agency-badge-white.svg" alt="" className="h-full w-full" /></span>
+                <div>
+                  <p className="font-serif text-base text-neutral-900 dark:text-neutral-50">TJN Agency</p>
+                  <p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400">#INV-0042</p>
+                </div>
               </div>
               <div className="mt-4 flex items-baseline justify-between">
                 <span className="text-xs text-neutral-500 dark:text-neutral-400">Amount due</span>
@@ -77,7 +80,7 @@ export default function BenefitsBento({ className }: { className?: string }) {
                 <p className="font-serif text-lg text-neutral-900 dark:text-neutral-50">TJN Agency</p>
                 <p className="mt-0.5 font-mono text-[10px] text-neutral-500 dark:text-neutral-400">Invoice · INV-0042</p>
               </div>
-              <span className="h-8 w-8 rounded" style={{ backgroundColor: "rgba(52, 211, 153, 0.9)" }} />
+              <span className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-full bg-neutral-950 ring-1 ring-white/10">{/* eslint-disable-next-line @next/next/no-img-element */}<img src="/clients/tjn-agency-badge-white.svg" alt="" className="h-full w-full" /></span>
             </div>
             <div className="mt-5 flex justify-between border-t border-neutral-200 dark:border-neutral-900 pt-4 text-[11px]">
               <div><p className="text-neutral-500 dark:text-neutral-400">Billed to</p><p className="mt-0.5 text-neutral-600 dark:text-neutral-200">Finer Fleet</p></div>

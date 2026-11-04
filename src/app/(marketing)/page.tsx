@@ -256,7 +256,7 @@ export default function HomePage() {
             <div className="w-52 shrink-0 border-r border-neutral-200 dark:border-neutral-900 p-4">
               <span className="px-1 font-serif text-lg text-neutral-900 dark:text-neutral-50">Invoyr</span>
               <div className="mt-4 flex items-center gap-2 rounded-lg border border-neutral-200 dark:border-neutral-800 p-2.5">
-                <span className="grid h-7 w-7 place-items-center rounded bg-neutral-200 dark:bg-neutral-800 text-xs text-neutral-600 dark:text-neutral-200">N</span>
+                <span className="grid h-7 w-7 shrink-0 place-items-center overflow-hidden rounded-full bg-neutral-950 ring-1 ring-white/10">{/* eslint-disable-next-line @next/next/no-img-element */}<img src="/clients/tjn-agency-badge-white.svg" alt="" className="h-full w-full" /></span>
                 <div><p className="text-xs text-neutral-900 dark:text-neutral-100">TJN Agency</p><p className="text-[10px] text-neutral-500 dark:text-neutral-400">Pro Plan</p></div>
               </div>
               <div className="mt-3 rounded-lg bg-neutral-950 dark:bg-neutral-50 py-2 text-center text-xs font-medium text-white dark:text-neutral-950">+ New invoice</div>

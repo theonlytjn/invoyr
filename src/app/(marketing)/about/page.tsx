@@ -69,7 +69,7 @@ export default function AboutPage() {
             <div className="rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-950 p-6 shadow-2xl shadow-neutral-900/10 dark:shadow-black/50">
               <div className="flex items-start justify-between">
                 <div><p className="font-serif text-lg text-neutral-900 dark:text-neutral-50">TJN Agency</p><p className="mt-0.5 font-mono text-[10px] text-neutral-500 dark:text-neutral-400">Invoice · INV-0041</p></div>
-                <span className="h-8 w-8 rounded" style={{ backgroundColor: "rgba(52, 211, 153, 0.9)" }} />
+                <span className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-full bg-neutral-950 ring-1 ring-white/10">{/* eslint-disable-next-line @next/next/no-img-element */}<img src="/clients/tjn-agency-badge-white.svg" alt="" className="h-full w-full" /></span>
               </div>
               <div className="mt-5 flex justify-between border-t border-neutral-200 dark:border-neutral-900 pt-4 text-[11px]">
                 <div><p className="text-neutral-500 dark:text-neutral-400">Billed to</p><p className="mt-0.5 text-neutral-600 dark:text-neutral-200">Finer Fleet</p></div>
