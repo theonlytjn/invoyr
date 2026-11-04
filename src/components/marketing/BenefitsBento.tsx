@@ -23,12 +23,12 @@ export default function BenefitsBento({ className }: { className?: string }) {
                 {/* eslint-disable-next-line @next/next/no-img-element */}<img src="/clients/clm-white.svg" alt="" className="h-9 w-9 shrink-0 rounded-full" />
                 <div>
                   <p className="font-serif text-base text-neutral-900 dark:text-neutral-50">Chop Life Music</p>
-                  <p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400">#INV-0042</p>
+                  <p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400">#INV-0087</p>
                 </div>
               </div>
               <div className="mt-4 flex items-baseline justify-between">
                 <span className="text-xs text-neutral-500 dark:text-neutral-400">Amount due</span>
-                <span className="font-serif text-2xl text-neutral-900 dark:text-neutral-50">£11,520</span>
+                <span className="font-serif text-2xl text-neutral-900 dark:text-neutral-50">£8,795.00</span>
               </div>
               <div className="mt-4 rounded-lg bg-neutral-950 dark:bg-neutral-50 py-2.5 text-center text-xs font-medium text-white dark:text-neutral-950">Pay now</div>
               <div className="mt-2 rounded-lg border border-neutral-200 dark:border-neutral-800 py-2.5 text-center text-xs text-neutral-700 dark:text-neutral-300">Pay with PayPal</div>
