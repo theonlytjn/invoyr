@@ -20,9 +20,9 @@ export default function BenefitsBento({ className }: { className?: string }) {
             </div>
             <div className="px-5 pb-8 pt-2">
               <div className="flex items-center gap-3 rounded-lg bg-neutral-100 dark:bg-neutral-900 px-4 py-3">
-                <span className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full bg-neutral-950 ring-1 ring-white/10">{/* eslint-disable-next-line @next/next/no-img-element */}<img src="/clients/tjn-agency-badge-white.svg" alt="" className="h-full w-full" /></span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}<img src="/clients/clm-white.svg" alt="" className="h-9 w-9 shrink-0 rounded-full" />
                 <div>
-                  <p className="font-serif text-base text-neutral-900 dark:text-neutral-50">TJN Agency</p>
+                  <p className="font-serif text-base text-neutral-900 dark:text-neutral-50">Chop Life Music</p>
                   <p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400">#INV-0042</p>
                 </div>
               </div>
@@ -34,7 +34,7 @@ export default function BenefitsBento({ className }: { className?: string }) {
               <div className="mt-2 rounded-lg border border-neutral-200 dark:border-neutral-800 py-2.5 text-center text-xs text-neutral-700 dark:text-neutral-300">Pay with PayPal</div>
               <p className="mt-4 text-center font-mono text-[9px] uppercase tracking-[0.12em] text-neutral-500 dark:text-neutral-400">Or pay by bank transfer</p>
               <div className="mt-3 grid grid-cols-2 gap-2 text-[10px]">
-                <div><p className="text-neutral-500 dark:text-neutral-400">Account</p><p className="text-neutral-600 dark:text-neutral-200">TJN Agency</p></div>
+                <div><p className="text-neutral-500 dark:text-neutral-400">Account</p><p className="text-neutral-600 dark:text-neutral-200">Chop Life Music</p></div>
                 <div><p className="text-neutral-500 dark:text-neutral-400">Sort code</p><p className="text-neutral-600 dark:text-neutral-200">04-00-35</p></div>
               </div>
             </div>

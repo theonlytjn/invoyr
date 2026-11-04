@@ -22,13 +22,13 @@ const CONTAINER = "max-w-[1600px] mx-auto px-6 lg:px-12";
  * a wordmark reads much larger, because the eye compares area, not height.
  */
 const TRUST_LOGOS = [
-  { name: "Cakes By Kels", src: "/clients/tjn.svg", dark: "/clients/tjn-white.svg" },
-  { name: "TJN Agency", src: "/clients/cbk.svg", dark: "/clients/cbk-white.svg" },
+  { name: "TJN Agency", src: "/clients/tjn.svg", dark: "/clients/tjn-white.svg" },
+  { name: "Cakes By Kels", src: "/clients/cbk.svg", dark: "/clients/cbk-white.svg" },
   { name: "Love Rooted", src: "/clients/love-rooted.svg", dark: "/clients/love-rooted-white.svg" },
-  { name: "Finer Fleet", src: "/clients/clm.svg", dark: "/clients/clm-white.svg" },
+  { name: "Chop Life Music", src: "/clients/clm.svg", dark: "/clients/clm-white.svg" },
   { name: "Lucid Partners", src: "/clients/lucid-partners.svg", dark: "/clients/lucid-partners-white.svg" },
   { name: "One Africa", src: "/clients/one-africa.svg", dark: "/clients/one-africa-white.svg" },
-  { name: "Chop Life Music", src: "/clients/ff.svg", dark: "/clients/ff-white.svg" },
+  { name: "Finer Fleet", src: "/clients/ff.svg", dark: "/clients/ff-white.svg" },
   { name: "B7", src: "/clients/b7.svg", dark: "/clients/b7-white.svg" },
   { name: "Nokha", src: "/clients/nokha.svg", dark: "/clients/nokha-white.svg" },
 ];
@@ -186,7 +186,7 @@ export default function HomePage() {
                   </div>
                   <div className="mt-5 rounded-lg border border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-900/50 p-4">
                     <p className="font-mono text-[10px] uppercase tracking-wide text-neutral-500 dark:text-neutral-400">Auto-reminder · sent in your name</p>
-                    <p className="mt-2 text-sm leading-relaxed text-neutral-700 dark:text-neutral-300">Hi Andrew — a friendly reminder that invoice INV-0042 for £11,520 is now 7 days overdue. You can pay securely below. Thank you!</p>
+                    <p className="mt-2 text-sm leading-relaxed text-neutral-700 dark:text-neutral-300">Hi Edson — a friendly reminder that invoice INV-0042 for £11,520 is now 7 days overdue. You can pay securely below. Thank you!</p>
                     <span className="mt-3 inline-block rounded-md bg-neutral-950 dark:bg-neutral-50 px-3 py-1.5 text-xs font-medium text-white dark:text-neutral-950">Pay now</span>
                   </div>
                   <div className="mt-5 flex items-center gap-2.5 border-t border-neutral-200 dark:border-neutral-900 pt-5 font-mono text-[11px] text-neutral-500 dark:text-neutral-400">
