@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { EmailShell } from "../components/EmailShell";
 import { EmailHeader } from "../components/EmailHeader";
 import { EmailFooter } from "../components/EmailFooter";
-import { BRAND } from "@/config/brand";
+import { EMAIL_COLORS } from "../theme";
 
 interface Props {
   preview: string;
@@ -18,17 +18,13 @@ export function MarketingLayout({ preview, unsubscribeUrl, children }: Props) {
         style={{
           maxWidth: 560,
           margin: "32px auto",
-          backgroundColor: "#ffffff",
+          backgroundColor: EMAIL_COLORS.surface,
           borderRadius: 12,
           overflow: "hidden",
-          border: "1px solid #e5e7eb",
+          border: `1px solid ${EMAIL_COLORS.border}`,
         }}
       >
-        <EmailHeader
-          orgName={BRAND.name}
-          logoUrl={BRAND.logoUrl}
-          accentColor={BRAND.accentColor}
-        />
+        <EmailHeader />
         <Section style={{ padding: "28px 32px 32px" }}>{children}</Section>
         <EmailFooter unsubscribeUrl={unsubscribeUrl} />
       </Container>

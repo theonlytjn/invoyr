@@ -2,6 +2,7 @@ import { Heading, Text, Hr } from "@react-email/components";
 import { TransactionalLayout } from "../layouts/TransactionalLayout";
 import { EmailButton } from "../components/EmailButton";
 import { InvoiceSummary } from "../components/InvoiceSummary";
+import { EMAIL_COLORS } from "../theme";
 
 export interface BankDetails {
   accountName?: string | null;
@@ -34,7 +35,7 @@ export function InvoiceSentEmail({
   clientName,
   orgName,
   logoUrl,
-  accentColor = "#111827",
+  accentColor = EMAIL_COLORS.ink,
   invoiceNumber,
   invoiceTotal,
   totalBeforeDiscount,
@@ -56,17 +57,17 @@ export function InvoiceSentEmail({
       accentColor={accentColor}
     >
       <Heading
-        style={{ fontSize: 22, fontWeight: 700, color: "#111827", margin: "0 0 4px" }}
+        style={{ fontSize: 22, fontWeight: 700, color: EMAIL_COLORS.ink, margin: "0 0 4px" }}
       >
         Invoice {invoiceNumber}
       </Heading>
-      <Text style={{ fontSize: 15, color: "#374151", lineHeight: "1.6", margin: "0 0 20px" }}>
+      <Text style={{ fontSize: 15, color: EMAIL_COLORS.body, lineHeight: "1.6", margin: "0 0 20px" }}>
         Hi {clientName},
       </Text>
-      <Text style={{ fontSize: 15, color: "#374151", lineHeight: "1.6", margin: "0 0 20px" }}>
+      <Text style={{ fontSize: 15, color: EMAIL_COLORS.body, lineHeight: "1.6", margin: "0 0 20px" }}>
         {orgName} has sent you invoice {invoiceNumber} for {invoiceTotal}.
       </Text>
-      <Text style={{ fontSize: 15, color: "#374151", lineHeight: "1.6", margin: "0 0 4px" }}>
+      <Text style={{ fontSize: 15, color: EMAIL_COLORS.body, lineHeight: "1.6", margin: "0 0 4px" }}>
         You can view the invoice, download a PDF and pay securely using the link below.
       </Text>
 
@@ -87,12 +88,12 @@ export function InvoiceSentEmail({
 
       {hasBankDetails && (
         <>
-          <Hr style={{ borderColor: "#e5e7eb", margin: "28px 0 20px" }} />
+          <Hr style={{ borderColor: EMAIL_COLORS.border, margin: "28px 0 20px" }} />
           <Text
             style={{
               fontSize: 11,
               fontWeight: 600,
-              color: "#9ca3af",
+              color: EMAIL_COLORS.subtle,
               textTransform: "uppercase",
               letterSpacing: "0.06em",
               margin: "0 0 12px",
@@ -103,43 +104,43 @@ export function InvoiceSentEmail({
           <table style={{ borderCollapse: "collapse", fontSize: 13 }}>
             {bankDetails?.accountName && (
               <tr>
-                <td style={{ color: "#6b7280", paddingRight: 16, paddingBottom: 4 }}>Account name</td>
-                <td style={{ fontWeight: 600, color: "#111827" }}>{bankDetails.accountName}</td>
+                <td style={{ color: EMAIL_COLORS.muted, paddingRight: 16, paddingBottom: 4 }}>Account name</td>
+                <td style={{ fontWeight: 600, color: EMAIL_COLORS.ink }}>{bankDetails.accountName}</td>
               </tr>
             )}
             {bankDetails?.bankName && (
               <tr>
-                <td style={{ color: "#6b7280", paddingRight: 16, paddingBottom: 4 }}>Bank</td>
-                <td style={{ fontWeight: 600, color: "#111827" }}>{bankDetails.bankName}</td>
+                <td style={{ color: EMAIL_COLORS.muted, paddingRight: 16, paddingBottom: 4 }}>Bank</td>
+                <td style={{ fontWeight: 600, color: EMAIL_COLORS.ink }}>{bankDetails.bankName}</td>
               </tr>
             )}
             {bankDetails?.accountNumber && (
               <tr>
-                <td style={{ color: "#6b7280", paddingRight: 16, paddingBottom: 4 }}>Account number</td>
-                <td style={{ fontWeight: 600, color: "#111827" }}>{bankDetails.accountNumber}</td>
+                <td style={{ color: EMAIL_COLORS.muted, paddingRight: 16, paddingBottom: 4 }}>Account number</td>
+                <td style={{ fontWeight: 600, color: EMAIL_COLORS.ink }}>{bankDetails.accountNumber}</td>
               </tr>
             )}
             {bankDetails?.sortCode && (
               <tr>
-                <td style={{ color: "#6b7280", paddingRight: 16, paddingBottom: 4 }}>Sort code</td>
-                <td style={{ fontWeight: 600, color: "#111827" }}>{bankDetails.sortCode}</td>
+                <td style={{ color: EMAIL_COLORS.muted, paddingRight: 16, paddingBottom: 4 }}>Sort code</td>
+                <td style={{ fontWeight: 600, color: EMAIL_COLORS.ink }}>{bankDetails.sortCode}</td>
               </tr>
             )}
             {bankDetails?.iban && (
               <tr>
-                <td style={{ color: "#6b7280", paddingRight: 16, paddingBottom: 4 }}>IBAN</td>
-                <td style={{ fontWeight: 600, color: "#111827" }}>{bankDetails.iban}</td>
+                <td style={{ color: EMAIL_COLORS.muted, paddingRight: 16, paddingBottom: 4 }}>IBAN</td>
+                <td style={{ fontWeight: 600, color: EMAIL_COLORS.ink }}>{bankDetails.iban}</td>
               </tr>
             )}
             {bankDetails?.bic && (
               <tr>
-                <td style={{ color: "#6b7280", paddingRight: 16, paddingBottom: 4 }}>BIC / SWIFT</td>
-                <td style={{ fontWeight: 600, color: "#111827" }}>{bankDetails.bic}</td>
+                <td style={{ color: EMAIL_COLORS.muted, paddingRight: 16, paddingBottom: 4 }}>BIC / SWIFT</td>
+                <td style={{ fontWeight: 600, color: EMAIL_COLORS.ink }}>{bankDetails.bic}</td>
               </tr>
             )}
           </table>
-          <Text style={{ fontSize: 12, color: "#9ca3af", margin: "8px 0 0" }}>
-            Reference: <strong style={{ color: "#6b7280" }}>{invoiceNumber}</strong>
+          <Text style={{ fontSize: 12, color: EMAIL_COLORS.subtle, margin: "8px 0 0" }}>
+            Reference: <strong style={{ color: EMAIL_COLORS.muted }}>{invoiceNumber}</strong>
           </Text>
         </>
       )}

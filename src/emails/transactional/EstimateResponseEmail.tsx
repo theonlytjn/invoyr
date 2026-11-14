@@ -3,6 +3,7 @@ import { TransactionalLayout } from "../layouts/TransactionalLayout";
 import { EmailButton } from "../components/EmailButton";
 import { EmailCallout } from "../components/EmailCallout";
 import { InvoiceSummary } from "../components/InvoiceSummary";
+import { EMAIL_COLORS } from "../theme";
 
 export interface EstimateResponseEmailProps {
   orgName: string;
@@ -19,7 +20,7 @@ export interface EstimateResponseEmailProps {
 export function EstimateResponseEmail({
   orgName,
   logoUrl,
-  accentColor = "#111827",
+  accentColor = EMAIL_COLORS.ink,
   estimateNumber,
   clientName,
   estimateTotal,
@@ -38,10 +39,10 @@ export function EstimateResponseEmail({
       logoUrl={logoUrl}
       accentColor={accentColor}
     >
-      <Heading style={{ fontSize: 22, fontWeight: 700, color: "#111827", margin: "0 0 4px" }}>
+      <Heading style={{ fontSize: 22, fontWeight: 700, color: EMAIL_COLORS.ink, margin: "0 0 4px" }}>
         Estimate {approved ? "approved" : "declined"}
       </Heading>
-      <Text style={{ fontSize: 15, color: "#374151", lineHeight: "1.6", margin: "0 0 20px" }}>
+      <Text style={{ fontSize: 15, color: EMAIL_COLORS.body, lineHeight: "1.6", margin: "0 0 20px" }}>
         {approved
           ? `${clientName} has approved estimate ${estimateNumber}. You can now convert it to an invoice.`
           : `${clientName} has declined estimate ${estimateNumber}.`}

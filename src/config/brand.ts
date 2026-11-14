@@ -6,8 +6,19 @@ export const BRAND = {
   url: "https://invoyr.io",
   appUrl: _appUrl,
   supportEmail: "support@invoyr.io",
-  accentColor: "#111827",
-  /** Absolute URL to the Invoyr wordmark (SVG, works in Gmail/Apple Mail/Outlook.com) */
+  /** Brand navy (--n-950). Default accent for Invoyr's own emails. */
+  accentColor: "#081026",
+  /** Invoyr lime (--brand). */
+  limeColor: "#8CD600",
+  /** Full-colour wordmark (SVG) for the web. */
   logoUrl: `${_appUrl}/brand/invoyr-logo.svg`,
+  /**
+   * PNG wordmarks for email. Gmail, Outlook and Yahoo block SVG images, so
+   * emails must use these PNGs (rendered at 3x the 32px display height).
+   */
+  emailLogoUrl: `${_appUrl}/brand/invoyr-logo-email.png`,
+  emailLogoWhiteUrl: `${_appUrl}/brand/invoyr-logo-email-white.png`,
+  /** Intrinsic aspect ratio of the wordmark (width / height). */
+  logoAspectRatio: 703.58 / 236.45,
   faviconUrl: `${_appUrl}/favicon.png?v=2`,
 };

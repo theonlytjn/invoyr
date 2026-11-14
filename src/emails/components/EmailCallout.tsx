@@ -1,13 +1,14 @@
 import { Section, Text } from "@react-email/components";
 import type { ReactNode } from "react";
+import { EMAIL_COLORS } from "../theme";
 
 type Variant = "warning" | "error" | "info" | "success";
 
 const VARIANTS: Record<Variant, { bg: string; border: string; color: string }> = {
-  warning: { bg: "#fffbeb", border: "#fbbf24", color: "#92400e" },
-  error: { bg: "#fef2f2", border: "#f87171", color: "#991b1b" },
-  info: { bg: "#eff6ff", border: "#93c5fd", color: "#1e40af" },
-  success: { bg: "#f0fdf4", border: "#4ade80", color: "#166534" },
+  warning: { bg: EMAIL_COLORS.warningBg, border: EMAIL_COLORS.warningBorder, color: EMAIL_COLORS.warningText },
+  error: { bg: EMAIL_COLORS.dangerBg, border: EMAIL_COLORS.dangerBorder, color: EMAIL_COLORS.dangerText },
+  info: { bg: EMAIL_COLORS.infoBg, border: EMAIL_COLORS.infoBorder, color: EMAIL_COLORS.infoText },
+  success: { bg: EMAIL_COLORS.successBg, border: EMAIL_COLORS.successBorder, color: EMAIL_COLORS.successText },
 };
 
 interface Props {

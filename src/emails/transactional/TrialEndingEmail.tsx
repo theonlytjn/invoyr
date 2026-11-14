@@ -2,6 +2,7 @@ import { Heading, Text } from "@react-email/components";
 import { TransactionalLayout } from "../layouts/TransactionalLayout";
 import { EmailButton } from "../components/EmailButton";
 import { TRIAL_EMAIL_COPY, type TrialEmailContext } from "@/config/email-copy";
+import { EMAIL_COLORS } from "../theme";
 
 /**
  * Covers the whole trial lifecycle — the reminders before it ends and the
@@ -19,9 +20,7 @@ export interface TrialEndingEmailProps extends TrialEmailContext {
 export function TrialEndingEmail({
   firstName,
   ctaUrl,
-  orgName = "Invoyr",
-  logoUrl,
-  accentColor = "#111827",
+  accentColor = EMAIL_COLORS.ink,
   ...context
 }: TrialEndingEmailProps) {
   return (
@@ -30,21 +29,18 @@ export function TrialEndingEmail({
     // on marketing consent.
     <TransactionalLayout
       preview={TRIAL_EMAIL_COPY.preview(context)}
-      orgName={orgName}
-      logoUrl={logoUrl}
-      accentColor={accentColor}
     >
-      <Heading style={{ fontSize: 22, fontWeight: 700, color: "#111827", margin: "0 0 8px" }}>
+      <Heading style={{ fontSize: 22, fontWeight: 700, color: EMAIL_COLORS.ink, margin: "0 0 8px" }}>
         {TRIAL_EMAIL_COPY.heading(context)}
       </Heading>
-      <Text style={{ fontSize: 15, color: "#374151", lineHeight: "1.6", margin: "0 0 16px" }}>
+      <Text style={{ fontSize: 15, color: EMAIL_COLORS.body, lineHeight: "1.6", margin: "0 0 16px" }}>
         Hi {firstName},
       </Text>
-      <Text style={{ fontSize: 15, color: "#374151", lineHeight: "1.6", margin: 0 }}>
+      <Text style={{ fontSize: 15, color: EMAIL_COLORS.body, lineHeight: "1.6", margin: 0 }}>
         {TRIAL_EMAIL_COPY.body(context)}
       </Text>
       {TRIAL_EMAIL_COPY.offer(context) && (
-        <Text style={{ fontSize: 15, color: "#374151", lineHeight: "1.6", margin: "16px 0 0" }}>
+        <Text style={{ fontSize: 15, color: EMAIL_COLORS.body, lineHeight: "1.6", margin: "16px 0 0" }}>
           {TRIAL_EMAIL_COPY.offer(context)}
         </Text>
       )}

@@ -1,6 +1,7 @@
 import { Heading, Text } from "@react-email/components";
 import { MarketingLayout } from "../layouts/MarketingLayout";
 import { EmailButton } from "../components/EmailButton";
+import { EMAIL_COLORS } from "../theme";
 
 export interface WinBackEmailProps {
   firstName: string;
@@ -40,13 +41,13 @@ export function WinBackEmail({
 
   return (
     <MarketingLayout preview={content.preview} unsubscribeUrl={unsubscribeUrl}>
-      <Heading style={{ fontSize: 22, fontWeight: 700, color: "#111827", margin: "0 0 8px" }}>
+      <Heading style={{ fontSize: 22, fontWeight: 700, color: EMAIL_COLORS.ink, margin: "0 0 8px" }}>
         {content.heading}
       </Heading>
-      <Text style={{ fontSize: 15, color: "#374151", lineHeight: "1.6", margin: "0 0 16px" }}>
+      <Text style={{ fontSize: 15, color: EMAIL_COLORS.body, lineHeight: "1.6", margin: "0 0 16px" }}>
         Hi {firstName},
       </Text>
-      <Text style={{ fontSize: 15, color: "#374151", lineHeight: "1.6", margin: "0 0 24px" }}>
+      <Text style={{ fontSize: 15, color: EMAIL_COLORS.body, lineHeight: "1.6", margin: "0 0 24px" }}>
         {content.body}
       </Text>
       <EmailButton href={ctaUrl}>{content.cta}</EmailButton>

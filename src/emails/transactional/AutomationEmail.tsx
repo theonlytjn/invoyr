@@ -1,6 +1,7 @@
 import { Heading, Text } from "@react-email/components";
 import { TransactionalLayout } from "../layouts/TransactionalLayout";
 import { EmailButton } from "../components/EmailButton";
+import { EMAIL_COLORS } from "../theme";
 
 export interface AutomationEmailProps {
   recipientName: string;
@@ -17,7 +18,7 @@ export function AutomationEmail({
   recipientName,
   orgName,
   logoUrl,
-  accentColor = "#111827",
+  accentColor = EMAIL_COLORS.ink,
   subject,
   body,
   ctaUrl,
@@ -30,11 +31,11 @@ export function AutomationEmail({
       logoUrl={logoUrl}
       accentColor={accentColor}
     >
-      <Heading style={{ fontSize: 22, fontWeight: 700, color: "#111827", margin: "0 0 16px" }}>
+      <Heading style={{ fontSize: 22, fontWeight: 700, color: EMAIL_COLORS.ink, margin: "0 0 16px" }}>
         {subject}
       </Heading>
       {body.split("\n").map((line, i) => (
-        <Text key={i} style={{ fontSize: 15, color: "#374151", lineHeight: "1.6", margin: "0 0 8px" }}>
+        <Text key={i} style={{ fontSize: 15, color: EMAIL_COLORS.body, lineHeight: "1.6", margin: "0 0 8px" }}>
           {line.replace(/\{\{recipient_name\}\}/g, recipientName)}
         </Text>
       ))}

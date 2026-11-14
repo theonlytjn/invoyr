@@ -71,6 +71,29 @@ Divider
 Signature
 ```
 
+### Branding (Nov 2026)
+
+- **Colours** come from `src/emails/theme.ts` (`EMAIL_COLORS`). It mirrors the brand
+  palette in `globals.css`: navy `#081026`, lime `#8CD600` and the navy-tinted neutrals.
+  Email clients can't read CSS variables, so this file is the email token layer. Never
+  put hex values in templates.
+- **Two header modes** (`EmailHeader`):
+  - *Invoyr's own emails* (no `orgName`: welcome, verify, password reset, trial ending,
+    weekly digest, invoice paid (to the owner), billing, team invite, marketing): the
+    Invoyr wordmark on white with a lime rule across the top.
+  - *Emails sent for an organisation* (invoice, reminders, estimates, receipts, credit
+    notes, statements, automations): the org's logo or name, ruled in the org's accent
+    colour. Button labels switch to dark text when the org colour is light.
+- **Footer**: "Sent with" plus the Invoyr wordmark, the legal entity and address, and
+  links to the site, support and (marketing only) unsubscribe.
+- **Logo**: emails use PNG wordmarks (`public/brand/invoyr-logo-email*.png`,
+  `BRAND.emailLogoUrl`). Gmail, Outlook and Yahoo block SVG images.
+- **Supabase Auth emails** (signup confirmation, password reset) are sent by Supabase,
+  not the app. They are generated from `VerifyEmail` / `PasswordResetEmail` by
+  `npx tsx scripts/build-auth-email-templates.tsx` into `supabase/templates/`, then
+  pasted into Supabase Dashboard → Authentication → Emails → Templates. Re-run and
+  re-paste whenever those two emails change.
+
 ## 4. Template rules
 
 - Do not hardcode copy inside layout components.

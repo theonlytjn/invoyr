@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { EmailShell } from "../components/EmailShell";
 import { EmailHeader } from "../components/EmailHeader";
 import { EmailFooter } from "../components/EmailFooter";
+import { EMAIL_COLORS } from "../theme";
 
 interface Props {
   preview: string;
@@ -16,7 +17,7 @@ export function TransactionalLayout({
   preview,
   orgName,
   logoUrl,
-  accentColor = "#111827",
+  accentColor = EMAIL_COLORS.ink,
   children,
 }: Props) {
   return (
@@ -25,10 +26,10 @@ export function TransactionalLayout({
         style={{
           maxWidth: 560,
           margin: "32px auto",
-          backgroundColor: "#ffffff",
+          backgroundColor: EMAIL_COLORS.surface,
           borderRadius: 12,
           overflow: "hidden",
-          border: "1px solid #e5e7eb",
+          border: `1px solid ${EMAIL_COLORS.border}`,
         }}
       >
         <EmailHeader orgName={orgName} logoUrl={logoUrl} accentColor={accentColor} />

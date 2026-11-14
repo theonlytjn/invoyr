@@ -1,6 +1,7 @@
 import { Heading, Text, Hr } from "@react-email/components";
 import { MarketingLayout } from "../layouts/MarketingLayout";
 import { EmailButton } from "../components/EmailButton";
+import { EMAIL_COLORS } from "../theme";
 
 export interface ProductUpdateEmailProps {
   firstName: string;
@@ -25,7 +26,7 @@ export function ProductUpdateEmail({
         style={{
           fontSize: 11,
           fontWeight: 600,
-          color: "#6b7280",
+          color: EMAIL_COLORS.muted,
           textTransform: "uppercase",
           letterSpacing: "0.08em",
           margin: "0 0 8px",
@@ -33,31 +34,31 @@ export function ProductUpdateEmail({
       >
         Product update
       </Text>
-      <Heading style={{ fontSize: 22, fontWeight: 700, color: "#111827", margin: "0 0 8px" }}>
+      <Heading style={{ fontSize: 22, fontWeight: 700, color: EMAIL_COLORS.ink, margin: "0 0 8px" }}>
         {updateTitle}
       </Heading>
-      <Text style={{ fontSize: 15, color: "#374151", lineHeight: "1.6", margin: "0 0 16px" }}>
+      <Text style={{ fontSize: 15, color: EMAIL_COLORS.body, lineHeight: "1.6", margin: "0 0 16px" }}>
         Hi {firstName},
       </Text>
-      <Text style={{ fontSize: 15, color: "#374151", lineHeight: "1.6", margin: "0 0 20px" }}>
+      <Text style={{ fontSize: 15, color: EMAIL_COLORS.body, lineHeight: "1.6", margin: "0 0 20px" }}>
         {updateSummary}
       </Text>
       {features.length > 0 && (
         <>
-          <Text style={{ fontSize: 13, fontWeight: 600, color: "#111827", margin: "0 0 8px" }}>
+          <Text style={{ fontSize: 13, fontWeight: 600, color: EMAIL_COLORS.ink, margin: "0 0 8px" }}>
             What&apos;s new:
           </Text>
           {features.map((f, i) => (
             <Text
               key={i}
-              style={{ fontSize: 14, color: "#374151", lineHeight: "1.6", margin: "0 0 4px", paddingLeft: 16 }}
+              style={{ fontSize: 14, color: EMAIL_COLORS.body, lineHeight: "1.6", margin: "0 0 4px", paddingLeft: 16 }}
             >
               · {f}
             </Text>
           ))}
         </>
       )}
-      <Hr style={{ borderColor: "#e5e7eb", margin: "24px 0" }} />
+      <Hr style={{ borderColor: EMAIL_COLORS.border, margin: "24px 0" }} />
       <EmailButton href={ctaUrl}>Open Invoyr</EmailButton>
     </MarketingLayout>
   );

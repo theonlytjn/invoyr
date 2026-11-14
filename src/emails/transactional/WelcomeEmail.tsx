@@ -1,6 +1,7 @@
 import { Heading, Text } from "@react-email/components";
 import { TransactionalLayout } from "../layouts/TransactionalLayout";
 import { EmailButton } from "../components/EmailButton";
+import { EMAIL_COLORS } from "../theme";
 
 export interface WelcomeEmailProps {
   firstName: string;
@@ -11,18 +12,18 @@ export function WelcomeEmail({ firstName, ctaUrl }: WelcomeEmailProps) {
   return (
     <TransactionalLayout preview="Your invoicing workspace is ready.">
       <Heading
-        style={{ fontSize: 22, fontWeight: 700, color: "#111827", margin: "0 0 8px" }}
+        style={{ fontSize: 22, fontWeight: 700, color: EMAIL_COLORS.ink, margin: "0 0 8px" }}
       >
         Welcome to Invoyr
       </Heading>
-      <Text style={{ fontSize: 15, color: "#374151", lineHeight: "1.6", margin: "0 0 16px" }}>
+      <Text style={{ fontSize: 15, color: EMAIL_COLORS.body, lineHeight: "1.6", margin: "0 0 16px" }}>
         Hi {firstName},
       </Text>
-      <Text style={{ fontSize: 15, color: "#374151", lineHeight: "1.6", margin: "0 0 16px" }}>
+      <Text style={{ fontSize: 15, color: EMAIL_COLORS.body, lineHeight: "1.6", margin: "0 0 16px" }}>
         Welcome to Invoyr — your new workspace for creating invoices, managing clients and
         getting paid faster.
       </Text>
-      <Text style={{ fontSize: 15, color: "#374151", lineHeight: "1.6", margin: 0 }}>
+      <Text style={{ fontSize: 15, color: EMAIL_COLORS.body, lineHeight: "1.6", margin: 0 }}>
         Start by adding your business details, uploading your logo and creating your first client.
       </Text>
       <EmailButton href={ctaUrl}>Set up my workspace</EmailButton>

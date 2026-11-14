@@ -2,6 +2,7 @@ import { Heading, Text } from "@react-email/components";
 import { TransactionalLayout } from "../layouts/TransactionalLayout";
 import { EmailButton } from "../components/EmailButton";
 import { EmailCallout } from "../components/EmailCallout";
+import { EMAIL_COLORS } from "../theme";
 
 export interface PaymentFailedEmailProps {
   firstName: string;
@@ -12,17 +13,17 @@ export function PaymentFailedEmail({ firstName, ctaUrl }: PaymentFailedEmailProp
   return (
     <TransactionalLayout preview="Please update your billing details to keep your account active.">
       <Heading
-        style={{ fontSize: 22, fontWeight: 700, color: "#111827", margin: "0 0 8px" }}
+        style={{ fontSize: 22, fontWeight: 700, color: EMAIL_COLORS.ink, margin: "0 0 8px" }}
       >
         Payment failed for your Invoyr subscription
       </Heading>
-      <Text style={{ fontSize: 15, color: "#374151", lineHeight: "1.6", margin: "0 0 16px" }}>
+      <Text style={{ fontSize: 15, color: EMAIL_COLORS.body, lineHeight: "1.6", margin: "0 0 16px" }}>
         Hi {firstName},
       </Text>
       <EmailCallout variant="error">
         We could not process the latest payment for your Invoyr subscription.
       </EmailCallout>
-      <Text style={{ fontSize: 15, color: "#374151", lineHeight: "1.6", margin: "16px 0 0" }}>
+      <Text style={{ fontSize: 15, color: EMAIL_COLORS.body, lineHeight: "1.6", margin: "16px 0 0" }}>
         Please update your billing details to avoid interruption to your account.
       </Text>
       <EmailButton href={ctaUrl}>Update billing details</EmailButton>

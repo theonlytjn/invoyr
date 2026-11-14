@@ -1,5 +1,6 @@
 import { Section } from "@react-email/components";
 import type { ReactNode } from "react";
+import { EMAIL_COLORS } from "../theme";
 
 interface Props {
   children: ReactNode;
@@ -9,8 +10,8 @@ export function EmailCard({ children }: Props) {
   return (
     <Section
       style={{
-        backgroundColor: "#f9fafb",
-        border: "1px solid #e5e7eb",
+        backgroundColor: EMAIL_COLORS.panel,
+        border: `1px solid ${EMAIL_COLORS.border}`,
         borderRadius: 8,
         padding: "16px 20px",
         marginTop: 16,

@@ -3,6 +3,7 @@ import { TransactionalLayout } from "../layouts/TransactionalLayout";
 import { EmailButton } from "../components/EmailButton";
 import { EmailCallout } from "../components/EmailCallout";
 import { InvoiceSummary } from "../components/InvoiceSummary";
+import { EMAIL_COLORS } from "../theme";
 
 export interface InvoicePaidOwnerEmailProps {
   firstName: string;
@@ -18,9 +19,7 @@ export interface InvoicePaidOwnerEmailProps {
 
 export function InvoicePaidOwnerEmail({
   firstName,
-  orgName,
-  logoUrl,
-  accentColor = "#111827",
+  accentColor = EMAIL_COLORS.ink,
   invoiceNumber,
   clientName,
   amountPaid,
@@ -30,14 +29,11 @@ export function InvoicePaidOwnerEmail({
   return (
     <TransactionalLayout
       preview={`${clientName} paid invoice ${invoiceNumber} — ${amountPaid} received.`}
-      orgName={orgName}
-      logoUrl={logoUrl}
-      accentColor={accentColor}
     >
-      <Heading style={{ fontSize: 22, fontWeight: 700, color: "#111827", margin: "0 0 4px" }}>
+      <Heading style={{ fontSize: 22, fontWeight: 700, color: EMAIL_COLORS.ink, margin: "0 0 4px" }}>
         Payment received
       </Heading>
-      <Text style={{ fontSize: 15, color: "#374151", lineHeight: "1.6", margin: "0 0 20px" }}>
+      <Text style={{ fontSize: 15, color: EMAIL_COLORS.body, lineHeight: "1.6", margin: "0 0 20px" }}>
         Hi {firstName},
       </Text>
       <EmailCallout variant="success">

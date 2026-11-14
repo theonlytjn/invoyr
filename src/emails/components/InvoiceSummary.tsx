@@ -1,5 +1,6 @@
 import { Section, Row, Column, Text, Hr } from "@react-email/components";
 import { discountLabel } from "@/lib/invoice-totals";
+import { EMAIL_COLORS } from "../theme";
 
 interface InvoiceSummaryProps {
   invoiceNumber: string;
@@ -24,58 +25,58 @@ export function InvoiceSummary({
   totalBeforeDiscount,
   discount,
   discountReason,
-  accentColor = "#111827",
+  accentColor = EMAIL_COLORS.ink,
 }: InvoiceSummaryProps) {
   return (
     <Section style={{ marginTop: 16, marginBottom: 8 }}>
       {issueDate && (
         <Row style={{ marginBottom: 8 }}>
           <Column>
-            <Text style={{ fontSize: 13, color: "#6b7280", margin: 0 }}>Issue date</Text>
+            <Text style={{ fontSize: 13, color: EMAIL_COLORS.muted, margin: 0 }}>Issue date</Text>
           </Column>
           <Column align="right">
-            <Text style={{ fontSize: 13, color: "#111827", margin: 0 }}>{issueDate}</Text>
+            <Text style={{ fontSize: 13, color: EMAIL_COLORS.ink, margin: 0 }}>{issueDate}</Text>
           </Column>
         </Row>
       )}
       {dueDate && (
         <Row style={{ marginBottom: 8 }}>
           <Column>
-            <Text style={{ fontSize: 13, color: "#6b7280", margin: 0 }}>Due date</Text>
+            <Text style={{ fontSize: 13, color: EMAIL_COLORS.muted, margin: 0 }}>Due date</Text>
           </Column>
           <Column align="right">
-            <Text style={{ fontSize: 13, color: "#111827", margin: 0 }}>{dueDate}</Text>
+            <Text style={{ fontSize: 13, color: EMAIL_COLORS.ink, margin: 0 }}>{dueDate}</Text>
           </Column>
         </Row>
       )}
       <Row style={{ marginBottom: 8 }}>
         <Column>
-          <Text style={{ fontSize: 13, color: "#6b7280", margin: 0 }}>Invoice</Text>
+          <Text style={{ fontSize: 13, color: EMAIL_COLORS.muted, margin: 0 }}>Invoice</Text>
         </Column>
         <Column align="right">
-          <Text style={{ fontSize: 13, color: "#111827", margin: 0 }}>{invoiceNumber}</Text>
+          <Text style={{ fontSize: 13, color: EMAIL_COLORS.ink, margin: 0 }}>{invoiceNumber}</Text>
         </Column>
       </Row>
-      <Hr style={{ borderColor: "#e5e7eb", margin: "8px 0" }} />
+      <Hr style={{ borderColor: EMAIL_COLORS.border, margin: "8px 0" }} />
       {discount && totalBeforeDiscount && (
         <Row style={{ marginBottom: 8 }}>
           <Column>
-            <Text style={{ fontSize: 13, color: "#6b7280", margin: 0 }}>Before discount</Text>
+            <Text style={{ fontSize: 13, color: EMAIL_COLORS.muted, margin: 0 }}>Before discount</Text>
           </Column>
           <Column align="right">
-            <Text style={{ fontSize: 13, color: "#111827", margin: 0 }}>{totalBeforeDiscount}</Text>
+            <Text style={{ fontSize: 13, color: EMAIL_COLORS.ink, margin: 0 }}>{totalBeforeDiscount}</Text>
           </Column>
         </Row>
       )}
       {discount && (
         <Row style={{ marginBottom: 8 }}>
           <Column>
-            <Text style={{ fontSize: 13, color: "#6b7280", margin: 0, paddingRight: 12 }}>
+            <Text style={{ fontSize: 13, color: EMAIL_COLORS.muted, margin: 0, paddingRight: 12 }}>
               {discountLabel(discountReason)}
             </Text>
           </Column>
           <Column align="right" style={{ verticalAlign: "top" }}>
-            <Text style={{ fontSize: 13, color: "#111827", margin: 0, whiteSpace: "nowrap" }}>
+            <Text style={{ fontSize: 13, color: EMAIL_COLORS.ink, margin: 0, whiteSpace: "nowrap" }}>
               −{discount}
             </Text>
           </Column>
@@ -83,7 +84,7 @@ export function InvoiceSummary({
       )}
       <Row>
         <Column>
-          <Text style={{ fontSize: 15, fontWeight: 700, color: "#111827", margin: 0 }}>
+          <Text style={{ fontSize: 15, fontWeight: 700, color: EMAIL_COLORS.ink, margin: 0 }}>
             {balanceDue !== undefined ? "Balance due" : "Total"}
           </Text>
         </Column>

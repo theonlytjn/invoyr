@@ -2,6 +2,7 @@ import { Heading, Text } from "@react-email/components";
 import { TransactionalLayout } from "../layouts/TransactionalLayout";
 import { EmailButton } from "../components/EmailButton";
 import { EmailCallout } from "../components/EmailCallout";
+import { EMAIL_COLORS } from "../theme";
 
 export interface CreditNoteEmailProps {
   clientName: string;
@@ -19,7 +20,7 @@ export function CreditNoteEmail({
   clientName,
   orgName,
   logoUrl,
-  accentColor = "#111827",
+  accentColor = EMAIL_COLORS.ink,
   creditNoteNumber,
   amount,
   reason,
@@ -34,11 +35,11 @@ export function CreditNoteEmail({
       accentColor={accentColor}
     >
       <Heading
-        style={{ fontSize: 22, fontWeight: 700, color: "#111827", margin: "0 0 4px" }}
+        style={{ fontSize: 22, fontWeight: 700, color: EMAIL_COLORS.ink, margin: "0 0 4px" }}
       >
         Credit note {creditNoteNumber}
       </Heading>
-      <Text style={{ fontSize: 15, color: "#374151", lineHeight: "1.6", margin: "0 0 20px" }}>
+      <Text style={{ fontSize: 15, color: EMAIL_COLORS.body, lineHeight: "1.6", margin: "0 0 20px" }}>
         Hi {clientName},
       </Text>
       <EmailCallout variant="info">
@@ -47,7 +48,7 @@ export function CreditNoteEmail({
       </EmailCallout>
       {payUrl && (
         <>
-          <Text style={{ fontSize: 15, color: "#374151", lineHeight: "1.6", margin: "20px 0 0" }}>
+          <Text style={{ fontSize: 15, color: EMAIL_COLORS.body, lineHeight: "1.6", margin: "20px 0 0" }}>
             You can view your updated invoice balance using the link below.
           </Text>
           <EmailButton href={payUrl} accentColor={accentColor}>

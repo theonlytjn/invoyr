@@ -2,6 +2,7 @@ import { Heading, Text } from "@react-email/components";
 import { TransactionalLayout } from "../layouts/TransactionalLayout";
 import { EmailButton } from "../components/EmailButton";
 import { InvoiceSummary } from "../components/InvoiceSummary";
+import { EMAIL_COLORS } from "../theme";
 
 export interface EstimateSentEmailProps {
   clientName: string;
@@ -19,7 +20,7 @@ export function EstimateSentEmail({
   clientName,
   orgName,
   logoUrl,
-  accentColor = "#111827",
+  accentColor = EMAIL_COLORS.ink,
   estimateNumber,
   estimateTotal,
   issueDate,
@@ -34,17 +35,17 @@ export function EstimateSentEmail({
       accentColor={accentColor}
     >
       <Heading
-        style={{ fontSize: 22, fontWeight: 700, color: "#111827", margin: "0 0 4px" }}
+        style={{ fontSize: 22, fontWeight: 700, color: EMAIL_COLORS.ink, margin: "0 0 4px" }}
       >
         Estimate {estimateNumber}
       </Heading>
-      <Text style={{ fontSize: 15, color: "#374151", lineHeight: "1.6", margin: "0 0 20px" }}>
+      <Text style={{ fontSize: 15, color: EMAIL_COLORS.body, lineHeight: "1.6", margin: "0 0 20px" }}>
         Hi {clientName},
       </Text>
-      <Text style={{ fontSize: 15, color: "#374151", lineHeight: "1.6", margin: "0 0 20px" }}>
+      <Text style={{ fontSize: 15, color: EMAIL_COLORS.body, lineHeight: "1.6", margin: "0 0 20px" }}>
         {orgName} has sent you estimate {estimateNumber} for {estimateTotal}.
       </Text>
-      <Text style={{ fontSize: 15, color: "#374151", lineHeight: "1.6", margin: "0 0 4px" }}>
+      <Text style={{ fontSize: 15, color: EMAIL_COLORS.body, lineHeight: "1.6", margin: "0 0 4px" }}>
         Please review the estimate using the link below. You can approve or decline it directly from the page.
       </Text>
 

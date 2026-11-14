@@ -3,6 +3,7 @@ import { TransactionalLayout } from "../layouts/TransactionalLayout";
 import { EmailButton } from "../components/EmailButton";
 import { EmailCallout } from "../components/EmailCallout";
 import { InvoiceSummary } from "../components/InvoiceSummary";
+import { EMAIL_COLORS } from "../theme";
 
 export interface OverdueReminderEmailProps {
   clientName: string;
@@ -19,7 +20,7 @@ export function OverdueReminderEmail({
   clientName,
   orgName,
   logoUrl,
-  accentColor = "#111827",
+  accentColor = EMAIL_COLORS.ink,
   invoiceNumber,
   dueDate,
   balanceDue,
@@ -33,17 +34,17 @@ export function OverdueReminderEmail({
       accentColor={accentColor}
     >
       <Heading
-        style={{ fontSize: 22, fontWeight: 700, color: "#dc2626", margin: "0 0 4px" }}
+        style={{ fontSize: 22, fontWeight: 700, color: EMAIL_COLORS.danger, margin: "0 0 4px" }}
       >
         Overdue invoice {invoiceNumber}
       </Heading>
-      <Text style={{ fontSize: 15, color: "#374151", lineHeight: "1.6", margin: "0 0 20px" }}>
+      <Text style={{ fontSize: 15, color: EMAIL_COLORS.body, lineHeight: "1.6", margin: "0 0 20px" }}>
         Hi {clientName},
       </Text>
       <EmailCallout variant="error">
         Invoice {invoiceNumber} from {orgName} is now overdue.
       </EmailCallout>
-      <Text style={{ fontSize: 15, color: "#374151", lineHeight: "1.6", margin: "20px 0 4px" }}>
+      <Text style={{ fontSize: 15, color: EMAIL_COLORS.body, lineHeight: "1.6", margin: "20px 0 4px" }}>
         Please use the secure link below to view and pay the invoice.
       </Text>
 
@@ -52,7 +53,7 @@ export function OverdueReminderEmail({
         dueDate={dueDate}
         total={balanceDue}
         balanceDue={balanceDue}
-        accentColor="#dc2626"
+        accentColor={EMAIL_COLORS.danger}
       />
 
       <EmailButton href={payUrl} accentColor={accentColor}>
