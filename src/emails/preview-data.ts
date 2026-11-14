@@ -20,6 +20,7 @@ import type { WeeklyDigestEmailProps } from "./transactional/WeeklyDigestEmail";
 import type { NewsletterEmailProps } from "./marketing/NewsletterEmail";
 import type { ProductUpdateEmailProps } from "./marketing/ProductUpdateEmail";
 import type { WinBackEmailProps } from "./marketing/WinBackEmail";
+import type { SignupFollowUpEmailProps } from "./transactional/SignupFollowUpEmail";
 
 export const PREVIEW_DATA = {
   welcome: {
@@ -282,4 +283,9 @@ export const PREVIEW_DATA = {
     unsubscribeUrl: "https://app.invoyr.io/api/email/unsubscribe?token=example",
     variant: "day0",
   } satisfies WinBackEmailProps,
+
+  signupFollowUp: {
+    firstName: "Alex",
+    roadmapUrl: "https://invoyr.io/roadmap",
+  } satisfies SignupFollowUpEmailProps,
 };

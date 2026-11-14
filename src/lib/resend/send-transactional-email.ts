@@ -17,6 +17,14 @@ interface SendTransactionalEmailOptions {
   templateName: TransactionalTemplateName | string;
   react: ReactElement;
   fromEmail?: string | null;
+  /** Where replies go, when that isn't the sender. */
+  replyTo?: string | null;
+  /**
+   * Send from Invoyr even when the org has its own SMTP configured. For
+   * Invoyr's own messages to the account holder, which shouldn't go out through
+   * the customer's mail server.
+   */
+  skipOrgSmtp?: boolean;
 }
 
 interface SendResult {
@@ -34,6 +42,8 @@ export async function sendTransactionalEmail({
   templateName,
   react,
   fromEmail,
+  replyTo,
+  skipOrgSmtp = false,
 }: SendTransactionalEmailOptions): Promise<SendResult> {
   let html: string;
 
@@ -52,11 +62,13 @@ export async function sendTransactionalEmail({
   const loggedRecipients = [to, ...ccList].join(", ");
 
   // Check if the org has custom SMTP configured
-  const { data: orgSmtp } = await supabase
-    .from("organisations")
-    .select("smtp_host, smtp_port, smtp_user, smtp_password, smtp_from_name, smtp_from_email")
-    .eq("id", orgId)
-    .single();
+  const { data: orgSmtp } = skipOrgSmtp
+    ? { data: null }
+    : await supabase
+        .from("organisations")
+        .select("smtp_host, smtp_port, smtp_user, smtp_password, smtp_from_name, smtp_from_email")
+        .eq("id", orgId)
+        .single();
 
   if (
     orgSmtp?.smtp_host &&
@@ -97,6 +109,7 @@ export async function sendTransactionalEmail({
     from,
     to,
     ...(ccList.length ? { cc: ccList } : {}),
+    ...(replyTo ? { replyTo } : {}),
     subject,
     html,
   });

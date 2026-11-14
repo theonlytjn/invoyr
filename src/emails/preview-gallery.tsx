@@ -23,6 +23,7 @@ import { WeeklyDigestEmail } from "./transactional/WeeklyDigestEmail";
 import { NewsletterEmail } from "./marketing/NewsletterEmail";
 import { ProductUpdateEmail } from "./marketing/ProductUpdateEmail";
 import { WinBackEmail } from "./marketing/WinBackEmail";
+import { SignupFollowUpEmail } from "./transactional/SignupFollowUpEmail";
 
 /**
  * Every email that can be previewed, with sample data.
@@ -147,6 +148,12 @@ export const EMAIL_PREVIEWS: EmailPreview[] = [
     title: "Weekly digest",
     description: "To the org owner every Monday at 8am, unless there was nothing to report.",
     element: () => createElement(WeeklyDigestEmail, PREVIEW_DATA.weeklyDigest),
+  },
+  {
+    slug: "signup-follow-up",
+    title: "Signup follow-up",
+    description: "From the founder to new account owners about three days after signup: thanks, and a request for feedback via reply or the roadmap.",
+    element: () => createElement(SignupFollowUpEmail, PREVIEW_DATA.signupFollowUp),
   },
   {
     slug: "subscription-activated",

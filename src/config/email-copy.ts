@@ -64,3 +64,29 @@ export const TRIAL_EMAIL_COPY = {
     return willBeCharged ? "View billing" : "Choose my plan";
   },
 } as const;
+
+/**
+ * The founder's note that goes out three days after signup, thanking people for
+ * trying Invoyr and asking for feedback. A one-off relationship email with no
+ * offer or promotion in it, so it is sent as transactional mail. Replies go to
+ * support, and the CTA opens the public roadmap where ideas and votes are
+ * collected.
+ */
+export const SIGNUP_FOLLOW_UP_COPY = {
+  /** Hours after signup before the note is due; the daily run sends to the 24h window after this. */
+  delayHours: 72,
+  subject: "Thanks for trying Invoyr",
+  preview: "A quick note from the founder, and a favour to ask.",
+  heading: (firstName?: string | null) =>
+    firstName ? `Thanks for giving Invoyr a go, ${firstName}` : "Thanks for giving Invoyr a go",
+  paragraphs: [
+    "It's been a few days since you signed up, so I wanted to say thank you personally. Invoyr is still young, and every person who tries it genuinely shapes what it becomes.",
+    "I'd really value your honest take. What's working, what's confusing, and what's missing? Big or small, I read every reply myself.",
+    "You can also see what we're building next on our public roadmap. Vote on the ideas that matter to you, or suggest your own.",
+  ],
+  cta: "See the roadmap",
+  replyPrompt: "Or just hit reply. It comes straight to me.",
+  signOff: "Thanks,",
+  signerName: "Tony Nwachi",
+  signerTitle: "Founder, Invoyr",
+} as const;

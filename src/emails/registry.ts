@@ -18,7 +18,8 @@ export type TransactionalTemplateName =
   | "team-invite"
   | "client-statement"
   | "credit-note"
-  | "weekly-digest";
+  | "weekly-digest"
+  | "signup-follow-up";
 
 export type MarketingTemplateName =
   | "newsletter"
@@ -102,6 +103,10 @@ export const EMAIL_REGISTRY: Record<TransactionalTemplateName, EmailRegistryEntr
   "weekly-digest": {
     templateName: "weekly-digest",
     defaultSubject: "Your weekly summary",
+  },
+  "signup-follow-up": {
+    templateName: "signup-follow-up",
+    defaultSubject: "Thanks for trying Invoyr",
   },
 };
 

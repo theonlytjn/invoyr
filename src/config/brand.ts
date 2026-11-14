@@ -24,6 +24,11 @@ export const BRAND = {
    */
   emailBannerUrl: `${_appUrl}/brand/invoyr-email-banner.jpg`,
   emailBannerAlt: "Invoyr: Get paid faster. Invoicing that runs itself.",
+  /** Founder's signature for personal notes (PNG, 3x a 48px display height). */
+  founderSignatureUrl: `${_appUrl}/brand/tn-signature-email.png`,
+  founderSignatureAspectRatio: 1406 / 508,
+  /** Public roadmap, on the marketing site. */
+  roadmapUrl: "https://invoyr.io/roadmap",
   /** Intrinsic aspect ratio of the wordmark (width / height). */
   logoAspectRatio: 703.58 / 236.45,
   faviconUrl: `${_appUrl}/favicon.png?v=2`,
