@@ -1,5 +1,5 @@
 import { requireAdmin } from "@/lib/admin";
-import { EMAIL_PREVIEWS, MISSING_PREVIEWS } from "@/emails/preview-gallery";
+import { EMAIL_PREVIEWS } from "@/emails/preview-gallery";
 
 export const metadata = { title: "Admin — Emails" };
 
@@ -52,25 +52,6 @@ export default async function AdminEmailsPage() {
           </section>
         ))}
       </div>
-
-      <section className="mt-8 rounded-2xl border border-neutral-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
-        <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-          Not previewable yet
-        </h2>
-        <p className="mt-1 text-xs text-neutral-500">
-          These templates exist and send, but have no sample data to render from.
-        </p>
-        <ul className="mt-3 flex flex-wrap gap-2">
-          {MISSING_PREVIEWS.map((name) => (
-            <li
-              key={name}
-              className="rounded-full bg-neutral-100 px-2.5 py-1 text-xs text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300"
-            >
-              {name}
-            </li>
-          ))}
-        </ul>
-      </section>
     </div>
   );
 }

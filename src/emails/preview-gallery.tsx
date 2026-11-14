@@ -11,14 +11,26 @@ import { OverdueReminderEmail } from "./transactional/OverdueReminderEmail";
 import { TrialEndingEmail } from "./transactional/TrialEndingEmail";
 import { PaymentFailedEmail } from "./transactional/PaymentFailedEmail";
 import { TeamInviteEmail } from "./transactional/TeamInviteEmail";
+import { AdminWelcomeEmail } from "./transactional/AdminWelcomeEmail";
+import { AutomationEmail } from "./transactional/AutomationEmail";
+import { ClientStatementEmail } from "./transactional/ClientStatementEmail";
+import { CreditNoteEmail } from "./transactional/CreditNoteEmail";
+import { EstimateSentEmail } from "./transactional/EstimateSentEmail";
+import { EstimateResponseEmail } from "./transactional/EstimateResponseEmail";
+import { InvoicePaidOwnerEmail } from "./transactional/InvoicePaidOwnerEmail";
+import { SubscriptionActivatedEmail } from "./transactional/SubscriptionActivatedEmail";
+import { WeeklyDigestEmail } from "./transactional/WeeklyDigestEmail";
+import { NewsletterEmail } from "./marketing/NewsletterEmail";
+import { ProductUpdateEmail } from "./marketing/ProductUpdateEmail";
+import { WinBackEmail } from "./marketing/WinBackEmail";
 
 /**
  * Every email that can be previewed, with sample data.
  *
  * Exists so the emails can be reviewed side by side — until now the only way to
  * see one was to trigger the real thing and read your inbox, which is no way to
- * judge a restyle. Templates without preview data are listed in
- * MISSING_PREVIEWS rather than silently omitted.
+ * judge a restyle. Every template in transactional/ and marketing/ should have
+ * an entry here.
  */
 export interface EmailPreview {
   slug: string;
@@ -88,23 +100,83 @@ export const EMAIL_PREVIEWS: EmailPreview[] = [
     description: "Invites someone into an organisation.",
     element: () => createElement(TeamInviteEmail, PREVIEW_DATA.teamInvite),
   },
+  {
+    slug: "invoice-paid-owner",
+    title: "Invoice paid (to you)",
+    description: "To the org owner when a client pays online through Stripe or PayPal. Not sent for payments recorded by hand.",
+    element: () => createElement(InvoicePaidOwnerEmail, PREVIEW_DATA.invoicePaidOwner),
+  },
+  {
+    slug: "credit-note",
+    title: "Credit note",
+    description: "To the client when a credit note is issued against an invoice, if emailing is ticked.",
+    element: () => createElement(CreditNoteEmail, PREVIEW_DATA.creditNote),
+  },
+  {
+    slug: "client-statement",
+    title: "Client statement",
+    description: "To the client when a statement of account is emailed from their page, with the PDF attached.",
+    element: () => createElement(ClientStatementEmail, PREVIEW_DATA.clientStatement),
+  },
+  {
+    slug: "estimate-sent",
+    title: "Estimate sent",
+    description: "To the client when an estimate is sent, with a link to approve or decline it.",
+    element: () => createElement(EstimateSentEmail, PREVIEW_DATA.estimateSent),
+  },
+  {
+    slug: "estimate-approved",
+    title: "Estimate approved",
+    description: "To the org owner when a client approves an estimate.",
+    element: () => createElement(EstimateResponseEmail, PREVIEW_DATA.estimateApproved),
+  },
+  {
+    slug: "estimate-declined",
+    title: "Estimate declined",
+    description: "To the org owner when a client declines an estimate. Same template as approved.",
+    element: () => createElement(EstimateResponseEmail, PREVIEW_DATA.estimateDeclined),
+  },
+  {
+    slug: "automation",
+    title: "Automation",
+    description: "Sent by an automation rule, to the client or the owner, with the rule's own subject and body.",
+    element: () => createElement(AutomationEmail, PREVIEW_DATA.automation),
+  },
+  {
+    slug: "weekly-digest",
+    title: "Weekly digest",
+    description: "To the org owner every Monday at 8am, unless there was nothing to report.",
+    element: () => createElement(WeeklyDigestEmail, PREVIEW_DATA.weeklyDigest),
+  },
+  {
+    slug: "subscription-activated",
+    title: "Subscription activated",
+    description: "To the org owner after a subscription checkout completes.",
+    element: () => createElement(SubscriptionActivatedEmail, PREVIEW_DATA.subscriptionActivated),
+  },
+  {
+    slug: "admin-welcome",
+    title: "Admin welcome",
+    description: "To a new owner when an Invoyr admin creates their account, with a temporary password.",
+    element: () => createElement(AdminWelcomeEmail, PREVIEW_DATA.adminWelcome),
+  },
+  {
+    slug: "newsletter",
+    title: "Newsletter (marketing)",
+    description: "Marketing email to consenting subscribers. Not sent from anywhere in the app yet.",
+    element: () => createElement(NewsletterEmail, PREVIEW_DATA.newsletter),
+  },
+  {
+    slug: "product-update",
+    title: "Product update (marketing)",
+    description: "Feature announcement to consenting subscribers. Not sent from anywhere in the app yet.",
+    element: () => createElement(ProductUpdateEmail, PREVIEW_DATA.productUpdate),
+  },
+  {
+    slug: "win-back",
+    title: "Win-back (marketing)",
+    description: "To lapsed accounts, in day 0, 3 and 7 variants (day 0 shown). Not sent from anywhere in the app yet.",
+    element: () => createElement(WinBackEmail, PREVIEW_DATA.winBack),
+  },
 ];
 
-/**
- * Templates that exist but have no preview data yet. Listed so the gap is
- * visible rather than looking like the template doesn't exist.
- */
-export const MISSING_PREVIEWS = [
-  "Admin welcome",
-  "Automation",
-  "Client statement",
-  "Credit note",
-  "Estimate sent",
-  "Estimate response",
-  "Invoice paid (to you)",
-  "Subscription activated",
-  "Weekly digest",
-  "Newsletter (marketing)",
-  "Product update (marketing)",
-  "Win-back (marketing)",
-];
