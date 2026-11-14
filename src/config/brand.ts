@@ -18,6 +18,12 @@ export const BRAND = {
    */
   emailLogoUrl: `${_appUrl}/brand/invoyr-logo-email.png`,
   emailLogoWhiteUrl: `${_appUrl}/brand/invoyr-logo-email-white.png`,
+  /**
+   * Header banner for Invoyr's own emails: wordmark and tagline on a hero
+   * photo. Rebuild with scripts/build-email-banner.sh. 1120x320 (2x).
+   */
+  emailBannerUrl: `${_appUrl}/brand/invoyr-email-banner.jpg`,
+  emailBannerAlt: "Invoyr: Get paid faster. Invoicing that runs itself.",
   /** Intrinsic aspect ratio of the wordmark (width / height). */
   logoAspectRatio: 703.58 / 236.45,
   faviconUrl: `${_appUrl}/favicon.png?v=2`,

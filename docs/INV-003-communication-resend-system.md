@@ -79,8 +79,13 @@ Signature
   put hex values in templates.
 - **Two header modes** (`EmailHeader`):
   - *Invoyr's own emails* (no `orgName`: welcome, verify, password reset, trial ending,
-    weekly digest, invoice paid (to the owner), billing, team invite, marketing): the
-    Invoyr wordmark on white with a lime rule across the top.
+    weekly digest, invoice paid (to the owner), billing, team invite, marketing): a
+    full-width banner with the reversed wordmark on the left and the tagline ("Get paid
+    faster. / Invoicing that runs itself.") on the right, over the homepage hero photo
+    tinted navy, with a lime rule beneath. It is one flat JPG
+    (`public/brand/invoyr-email-banner.jpg`), because Outlook desktop and some Gmail
+    setups drop CSS background images. Rebuild it with `scripts/build-email-banner.sh
+    [hero image] [crop gravity]`.
   - *Emails sent for an organisation* (invoice, reminders, estimates, receipts, credit
     notes, statements, automations): the org's logo or name, ruled in the org's accent
     colour. Button labels switch to dark text when the org colour is light.
