@@ -51,6 +51,12 @@ export default function MarketingHeader() {
           ) : (
             <>
               <Link
+                href="/demo"
+                className="rounded px-1 py-2 text-[1.15rem] text-neutral-600 dark:text-neutral-200 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-950"
+              >
+                Book a demo
+              </Link>
+              <Link
                 href="/login"
                 className="rounded px-1 py-2 text-[1.15rem] text-neutral-600 dark:text-neutral-200 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-950"
               >
@@ -119,6 +125,9 @@ export default function MarketingHeader() {
               </>
             ) : (
               <>
+                <Link href="/demo" onClick={close} className="rounded py-2.5 text-base text-neutral-600 dark:text-neutral-200 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-950">
+                  Book a demo
+                </Link>
                 <Link href="/login" onClick={close} className="rounded py-2.5 text-base text-neutral-600 dark:text-neutral-200 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-950">
                   Sign in
                 </Link>

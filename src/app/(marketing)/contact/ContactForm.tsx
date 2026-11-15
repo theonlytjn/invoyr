@@ -2,14 +2,23 @@
 
 import { useState } from "react";
 import TurnstileWidget, { turnstileConfigured } from "@/components/TurnstileWidget";
+import { DEMO_COPY } from "@/config/demo";
 
 const inputCls =
   "w-full rounded-lg bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 px-3.5 py-3 text-base text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 outline-none transition-colors focus:border-brand focus:ring-1 focus:ring-brand";
 const labelCls = "block text-base text-neutral-700 dark:text-neutral-300 mb-1.5";
 
-export default function ContactForm() {
+/**
+ * The contact form. `kind="demo"` adds the demo-request fields (company, team
+ * size, times that suit) and makes the message optional.
+ */
+export default function ContactForm({ kind = "message" }: { kind?: "message" | "demo" }) {
+  const isDemo = kind === "demo";
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [company, setCompany] = useState("");
+  const [teamSize, setTeamSize] = useState("");
+  const [availability, setAvailability] = useState("");
   const [message, setMessage] = useState("");
   const [captchaToken, setCaptchaToken] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
@@ -21,7 +30,11 @@ export default function ContactForm() {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, message, captchaToken }),
+        body: JSON.stringify(
+          isDemo
+            ? { kind, name, email, company, teamSize, availability, message, captchaToken }
+            : { kind, name, email, message, captchaToken }
+        ),
       });
       if (res.ok) {
         setStatus("sent");
@@ -39,8 +52,12 @@ export default function ContactForm() {
         <div className="w-11 h-11 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
           <span className="text-emerald-600 dark:text-emerald-400 text-lg" aria-hidden>✓</span>
         </div>
-        <p className="text-lg text-neutral-900 dark:text-neutral-100">Message sent</p>
-        <p className="text-base text-neutral-500 dark:text-neutral-400 mt-1">We&apos;ll reply within one business day.</p>
+        <p className="text-lg text-neutral-900 dark:text-neutral-100">
+          {isDemo ? DEMO_COPY.success.title : "Message sent"}
+        </p>
+        <p className="text-base text-neutral-500 dark:text-neutral-400 mt-1">
+          {isDemo ? DEMO_COPY.success.body : "We\u2019ll reply within one business day."}
+        </p>
       </div>
     );
   }
@@ -57,9 +74,34 @@ export default function ContactForm() {
           <input id="email" type="email" className={inputCls} value={email} onChange={(e) => setEmail(e.target.value)} required />
         </div>
       </div>
+      {isDemo && (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="company" className={labelCls}>Business name <span className="text-neutral-500">(optional)</span></label>
+              <input id="company" className={inputCls} value={company} onChange={(e) => setCompany(e.target.value)} autoComplete="organization" />
+            </div>
+            <div>
+              <label htmlFor="teamSize" className={labelCls}>Team size</label>
+              <select id="teamSize" className={inputCls} value={teamSize} onChange={(e) => setTeamSize(e.target.value)}>
+                <option value="">Choose one</option>
+                {DEMO_COPY.teamSizes.map((size) => (
+                  <option key={size} value={size}>{size}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div>
+            <label htmlFor="availability" className={labelCls}>When suits you? <span className="text-neutral-500">(optional)</span></label>
+            <input id="availability" className={inputCls} placeholder="e.g. weekday mornings, UK time" value={availability} onChange={(e) => setAvailability(e.target.value)} />
+          </div>
+        </>
+      )}
       <div>
-        <label htmlFor="message" className={labelCls}>Message</label>
-        <textarea id="message" rows={5} className={`${inputCls} resize-y`} value={message} onChange={(e) => setMessage(e.target.value)} required />
+        <label htmlFor="message" className={labelCls}>
+          {isDemo ? <>Anything you&apos;d like us to cover? <span className="text-neutral-500">(optional)</span></> : "Message"}
+        </label>
+        <textarea id="message" rows={isDemo ? 3 : 5} className={`${inputCls} resize-y`} value={message} onChange={(e) => setMessage(e.target.value)} required={!isDemo} />
       </div>
       <TurnstileWidget onVerify={setCaptchaToken} />
       {status === "error" && (
@@ -70,7 +112,7 @@ export default function ContactForm() {
         disabled={status === "sending" || (turnstileConfigured && !captchaToken)}
         className="px-5 py-3 rounded-lg bg-neutral-950 dark:bg-neutral-50 text-white dark:text-neutral-950 text-base font-medium hover:bg-neutral-800 dark:hover:bg-white transition-colors disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-950"
       >
-        {status === "sending" ? "Sending…" : "Send message"}
+        {status === "sending" ? "Sending…" : isDemo ? "Request a demo" : "Send message"}
       </button>
     </form>
   );

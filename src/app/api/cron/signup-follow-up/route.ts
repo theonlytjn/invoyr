@@ -1,31 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createElement } from "react";
 import { createServiceClient } from "@/lib/supabase/server";
-import { sendTransactionalEmail } from "@/lib/resend/send-transactional-email";
-import { SignupFollowUpEmail } from "@/emails/transactional/SignupFollowUpEmail";
-import { SIGNUP_FOLLOW_UP_COPY } from "@/config/email-copy";
-import { BRAND } from "@/config/brand";
+import { FOUNDER_NOTE_COPY } from "@/config/email-copy";
+import { sendFounderNote } from "@/lib/founder-notes/send";
 
 /**
  * The founder's thank-you note, run daily at 10:00 UTC.
  *
  * Picks up everyone whose profile was created between 72 and 96 hours ago, so
  * each signup falls into exactly one daily run, about three days in and at a
- * civilised hour. Only account owners are written to: teammates who joined
- * through an invite didn't sign up. The note is sent once per address, ever,
- * keyed on email_logs.
+ * civilised hour. That includes people who signed up but never finished
+ * onboarding (no organisation yet), whose feedback is the most useful of all.
+ * Teammates who joined through an invite are skipped: they didn't sign up.
  */
 
-const TEMPLATE = "signup-follow-up";
 const HOUR = 60 * 60 * 1000;
-
-/** "Tony from Invoyr <invoices@invoyr.io>", whatever form the env var takes. */
-function founderFrom(): string | undefined {
-  const configured = process.env.RESEND_FROM_EMAIL;
-  if (!configured) return undefined;
-  const address = configured.match(/<([^>]+)>/)?.[1] ?? configured.trim();
-  return `${SIGNUP_FOLLOW_UP_COPY.signerName.split(" ")[0]} from ${BRAND.name} <${address}>`;
-}
 
 export async function GET(req: NextRequest) {
   if (req.headers.get("authorization") !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -34,7 +22,7 @@ export async function GET(req: NextRequest) {
 
   const supabase = createServiceClient();
   const now = Date.now();
-  const delay = SIGNUP_FOLLOW_UP_COPY.delayHours * HOUR;
+  const delay = FOUNDER_NOTE_COPY.delayHours * HOUR;
 
   const { data: profiles, error } = await supabase
     .from("profiles")
@@ -48,42 +36,27 @@ export async function GET(req: NextRequest) {
   }
 
   async function sendTo(profile: { id: string; first_name: string | null }) {
-    const { data: membership } = await supabase
+    const { data: memberships, error: memberError } = await supabase
       .from("org_members")
-      .select("org_id")
-      .eq("user_id", profile.id)
-      .eq("role", "owner")
-      .limit(1)
-      .maybeSingle();
-    if (!membership?.org_id) return false;
+      .select("org_id, role")
+      .eq("user_id", profile.id);
+    if (memberError) return false;
+
+    const owned = memberships?.find((m) => m.role === "owner");
+    // In an organisation but not its owner: an invited teammate.
+    if (!owned && memberships?.length) return false;
 
     const { data: authUser } = await supabase.auth.admin.getUserById(profile.id);
     const email = authUser?.user?.email;
     if (!email) return false;
 
-    const { data: prior, error: priorError } = await supabase
-      .from("email_logs")
-      .select("id")
-      .eq("template_name", TEMPLATE)
-      .eq("to_email", email)
-      .limit(1);
-    // A failed lookup must not disable the guard and double-send.
-    if (priorError || prior?.length) return false;
-
-    const result = await sendTransactionalEmail({
-      orgId: membership.org_id,
+    return sendFounderNote(supabase, {
+      note: "signup",
       to: email,
-      subject: SIGNUP_FOLLOW_UP_COPY.subject,
-      templateName: TEMPLATE,
-      fromEmail: founderFrom(),
-      replyTo: BRAND.supportEmail,
-      skipOrgSmtp: true,
-      react: createElement(SignupFollowUpEmail, {
-        firstName: profile.first_name?.trim() || null,
-        roadmapUrl: BRAND.roadmapUrl,
-      }),
+      firstName: profile.first_name,
+      orgId: owned?.org_id ?? null,
+      userId: profile.id,
     });
-    return result.ok;
   }
 
   const results = await Promise.allSettled((profiles ?? []).map(sendTo));

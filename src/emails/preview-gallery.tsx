@@ -23,7 +23,7 @@ import { WeeklyDigestEmail } from "./transactional/WeeklyDigestEmail";
 import { NewsletterEmail } from "./marketing/NewsletterEmail";
 import { ProductUpdateEmail } from "./marketing/ProductUpdateEmail";
 import { WinBackEmail } from "./marketing/WinBackEmail";
-import { SignupFollowUpEmail } from "./transactional/SignupFollowUpEmail";
+import { FounderNoteEmail } from "./transactional/FounderNoteEmail";
 
 /**
  * Every email that can be previewed, with sample data.
@@ -152,8 +152,14 @@ export const EMAIL_PREVIEWS: EmailPreview[] = [
   {
     slug: "signup-follow-up",
     title: "Signup follow-up",
-    description: "From the founder to new account owners about three days after signup: thanks, and a request for feedback via reply or the roadmap.",
-    element: () => createElement(SignupFollowUpEmail, PREVIEW_DATA.signupFollowUp),
+    description: "From the founder about three days after signup, including to people who never finished onboarding: thanks, and a request for feedback via reply or the roadmap.",
+    element: () => createElement(FounderNoteEmail, PREVIEW_DATA.signupFollowUp),
+  },
+  {
+    slug: "trial-ended-follow-up",
+    title: "Trial ended follow-up",
+    description: "From the founder to the owner three days after a trial ends unpaid (not past due, not comped): what got in the way, with a link to suggest an improvement on the roadmap.",
+    element: () => createElement(FounderNoteEmail, PREVIEW_DATA.trialEndedFollowUp),
   },
   {
     slug: "subscription-activated",

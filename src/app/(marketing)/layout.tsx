@@ -11,6 +11,7 @@ const NAV = [
   { href: "/pricing", label: "Pricing" },
   { href: "/about", label: "About" },
   { href: "/roadmap", label: "Roadmap" },
+  { href: "/demo", label: "Book a demo" },
 ];
 
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {

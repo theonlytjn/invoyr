@@ -72,24 +72,46 @@ export const TRIAL_EMAIL_COPY = {
  * support, and the CTA opens the public roadmap where ideas and votes are
  * collected.
  */
-export const SIGNUP_FOLLOW_UP_COPY = {
-  /** Hours after signup before the note is due; the daily run sends to the 24h window after this. */
+/**
+ * Personal notes from the founder, signed, sent from "Tony from Invoyr" with
+ * replies going to support. No offers or promotion, so they go out as
+ * relationship (transactional) email.
+ */
+export const FOUNDER_NOTE_COPY = {
+  /** Hours after the trigger (signup, or trial end) before a note is due; each daily run covers the next 24h. */
   delayHours: 72,
-  subject: "Thanks for trying Invoyr",
-  preview: "A quick note from the founder, and a favour to ask.",
-  heading: (firstName?: string | null) =>
-    firstName ? `Thanks for giving Invoyr a go, ${firstName}` : "Thanks for giving Invoyr a go",
-  paragraphs: [
-    "It's been a few days since you signed up, so I wanted to say thank you personally. Invoyr is still young, and every person who tries it genuinely shapes what it becomes.",
-    "I'd really value your honest take. What's working, what's confusing, and what's missing? Big or small, I read every reply myself.",
-    "You can also see what we're building next on our public roadmap. Vote on the ideas that matter to you, or suggest your own.",
-  ],
-  cta: "See the roadmap",
+  signup: {
+    subject: "Thanks for trying Invoyr",
+    preview: "A quick note from the founder, and a favour to ask.",
+    heading: (firstName?: string | null) =>
+      firstName ? `Thanks for giving Invoyr a go, ${firstName}` : "Thanks for giving Invoyr a go",
+    paragraphs: [
+      "It's been a few days since you signed up, so I wanted to say thank you personally. Invoyr is still young, and every person who tries it genuinely shapes what it becomes.",
+      "I'd really value your honest take. What's working, what's confusing, and what's missing? Big or small, I read every reply myself.",
+      "You can also see what we're building next on our public roadmap. Vote on the ideas that matter to you, or suggest your own.",
+    ],
+    cta: "See the roadmap",
+  },
+  trialEnded: {
+    subject: "Sorry to see you go",
+    preview: "One quick question from the founder: what got in the way?",
+    heading: (firstName?: string | null) =>
+      firstName ? `Sorry to see you go, ${firstName}` : "Sorry to see you go",
+    paragraphs: [
+      "Your Invoyr trial ended a few days ago and you didn't carry on, so I wanted to say thank you for giving it a proper try.",
+      "I'd love to know what stopped you. Was something missing, confusing or harder than it should have been? Or was it simply the wrong time? Even one line helps, and I read every reply myself.",
+      "If there's something that would have made the difference, suggest it on our public roadmap. That's where we decide what to build next, and it's how we hope to earn you back.",
+      "Everything you set up is still there if you ever want to pick up where you left off.",
+    ],
+    cta: "Suggest an improvement",
+  },
   replyPrompt: "Or just hit reply. It comes straight to me.",
   signOff: "Thanks,",
   signerName: "Tony Nwachi",
   signerTitle: "Founder, Invoyr",
 } as const;
+
+export type FounderNoteKind = "signup" | "trialEnded";
 
 /** Row labels for the InvoiceSummary block, by what it's summarising. */
 export const SUMMARY_LABELS = {

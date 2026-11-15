@@ -20,6 +20,7 @@ const MARKETING_PATHS = [
   "/dpa",
   "/help",
   "/roadmap",
+  "/demo",
 ];
 
 function isMarketingPath(pathname: string): boolean {

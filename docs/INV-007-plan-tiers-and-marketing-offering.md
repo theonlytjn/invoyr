@@ -265,3 +265,13 @@ later others) are the upgrade incentive.
   shared marketing `layout` are still in the old light `gray-*` theme. The pricing
   page is dark/editorial; converting the whole marketing site for consistency is a
   follow-up.
+
+## Book a demo (Nov 2026)
+
+`invoyr.io/demo`, linked from the marketing header ("Book a demo", desktop and mobile) and
+footer. Copy and agenda in `src/config/demo.ts`. Requests use the contact form with
+`kind="demo"` (business name, team size, times that suit, what to cover) and arrive at
+`CONTACT_EMAIL` with reply-to set to the requester, subject "Demo request: {name} ({company})".
+Set `NEXT_PUBLIC_DEMO_BOOKING_URL` (Cal.com / Calendly) to show a "Pick a time in my calendar"
+button above the form. The contact API now HTML-escapes everything visitors type.
+A script for the "how to use" video is in `docs/demo/how-to-use-video-script.md`.

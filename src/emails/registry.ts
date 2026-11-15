@@ -19,7 +19,8 @@ export type TransactionalTemplateName =
   | "client-statement"
   | "credit-note"
   | "weekly-digest"
-  | "signup-follow-up";
+  | "signup-follow-up"
+  | "trial-ended-follow-up";
 
 export type MarketingTemplateName =
   | "newsletter"
@@ -107,6 +108,10 @@ export const EMAIL_REGISTRY: Record<TransactionalTemplateName, EmailRegistryEntr
   "signup-follow-up": {
     templateName: "signup-follow-up",
     defaultSubject: "Thanks for trying Invoyr",
+  },
+  "trial-ended-follow-up": {
+    templateName: "trial-ended-follow-up",
+    defaultSubject: "Sorry to see you go",
   },
 };
 

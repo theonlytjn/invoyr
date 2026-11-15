@@ -8,7 +8,14 @@ import { ccRecipients } from "@/lib/email-recipients";
 import { writeEmailLog } from "./email-log";
 
 interface SendTransactionalEmailOptions {
-  orgId: string;
+  /**
+   * The organisation the email belongs to. Null only for Invoyr's own notes to
+   * a person who has no organisation yet (signed up, never finished
+   * onboarding); pass `userId` then, so the log row is still scoped to them.
+   */
+  orgId: string | null;
+  /** The account holder the email is about, for logging. */
+  userId?: string | null;
   invoiceId?: string | null;
   to: string;
   /** Additional recipients copied on the email; invalid entries are dropped. */
@@ -35,6 +42,7 @@ interface SendResult {
 
 export async function sendTransactionalEmail({
   orgId,
+  userId,
   invoiceId,
   to,
   cc,
@@ -62,7 +70,7 @@ export async function sendTransactionalEmail({
   const loggedRecipients = [to, ...ccList].join(", ");
 
   // Check if the org has custom SMTP configured
-  const { data: orgSmtp } = skipOrgSmtp
+  const { data: orgSmtp } = skipOrgSmtp || !orgId
     ? { data: null }
     : await supabase
         .from("organisations")
@@ -90,6 +98,7 @@ export async function sendTransactionalEmail({
 
     await writeEmailLog(supabase, {
       org_id: orgId,
+      user_id: userId ?? null,
       invoice_id: invoiceId ?? null,
       resend_id: null,
       to_email: loggedRecipients,
@@ -116,6 +125,7 @@ export async function sendTransactionalEmail({
 
   await writeEmailLog(supabase, {
     org_id: orgId,
+    user_id: userId ?? null,
     invoice_id: invoiceId ?? null,
     resend_id: data?.id ?? null,
     to_email: loggedRecipients,

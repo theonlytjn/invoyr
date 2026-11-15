@@ -21,7 +21,7 @@ import type { WeeklyDigestEmailProps } from "./transactional/WeeklyDigestEmail";
 import type { NewsletterEmailProps } from "./marketing/NewsletterEmail";
 import type { ProductUpdateEmailProps } from "./marketing/ProductUpdateEmail";
 import type { WinBackEmailProps } from "./marketing/WinBackEmail";
-import type { SignupFollowUpEmailProps } from "./transactional/SignupFollowUpEmail";
+import type { FounderNoteEmailProps } from "./transactional/FounderNoteEmail";
 
 export const PREVIEW_DATA = {
   welcome: {
@@ -287,7 +287,14 @@ export const PREVIEW_DATA = {
   } satisfies WinBackEmailProps,
 
   signupFollowUp: {
+    note: "signup",
     firstName: "Alex",
-    roadmapUrl: "https://invoyr.io/roadmap",
-  } satisfies SignupFollowUpEmailProps,
+    ctaUrl: "https://invoyr.io/roadmap",
+  } satisfies FounderNoteEmailProps,
+
+  trialEndedFollowUp: {
+    note: "trialEnded",
+    firstName: "Alex",
+    ctaUrl: "https://invoyr.io/roadmap?suggest=1",
+  } satisfies FounderNoteEmailProps,
 };

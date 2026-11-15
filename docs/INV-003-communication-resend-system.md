@@ -99,21 +99,30 @@ Signature
   pasted into Supabase Dashboard → Authentication → Emails → Templates. Re-run and
   re-paste whenever those two emails change.
 
-### Signup follow-up (Nov 2026)
+### Founder notes (Nov 2026)
 
-A personal note from the founder about three days after signup: thanks for
-trying Invoyr, a request for honest feedback by reply, and a link to the public
-roadmap (INV-009). Template `SignupFollowUpEmail`, copy in
-`SIGNUP_FOLLOW_UP_COPY` (`src/config/email-copy.ts`).
+Personal, signed notes from the founder asking for feedback by reply or on the
+public roadmap (INV-009). One template, `FounderNoteEmail` (`note: "signup" |
+"trialEnded"`), copy in `FOUNDER_NOTE_COPY` (`src/config/email-copy.ts`), sending
+in `src/lib/founder-notes/send.ts`. Both come from "Tony from Invoyr" at the
+normal sending address, reply-to support@invoyr.io, always via Invoyr's Resend
+account (`skipOrgSmtp`), once per address per kind, ever (checked against
+`email_logs`, failing safe). No offer or promotion, so they are sent as
+transactional relationship email.
 
-- Sent by `/api/cron/signup-follow-up`, daily at 10:00 UTC, to account **owners**
-  whose profile was created 72–96 hours earlier, so each signup lands in exactly
-  one run. Invited teammates are skipped.
-- Once per address, ever (checked against `email_logs`, failing safe).
-- From "Tony from Invoyr" at the normal sending address, reply-to
-  support@invoyr.io, and always via Invoyr's Resend account (`skipOrgSmtp`), never
-  a customer's own SMTP server.
-- No offer or promotion, so it is sent as a transactional relationship email.
+- **Signup follow-up** (`signup-follow-up`): `/api/cron/signup-follow-up`, daily
+  at 10:00 UTC, to everyone whose profile was created 72–96 hours earlier,
+  including people who never finished onboarding (logged with `org_id` null and
+  their `user_id`). Invited teammates are skipped.
+- **Trial ended follow-up** (`trial-ended-follow-up`):
+  `/api/cron/trial-ended-follow-up`, daily at 10:15 UTC, to the owner of each org
+  whose trial ended 72–96 hours earlier with status `trialing`, `canceled` or
+  `incomplete`. Skipped when `past_due` (they tried to pay; the payment-failed
+  email covers it) or comped. "Sorry to see you go, what got in the way?", with
+  a button to the roadmap's suggest form (`/roadmap?suggest=1`).
+- `email_logs.org_id` is nullable and the table has `user_id` (migration
+  `email_logs_user_scoped`, 15 Nov 2026). Before this, production had `org_id`
+  NOT NULL and no `user_id`, so the marketing sender's log writes were failing.
 
 ### Fixes from the full preview pass (15 Nov 2026)
 
