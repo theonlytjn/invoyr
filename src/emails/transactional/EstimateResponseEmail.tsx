@@ -58,6 +58,7 @@ export function EstimateResponseEmail({
         invoiceNumber={estimateNumber}
         issueDate={issueDate}
         total={estimateTotal}
+        kind="estimate"
         accentColor={accentColor}
       />
 

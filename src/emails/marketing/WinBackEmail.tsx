@@ -2,6 +2,7 @@ import { Heading, Text } from "@react-email/components";
 import { MarketingLayout } from "../layouts/MarketingLayout";
 import { EmailButton } from "../components/EmailButton";
 import { EMAIL_COLORS } from "../theme";
+import { WIN_BACK_COPY } from "@/config/email-copy";
 
 export interface WinBackEmailProps {
   firstName: string;
@@ -10,26 +11,6 @@ export interface WinBackEmailProps {
   variant?: "day0" | "day3" | "day7";
 }
 
-const CONTENT = {
-  day0: {
-    preview: "We saved your Invoyr workspace.",
-    heading: "We saved your workspace",
-    body: "Your Invoyr workspace is still here. All your clients, invoices and payment history are ready and waiting whenever you come back.",
-    cta: "Return to Invoyr",
-  },
-  day3: {
-    preview: "Here's what you can still do with Invoyr.",
-    heading: "What you can still do with Invoyr",
-    body: "Create and send professional invoices, accept card payments, track what's outstanding and get paid faster — all in one place. Your workspace is saved.",
-    cta: "Pick up where you left off",
-  },
-  day7: {
-    preview: "A special offer, just for you.",
-    heading: "Come back — we'll make it worth it",
-    body: "We'd love to have you back. Upgrade now and get your first month free on any paid plan. Your data is still safe, your clients are still there.",
-    cta: "Claim your offer",
-  },
-} as const;
 
 export function WinBackEmail({
   firstName,
@@ -37,7 +18,7 @@ export function WinBackEmail({
   unsubscribeUrl,
   variant = "day0",
 }: WinBackEmailProps) {
-  const content = CONTENT[variant];
+  const content = WIN_BACK_COPY[variant];
 
   return (
     <MarketingLayout preview={content.preview} unsubscribeUrl={unsubscribeUrl}>

@@ -1,6 +1,7 @@
 import { Section, Row, Column, Text, Hr } from "@react-email/components";
 import { discountLabel } from "@/lib/invoice-totals";
 import { EMAIL_COLORS } from "../theme";
+import { SUMMARY_LABELS, type SummaryKind } from "@/config/email-copy";
 
 interface InvoiceSummaryProps {
   invoiceNumber: string;
@@ -14,6 +15,8 @@ interface InvoiceSummaryProps {
   discount?: string;
   discountReason?: string | null;
   accentColor?: string;
+  /** What's being summarised, which sets the row labels. Defaults to invoice. */
+  kind?: SummaryKind;
 }
 
 export function InvoiceSummary({
@@ -26,13 +29,15 @@ export function InvoiceSummary({
   discount,
   discountReason,
   accentColor = EMAIL_COLORS.ink,
+  kind = "invoice",
 }: InvoiceSummaryProps) {
+  const labels = SUMMARY_LABELS[kind];
   return (
     <Section style={{ marginTop: 16, marginBottom: 8 }}>
       {issueDate && (
         <Row style={{ marginBottom: 8 }}>
           <Column>
-            <Text style={{ fontSize: 13, color: EMAIL_COLORS.muted, margin: 0 }}>Issue date</Text>
+            <Text style={{ fontSize: 13, color: EMAIL_COLORS.muted, margin: 0 }}>{labels.date}</Text>
           </Column>
           <Column align="right">
             <Text style={{ fontSize: 13, color: EMAIL_COLORS.ink, margin: 0 }}>{issueDate}</Text>
@@ -42,7 +47,7 @@ export function InvoiceSummary({
       {dueDate && (
         <Row style={{ marginBottom: 8 }}>
           <Column>
-            <Text style={{ fontSize: 13, color: EMAIL_COLORS.muted, margin: 0 }}>Due date</Text>
+            <Text style={{ fontSize: 13, color: EMAIL_COLORS.muted, margin: 0 }}>{labels.due}</Text>
           </Column>
           <Column align="right">
             <Text style={{ fontSize: 13, color: EMAIL_COLORS.ink, margin: 0 }}>{dueDate}</Text>
@@ -51,7 +56,7 @@ export function InvoiceSummary({
       )}
       <Row style={{ marginBottom: 8 }}>
         <Column>
-          <Text style={{ fontSize: 13, color: EMAIL_COLORS.muted, margin: 0 }}>Invoice</Text>
+          <Text style={{ fontSize: 13, color: EMAIL_COLORS.muted, margin: 0 }}>{labels.number}</Text>
         </Column>
         <Column align="right">
           <Text style={{ fontSize: 13, color: EMAIL_COLORS.ink, margin: 0 }}>{invoiceNumber}</Text>
@@ -85,7 +90,7 @@ export function InvoiceSummary({
       <Row>
         <Column>
           <Text style={{ fontSize: 15, fontWeight: 700, color: EMAIL_COLORS.ink, margin: 0 }}>
-            {balanceDue !== undefined ? "Balance due" : "Total"}
+            {balanceDue !== undefined ? "Balance due" : labels.total}
           </Text>
         </Column>
         <Column align="right">

@@ -1,3 +1,4 @@
+import { PLAN_MAP } from "@/config/plans";
 import type { InvoiceSentEmailProps } from "./transactional/InvoiceSentEmail";
 import type { PaymentReceivedEmailProps } from "./transactional/PaymentReceivedEmail";
 import type { PaymentReminderEmailProps } from "./transactional/PaymentReminderEmail";
@@ -121,7 +122,7 @@ export const PREVIEW_DATA = {
     orgName: "Acme Studio",
     accentColor: "#2563eb",
     subject: "Invoice INV-0012 is 7 days overdue",
-    body: "Hi Sarah Johnson,\nJust a quick note that invoice INV-0012 for GBP 2400.00 is now 7 days overdue.\nIf you've already paid, please ignore this message. Otherwise you can settle it online using the link below.\nThanks,\nAcme Studio",
+    body: "Hi Sarah Johnson,\nJust a quick note that invoice INV-0012 for £2,400.00 is now 7 days overdue.\nIf you've already paid, please ignore this message. Otherwise you can settle it online using the link below.\nThanks,\nAcme Studio",
     ctaUrl: "https://app.invoyr.io/pay/abc123",
     ctaLabel: "View invoice",
   } satisfies AutomationEmailProps,
@@ -232,7 +233,8 @@ export const PREVIEW_DATA = {
 
   subscriptionActivated: {
     firstName: "Alex",
-    planName: "Invoyr Pro",
+    planName: "Invoyr Business",
+    highlights: PLAN_MAP.business.highlights,
     ctaUrl: "https://app.invoyr.io/dashboard",
   } satisfies SubscriptionActivatedEmailProps,
 

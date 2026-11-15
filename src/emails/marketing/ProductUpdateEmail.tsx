@@ -2,6 +2,7 @@ import { Heading, Text, Hr } from "@react-email/components";
 import { MarketingLayout } from "../layouts/MarketingLayout";
 import { EmailButton } from "../components/EmailButton";
 import { EMAIL_COLORS } from "../theme";
+import { PRODUCT_UPDATE_COPY as COPY } from "@/config/email-copy";
 
 export interface ProductUpdateEmailProps {
   firstName: string;
@@ -21,7 +22,7 @@ export function ProductUpdateEmail({
   unsubscribeUrl,
 }: ProductUpdateEmailProps) {
   return (
-    <MarketingLayout preview={`What's new in Invoyr: ${updateTitle}`} unsubscribeUrl={unsubscribeUrl}>
+    <MarketingLayout preview={COPY.preview(updateTitle)} unsubscribeUrl={unsubscribeUrl}>
       <Text
         style={{
           fontSize: 11,
@@ -32,7 +33,7 @@ export function ProductUpdateEmail({
           margin: "0 0 8px",
         }}
       >
-        Product update
+        {COPY.kicker}
       </Text>
       <Heading style={{ fontSize: 22, fontWeight: 700, color: EMAIL_COLORS.ink, margin: "0 0 8px" }}>
         {updateTitle}
@@ -46,7 +47,7 @@ export function ProductUpdateEmail({
       {features.length > 0 && (
         <>
           <Text style={{ fontSize: 13, fontWeight: 600, color: EMAIL_COLORS.ink, margin: "0 0 8px" }}>
-            What&apos;s new:
+            {COPY.featuresHeading}
           </Text>
           {features.map((f, i) => (
             <Text
@@ -59,7 +60,7 @@ export function ProductUpdateEmail({
         </>
       )}
       <Hr style={{ borderColor: EMAIL_COLORS.border, margin: "24px 0" }} />
-      <EmailButton href={ctaUrl}>Open Invoyr</EmailButton>
+      <EmailButton href={ctaUrl}>{COPY.cta}</EmailButton>
     </MarketingLayout>
   );
 }

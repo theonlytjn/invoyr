@@ -3,6 +3,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { sendTransactionalEmail } from "@/lib/resend/send-transactional-email";
 import { AutomationEmail } from "@/emails/transactional/AutomationEmail";
 import type { AutomationRule, AutomationConditions } from "@/lib/supabase/types";
+import { formatCurrency } from "@/lib/utils";
 
 export interface AutomationPayload {
   invoice_id?: string;
@@ -18,12 +19,28 @@ export interface AutomationPayload {
   pay_url?: string;
 }
 
-function interpolate(template: string, payload: AutomationPayload, orgName: string): string {
+/** "£2,400.00" rather than "GBP 2400.00"; falls back if the currency code is unknown. */
+export function formatAutomationAmount(amount: number | undefined, currency: string | undefined): string {
+  if (amount == null) return "";
+  try {
+    return formatCurrency(amount, currency || "GBP");
+  } catch {
+    return `${currency ?? ""} ${amount.toFixed(2)}`.trim();
+  }
+}
+
+export function interpolate(
+  template: string,
+  payload: AutomationPayload,
+  orgName: string,
+  recipientName = payload.client_name ?? "there",
+): string {
   return template
+    .replace(/\{\{recipient_name\}\}/g, recipientName)
     .replace(/\{\{client_name\}\}/g, payload.client_name ?? "there")
     .replace(/\{\{invoice_number\}\}/g, payload.invoice_number ?? "")
     .replace(/\{\{estimate_number\}\}/g, payload.estimate_number ?? "")
-    .replace(/\{\{amount\}\}/g, payload.amount != null ? `${payload.currency ?? ""} ${payload.amount.toFixed(2)}` : "")
+    .replace(/\{\{amount\}\}/g, formatAutomationAmount(payload.amount, payload.currency))
     .replace(/\{\{org_name\}\}/g, orgName)
     .replace(/\{\{days_overdue\}\}/g, String(payload.days_overdue ?? ""));
 }
@@ -64,17 +81,21 @@ export async function runAutomations(
 
   // Fetch org owner email only if needed
   let ownerEmail: string | null = null;
+  let ownerFirstName: string | null = null;
   const needsOwner = rules.some((r) => r.action_type === "notify_owner");
   if (needsOwner) {
     const { data: members } = await supabase
       .from("org_members")
-      .select("user_id")
+      .select("user_id, profiles(first_name)")
       .eq("org_id", orgId)
       .eq("role", "owner")
       .limit(1);
-    if (members?.[0]?.user_id) {
-      const { data: authUser } = await supabase.auth.admin.getUserById(members[0].user_id);
+    const owner = members?.[0];
+    if (owner?.user_id) {
+      const { data: authUser } = await supabase.auth.admin.getUserById(owner.user_id);
       ownerEmail = authUser?.user?.email ?? null;
+      const profile = Array.isArray(owner.profiles) ? owner.profiles[0] : owner.profiles;
+      ownerFirstName = (profile as { first_name?: string | null } | null)?.first_name?.trim() || null;
     }
   }
 
@@ -82,8 +103,11 @@ export async function runAutomations(
     rules.map(async (rule: AutomationRule) => {
       if (!meetsConditions(rule.conditions, payload)) return;
 
-      const subject = interpolate(rule.action_config.subject ?? "Notification from {{org_name}}", payload, orgName);
-      const body = interpolate(rule.action_config.body ?? "", payload, orgName);
+      // Client emails greet the client; owner notifications greet the owner.
+      const recipientName =
+        rule.action_type === "notify_owner" ? (ownerFirstName ?? "there") : (payload.client_name ?? "there");
+      const subject = interpolate(rule.action_config.subject ?? "Notification from {{org_name}}", payload, orgName, recipientName);
+      const body = interpolate(rule.action_config.body ?? "", payload, orgName, recipientName);
       const ctaUrl = payload.pay_url;
 
       let sent = false;
@@ -97,7 +121,7 @@ export async function runAutomations(
           templateName: `automation-${rule.id}`,
           fromEmail: (orgRow as { from_email?: string | null }).from_email,
           react: createElement(AutomationEmail, {
-            recipientName: payload.client_name ?? "there",
+            recipientName,
             orgName,
             logoUrl,
             accentColor,
@@ -117,7 +141,7 @@ export async function runAutomations(
           templateName: `automation-owner-${rule.id}`,
           fromEmail: (orgRow as { from_email?: string | null }).from_email,
           react: createElement(AutomationEmail, {
-            recipientName: orgName,
+            recipientName,
             orgName,
             logoUrl,
             accentColor,

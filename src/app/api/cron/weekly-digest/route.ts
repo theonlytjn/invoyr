@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
       .in("id", orgIds),
     supabase
       .from("org_members")
-      .select("org_id, user_id, profiles(full_name)")
+      .select("org_id, user_id, profiles(first_name, full_name)")
       .in("org_id", orgIds)
       .eq("role", "owner"),
   ]);
@@ -119,7 +119,11 @@ export async function GET(req: NextRequest) {
         subject: `Your weekly summary — ${org.name}`,
         templateName: "weekly-digest",
         react: createElement(WeeklyDigestEmail, {
-          ownerName: (ownerProfile as { full_name?: string | null } | null)?.full_name ?? "there",
+          ownerName: (() => {
+            // First name, like every other email; fall back to the first word of the full name.
+            const p = ownerProfile as { first_name?: string | null; full_name?: string | null } | null;
+            return p?.first_name?.trim() || p?.full_name?.trim().split(/\s+/)[0] || "there";
+          })(),
           orgName: org.name,
           accentColor: org.accent_color ?? "#111827",
           outstanding: formatCurrency(outstanding, currency),

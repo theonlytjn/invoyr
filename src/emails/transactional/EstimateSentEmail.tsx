@@ -54,6 +54,7 @@ export function EstimateSentEmail({
         issueDate={issueDate}
         dueDate={expiryDate}
         total={estimateTotal}
+        kind="estimate"
         accentColor={accentColor}
       />
 

@@ -9,7 +9,7 @@ import { PaymentFailedEmail } from "@/emails/transactional/PaymentFailedEmail";
 import { PaymentReceivedEmail } from "@/emails/transactional/PaymentReceivedEmail";
 import { SubscriptionActivatedEmail } from "@/emails/transactional/SubscriptionActivatedEmail";
 import { InvoicePaidOwnerEmail } from "@/emails/transactional/InvoicePaidOwnerEmail";
-import { billingIntervalOf, getPlanByPriceId } from "@/config/plans";
+import { billingIntervalOf, getPlanByPriceId, PLAN_MAP, type PlanId } from "@/config/plans";
 import { formatDate } from "@/lib/utils";
 import { recordPaymentRow } from "@/lib/payments/record-payment-row";
 import { applyInvoicePaymentState } from "@/lib/payments/apply-invoice-payment-state";
@@ -325,6 +325,7 @@ async function handleSubscriptionCheckout(session: Stripe.Checkout.Session) {
     react: createElement(SubscriptionActivatedEmail, {
       firstName: profile?.first_name ?? "there",
       planName: `Invoyr ${planLabel}`,
+      highlights: PLAN_MAP[resolvedPlan.toLowerCase() as PlanId]?.highlights ?? [],
       ctaUrl: `${appUrl}/dashboard`,
     }),
   });

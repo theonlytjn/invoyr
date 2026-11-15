@@ -90,3 +90,53 @@ export const SIGNUP_FOLLOW_UP_COPY = {
   signerName: "Tony Nwachi",
   signerTitle: "Founder, Invoyr",
 } as const;
+
+/** Row labels for the InvoiceSummary block, by what it's summarising. */
+export const SUMMARY_LABELS = {
+  invoice: { date: "Issue date", due: "Due date", number: "Invoice", total: "Total" },
+  estimate: { date: "Issue date", due: "Valid until", number: "Estimate", total: "Total" },
+  payment: { date: "Paid on", due: "Due date", number: "Invoice", total: "Amount paid" },
+} as const;
+
+export type SummaryKind = keyof typeof SUMMARY_LABELS;
+
+/** Sent from the Stripe webhook when a subscription becomes active. */
+export const SUBSCRIPTION_ACTIVATED_COPY = {
+  preview: (planName: string) => `You're now on the ${planName} plan. Let's get started.`,
+  heading: (planName: string) => `You're on ${planName}`,
+  intro: (planName: string) => `Your ${planName} subscription is now active. Here's what you've unlocked:`,
+  outro: "Head to your dashboard to make the most of your workspace.",
+  cta: "Go to my dashboard",
+} as const;
+
+/** Lapsed-account sequence (marketing; consent and unsubscribe required). Not yet wired to a sender. */
+export const WIN_BACK_COPY = {
+  day0: {
+    preview: "We saved your Invoyr workspace.",
+    heading: "We saved your workspace",
+    body: "Your Invoyr workspace is still here. All your clients, invoices and payment history are ready and waiting whenever you come back.",
+    cta: "Return to Invoyr",
+  },
+  day3: {
+    preview: "Here's what you can still do with Invoyr.",
+    heading: "What you can still do with Invoyr",
+    body: "Create and send professional invoices, accept card payments, track what's outstanding and get paid faster, all in one place. Your workspace is saved.",
+    cta: "Pick up where you left off",
+  },
+  day7: {
+    // No promotional offer here: there is no free-month mechanism in billing,
+    // so the email mustn't promise one.
+    preview: "Pay monthly now, from £8 a month.",
+    heading: "Come back on a monthly plan",
+    body: "Every Invoyr plan can now be paid monthly, from £8 a month, so there's no big upfront commitment. Your data is still safe and your clients are still there.",
+    cta: "Choose a plan",
+  },
+} as const;
+
+/** Product update announcement (marketing; consent and unsubscribe required). */
+export const PRODUCT_UPDATE_COPY = {
+  kicker: "Product update",
+  preview: (title: string) => `What's new in Invoyr: ${title}`,
+  featuresHeading: "What's new:",
+  cta: "Open Invoyr",
+} as const;

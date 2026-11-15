@@ -115,6 +115,22 @@ roadmap (INV-009). Template `SignupFollowUpEmail`, copy in
   a customer's own SMTP server.
 - No offer or promotion, so it is sent as a transactional relationship email.
 
+### Fixes from the full preview pass (15 Nov 2026)
+
+- `InvoiceSummary` takes a `kind` (`invoice | estimate | payment`) and reads its row
+  labels from `SUMMARY_LABELS`, so estimates say "Estimate" / "Valid until" and the
+  owner's payment email says "Paid on" / "Amount paid".
+- Subscription activated lists the purchased plan's `highlights` from
+  `src/config/plans.ts` (it used to promise Pro features to every plan).
+- Weekly digest greets by first name.
+- Automation emails format `{{amount}}` as currency ("£2,400.00"), fill
+  `{{recipient_name}}` in subject and body, and greet the owner by first name on
+  owner notifications.
+- Win-back, product update and subscription copy moved to `src/config/email-copy.ts`.
+  Win-back day 7 no longer promises a free month (no such offer exists in billing).
+- Still open: the marketing emails (newsletter, product update, win-back) are not
+  sent from anywhere yet.
+
 ## 4. Template rules
 
 - Do not hardcode copy inside layout components.

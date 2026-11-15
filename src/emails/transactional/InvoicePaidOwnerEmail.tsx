@@ -43,6 +43,7 @@ export function InvoicePaidOwnerEmail({
         invoiceNumber={invoiceNumber}
         issueDate={paidAt}
         total={amountPaid}
+        kind="payment"
         accentColor={accentColor}
       />
       <EmailButton href={viewUrl} accentColor={accentColor}>
