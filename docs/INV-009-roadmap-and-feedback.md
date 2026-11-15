@@ -1,7 +1,7 @@
 ---
 title: INV-009 Public roadmap and feedback
 version: 1.0
-status: Built, awaiting migration
+status: Live (migration applied 15 Nov 2026)
 owner: Product / Engineering
 last_updated: 2026-11-15
 ---

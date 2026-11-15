@@ -41,6 +41,11 @@ export function RoadmapBoard({ items }: { items: PublicRoadmapItem[] }) {
     const params = new URLSearchParams(window.location.search);
     const t = params.get("tab");
     if (ROADMAP_TABS.some((x) => x.id === t)) setTab(t as RoadmapTab);
+    else {
+      // No tab asked for: open on the first one with something in it.
+      const firstFull = ROADMAP_TABS.find((x) => items.some((i) => x.statuses.includes(i.status)));
+      if (firstFull) setTab(firstFull.id);
+    }
     const slug = params.get("item");
     const linked = items.find((i) => i.slug === slug);
     if (linked) {
@@ -131,7 +136,7 @@ export function RoadmapBoard({ items }: { items: PublicRoadmapItem[] }) {
 
   function selectTab(id: RoadmapTab) {
     setTab(id);
-    setQuery({ tab: id === "planned" ? null : id });
+    setQuery({ tab: id });
   }
 
   function open(slug: string | null) {

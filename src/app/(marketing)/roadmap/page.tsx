@@ -5,7 +5,7 @@ import { PUBLIC_ITEM_COLUMNS, type PublicRoadmapItem } from "@/lib/roadmap/types
 import { RoadmapBoard } from "@/components/roadmap/RoadmapBoard";
 
 export const metadata: Metadata = {
-  title: `${COPY.metaTitle} — Invoyr`,
+  title: COPY.metaTitle,
   description: COPY.metaDescription,
   alternates: { canonical: "https://invoyr.io/roadmap" },
 };
