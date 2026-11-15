@@ -1372,3 +1372,115 @@ grant execute on function public.redeem_trial_code(text, uuid) to service_role;
 insert into public.trial_codes (code, trial_days, max_redemptions, yearly_offer_percent, note)
 values ('FOUNDING', 30, 50, 25, 'Early adopters: 30-day trial, then 25% off the first yearly payment')
 on conflict (code) do nothing;
+
+-- 24. PRODUCT ROADMAP & FEEDBACK
+-- ----------------------------------------------------------------
+-- The public roadmap at invoyr.io/roadmap. Product-level data, not
+-- organisation data, so these tables are keyed by user rather than org_id.
+-- Anyone can read published items; signed-in users manage only their own
+-- votes and ideas; everything else (creating and editing items, reviewing
+-- ideas) goes through the service role from /admin/roadmap.
+do $$ begin
+  if not exists (select 1 from pg_type where typname = 'roadmap_status') then
+    create type public.roadmap_status as enum ('considering', 'planned', 'in_progress', 'launched');
+  end if;
+  if not exists (select 1 from pg_type where typname = 'roadmap_importance') then
+    create type public.roadmap_importance as enum ('not_important', 'nice_to_have', 'important', 'critical');
+  end if;
+  if not exists (select 1 from pg_type where typname = 'roadmap_idea_status') then
+    create type public.roadmap_idea_status as enum ('new', 'reviewed', 'merged', 'published', 'declined');
+  end if;
+end $$;
+
+create table if not exists public.roadmap_items (
+  id            uuid primary key default gen_random_uuid(),
+  slug          text not null unique check (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$' and length(slug) <= 80),
+  title         text not null check (length(title) between 3 and 120),
+  summary       text not null default '' check (length(summary) <= 300),
+  body          text not null default '' check (length(body) <= 5000),
+  category      text not null default 'General' check (length(category) between 1 and 40),
+  status        public.roadmap_status not null default 'considering',
+  is_published  boolean not null default false,
+  sort_order    integer not null default 0,
+  launched_at   date,
+  created_at    timestamptz not null default now(),
+  updated_at    timestamptz not null default now()
+);
+create index if not exists roadmap_items_published_idx on public.roadmap_items(is_published, status);
+
+create table if not exists public.roadmap_votes (
+  id          bigint generated always as identity primary key,
+  item_id     uuid not null references public.roadmap_items(id) on delete cascade,
+  user_id     uuid not null references auth.users(id) on delete cascade,
+  importance  public.roadmap_importance not null,
+  comment     text check (length(comment) <= 1000),
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now(),
+  unique (item_id, user_id)
+);
+create index if not exists roadmap_votes_user_idx on public.roadmap_votes(user_id);
+
+create table if not exists public.roadmap_ideas (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid not null references auth.users(id) on delete cascade,
+  title       text not null check (length(title) between 3 and 120),
+  details     text not null default '' check (length(details) <= 2000),
+  status      public.roadmap_idea_status not null default 'new',
+  item_id     uuid references public.roadmap_items(id) on delete set null,
+  admin_note  text check (length(admin_note) <= 1000),
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now()
+);
+create index if not exists roadmap_ideas_status_idx on public.roadmap_ideas(status, created_at desc);
+
+alter table public.roadmap_items enable row level security;
+alter table public.roadmap_votes enable row level security;
+alter table public.roadmap_ideas enable row level security;
+
+drop policy if exists roadmap_items_read_published on public.roadmap_items;
+create policy roadmap_items_read_published on public.roadmap_items
+  for select to anon, authenticated using (is_published);
+
+drop policy if exists roadmap_votes_own_select on public.roadmap_votes;
+create policy roadmap_votes_own_select on public.roadmap_votes
+  for select to authenticated using (user_id = (select auth.uid()));
+drop policy if exists roadmap_votes_own_insert on public.roadmap_votes;
+create policy roadmap_votes_own_insert on public.roadmap_votes
+  for insert to authenticated with check (
+    user_id = (select auth.uid())
+    and exists (select 1 from public.roadmap_items i where i.id = item_id and i.is_published)
+  );
+drop policy if exists roadmap_votes_own_update on public.roadmap_votes;
+create policy roadmap_votes_own_update on public.roadmap_votes
+  for update to authenticated using (user_id = (select auth.uid()))
+  with check (
+    user_id = (select auth.uid())
+    and exists (select 1 from public.roadmap_items i where i.id = item_id and i.is_published)
+  );
+drop policy if exists roadmap_votes_own_delete on public.roadmap_votes;
+create policy roadmap_votes_own_delete on public.roadmap_votes
+  for delete to authenticated using (user_id = (select auth.uid()));
+
+drop policy if exists roadmap_ideas_own_select on public.roadmap_ideas;
+create policy roadmap_ideas_own_select on public.roadmap_ideas
+  for select to authenticated using (user_id = (select auth.uid()));
+drop policy if exists roadmap_ideas_own_insert on public.roadmap_ideas;
+create policy roadmap_ideas_own_insert on public.roadmap_ideas
+  for insert to authenticated with check (
+    user_id = (select auth.uid()) and status = 'new' and item_id is null and admin_note is null
+  );
+
+do $$ begin
+  if not exists (select 1 from pg_trigger where tgname = 'trg_roadmap_items_updated_at') then
+    create trigger trg_roadmap_items_updated_at before update on public.roadmap_items
+      for each row execute function public.touch_updated_at();
+  end if;
+  if not exists (select 1 from pg_trigger where tgname = 'trg_roadmap_votes_updated_at') then
+    create trigger trg_roadmap_votes_updated_at before update on public.roadmap_votes
+      for each row execute function public.touch_updated_at();
+  end if;
+  if not exists (select 1 from pg_trigger where tgname = 'trg_roadmap_ideas_updated_at') then
+    create trigger trg_roadmap_ideas_updated_at before update on public.roadmap_ideas
+      for each row execute function public.touch_updated_at();
+  end if;
+end $$;

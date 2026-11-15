@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getOrg } from "@/lib/auth";
-import { MARKETING_ORIGINS } from "@/config/domains";
+import { withMarketingCors } from "@/lib/api/cors";
 
 /**
  * Who is signed in, for the marketing header. Called cross-origin from
@@ -35,12 +35,5 @@ export async function GET(req: NextRequest) {
 
   const res = NextResponse.json(body);
   res.headers.set("Cache-Control", "no-store");
-  res.headers.set("Vary", "Origin, Cookie");
-
-  const origin = req.headers.get("origin");
-  if (origin && MARKETING_ORIGINS.includes(origin)) {
-    res.headers.set("Access-Control-Allow-Origin", origin);
-    res.headers.set("Access-Control-Allow-Credentials", "true");
-  }
-  return res;
+  return withMarketingCors(req, res);
 }

@@ -19,6 +19,7 @@ const MARKETING_PATHS = [
   "/terms",
   "/dpa",
   "/help",
+  "/roadmap",
 ];
 
 function isMarketingPath(pathname: string): boolean {

@@ -10,6 +10,7 @@ const NAV = [
   { href: "/use-cases", label: "Use cases" },
   { href: "/pricing", label: "Pricing" },
   { href: "/about", label: "About" },
+  { href: "/roadmap", label: "Roadmap" },
 ];
 
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {

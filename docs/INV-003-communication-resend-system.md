@@ -99,6 +99,22 @@ Signature
   pasted into Supabase Dashboard → Authentication → Emails → Templates. Re-run and
   re-paste whenever those two emails change.
 
+### Signup follow-up (Nov 2026)
+
+A personal note from the founder about three days after signup: thanks for
+trying Invoyr, a request for honest feedback by reply, and a link to the public
+roadmap (INV-009). Template `SignupFollowUpEmail`, copy in
+`SIGNUP_FOLLOW_UP_COPY` (`src/config/email-copy.ts`).
+
+- Sent by `/api/cron/signup-follow-up`, daily at 10:00 UTC, to account **owners**
+  whose profile was created 72–96 hours earlier, so each signup lands in exactly
+  one run. Invited teammates are skipped.
+- Once per address, ever (checked against `email_logs`, failing safe).
+- From "Tony from Invoyr" at the normal sending address, reply-to
+  support@invoyr.io, and always via Invoyr's Resend account (`skipOrgSmtp`), never
+  a customer's own SMTP server.
+- No offer or promotion, so it is sent as a transactional relationship email.
+
 ## 4. Template rules
 
 - Do not hardcode copy inside layout components.
