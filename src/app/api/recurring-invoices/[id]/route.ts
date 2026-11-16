@@ -2,25 +2,8 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
 import { replaceLineItems } from "@/lib/line-items";
-import { z } from "zod";
-
-const schema = z.object({
-  client_id: z.string().uuid().nullable().optional(),
-  frequency: z.enum(["weekly", "monthly", "quarterly", "yearly"]).optional(),
-  end_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
-  template: z.enum(["tjn_classic", "clean_minimal", "bold_split", "modern_studio"]).optional(),
-  currency: z.string().optional(),
-  notes: z.string().nullable().optional(),
-  terms: z.string().nullable().optional(),
-  status: z.enum(["active", "paused", "ended"]).optional(),
-  items: z.array(z.object({
-    description: z.string().min(1),
-    quantity: z.number().positive(),
-    unit_price: z.number().min(0),
-    vat_rate: z.number().min(0).max(100),
-    sort_order: z.number().int().default(0),
-  })).min(1).optional(),
-});
+import { checkSchedule, firstIssue, updateRecurringSchema } from "@/lib/recurring/schema";
+import { firstRunOnOrAfter, nextRunAfter } from "@/lib/recurring/schedule";
 
 interface Params { params: Promise<{ id: string }> }
 
@@ -29,20 +12,49 @@ export async function PATCH(req: Request, { params }: Params) {
   const org = await requireOrg();
   const supabase = await createClient();
 
-  const body = await req.json();
-  const parsed = schema.safeParse(body);
-  if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+  const body = await req.json().catch(() => null);
+  const parsed = updateRecurringSchema.safeParse(body);
+  if (!parsed.success) return NextResponse.json({ error: firstIssue(parsed.error) }, { status: 400 });
 
   const { items, ...fields } = parsed.data;
 
   // Confirm the schedule belongs to this org before touching it or its lines.
   const { data: existing } = await supabase
     .from("recurring_invoices")
-    .select("id")
+    .select("id, client_id, auto_send, start_date, end_date, frequency, last_run_at, next_run_at, status")
     .eq("id", id)
     .eq("org_id", org.id)
     .maybeSingle();
   if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  // Check the cross-field rules against the schedule as it will be after this edit.
+  const merged = { ...existing, ...fields };
+  const problem = checkSchedule(merged);
+  if (problem) return NextResponse.json({ error: problem }, { status: 400 });
+
+  if (fields.client_id) {
+    const { data: client } = await supabase
+      .from("clients")
+      .select("id")
+      .eq("id", fields.client_id)
+      .eq("org_id", org.id)
+      .maybeSingle();
+    if (!client) return NextResponse.json({ error: "Client not found." }, { status: 400 });
+  }
+
+  // Changing when it runs moves the next invoice to match: the start date if
+  // nothing has been generated yet, otherwise the next date after the last run.
+  if (fields.start_date !== undefined || fields.frequency !== undefined) {
+    const update = fields as typeof fields & { next_run_at?: string };
+    update.next_run_at = existing.last_run_at
+      ? nextRunAfter(merged.start_date, merged.frequency, existing.last_run_at)
+      : firstRunOnOrAfter(merged.start_date, merged.frequency, new Date().toISOString().slice(0, 10));
+  }
+  // An ended schedule whose end date was pushed back carries on.
+  if (existing.status === "ended" && fields.end_date !== undefined && fields.status === undefined) {
+    const update = fields as typeof fields & { status?: string };
+    if (!fields.end_date || fields.end_date >= existing.next_run_at) update.status = "active";
+  }
 
   if (Object.keys(fields).length > 0) {
     const { data: updated, error } = await supabase

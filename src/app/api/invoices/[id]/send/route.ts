@@ -1,18 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createElement } from "react";
 import { createClient } from "@/lib/supabase/server";
-import { sendTransactionalEmail } from "@/lib/resend/send-transactional-email";
-import { dispatchWebhook } from "@/lib/webhooks/dispatch";
-import { runAutomations } from "@/lib/automations/execute";
-import { InvoiceSentEmail } from "@/emails/transactional/InvoiceSentEmail";
-import { invoiceEmailAmounts } from "@/lib/invoice-totals";
-import { ccRecipients } from "@/lib/email-recipients";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { composeSchema, sendInvoiceEmail } from "@/lib/invoices/send-invoice-email";
 
-export async function POST(
-  _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+/**
+ * Sends the invoice to its client. The body is the optional compose box:
+ * `{ subject?, message?, cc? }`. An empty body sends the standard email.
+ */
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
 
@@ -21,102 +15,22 @@ export async function POST(
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { data: invoice } = await supabase
-    .from("invoices")
-    .select(
-      "*, clients(*), invoice_items(*), organisations(name, accent_color, logo_url, from_email, bank_account_name, bank_name, bank_account_number, bank_sort_code, bank_iban, bank_bic)"
-    )
-    .eq("id", id)
-    .single();
-
-  if (!invoice) return NextResponse.json({ error: "Not found" }, { status: 404 });
-
-  const client = Array.isArray(invoice.clients) ? invoice.clients[0] : invoice.clients;
-  const org = Array.isArray(invoice.organisations)
-    ? invoice.organisations[0]
-    : invoice.organisations;
-
-  if (!client?.email) {
-    return NextResponse.json({ error: "Client has no email address" }, { status: 400 });
+  const raw = await req.text();
+  let body: unknown = {};
+  if (raw) {
+    try {
+      body = JSON.parse(raw);
+    } catch {
+      return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+    }
+  }
+  const parsed = composeSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Invalid request" }, { status: 400 });
   }
 
-  const amounts = invoiceEmailAmounts(invoice.invoice_items ?? [], invoice, formatCurrency);
+  const result = await sendInvoiceEmail(supabase, id, { compose: parsed.data, source: "manual" });
+  if (!result.ok) return NextResponse.json({ error: result.error }, { status: result.status });
 
-  const payUrl = invoice.public_token
-    ? `${process.env.NEXT_PUBLIC_APP_URL}/pay/${invoice.public_token}`
-    : `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`;
-
-  const hasBankDetails = org?.bank_account_name || org?.bank_account_number;
-  const logoUrl = org?.logo_url ? org.logo_url.split("?")[0] : null;
-
-  const result = await sendTransactionalEmail({
-    orgId: invoice.org_id,
-    invoiceId: id,
-    to: client.email,
-    cc: client.cc_emails,
-    subject: `Invoice ${invoice.invoice_number}${org?.name ? ` from ${org.name}` : ""}`,
-    templateName: "invoice-sent",
-    fromEmail: (org as { from_email?: string | null })?.from_email,
-    react: createElement(InvoiceSentEmail, {
-      clientName: client.name ?? "there",
-      orgName: org?.name ?? "",
-      logoUrl,
-      accentColor: org?.accent_color ?? "#111827",
-      invoiceNumber: invoice.invoice_number,
-      ...amounts,
-      issueDate: invoice.issue_date ? formatDate(invoice.issue_date) : undefined,
-      dueDate: invoice.due_date ? formatDate(invoice.due_date) : undefined,
-      payUrl,
-      bankDetails: hasBankDetails
-        ? {
-            accountName: org?.bank_account_name,
-            bankName: org?.bank_name,
-            accountNumber: org?.bank_account_number,
-            sortCode: org?.bank_sort_code,
-            iban: org?.bank_iban,
-            bic: org?.bank_bic,
-          }
-        : null,
-    }),
-  });
-
-  if (!result.ok) {
-    return NextResponse.json({ error: result.error ?? "Send failed" }, { status: 500 });
-  }
-
-  await supabase
-    .from("invoices")
-    .update({ status: "sent", sent_at: new Date().toISOString() })
-    .eq("id", id);
-
-  await supabase.from("audit_logs").insert({
-    org_id: invoice.org_id,
-    action: "invoice.sent",
-    entity_type: "invoice",
-    entity_id: id,
-    meta: { to: client.email, invoice_number: invoice.invoice_number },
-  });
-
-  runAutomations(invoice.org_id, "invoice.sent", {
-    invoice_id: invoice.id,
-    invoice_number: invoice.invoice_number,
-    client_name: client.name ?? undefined,
-    client_email: client.email ?? undefined,
-    amount: invoice.total,
-    currency: invoice.currency,
-  }).catch(() => {});
-
-  dispatchWebhook(invoice.org_id, "invoice.sent", {
-    id: invoice.id,
-    invoice_number: invoice.invoice_number,
-    client_email: client.email,
-    total: invoice.total,
-    currency: invoice.currency,
-  }).catch(() => {});
-
-  return NextResponse.json({
-    ok: true,
-    to: client.email,
-    cc: ccRecipients(client.email, client.cc_emails),
-  });
+  return NextResponse.json({ ok: true, to: result.to, cc: result.cc });
 }

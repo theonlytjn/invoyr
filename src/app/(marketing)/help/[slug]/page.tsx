@@ -45,7 +45,7 @@ const BODIES: Record<string, React.ReactNode> = {
 
       <h2>2. Add your logo and colour</h2>
       <p>
-        Upload a logo (PNG, JPG, WEBP or SVG, up to 2MB) and pick an accent colour. Both appear on
+        Upload a logo (PNG, JPG or WebP, up to 2MB) and pick an accent colour. Both appear on
         your invoices, on the page your clients pay from, and in the emails sent on your behalf.
         You can change them later in <strong>Settings → Company</strong>.
       </p>
@@ -124,9 +124,11 @@ const BODIES: Record<string, React.ReactNode> = {
 
       <h2>4. Send it</h2>
       <p>
-        Save the invoice, then choose <strong>Send to client</strong>. Invoyr emails it in your
-        name, from your business, with a link to view and pay. You&apos;ll get a confirmation
-        naming everyone it went to, including anyone copied in.
+        Save the invoice, then choose <strong>Send to client…</strong> from the invoice&apos;s menu.
+        Before it goes, you can check who it&apos;s going to, change who&apos;s copied in, edit the
+        subject and add a personal message. Invoyr emails it in your name, from your business, with
+        your message at the top and a link to view and pay. You&apos;ll get a confirmation naming
+        everyone it went to.
       </p>
       <p>
         The invoice&apos;s history then records what happened and when: sent, opened by your client,
@@ -250,7 +252,8 @@ const BODIES: Record<string, React.ReactNode> = {
         five addresses, separated by commas.
       </p>
       <p>
-        Those addresses are copied on every invoice, reminder and statement for that client. If one
+        Those addresses are copied on every invoice, reminder and statement for that client, and are
+        filled in for you when you send, so you can change them for a single invoice. If one
         is mistyped, the invoice still goes to your main contact — a bad address never blocks the
         send.
       </p>

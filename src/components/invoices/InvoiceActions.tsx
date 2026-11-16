@@ -30,19 +30,24 @@ import {
 } from "@/components/ui/dialog";
 import RecordPaymentModal from "./RecordPaymentModal";
 import CreditNoteModal from "./CreditNoteModal";
+import SendInvoiceDialog from "./SendInvoiceDialog";
 import type { Invoice } from "@/lib/supabase/types";
 import { EyeIcon } from "@phosphor-icons/react";
 
 interface Props {
   invoice: Invoice;
   clientEmail?: string | null;
+  /** The client's saved "Also send invoices to" list, prefilled as CC. */
+  clientCc?: string[] | null;
+  /** The subject the compose box starts with. */
+  defaultSubject: string;
 }
 
-export default function InvoiceActions({ invoice, clientEmail }: Props) {
+export default function InvoiceActions({ invoice, clientEmail, clientCc, defaultSubject }: Props) {
   const router = useRouter();
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [creditNoteOpen, setCreditNoteOpen] = useState(false);
-  const [sending, setSending] = useState(false);
+  const [composeOpen, setComposeOpen] = useState(false);
   const [reminding, setReminding] = useState(false);
   const [issuing, setIssuing] = useState(false);
   const [duplicating, setDuplicating] = useState(false);
@@ -70,18 +75,10 @@ export default function InvoiceActions({ invoice, clientEmail }: Props) {
     }
   }
 
-  async function handleSend() {
-    setSending(true);
-    const res = await fetch(`/api/invoices/${invoice.id}/send`, { method: "POST" });
-    setSending(false);
-    const payload = await res.json().catch(() => ({}));
-
-    if (res.ok) {
-      setSentTo({ to: payload?.to ?? clientEmail ?? "", cc: payload?.cc ?? [] });
-      router.refresh();
-    } else {
-      alert(payload?.error ?? "Failed to send invoice");
-    }
+  function handleSent(sent: { to: string; cc: string[] }) {
+    setComposeOpen(false);
+    setSentTo(sent);
+    router.refresh();
   }
 
   async function handleRemind() {
@@ -148,9 +145,9 @@ export default function InvoiceActions({ invoice, clientEmail }: Props) {
             </DropdownMenuItem>
           )}
           {canSend && (
-            <DropdownMenuItem onClick={handleSend} disabled={sending}>
+            <DropdownMenuItem onClick={() => setComposeOpen(true)}>
               <SendIcon size={16} className="mr-2" />
-              {sending ? "Sending…" : "Send to client"}
+              Send to client…
             </DropdownMenuItem>
           )}
           {canRemind && (
@@ -195,6 +192,17 @@ export default function InvoiceActions({ invoice, clientEmail }: Props) {
           )}
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <SendInvoiceDialog
+        open={composeOpen}
+        onOpenChange={setComposeOpen}
+        invoiceId={invoice.id}
+        invoiceNumber={invoice.invoice_number}
+        clientEmail={clientEmail ?? null}
+        clientCc={clientCc ?? []}
+        defaultSubject={defaultSubject}
+        onSent={handleSent}
+      />
 
       <Dialog open={Boolean(sentTo)} onOpenChange={(open) => !open && setSentTo(null)}>
         <DialogContent className="sm:max-w-md">

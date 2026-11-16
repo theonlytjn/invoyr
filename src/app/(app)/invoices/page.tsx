@@ -66,6 +66,12 @@ export default async function InvoicesPage({
               </a>
             )}
             <Link
+              href="/invoices/recurring"
+              className="flex items-center gap-1.5 px-3.5 py-2 border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 text-sm font-medium rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+            >
+              Recurring
+            </Link>
+            <Link
               href="/invoices/new"
               className="flex items-center gap-1.5 px-3.5 py-2 bg-neutral-950 text-white text-sm font-medium rounded-lg hover:bg-neutral-800 transition-colors"
             >

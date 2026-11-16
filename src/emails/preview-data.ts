@@ -51,6 +51,7 @@ export const PREVIEW_DATA = {
     issueDate: "19 Jun 2026",
     dueDate: "3 Jul 2026",
     payUrl: "https://app.invoyr.io/pay/abc123",
+    message: "Thanks for another great month, Sarah. This covers the June retainer plus the extra landing page we discussed.",
     bankDetails: {
       accountName: "Acme Studio Ltd",
       bankName: "Barclays",

@@ -16,6 +16,7 @@ import {
   PlusIcon,
   LockIcon,
   ExpenseIcon,
+  RecurringIcon,
 } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { useSignOut } from "@/hooks/useSignOut";
@@ -26,6 +27,7 @@ import OrgSwitcher from "./OrgSwitcher";
 const NAV_ITEMS: { href: string; label: string; icon: React.ComponentType<{ size?: number; className?: string }>; requires?: Feature }[] = [
   { href: "/dashboard", label: "Overview", icon: DashboardIcon },
   { href: "/invoices", label: "Invoices", icon: InvoiceIcon },
+  { href: "/invoices/recurring", label: "Recurring", icon: RecurringIcon, requires: "recurring_invoices" },
   { href: "/estimates", label: "Estimates", icon: EstimateIcon },
   { href: "/clients", label: "Clients", icon: UsersIcon },
   { href: "/payments", label: "Payments", icon: CreditCardIcon },
@@ -48,6 +50,12 @@ export default function Sidebar({ org, orgs, userEmail, plan, trialDaysLeft, isA
   const [collapsed, setCollapsed] = useState(false);
 
   const { signOut, signingOut } = useSignOut();
+
+  // The most specific match wins, so /invoices/recurring lights up
+  // "Recurring" and not "Invoices" as well.
+  const activeHref = NAV_ITEMS.map((item) => item.href)
+    .filter((href) => pathname === href || (href !== "/dashboard" && pathname.startsWith(`${href}/`)))
+    .sort((a, b) => b.length - a.length)[0];
 
   return (
     <aside
@@ -108,7 +116,7 @@ export default function Sidebar({ org, orgs, userEmail, plan, trialDaysLeft, isA
         <ul className="space-y-1.5">
           {NAV_ITEMS.map(({ href, label, icon: Icon, requires }) => {
             const locked = requires ? !canAccess(plan, requires) : false;
-            const active = !locked && (pathname === href || (href !== "/dashboard" && pathname.startsWith(href)));
+            const active = !locked && activeHref === href;
             return (
               <li key={href}>
                 <Link

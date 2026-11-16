@@ -235,6 +235,8 @@ export interface RecurringInvoice {
   notes: string | null;
   terms: string | null;
   auto_send: boolean;
+  /** Payment terms on each generated invoice, in days after issue. */
+  due_days: number;
   status: "active" | "paused" | "ended";
   created_at: string;
   updated_at: string;

@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/client";
 import { postSettings } from "@/lib/settings/post-settings";
+import { LOGO_ACCEPTED_TYPES, LOGO_HINT, logoStoragePath, sniffLogoType, validateLogoFile } from "@/lib/onboarding/logo-upload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -50,14 +51,20 @@ export default function BrandingForm({ org, canUploadLogo = false }: Props) {
   async function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    setLogoUploading(true);
     setLogoError(null);
+    const contentType = sniffLogoType(new Uint8Array(await file.slice(0, 16).arrayBuffer()));
+    const invalid = validateLogoFile(file) ?? (contentType ? null : "Choose a PNG, JPG or WebP image.");
+    if (invalid || !contentType) {
+      setLogoError(invalid);
+      e.target.value = "";
+      return;
+    }
+    setLogoUploading(true);
     const supabase = createClient();
-    const ext = file.name.split(".").pop();
-    const path = `${org.id}/logo.${ext}`;
+    const path = logoStoragePath(org.id, contentType);
     const { error: uploadError } = await supabase.storage
       .from("logos")
-      .upload(path, file, { upsert: true, contentType: file.type });
+      .upload(path, file, { upsert: true, contentType });
     if (uploadError) {
       setLogoError(uploadError.message);
       setLogoUploading(false);
@@ -141,7 +148,7 @@ export default function BrandingForm({ org, canUploadLogo = false }: Props) {
         <Label>Company logo</Label>
         {canUploadLogo ? (
           <>
-            <p className="text-xs text-neutral-500">Shown on PDFs and the payment page. PNG, JPG or WebP, max 2 MB.</p>
+            <p className="text-xs text-neutral-500">Shown on PDFs and the payment page. {LOGO_HINT}</p>
             <div className="flex items-center gap-4">
               {logoUrl ? (
                 <img src={logoUrl} alt="Company logo" className="h-14 w-auto max-w-[140px] object-contain rounded border border-neutral-200 dark:border-neutral-700 p-1 bg-white" />
@@ -160,7 +167,7 @@ export default function BrandingForm({ org, canUploadLogo = false }: Props) {
                   </button>
                 )}
               </div>
-              <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleLogoChange} />
+              <input ref={fileInputRef} type="file" accept={LOGO_ACCEPTED_TYPES.join(",")} className="hidden" onChange={handleLogoChange} />
             </div>
             {logoError && <p role="alert" className="text-xs text-red-600">{logoError}</p>}
           </>

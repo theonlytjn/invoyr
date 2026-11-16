@@ -5,14 +5,8 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { formatCurrency } from "@/lib/utils";
 import { computeTotals } from "@/lib/invoice-totals";
+import { FREQUENCY_LABELS } from "@/lib/recurring/schedule";
 import type { RecurringInvoiceWithClient } from "@/lib/supabase/types";
-
-const FREQ_LABELS: Record<string, string> = {
-  weekly: "Weekly",
-  monthly: "Monthly",
-  quarterly: "Quarterly",
-  yearly: "Yearly",
-};
 
 const STATUS_STYLES: Record<string, string> = {
   active: "text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-950/30",
@@ -90,7 +84,7 @@ export default function RecurringList({ schedules }: Props) {
                 <td className="py-3 px-5 font-medium text-neutral-950 dark:text-neutral-50">
                   {s.clients?.name ?? <span className="text-neutral-400 italic">No client</span>}
                 </td>
-                <td className="py-3 px-4 text-neutral-600 dark:text-neutral-400">{FREQ_LABELS[s.frequency]}</td>
+                <td className="py-3 px-4 text-neutral-600 dark:text-neutral-400">{FREQUENCY_LABELS[s.frequency]}</td>
                 <td className="py-3 px-4 font-medium text-neutral-950 dark:text-neutral-50">
                   {formatCurrency(totals.total, s.currency)}
                 </td>
@@ -113,6 +107,12 @@ export default function RecurringList({ schedules }: Props) {
                         {s.status === "active" ? "Pause" : "Resume"}
                       </button>
                     )}
+                    <Link
+                      href={`/invoices/recurring/${s.id}`}
+                      className="text-xs text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-50 transition-colors"
+                    >
+                      Edit
+                    </Link>
                     <button
                       onClick={() => handleDelete(s.id)}
                       disabled={isActing || isPending}

@@ -262,6 +262,8 @@ create table if not exists public.recurring_invoices (
   notes           text,
   terms           text,
   auto_send       boolean not null default false,
+  -- Payment terms on each generated invoice, in days after issue.
+  due_days        integer not null default 30 check (due_days between 0 and 365),
   status          public.recurring_status not null default 'active',
   next_run_at     date not null,
   -- Null until the schedule has generated at least once. Written by the
@@ -1093,6 +1095,12 @@ comment on column public.organisations.comp_expires_at is
 -- does. Dropping it silently breaks every upload with "new row violates row-level
 -- security policy" — which is exactly what happened to logo uploads between the
 -- 2026-07-27 security pass and 2026-09-09.
+
+-- logos bucket: raster images only, 2MB. SVG is refused: email clients don't
+-- show it, the PDF renderer can't embed it, and it can carry script.
+update storage.buckets
+  set allowed_mime_types = array['image/png','image/jpeg','image/webp'], file_size_limit = 2097152
+  where id = 'logos';
 
 -- logos: scoped so an org member can only write inside their own org's folder.
 drop policy if exists logos_select on storage.objects;

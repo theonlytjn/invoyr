@@ -10,20 +10,21 @@ import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { Textarea } from "@/components/ui/textarea";
 import LineItemsEditor, { type LineItemRow } from "@/components/invoices/LineItemsEditor";
 import { computeTotals } from "@/lib/invoice-totals";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatDate } from "@/lib/utils";
+import {
+  FREQUENCY_LABELS,
+  FREQUENCY_PHRASES,
+  RECURRING_DUE_DAYS,
+  firstRunOnOrAfter,
+  nextRunAfter,
+  type RecurringFrequency,
+} from "@/lib/recurring/schedule";
 import type { Client, RecurringInvoiceWithClient } from "@/lib/supabase/types";
 
 interface Props {
   clients: Client[];
   existing?: RecurringInvoiceWithClient;
 }
-
-const FREQ_LABELS: Record<string, string> = {
-  weekly: "Weekly",
-  monthly: "Monthly",
-  quarterly: "Quarterly",
-  yearly: "Yearly",
-};
 
 function makeRows(items?: { description: string; quantity: number; unit_price: number; vat_rate: number }[]): LineItemRow[] {
   if (!items?.length) return [{ id: crypto.randomUUID(), description: "", quantity: 1, unit_price: 0, vat_rate: 20 }];
@@ -36,7 +37,8 @@ export default function RecurringForm({ clients, existing }: Props) {
   const [error, setError] = useState<string | null>(null);
 
   const [clientId, setClientId] = useState(existing?.client_id ?? "");
-  const [frequency, setFrequency] = useState<string>(existing?.frequency ?? "monthly");
+  const [frequency, setFrequency] = useState<RecurringFrequency>(existing?.frequency ?? "monthly");
+  const [dueDays, setDueDays] = useState<number>(existing?.due_days ?? 30);
   const [startDate, setStartDate] = useState(existing?.start_date ?? new Date().toISOString().slice(0, 10));
   const [endDate, setEndDate] = useState(existing?.end_date ?? "");
   const [currency, setCurrency] = useState(existing?.currency ?? "GBP");
@@ -52,8 +54,29 @@ export default function RecurringForm({ clients, existing }: Props) {
     vat_rate: i.vat_rate,
   })));
 
+  const today = new Date().toISOString().slice(0, 10);
+  const firstRun = existing?.last_run_at
+    ? nextRunAfter(startDate, frequency, existing.last_run_at)
+    : firstRunOnOrAfter(startDate, frequency, today);
+  const selectedClient = clients.find((c) => c.id === clientId);
+  const autoSendProblem = autoSend
+    ? !clientId
+      ? "Choose a client so there's someone to send to."
+      : !selectedClient?.email
+        ? `${selectedClient?.name ?? "This client"} has no email address, so invoices will be saved as drafts instead.`
+        : null
+    : null;
+
   function handleSave() {
     setError(null);
+    if (autoSend && !clientId) {
+      setError("Choose a client to auto-send to, or turn auto-send off.");
+      return;
+    }
+    if (items.some((i) => !i.description.trim())) {
+      setError("Every line needs a description.");
+      return;
+    }
     startTransition(async () => {
       const payload = {
         client_id: clientId || null,
@@ -64,6 +87,7 @@ export default function RecurringForm({ clients, existing }: Props) {
         notes: notes || null,
         terms: terms || null,
         auto_send: autoSend,
+        due_days: dueDays,
         items: items.map((i, idx) => ({
           description: i.description,
           quantity: i.quantity,
@@ -118,10 +142,10 @@ export default function RecurringForm({ clients, existing }: Props) {
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label>Frequency</Label>
-            <Select value={frequency} onValueChange={setFrequency}>
+            <Select value={frequency} onValueChange={(v) => setFrequency(v as RecurringFrequency)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                {Object.entries(FREQ_LABELS).map(([v, l]) => (
+                {Object.entries(FREQUENCY_LABELS).map(([v, l]) => (
                   <SelectItem key={v} value={v}>{l}</SelectItem>
                 ))}
               </SelectContent>
@@ -140,7 +164,7 @@ export default function RecurringForm({ clients, existing }: Props) {
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <Label>Start date</Label>
+            <Label>First invoice on</Label>
             <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
           </div>
           <div className="space-y-1.5">
@@ -148,6 +172,32 @@ export default function RecurringForm({ clients, existing }: Props) {
             <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} min={startDate} />
           </div>
         </div>
+
+        <div className="space-y-1.5">
+          <Label>Payment terms on each invoice</Label>
+          <Select value={String(dueDays)} onValueChange={(v) => setDueDays(Number(v))}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {RECURRING_DUE_DAYS.map((t) => (
+                <SelectItem key={t.days} value={String(t.days)}>{t.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <p className="rounded-lg bg-neutral-50 dark:bg-neutral-800/60 px-3 py-2.5 text-sm text-neutral-600 dark:text-neutral-300">
+          {startDate ? (
+            <>
+              Next invoice <strong className="text-neutral-900 dark:text-neutral-50">{formatDate(firstRun)}</strong>, then{" "}
+              {FREQUENCY_PHRASES[frequency]}
+              {endDate ? ` until ${formatDate(endDate)}` : ""}. Each one is{" "}
+              {dueDays === 0 ? "due on receipt" : `due ${dueDays} days after it's issued`}, and{" "}
+              {autoSend ? "emailed to your client automatically" : "saved as a draft for you to check and send"}.
+            </>
+          ) : (
+            "Choose when the first invoice should be made."
+          )}
+        </p>
 
         <label className="flex items-center justify-between cursor-pointer">
           <div>
@@ -172,6 +222,9 @@ export default function RecurringForm({ clients, existing }: Props) {
             />
           </button>
         </label>
+        {autoSendProblem && (
+          <p className="text-xs text-amber-700 dark:text-amber-300">{autoSendProblem}</p>
+        )}
       </div>
 
       {/* Line items */}
@@ -206,7 +259,7 @@ export default function RecurringForm({ clients, existing }: Props) {
         </div>
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p role="alert" className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
       <div className="flex gap-3">
         <Button variant="outline" onClick={() => router.back()} disabled={isPending}>Cancel</Button>

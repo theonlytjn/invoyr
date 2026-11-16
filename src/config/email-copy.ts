@@ -162,3 +162,23 @@ export const PRODUCT_UPDATE_COPY = {
   featuresHeading: "What's new:",
   cta: "Open Invoyr",
 } as const;
+
+/** The invoice email to a client (InvoiceSentEmail) and the owner's compose box. */
+export const INVOICE_SENT_COPY = {
+  subject: (invoiceNumber: string, orgName?: string | null) =>
+    `Invoice ${invoiceNumber}${orgName ? ` from ${orgName}` : ""}`,
+  preview: (orgName: string, total: string) => `${orgName} has sent you an invoice for ${total}.`,
+  heading: (invoiceNumber: string) => `Invoice ${invoiceNumber}`,
+  greeting: (clientName: string) => `Hi ${clientName},`,
+  intro: (orgName: string, invoiceNumber: string, total: string) =>
+    `${orgName} has sent you invoice ${invoiceNumber} for ${total}.`,
+  /** Label above the sender's own note, when they wrote one. */
+  messageLabel: (orgName: string) => `A note from ${orgName}`,
+  howToPay: "You can view the invoice, download a PDF and pay securely using the link below.",
+  cta: "View and pay invoice",
+  bankHeading: "Or pay by bank transfer",
+  bankReference: "Reference:",
+  /** Longest personal message the compose box accepts. */
+  messageMaxLength: 2000,
+  subjectMaxLength: 200,
+} as const;

@@ -1,8 +1,9 @@
-import { Heading, Text, Hr } from "@react-email/components";
+import { Heading, Text, Hr, Section } from "@react-email/components";
 import { TransactionalLayout } from "../layouts/TransactionalLayout";
 import { EmailButton } from "../components/EmailButton";
 import { InvoiceSummary } from "../components/InvoiceSummary";
 import { EMAIL_COLORS } from "../theme";
+import { INVOICE_SENT_COPY as COPY } from "@/config/email-copy";
 
 export interface BankDetails {
   accountName?: string | null;
@@ -29,6 +30,8 @@ export interface InvoiceSentEmailProps {
   dueDate?: string;
   payUrl: string;
   bankDetails?: BankDetails | null;
+  /** The sender's own note from the compose box, shown above the summary. */
+  message?: string | null;
 }
 
 export function InvoiceSentEmail({
@@ -45,13 +48,14 @@ export function InvoiceSentEmail({
   dueDate,
   payUrl,
   bankDetails,
+  message,
 }: InvoiceSentEmailProps) {
   const hasBankDetails =
     bankDetails?.accountName || bankDetails?.accountNumber;
 
   return (
     <TransactionalLayout
-      preview={`${orgName} has sent you an invoice for ${invoiceTotal}.`}
+      preview={COPY.preview(orgName, invoiceTotal)}
       orgName={orgName}
       logoUrl={logoUrl}
       accentColor={accentColor}
@@ -59,16 +63,41 @@ export function InvoiceSentEmail({
       <Heading
         style={{ fontSize: 22, fontWeight: 700, color: EMAIL_COLORS.ink, margin: "0 0 4px" }}
       >
-        Invoice {invoiceNumber}
+        {COPY.heading(invoiceNumber)}
       </Heading>
       <Text style={{ fontSize: 15, color: EMAIL_COLORS.body, lineHeight: "1.6", margin: "0 0 20px" }}>
-        Hi {clientName},
+        {COPY.greeting(clientName)}
       </Text>
       <Text style={{ fontSize: 15, color: EMAIL_COLORS.body, lineHeight: "1.6", margin: "0 0 20px" }}>
-        {orgName} has sent you invoice {invoiceNumber} for {invoiceTotal}.
+        {COPY.intro(orgName, invoiceNumber, invoiceTotal)}
       </Text>
+      {message?.trim() && (
+        <Section
+          style={{
+            borderLeft: `3px solid ${accentColor}`,
+            backgroundColor: EMAIL_COLORS.panel,
+            padding: "12px 16px",
+            margin: "0 0 20px",
+          }}
+        >
+          <Text style={{ fontSize: 12, fontWeight: 600, color: EMAIL_COLORS.muted, margin: "0 0 6px" }}>
+            {COPY.messageLabel(orgName)}
+          </Text>
+          {message
+            .trim()
+            .split(/\n{2,}/)
+            .map((para, i) => (
+              <Text
+                key={i}
+                style={{ fontSize: 15, color: EMAIL_COLORS.body, lineHeight: "1.6", margin: "0 0 8px", whiteSpace: "pre-line" }}
+              >
+                {para}
+              </Text>
+            ))}
+        </Section>
+      )}
       <Text style={{ fontSize: 15, color: EMAIL_COLORS.body, lineHeight: "1.6", margin: "0 0 4px" }}>
-        You can view the invoice, download a PDF and pay securely using the link below.
+        {COPY.howToPay}
       </Text>
 
       <InvoiceSummary
@@ -83,7 +112,7 @@ export function InvoiceSentEmail({
       />
 
       <EmailButton href={payUrl} accentColor={accentColor}>
-        View and pay invoice
+        {COPY.cta}
       </EmailButton>
 
       {hasBankDetails && (
@@ -99,7 +128,7 @@ export function InvoiceSentEmail({
               margin: "0 0 12px",
             }}
           >
-            Or pay by bank transfer
+            {COPY.bankHeading}
           </Text>
           <table style={{ borderCollapse: "collapse", fontSize: 13 }}>
             {bankDetails?.accountName && (
@@ -140,7 +169,7 @@ export function InvoiceSentEmail({
             )}
           </table>
           <Text style={{ fontSize: 12, color: EMAIL_COLORS.subtle, margin: "8px 0 0" }}>
-            Reference: <strong style={{ color: EMAIL_COLORS.muted }}>{invoiceNumber}</strong>
+            {COPY.bankReference} <strong style={{ color: EMAIL_COLORS.muted }}>{invoiceNumber}</strong>
           </Text>
         </>
       )}

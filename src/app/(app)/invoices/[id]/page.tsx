@@ -10,6 +10,7 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import Topbar from "@/components/shell/Topbar";
 import InvoiceStatusBadge from "@/components/invoices/InvoiceStatusBadge";
 import InvoiceActions from "@/components/invoices/InvoiceActions";
+import { INVOICE_SENT_COPY } from "@/config/email-copy";
 import CopyPaymentLink from "@/components/invoices/CopyPaymentLink";
 import { TEMPLATE_MAP } from "@/components/invoice-templates";
 import type { Metadata } from "next";
@@ -123,7 +124,12 @@ export default async function InvoiceDetailPage({ params }: Props) {
             >
               Download PDF
             </Link>
-            <InvoiceActions invoice={invoice} clientEmail={client?.email ?? null} />
+            <InvoiceActions
+              invoice={invoice}
+              clientEmail={client?.email ?? null}
+              clientCc={client?.cc_emails ?? []}
+              defaultSubject={INVOICE_SENT_COPY.subject(invoice.invoice_number, org.name)}
+            />
           </div>
         }
       />

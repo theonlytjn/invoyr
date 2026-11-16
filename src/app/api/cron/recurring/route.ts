@@ -1,43 +1,52 @@
 import { NextResponse } from "next/server";
-import { createElement } from "react";
 import { createServiceClient } from "@/lib/supabase/server";
-import { sendTransactionalEmail } from "@/lib/resend/send-transactional-email";
-import { InvoiceSentEmail } from "@/emails/transactional/InvoiceSentEmail";
-import { formatCurrency, formatDate } from "@/lib/utils";
 import { claimDocumentNumber, formatDocumentNumber } from "@/lib/document-number";
+import { getOrgIdsWithFeature } from "@/lib/billing";
+import { sendInvoiceEmail } from "@/lib/invoices/send-invoice-email";
+import { dueDateFor, nextRunAfter, type RecurringFrequency } from "@/lib/recurring/schedule";
 
-function calcNextRun(frequency: string, from: Date): string {
-  const d = new Date(from);
-  if (frequency === "weekly") d.setDate(d.getDate() + 7);
-  else if (frequency === "monthly") d.setMonth(d.getMonth() + 1);
-  else if (frequency === "quarterly") d.setMonth(d.getMonth() + 3);
-  else d.setFullYear(d.getFullYear() + 1);
-  return d.toISOString().slice(0, 10);
-}
-
+/**
+ * Generates the invoices recurring schedules are due to make, daily at 06:00 UTC.
+ *
+ * Each due schedule makes one invoice dated today, due after the schedule's
+ * payment terms. With auto-send on (and a client with an email), it goes
+ * straight to the client through the same path as the Send button, so the
+ * email links to the client's pay page. Otherwise it waits as a draft.
+ *
+ * Schedules belonging to an organisation that no longer has recurring
+ * invoices on its plan (trial lapsed, downgraded) are skipped and left where
+ * they are, so they pick up again if the plan comes back.
+ */
 export async function GET(req: Request) {
   const auth = req.headers.get("authorization");
   if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const supabase = await createServiceClient();
+  const supabase = createServiceClient();
   const today = new Date().toISOString().slice(0, 10);
 
   const { data: due, error } = await supabase
     .from("recurring_invoices")
-    .select("*, recurring_invoice_items(*), organisations(invoice_prefix, name, accent_color, logo_url, bank_account_name, bank_name, bank_account_number, bank_sort_code, bank_iban, bank_bic)")
+    .select("*, recurring_invoice_items(*), organisations(invoice_prefix)")
     .eq("status", "active")
     .lte("next_run_at", today);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   if (!due?.length) return NextResponse.json({ generated: 0 });
 
+  const entitled = await getOrgIdsWithFeature("recurring_invoices");
   let generated = 0;
+  let sent = 0;
+  let skipped = 0;
 
   for (const rec of due) {
     const org = Array.isArray(rec.organisations) ? rec.organisations[0] : rec.organisations;
     if (!org) continue;
+    if (!entitled.has(rec.org_id)) {
+      skipped++;
+      continue;
+    }
 
     // Claimed per invoice, not read once from the org row above: two schedules
     // for the same org due on the same day used to get the same number.
@@ -75,6 +84,7 @@ export async function GET(req: Request) {
         status: shouldAutoSend ? "issued" : "draft",
         template: rec.template,
         issue_date: today,
+        due_date: dueDateFor(today, rec.due_days ?? 30),
         currency: rec.currency,
         subtotal,
         vat_amount: vatAmount,
@@ -120,64 +130,14 @@ export async function GET(req: Request) {
     });
 
     if (shouldAutoSend) {
-      const { data: clientData } = await supabase
-        .from("clients")
-        .select("name, email")
-        .eq("id", rec.client_id)
-        .single();
-
-      if (clientData?.email) {
-        const payUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`;
-        const hasBankDetails = org.bank_account_name || org.bank_account_number;
-        const logoUrl = org.logo_url ? org.logo_url.split("?")[0] : null;
-
-        const emailResult = await sendTransactionalEmail({
-          orgId: rec.org_id,
-          invoiceId: invoice.id,
-          to: clientData.email,
-          subject: `Invoice ${invoiceNumber}${org.name ? ` from ${org.name}` : ""}`,
-          templateName: "invoice-sent",
-          react: createElement(InvoiceSentEmail, {
-            clientName: clientData.name ?? "there",
-            orgName: org.name ?? "",
-            logoUrl,
-            accentColor: org.accent_color ?? "#111827",
-            invoiceNumber,
-            invoiceTotal: formatCurrency(total, rec.currency),
-            issueDate: formatDate(today),
-            dueDate: undefined,
-            payUrl,
-            bankDetails: hasBankDetails
-              ? {
-                  accountName: org.bank_account_name,
-                  bankName: org.bank_name,
-                  accountNumber: org.bank_account_number,
-                  sortCode: org.bank_sort_code,
-                  iban: org.bank_iban,
-                  bic: org.bank_bic,
-                }
-              : null,
-          }),
-        });
-
-        if (emailResult.ok) {
-          await supabase
-            .from("invoices")
-            .update({ status: "sent", sent_at: new Date().toISOString() })
-            .eq("id", invoice.id);
-
-          await supabase.from("audit_logs").insert({
-            org_id: rec.org_id,
-            action: "invoice.sent",
-            entity_type: "invoice",
-            entity_id: invoice.id,
-            meta: { to: clientData.email, invoice_number: invoiceNumber, source: "recurring_auto_send" },
-          });
-        }
-      }
+      const result = await sendInvoiceEmail(supabase, invoice.id, { source: "recurring" });
+      if (result.ok) sent++;
+      else console.error("recurring: auto-send failed", { recurring_id: rec.id, invoice_id: invoice.id, error: result.error });
     }
 
-    const nextRun = calcNextRun(rec.frequency, new Date(rec.next_run_at));
+    // From today, not from the missed date: a run that was skipped for days
+    // makes one invoice now rather than one every morning until caught up.
+    const nextRun = nextRunAfter(rec.start_date, rec.frequency as RecurringFrequency, today);
     const ended = rec.end_date && nextRun > rec.end_date;
 
     await supabase
@@ -192,5 +152,5 @@ export async function GET(req: Request) {
     generated++;
   }
 
-  return NextResponse.json({ generated });
+  return NextResponse.json({ generated, sent, skipped });
 }

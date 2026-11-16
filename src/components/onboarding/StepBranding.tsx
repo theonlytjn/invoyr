@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { LOGO_ACCEPTED_TYPES, validateLogoFile } from "@/lib/onboarding/logo-upload";
+import { LOGO_ACCEPTED_TYPES, LOGO_HINT, validateLogoFile } from "@/lib/onboarding/logo-upload";
 import type { OnboardingData } from "./OnboardingWizard";
 
 interface Props {
@@ -111,7 +111,7 @@ export default function StepBranding({ data, update, onLogoChange, logoFile, onB
           />
           <div className="mt-1.5 flex items-center justify-between gap-3">
             <p id="logo-hint" className="text-xs text-neutral-400">
-              PNG, JPG, WEBP or SVG, up to 2MB. You can change it later in Settings.
+              {LOGO_HINT} You can change it later in Settings.
             </p>
             {logoFile && (
               <button

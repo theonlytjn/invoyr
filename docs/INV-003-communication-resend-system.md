@@ -454,3 +454,13 @@ notification_queue
 - Email logs are written for each transactional send.
 - Marketing emails are blocked without consent.
 - Unsubscribe handling exists before any broadcast is sent.
+
+### Invoice compose box (Nov 2026)
+
+"Send to client…" on the invoice page opens `SendInvoiceDialog`: To (read-only), CC
+(prefilled from the client's "Also send invoices to"), Subject (prefilled) and an optional
+Message, shown in the email as "A note from {org}" above the summary. All invoice sends
+(single, bulk, recurring auto-send) go through `sendInvoiceEmail`
+(`src/lib/invoices/send-invoice-email.ts`), which validates the compose fields with Zod,
+always links to the client's `/pay/{token}` page (never the owner's dashboard), logs, and
+fires automations and webhooks. InvoiceSentEmail copy lives in `INVOICE_SENT_COPY`.

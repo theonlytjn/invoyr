@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { logoStoragePath, validateLogoFile } from "@/lib/onboarding/logo-upload";
+import { logoStoragePath, sniffLogoType, validateLogoFile } from "@/lib/onboarding/logo-upload";
 
 const fieldsSchema = z.object({
   orgId: z.string().uuid(),
@@ -27,6 +27,11 @@ export async function POST(req: NextRequest) {
 
   const invalid = validateLogoFile(file);
   if (invalid) return NextResponse.json({ error: invalid }, { status: 400 });
+  // Trust the bytes, not the file name.
+  const contentType = sniffLogoType(new Uint8Array(await file.slice(0, 16).arrayBuffer()));
+  if (!contentType) {
+    return NextResponse.json({ error: "Choose a PNG, JPG or WebP image." }, { status: 400 });
+  }
 
   const { data: membership } = await supabase
     .from("org_members")
@@ -37,11 +42,11 @@ export async function POST(req: NextRequest) {
   if (!membership) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const service = createServiceClient();
-  const path = logoStoragePath(parsed.data.orgId, file.type);
+  const path = logoStoragePath(parsed.data.orgId, contentType);
 
   const { error: uploadError } = await service.storage
     .from("logos")
-    .upload(path, file, { upsert: true, contentType: file.type });
+    .upload(path, file, { upsert: true, contentType });
 
   if (uploadError) {
     return NextResponse.json({ error: uploadError.message }, { status: 500 });

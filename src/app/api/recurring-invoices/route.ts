@@ -3,35 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { requireOrg } from "@/lib/auth";
 import { getOrgPlan } from "@/lib/billing";
 import { canAccess } from "@/config/plans";
-import { z } from "zod";
-
-const schema = z.object({
-  client_id: z.string().uuid().nullable().optional(),
-  frequency: z.enum(["weekly", "monthly", "quarterly", "yearly"]),
-  start_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  end_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
-  template: z.enum(["tjn_classic", "clean_minimal", "bold_split", "modern_studio"]).default("tjn_classic"),
-  currency: z.string().default("GBP"),
-  notes: z.string().nullable().optional(),
-  terms: z.string().nullable().optional(),
-  auto_send: z.boolean().default(false),
-  items: z.array(z.object({
-    description: z.string().min(1),
-    quantity: z.number().positive(),
-    unit_price: z.number().min(0),
-    vat_rate: z.number().min(0).max(100),
-    sort_order: z.number().int().default(0),
-  })).min(1),
-});
-
-function calcNextRun(frequency: string, from: Date): string {
-  const d = new Date(from);
-  if (frequency === "weekly") d.setDate(d.getDate() + 7);
-  else if (frequency === "monthly") d.setMonth(d.getMonth() + 1);
-  else if (frequency === "quarterly") d.setMonth(d.getMonth() + 3);
-  else d.setFullYear(d.getFullYear() + 1);
-  return d.toISOString().slice(0, 10);
-}
+import { createRecurringSchema, firstIssue } from "@/lib/recurring/schema";
+import { firstRunOnOrAfter } from "@/lib/recurring/schedule";
 
 export async function GET() {
   const org = await requireOrg();
@@ -56,12 +29,24 @@ export async function POST(req: Request) {
 
   const supabase = await createClient();
 
-  const body = await req.json();
-  const parsed = schema.safeParse(body);
-  if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+  const body = await req.json().catch(() => null);
+  const parsed = createRecurringSchema.safeParse(body);
+  if (!parsed.success) return NextResponse.json({ error: firstIssue(parsed.error) }, { status: 400 });
 
   const { items, ...fields } = parsed.data;
-  const nextRun = calcNextRun(fields.frequency, new Date(fields.start_date));
+
+  if (fields.client_id) {
+    const { data: client } = await supabase
+      .from("clients")
+      .select("id")
+      .eq("id", fields.client_id)
+      .eq("org_id", org.id)
+      .maybeSingle();
+    if (!client) return NextResponse.json({ error: "Client not found." }, { status: 400 });
+  }
+
+  // The first invoice is made on the start date itself, not one period later.
+  const nextRun = firstRunOnOrAfter(fields.start_date, fields.frequency, new Date().toISOString().slice(0, 10));
 
   const { data: rec, error } = await supabase
     .from("recurring_invoices")

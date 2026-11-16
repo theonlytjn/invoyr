@@ -21,6 +21,10 @@ export function InvoiceIcon({ size = 20, className }: IconProps) {
   return <Hi name="invoice-01" size={size} className={className} />;
 }
 
+export function RecurringIcon({ size = 20, className }: IconProps) {
+  return <Hi name="repeat" size={size} className={className} />;
+}
+
 export function UsersIcon({ size = 20, className }: IconProps) {
   return <Hi name="user-multiple-02" size={size} className={className} />;
 }
