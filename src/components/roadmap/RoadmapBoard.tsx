@@ -6,7 +6,7 @@ import { ROADMAP_COPY as COPY, ROADMAP_STATUS_LABELS, ROADMAP_TABS, type Roadmap
 import { groupByCategory, groupByLaunchMonth, groupByStatus, matchesSearch } from "@/lib/roadmap/group";
 import type { PublicRoadmapItem, RoadmapImportance, RoadmapVote } from "@/lib/roadmap/types";
 import { RoadmapItemDialog } from "./RoadmapItemDialog";
-import { SuggestIdeaDialog } from "./SuggestIdeaDialog";
+import { SuggestIdeaDialog, type IdeaSubmission } from "./SuggestIdeaDialog";
 import { cn } from "@/lib/utils";
 
 const IMPORTANCE_SHORT: Record<RoadmapImportance, string> = {
@@ -36,7 +36,7 @@ export function RoadmapBoard({ items }: { items: PublicRoadmapItem[] }) {
   const [suggestOpen, setSuggestOpen] = useState(false);
   const [votes, setVotes] = useState<Record<string, RoadmapVote>>({});
 
-  // Deep links: ?tab=considering, ?item=<slug>, ?suggest=1 (after signing in).
+  // Deep links: ?tab=considering, ?item=<slug>, ?suggest=1.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const t = params.get("tab");
@@ -96,13 +96,13 @@ export function RoadmapBoard({ items }: { items: PublicRoadmapItem[] }) {
   );
 
   const suggest = useCallback(
-    async (title: string, details: string) => {
+    async (idea: IdeaSubmission) => {
       try {
         const res = await fetch(`${appOrigin}/api/roadmap/ideas`, {
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title, details }),
+          body: JSON.stringify(idea),
         });
         if (res.ok) return { ok: true };
         const data = await res.json().catch(() => ({}));
@@ -144,10 +144,6 @@ export function RoadmapBoard({ items }: { items: PublicRoadmapItem[] }) {
     setQuery({ item: slug });
   }
 
-  function onSuggestClick() {
-    if (signedIn) setSuggestOpen(true);
-    else window.location.href = signInUrl("/roadmap?suggest=1");
-  }
 
   return (
     <div>
@@ -190,11 +186,11 @@ export function RoadmapBoard({ items }: { items: PublicRoadmapItem[] }) {
           </label>
           <button
             type="button"
-            onClick={onSuggestClick}
+            onClick={() => setSuggestOpen(true)}
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
           >
             <span aria-hidden className="text-base leading-none">+</span>
-            {signedIn || session.status === "loading" ? COPY.submitIdea : COPY.signInToSuggest}
+            {COPY.submitIdea}
           </button>
         </div>
       </div>
@@ -267,6 +263,11 @@ export function RoadmapBoard({ items }: { items: PublicRoadmapItem[] }) {
           if (!o) setQuery({ suggest: null });
         }}
         submit={suggest}
+        guest={!signedIn}
+        defaults={{
+          name: signedIn ? session.name ?? "" : "",
+          email: signedIn ? session.email ?? "" : "",
+        }}
       />
     </div>
   );

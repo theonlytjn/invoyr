@@ -1441,6 +1441,19 @@ create table if not exists public.roadmap_ideas (
 );
 create index if not exists roadmap_ideas_status_idx on public.roadmap_ideas(status, created_at desc);
 
+-- Guest suggestions (migration roadmap_ideas_guest_submissions, 19 Nov 2026):
+-- signed-out visitors can suggest an idea by leaving a name and email. Those rows
+-- have no user_id and are inserted by the API with the service role.
+alter table public.roadmap_ideas alter column user_id drop not null;
+alter table public.roadmap_ideas add column if not exists submitter_name text check (length(submitter_name) between 1 and 100);
+alter table public.roadmap_ideas add column if not exists submitter_email text check (length(submitter_email) between 3 and 254);
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'roadmap_ideas_has_submitter') then
+    alter table public.roadmap_ideas add constraint roadmap_ideas_has_submitter
+      check (user_id is not null or (submitter_name is not null and submitter_email is not null));
+  end if;
+end $$;
+
 alter table public.roadmap_items enable row level security;
 alter table public.roadmap_votes enable row level security;
 alter table public.roadmap_ideas enable row level security;

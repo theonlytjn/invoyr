@@ -1,9 +1,9 @@
 ---
 title: INV-009 Public roadmap and feedback
-version: 1.0
-status: Live (migration applied 15 Nov 2026)
+version: 1.1
+status: Live (migrations applied 15 Nov and 19 Nov 2026)
 owner: Product / Engineering
-last_updated: 2026-11-15
+last_updated: 2026-11-19
 ---
 
 # INV-009 — Public roadmap and feedback
@@ -19,7 +19,8 @@ for feedback and links here.
 
 | Question | Decision |
 | --- | --- |
-| Who can see / vote | Public view at invoyr.io/roadmap; voting and suggesting need an Invoyr login |
+| Who can see / vote | Public view at invoyr.io/roadmap; voting needs an Invoyr login |
+| Who can suggest (19 Nov 2026) | Anyone, no login. Everyone leaves a name and email (prefilled when signed in) so we can follow up |
 | New ideas | Go to an admin inbox for review; never shown publicly as submitted |
 | Reaction | Mimestream-style importance: Not important / Nice to have / Important / Critical, plus optional comment. Counts are admin-only |
 
@@ -30,7 +31,10 @@ for feedback and links here.
 - Search across title, summary, body and category.
 - Each card opens a dialog with the full description and the importance buttons.
   Choosing the current answer again clears the vote. Launched items can't be voted on.
-- Deep links: `?tab=considering`, `?item=<slug>`, `?suggest=1`. Signed-out visitors
+- **Suggest an idea** opens the form for everyone. It asks for name, email, idea and
+  optional details; signed-in visitors get name and email prefilled, and signed-out
+  visitors also pass Cloudflare Turnstile (when configured).
+- Deep links: `?tab=considering`, `?item=<slug>`, `?suggest=1`. Signed-out voters
   are sent to `app.invoyr.io/login?next=/roadmap?item=<slug>` and come back to the
   same card (middleware moves `/roadmap` back to the marketing domain).
 - Static (ISR, `revalidate = 300`) and refreshed immediately by `revalidatePath` on
@@ -51,7 +55,7 @@ signed-in visitor's behalf.
 | --- | --- | --- |
 | `GET /api/roadmap/votes` | session (optional) | The visitor's own votes |
 | `POST /api/roadmap/votes` | session | Set, change or clear a vote (60/min per user) |
-| `POST /api/roadmap/ideas` | session | Suggest an idea (10/hour per user) |
+| `POST /api/roadmap/ideas` | none (session optional) | Suggest an idea: 10/hour per user, 5/hour per IP for guests, Turnstile for guests |
 | `POST /api/admin/roadmap/items` | admin | Create item (optionally from an idea) |
 | `PATCH/DELETE /api/admin/roadmap/items/[id]` | admin | Edit, publish, change stage, delete |
 | `PATCH /api/admin/roadmap/ideas/[id]` | admin | Mark reviewed / declined, merge into an item |
@@ -65,12 +69,16 @@ All input is validated with Zod (`src/lib/roadmap/schema.ts`).
   `launched_at` (stamped automatically when moved to Launched).
 - `roadmap_votes`: one per user per item, `importance` enum and optional comment.
 - `roadmap_ideas`: submitted ideas with review status
-  (`new | reviewed | merged | published | declined`) and the item they became.
+  (`new | reviewed | merged | published | declined`), the item they became, and the
+  `submitter_name` / `submitter_email` typed in the form. `user_id` is null for guest
+  suggestions (migration `roadmap_ideas_guest_submissions`); a check constraint
+  requires either a user or a name and email.
 
 These are product-level tables, not organisation data, so they are keyed by user
 rather than `org_id`. RLS: anyone reads published items; users read and write only
-their own votes (only on published items) and insert/read their own ideas. All admin
-work uses the service role.
+their own votes (only on published items) and insert/read their own ideas. Guest
+ideas have no user to insert as, so the API writes them with the service role after
+Zod validation, the rate limit and the captcha. All admin work uses the service role.
 
 Starter content is in `supabase/seed-roadmap.sql`: shipped features as published
 *Launched* items (dated from git history, claims checked against the code) and one
@@ -83,7 +91,8 @@ publishes them.
   Critical · Important · Nice to have · Not important; a **demand score**
   (critical 3, important 2, nice to have 1) with sort by demand; a Feedback dialog
   listing every voter's email, answer and comment.
-- **Ideas inbox**: add to roadmap (prefills a new item and links the idea), merge into
+- **Ideas inbox**: shows the submitter's name and email, marked *Guest (no account)*
+  when signed out; add to roadmap (prefills a new item and links the idea), merge into
   an existing item, mark reviewed, decline, reopen.
 
 ## 7. Not done / follow-ups
@@ -92,3 +101,5 @@ publishes them.
 - No admin notification when an idea arrives; check the inbox.
 - Ideas from people who never finished onboarding are accepted, but the signup
   follow-up email only reaches account owners (email_logs needs an org).
+- Guest emails are kept only to follow up on the idea; they are not added to any
+  marketing list (no consent is asked for).

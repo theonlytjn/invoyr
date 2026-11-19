@@ -24,7 +24,7 @@ export interface AdminFeedback {
   at: string;
 }
 export type AdminItem = RoadmapItem & { tally: ImportanceTally; score: number; feedback: AdminFeedback[] };
-export type AdminIdea = RoadmapIdea & { email: string };
+export type AdminIdea = RoadmapIdea & { email: string; name: string | null; guest: boolean };
 
 const STATUSES: RoadmapStatus[] = ["in_progress", "planned", "considering", "launched"];
 const IMPORTANCE_LABEL = Object.fromEntries(ROADMAP_IMPORTANCE.map((o) => [o.value, o.label])) as Record<RoadmapImportance, string>;
@@ -354,7 +354,9 @@ function IdeaRow({
         <div className="min-w-0">
           <p className="font-medium text-neutral-950 dark:text-neutral-50">{idea.title}</p>
           <p className="mt-0.5 text-xs text-neutral-500">
+            {idea.name && <>{idea.name} · </>}
             <a href={`mailto:${idea.email}`} className="hover:underline">{idea.email}</a> ·{" "}
+            {idea.guest && <>Guest (no account) · </>}
             {new Date(idea.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
           </p>
         </div>

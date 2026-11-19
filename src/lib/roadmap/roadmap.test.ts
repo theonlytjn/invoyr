@@ -89,8 +89,19 @@ describe("schemas", () => {
   });
 
   it("idea: needs a real title", () => {
-    expect(ideaSchema.safeParse({ title: "ab" }).success).toBe(false);
-    expect(ideaSchema.parse({ title: " Instalments " })).toEqual({ title: "Instalments", details: "" });
+    const who = { name: "Sam", email: "sam@example.com" };
+    expect(ideaSchema.safeParse({ ...who, title: "ab" }).success).toBe(false);
+    expect(ideaSchema.parse({ ...who, title: " Instalments " })).toEqual({ ...who, title: "Instalments", details: "" });
+  });
+
+  it("idea: needs a name and a valid email", () => {
+    expect(ideaSchema.safeParse({ title: "Instalments" }).success).toBe(false);
+    expect(ideaSchema.safeParse({ name: " ", email: "sam@example.com", title: "Instalments" }).success).toBe(false);
+    expect(ideaSchema.safeParse({ name: "Sam", email: "not-an-email", title: "Instalments" }).success).toBe(false);
+    expect(ideaSchema.parse({ name: " Sam ", email: " Sam@Example.com ", title: "Instalments" })).toMatchObject({
+      name: "Sam",
+      email: "sam@example.com",
+    });
   });
 
   it("item: validates slug and defaults", () => {

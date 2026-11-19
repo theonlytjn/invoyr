@@ -63,7 +63,10 @@ export default async function AdminRoadmapPage() {
 
   const adminIdeas: AdminIdea[] = ((ideas ?? []) as RoadmapIdea[]).map((idea) => ({
     ...idea,
-    email: emailOf.get(idea.user_id) ?? "unknown",
+    // What they typed in the form; older ideas (before name/email were asked for) fall back to the account email.
+    email: idea.submitter_email ?? (idea.user_id ? emailOf.get(idea.user_id) : undefined) ?? "unknown",
+    name: idea.submitter_name,
+    guest: !idea.user_id,
   }));
 
   return <RoadmapAdmin items={adminItems} ideas={adminIdeas} />;

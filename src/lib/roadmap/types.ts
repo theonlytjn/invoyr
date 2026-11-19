@@ -33,7 +33,10 @@ export interface RoadmapVote {
 
 export interface RoadmapIdea {
   id: string;
-  user_id: string;
+  /** Null for a guest suggestion from a signed-out visitor. */
+  user_id: string | null;
+  submitter_name: string | null;
+  submitter_email: string | null;
   title: string;
   details: string;
   status: RoadmapIdeaStatus;

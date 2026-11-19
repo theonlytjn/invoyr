@@ -20,9 +20,13 @@ export const voteSchema = z.object({
   comment: optionalText(1000),
 });
 
+/** Name and email are required so we can follow up, whether or not the visitor is signed in. */
 export const ideaSchema = z.object({
+  name: z.string().trim().min(1, "Add your name").max(100),
+  email: z.string().trim().toLowerCase().email("Add a valid email address").max(254),
   title: z.string().trim().min(3, "Give your idea a short title").max(120),
   details: z.string().trim().max(2000).default(""),
+  captchaToken: z.string().max(4096).optional(),
 });
 
 export function slugify(text: string): string {
