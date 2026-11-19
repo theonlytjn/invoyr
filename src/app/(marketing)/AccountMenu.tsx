@@ -20,6 +20,14 @@ export const ACCOUNT_LINKS = [
   { href: "/settings", label: "Settings" },
 ];
 
+// Shown after the main links, for the platform admin only.
+export const ADMIN_LINK = { href: "/admin", label: "Admin" };
+
+/** The links to show this account: the main destinations, plus Admin for the platform admin. */
+export function accountLinksFor(account: AccountDetails) {
+  return account.isAdmin ? [...ACCOUNT_LINKS, ADMIN_LINK] : ACCOUNT_LINKS;
+}
+
 const FOCUS_RING =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-950";
 
@@ -96,7 +104,7 @@ export default function AccountMenu({ account, appOrigin }: { account: AccountDe
           {orgName && <p className="mt-1 truncate text-sm text-neutral-600 dark:text-neutral-300">{orgName}</p>}
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-neutral-200 dark:bg-neutral-800" />
-        {ACCOUNT_LINKS.map((link) => (
+        {accountLinksFor(account).map((link) => (
           <DropdownMenuItem key={link.href} asChild className={itemClass}>
             <a href={`${appOrigin}${link.href}`}>{link.label}</a>
           </DropdownMenuItem>

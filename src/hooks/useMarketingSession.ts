@@ -8,7 +8,7 @@ export type MarketingSession =
   | { status: "signed-out" }
   | ({ status: "signed-in" } & AccountDetails);
 
-export type AccountDetails = { name: string | null; email: string | null; orgName: string | null; orgLogoUrl: string | null };
+export type AccountDetails = { name: string | null; email: string | null; orgName: string | null; orgLogoUrl: string | null; isAdmin: boolean };
 
 // Last answer, so a signed-in visitor doesn't see "Sign in" flash on every page
 // load. Holds display details only; the request below always has the final say.
@@ -28,7 +28,7 @@ export function useMarketingSession() {
 
     try {
       const hint = localStorage.getItem(HINT_KEY);
-      if (hint) setSession({ status: "signed-in", orgName: null, orgLogoUrl: null, ...JSON.parse(hint) });
+      if (hint) setSession({ status: "signed-in", orgName: null, orgLogoUrl: null, isAdmin: false, ...JSON.parse(hint) });
     } catch {}
 
     let cancelled = false;
@@ -42,6 +42,7 @@ export function useMarketingSession() {
             email: data.email ?? null,
             orgName: data.orgName ?? null,
             orgLogoUrl: data.orgLogoUrl ?? null,
+            isAdmin: data.isAdmin === true,
           };
           setSession({ status: "signed-in", ...details });
           try { localStorage.setItem(HINT_KEY, JSON.stringify(details)); } catch {}

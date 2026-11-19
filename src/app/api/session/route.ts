@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getOrg } from "@/lib/auth";
 import { withMarketingCors } from "@/lib/api/cors";
+import { ADMIN_EMAIL } from "@/lib/admin";
 
 /**
  * Who is signed in, for the marketing header. Called cross-origin from
@@ -14,7 +15,7 @@ export async function GET(req: NextRequest) {
 
   let body:
     | { signedIn: false }
-    | { signedIn: true; name: string | null; email: string | null; orgName: string | null; orgLogoUrl: string | null } = {
+    | { signedIn: true; name: string | null; email: string | null; orgName: string | null; orgLogoUrl: string | null; isAdmin: boolean } = {
     signedIn: false,
   };
 
@@ -30,6 +31,8 @@ export async function GET(req: NextRequest) {
       email: user.email ?? null,
       orgName: org?.name ?? null,
       orgLogoUrl: org?.logo_url ?? null,
+      // Only decides whether the menu shows the Admin link; /admin checks again server-side.
+      isAdmin: user.email === ADMIN_EMAIL,
     };
   }
 
